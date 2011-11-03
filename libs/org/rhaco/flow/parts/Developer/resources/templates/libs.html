@@ -1,0 +1,29 @@
+<rt:extends href="index.html" />
+
+<rt:block name="content">
+<div class="post">
+	<div class="post-bgtop">
+		<div class="post-bgbtm">
+			<h2 class="title">Libraries</h2>			
+			
+			<table rt:param="{$packages}" rt:var="var" rt:key="package">
+			<thead>
+				<tr>
+					<th>package</th>
+					<th>summary</th>
+					<th>todo</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="even">
+					<td><a href="{$t.package_method_url('class_info',$package)}">{$f.package_name($package)}</a></td>
+					<td>{$t.html($var[0])}</td>
+					<td style="text-align:right; color:{$t.has_switch($var[1],'#ff8888','#888888')}">{$var[1]}</td>
+				</tr>
+			</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+</rt:block>
+

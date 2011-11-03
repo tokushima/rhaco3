@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+</head>
+<body>
+	{$xml_var}
+	{$xml_var_value}
+	[{$xml_var_obj.aaa()}]
+	[{$xml_var_obj.bbb()}]
+	{$xml_var_objA}
+	{$xml_var_objB}
+	{$xml_var_objC}
+	<rt:loop param="xml_var_array" var="a">{$a}</rt:loop>
+	<rt:block name="content">
+		INDEX
+	</rt:block>
+	{$t.media()}
+</body>
+</html>

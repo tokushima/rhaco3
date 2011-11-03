@@ -1,0 +1,27 @@
+<rt:extends href="index.html" />
+
+<rt:block name="righttop">
+</rt:block>
+
+<rt:block name="content">
+
+<table class="list" rt:param="object_list" rt:var="obj">
+<thead>
+<tr>
+	<th>class</th>
+	<th>name</th>
+	<th>type</th>
+	<th>summary</th>
+</tr>
+</thead>
+<tbody>
+<tr style="{$t.cond_switch($obj->exists(),'font-weight: bold;','')}">
+	<td valign="top">{$obj.class()}</td>
+	<td>{$obj.name()}</td>
+	<td>{$obj.type()}</td>
+	<td>{$obj.summary()}</td>
+</tr>
+</tbody>
+</table>
+
+</rt:block>

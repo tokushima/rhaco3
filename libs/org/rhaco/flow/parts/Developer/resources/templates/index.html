@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Title      : Vertebrate 
+Version    : 1.0
+Released   : 20100428
+Description: A two-column fixed-width template suitable for small websites.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>{$app_name}</title>
+<link href="default.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+<div id="header">
+	<div id="logo">
+		<h1><a href="{$t.package_method_url('index')}">{$app_name}</a></h1>
+		<h2>{$app_summary}</h2>
+	</div>
+	<!-- end div#logo -->
+	<div id="menu">
+		<ul>
+		</ul>
+	</div>
+	<!-- end div#menu -->
+</div>
+<div>
+	<div id="page">
+		<div id="page-bgtop">
+			<div id="content">
+				<rt:block name="content">
+				<div class="post">
+					<div class="post-bgtop">
+						<div class="post-bgbtm">
+							<h2 class="title">Description</h2>
+							<div class="entry">
+								<p>
+									{$t.html($app_description)}
+								</p>
+							</div>
+							
+							<table rt:param="{$maps}" rt:var="map" rt:key="url">
+							<thead>
+								<tr>
+									<th>name</th>
+									<th>url</th>
+									<th>template</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr class="even">
+									<td nowrap>						
+										<rt:if param="{$map['class']}">
+											<a href="{$t.package_method_url('method_info',$map['class'],$map['method'])}">{$map['name']}</a>
+										<rt:else />
+											{$map['name']}
+										</rt:if>
+									</td>
+									<td>{$map['url']}</td>
+									<td>
+										<rt:if param="{$map['template']}">{$map['template']}</rt:if>
+									</td>
+								</tr>
+							</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				</rt:block>
+			</div>
+			<!-- end div#content -->
+			<div id="sidebar">
+				<div id="sidebar-bgtop">
+					<div id="sidebar-bgbtm">
+						<ul>
+							<rt:block name="righttop">
+							</rt:block>
+							<li>
+								<h2>application</h2>
+								<ul>
+									<li><a href="{$t.package_method_url('index')}">map</a></li>
+									<li><a href="{$t.package_method_url('libs')}">reference</a></li>
+									<li><a href="{$t.package_method_url('conf_list')}">conf</a></li>
+									<rt:if param="{$is_smtp_blackhole}">
+										<li><a href="{$t.package_method_url('mail_list')}">Mail (Smtp Blackhole)</a></li>
+									</rt:if>
+								</ul>
+							</li>
+							<li>
+								<h2>model</h2>
+								<ul>
+									<rt:loop param="models" var="m">
+										<li><a href="{$t.package_method_url('do_find',$m)}">{$f.package_name($m)}</a></li>
+									</rt:loop>								
+								</ul>
+							</li>							
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!-- end div#sidebar -->
+			<div style="clear: both; height: 1px"></div>
+		</div>
+	</div>
+	<!-- end div#page -->
+</div>
+<!-- end div#wrapper -->
+<div id="footer-wrapper">
+	<div id="footer">
+		<p id="legal"></p>
+	</div>
+</div>
+<!-- end div#footer -->
+</body>
+</html>
