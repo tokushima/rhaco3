@@ -84,7 +84,7 @@ class Conf{
 		$conf_get = function($filename){
 			$src = file_get_contents($filename);
 			$gets = array();
-			if(preg_match_all('/[^\w]Conf::'.'(get.*)\(([\"\'])(.+?)\\2/',$src,$m)){
+			if(preg_match_all('/[^\w]Conf::'.'(get|get_array)\(([\"\'])(.+?)\\2/',$src,$m)){
 				foreach($m[3] as $k => $n){
 					if(!isset($gets[$n])) $gets[$n] = array('string','');
 				}

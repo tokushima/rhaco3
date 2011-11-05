@@ -4,6 +4,7 @@ use \org\rhaco\net\Path;
 /**
  * ファイルの一覧をセットする
  * @author tokushima
+ * @conf string $document_root 一覧するディレクトリのベースパス
  */
 class File extends RequestFlow{
 	/**

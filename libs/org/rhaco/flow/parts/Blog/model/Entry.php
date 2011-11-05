@@ -8,6 +8,7 @@ use \org\rhaco\store\db\Q;
  * @var string $title @{"max":100,"require":true}
  * @var text $description @{"require":true}
  * @var timestamp $create_date@{"auto_now_add":true}
+ * @conf string $atom_url_base Atom feedのベースURL
  */
 class Entry extends \org\rhaco\store\db\Dao implements \org\rhaco\net\xml\atom\AtomInterface{
 	protected $id;

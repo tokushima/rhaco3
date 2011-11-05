@@ -8,6 +8,8 @@ namespace org\rhaco;
  * @var timestamp $time
  * @var string $file
  * @var integer $line
+ * @conf string $level ログレベル (none,error,warn,info,debug)
+ * @conf boolean $disp 標準出力に出すか
  */
 class Log extends \org\rhaco\Object{
 	static private $stdout = true;

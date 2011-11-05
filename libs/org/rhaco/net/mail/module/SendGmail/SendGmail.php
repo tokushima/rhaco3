@@ -4,6 +4,7 @@ namespace org\rhaco\net\mail\module;
  * gmailでメール送信を行う
  * tls://を利用にするためOpenSSL サポートを有効にしてある必要がある
  * @author tokushima
+ * @conf string[] $account gmailアカウント,パスワード
  */
 class SendGmail extends \org\rhaco\Object{
 	protected $login;

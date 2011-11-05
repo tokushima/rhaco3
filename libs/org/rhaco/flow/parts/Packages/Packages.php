@@ -5,7 +5,7 @@ use org\rhaco\flow\parts\Packages\Model;
 /**
  * ライブラリパッケージを一覧する
  * @author tokushima
- *
+ * @conf string $document_root packages.csvがあるディレクトリ
  */
 class Packages extends RequestFlow{
 	/**

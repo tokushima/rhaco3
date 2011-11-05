@@ -3,6 +3,11 @@ namespace org\rhaco;
 use \org\rhaco\Conf;
 /**
  * リクエストから出力までの流れを制御する
+ * @conf string $app_url アプリケーションのベースURL
+ * @conf string $template_path テンプレートファイルのベースパス
+ * @conf string $media_url メディアファイルのベースURL
+ * @conf boolean $secure patternsでsecure指定された場合にhttpsとするか
+ * @conf string $mode アプリケーションの実行モード(任意文字列)
  */
 class Flow{
 	private $module = array();

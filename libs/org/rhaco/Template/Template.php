@@ -3,6 +3,7 @@ namespace org\rhaco;
 /**
  * テンプレートを処理する
  * @author tokushima
+ * @conf boolean $display_exception 例外が発生した場合にメッセージを表示するか
  */
 class Template{
 	private $module = array();

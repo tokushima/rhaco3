@@ -4,6 +4,10 @@ namespace org\rhaco\net;
  * セッションを操作する
  * @see http://jp2.php.net/manual/ja/function.session-set-save-handler.php
  * @author tokushima
+ * @conf string $session_name セッション名
+ * @conf string $session_limiter キャッシュリミッタ nocache,private,private_no_expire,public
+ * @conf integer $session_expire キャッシュの有効期限(sec)
+ * @conf string $module セッションの実装モジュールのパッケージ名
  */
 class Session{
 	private $ses_n;

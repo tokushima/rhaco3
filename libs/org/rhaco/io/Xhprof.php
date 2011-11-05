@@ -8,6 +8,8 @@ namespace org\rhaco\io;
  * @author tokushima
  * @conf string $output_dir 出力ディレクトリ
  * @conf string $type 出力ファイルの種類 ( ******.xhprof )
+ * @conf string $preg_match 対象のURLパターン
+ * @conf string $view_url 結果表示のURL(xhprof_html)
  */
 class Xhprof{
 	static public function __shutdown__(){

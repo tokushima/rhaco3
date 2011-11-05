@@ -18,6 +18,7 @@ namespace org\rhaco\io;
  * @var number $rotation
  * @var time $duration
  * @var mixed{} $raw @{"hash":false}
+ * @conf string $cmd exiftoolのパス
  */
 class MediaInfo extends \org\rhaco\Object{
 	protected $type = 'photo';

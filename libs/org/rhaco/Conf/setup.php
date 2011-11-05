@@ -1,4 +1,7 @@
 <?php
+/**
+ * Configuration list 
+ */
 $all = \org\rhaco\Conf::all();
 $length = 0;
 foreach($all as $p => $confs){

@@ -3,6 +3,7 @@ namespace org\rhaco\io\log;
 /**
  * ファイルにログを出力するLogモジュール
  * @author tokushima
+ * @conf string $path ログファイルを保存するディレクトリ
  */
 class File{
 	private $path;
@@ -14,7 +15,6 @@ class File{
 	static private function path($dir=null){
 		if($dir===null) $dir = \org\rhaco\Conf::get('path',getcwd().'/work/logs');
 		if(substr(str_replace("\\",'/',$dir),-1) == '/') $dir = subustr($dir,0,-1);
-
 		if(!is_dir($dir)) mkdir($dir,0777,true);
 		return $dir.'/'.date('Ymd').'.log';
 	}
