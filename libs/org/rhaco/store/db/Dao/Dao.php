@@ -1,5 +1,7 @@
 <?php
 namespace org\rhaco\store\db;
+use org\rhaco\store\queue\exception\IllegalDataTypeException;
+
 use \org\rhaco\Conf;
 use \org\rhaco\Paginator;
 use \org\rhaco\store\db\Q;
@@ -700,6 +702,29 @@ abstract class Dao extends \org\rhaco\Object{
 		$this->__after_delete__();
 	}
 	/**
+	 * 指定のプロパティにユニークコードをセットする
+	 * @param string $prop_name
+	 * @return string 生成されたユニークコード
+	 */
+	final public function set_unique_code($prop_name){
+		$code = '';
+		$max = $this->prop_anon($prop_name,'max',32);
+		$ctype = $this->prop_anon($prop_name,'ctype','alnum');
+		if($ctype != 'alnum' && $ctype != 'alpha' && $ctype != 'digit') throw new \LogicException('unexpected ctype');
+		$char = '';
+		if($ctype == 'alnum' || $ctype == 'digit') $char .= '0123456789';
+		if($ctype != 'digit'){
+		 	if($this->prop_anon($prop_name,'upper',false) === true) $char .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		 	if($this->prop_anon($prop_name,'lower',true) === true) $char .= 'abcdefghijklmnopqrstuvwxyz';
+		}
+		$charl = strlen($char) - 1;
+		while($code == '' || static::find_count(Q::eq($prop_name,$code)) > 0){
+			for($code='',$i=0;$i<$max;$i++) $code .= $char[mt_rand(0,$charl)];
+		}
+		$this->{$prop_name}($code);
+		return $code;
+	}
+	/**
 	 * DBへ保存する
 	 */
 	final public function save(){
@@ -724,14 +749,7 @@ abstract class Dao extends \org\rhaco\Object{
 				}
 			}else if($new && ($this->{$column->name()}() === null || $this->{$column->name()}() === '')){
 				if($this->prop_anon($column->name(),'type') == 'string' && $this->prop_anon($column->name(),'auto_code_add') === true){
-					$code = '';
-					$max = $this->prop_anon($column->name(),'max',32);
-					while(empty($code) || static::find_count(Q::eq($column->name(),$code)) > 0){
-						$code = '';
-						while(strlen($code) < $max) $code .= md5(microtime().mt_rand());
-						$code = substr($code,0,$max);
-					}
-					$this->{$column->name()}($code);
+					$this->set_unique_code($column->name());
 				}else if($this->prop_anon($column->name(),'auto_now_add') === true){
 					switch($this->prop_anon($column->name(),'type')){
 						case 'timestamp':

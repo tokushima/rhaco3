@@ -139,6 +139,69 @@ foreach(UniqueCode::find() as $o){
 
 
 /**
+ * @var serial $id
+ * @var string $code1 @{"auto_code_add":true,"ctype":"digit"}
+ * @var string $code2 @{"auto_code_add":true,"max":10,"ctype":"digit"}
+ * @var string $code3 @{"auto_code_add":true,"max":40,"ctype":"digit"}
+ */
+class UniqueCodeDigit extends UniqueCode{
+	protected $id;
+	protected $code1;
+	protected $code2;
+	protected $code3;
+}
+UniqueCodeDigit::find_delete();
+$obj = new UniqueCodeDigit();
+eq(null,$obj->code1());
+eq(null,$obj->code2());
+eq(null,$obj->code3());
+$obj->save();
+
+foreach(UniqueCodeDigit::find() as $o){
+	neq(null,$o->code1());
+	neq(null,$o->code2());
+	neq(null,$o->code3());
+	eq(32,strlen($o->code1()));
+	eq(10,strlen($o->code2()));
+	eq(40,strlen($o->code3()));
+	eq(true,ctype_digit($o->code1()));
+	eq(true,ctype_digit($o->code2()));
+	eq(true,ctype_digit($o->code3()));
+}
+
+/**
+ * @var serial $id
+ * @var string $code1 @{"auto_code_add":true,"ctype":"alpha"}
+ * @var string $code2 @{"auto_code_add":true,"max":10,"ctype":"alpha"}
+ * @var string $code3 @{"auto_code_add":true,"max":40,"ctype":"alpha"}
+ */
+class UniqueCodeAlpha extends UniqueCode{
+	protected $id;
+	protected $code1;
+	protected $code2;
+	protected $code3;
+}
+UniqueCodeAlpha::find_delete();
+$obj = new UniqueCodeAlpha();
+eq(null,$obj->code1());
+eq(null,$obj->code2());
+eq(null,$obj->code3());
+$obj->save();
+
+foreach(UniqueCodeAlpha::find() as $o){
+	neq(null,$o->code1());
+	neq(null,$o->code2());
+	neq(null,$o->code3());
+	eq(32,strlen($o->code1()));
+	eq(10,strlen($o->code2()));
+	eq(40,strlen($o->code3()));
+	eq(true,ctype_alpha($o->code1()));
+	eq(true,ctype_alpha($o->code2()));
+	eq(true,ctype_alpha($o->code3()));
+}
+
+
+/**
  * @var integer $id1 @{"primary":true}
  * @var integer $id2 @{"primary":true}
  * @var string $value
