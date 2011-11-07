@@ -232,33 +232,31 @@ class Flow{
 					}
 					try{
 						foreach($modules as $m) $this->set_object_module($m);
-						if(!isset($apps[$k]['class'])){
-							$apps[$k]['class'] = '\org\rhaco\flow\parts\RequestFlow';
-							$apps[$k]['method'] = 'noop';
-						}
-						if(!class_exists(str_replace('.',"\\",$apps[$k]['class']))) throw new \InvalidArgumentException($apps[$k]['class'].' not found');
-						if(isset($map['session'])) \org\rhaco\Conf::set('module',$map['session']);
-						$r = $this->str_reflection($apps[$k]['class']);
-						$obj = $r->newInstance();
-						if($obj instanceof \org\rhaco\Object){
-							foreach($modules as $m) $obj->set_object_module($m);
-						}
-						if($obj instanceof \org\rhaco\flow\FlowInterface){
-							$obj->set_select_map_name($apps[$k]['name']);
-							$obj->set_maps($apps);
-							$obj->set_args((isset($apps[$k]['args']) && is_array($apps[$k]['args'])) ? $apps[$k]['args'] : array());
-							$obj->before();
-							$theme = $obj->get_theme();
-							$put_block = $obj->get_block();
-						}
-						$result = call_user_func_array(array($obj,$apps[$k]['method']),$p);
-						if($result !== null) $obj = $result;
-						
-						if($obj instanceof \org\rhaco\flow\FlowInterface){
-							$obj->after();
-							if(\org\rhaco\Exceptions::has()) $obj->exception();
-							$theme = $obj->get_theme();
-							$put_block = $obj->get_block();
+						if(isset($apps[$k]['class'])){
+							if(!class_exists(str_replace('.',"\\",$apps[$k]['class']))) throw new \InvalidArgumentException($apps[$k]['class'].' not found');
+							if(isset($map['session'])) \org\rhaco\Conf::set('module',$map['session']);
+							$r = $this->str_reflection($apps[$k]['class']);
+							$obj = $r->newInstance();
+							if($obj instanceof \org\rhaco\Object){
+								foreach($modules as $m) $obj->set_object_module($m);
+							}
+							if($obj instanceof \org\rhaco\flow\FlowInterface){
+								$obj->set_select_map_name($apps[$k]['name']);
+								$obj->set_maps($apps);
+								$obj->set_args((isset($apps[$k]['args']) && is_array($apps[$k]['args'])) ? $apps[$k]['args'] : array());
+								$obj->before();
+								$theme = $obj->get_theme();
+								$put_block = $obj->get_block();
+							}
+							$result = call_user_func_array(array($obj,$apps[$k]['method']),$p);
+							if($result !== null) $obj = $result;
+							
+							if($obj instanceof \org\rhaco\flow\FlowInterface){
+								$obj->after();
+								if(\org\rhaco\Exceptions::has()) $obj->exception();
+								$theme = $obj->get_theme();
+								$put_block = $obj->get_block();
+							}
 						}
 						if(isset($apps[$k]['template'])){
 							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
