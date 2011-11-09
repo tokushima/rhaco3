@@ -356,7 +356,6 @@ abstract class Dao extends \org\rhaco\Object{
 		$statement = $this->query($daq);
 		$errors = $statement->errorInfo();
 		if(isset($errors[1])){
-			static::rollback();
 			throw new DaoException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : '').PHP_EOL.'( '.$daq->sql().' )');
 		}
 		if($statement->columnCount() == 0) return ($is_list) ? array() : null;
@@ -584,18 +583,14 @@ abstract class Dao extends \org\rhaco\Object{
 	 * @return $this
 	 */
 	final static public function find_get(){
-		$dao = new static();
 		$args = func_get_args();
-		$args[] = new Paginator(1,1);
-		$result = null;
-
-		$it = call_user_func_array(array(get_called_class(),'find'),$args);
-		foreach($it as $p){
-			$result = $p;
-			break;
-		}
-		if($result === null) throw new NotfoundException(get_class($dao).' not found');
-		return $result;
+		$dao = new static();
+		$query = new Q();
+		$query->add($dao->__find_conds__());
+		$query->add(new Paginator(1,1));
+		if(!empty($args)) call_user_func_array(array($query,'add'),$args);
+		foreach(self::get_statement_iterator($dao,$query) as $d) return $d;
+		throw new NotfoundException(get_class($dao).' not found');
 	}
 	/**
 	 * サブクエリを取得する
@@ -618,6 +613,18 @@ abstract class Dao extends \org\rhaco\Object{
 		}
 		return static::module('select_sql',$dao,$query,$paginator,$name);
 	}
+	final static private function get_statement_iterator($dao,$query){
+		if(!$query->is_order_by()){
+			foreach($dao->primary_columns() as $column) $query->order($column->name());
+		}
+		$daq = static::module('select_sql',$dao,$query,$query->paginator());
+		$statement = $dao->query($daq);
+		$errors = $statement->errorInfo();
+		if(isset($errors[1])){
+			throw new DaoException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : ''));
+		}
+		return new Dao\StatementIterator($dao,$statement);
+	}
 	/**
 	 * 検索を実行する
 	 * @return StatementIterator
@@ -627,24 +634,14 @@ abstract class Dao extends \org\rhaco\Object{
 		$dao = new static();
 		$query = new Q();
 		$query->add($dao->__find_conds__());
-
 		if(!empty($args)) call_user_func_array(array($query,'add'),$args);
-		if(!$query->is_order_by()){
-			foreach($dao->primary_columns() as $column) $query->order($column->name());
-		}
+		
 		$paginator = $query->paginator();
 		if($paginator instanceof Paginator){
 			$paginator->total(call_user_func_array(array(get_called_class(),'find_count'),$args));
 			if($paginator->total() == 0) return array();
 		}
-		$daq = static::module('select_sql',$dao,$query,$paginator);
-		$statement = $dao->query($daq);
-		$errors = $statement->errorInfo();
-		if(isset($errors[1])){
-			static::rollback();
-			throw new DaoException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : ''));
-		}
-		return new Dao\StatementIterator($dao,$statement);
+		return static::get_statement_iterator($dao,$query);
 	}
 	/**
 	 * 検索結果をすべて取得する
@@ -814,26 +811,10 @@ abstract class Dao extends \org\rhaco\Object{
 	 * @return $this
 	 */
 	final public function sync(){
-		$class = get_class($this);
 		$query = new Q();
-		$paginator = new Paginator(1,1);
-		foreach($this->primary_columns() as $column){
-			$query->add(Q::eq($column->name(),$this->{$column->name()}()));
-		}
-		/**
-		 * selectを実行するSQL文の生成
-		 * @param self $this
-		 * @return Daq
-		 */
-		$daq = $class::module('select_sql',$this,$query,$paginator);
-		$statement = $this->query($daq);
-		$errors = $statement->errorInfo();
-		if(isset($errors[1])){
-			$class::rollback();
-			throw new DaoException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : ''));
-		}
-		$it = new Dao\StatementIterator($this,$statement);
-		foreach($it as $dao){
+		$query->add(new Paginator(1,1));
+		foreach($this->primary_columns() as $column) $query->add(Q::eq($column->name(),$this->{$column->name()}()));
+		foreach(self::get_statement_iterator($this,$query) as $dao){
 			foreach(get_object_vars($dao) as $k => $v){
 				if($k[0] != '_') $this->{$k}($v);
 			}
