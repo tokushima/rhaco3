@@ -7,11 +7,12 @@ include_once(__DIR__.'/funcs.php');
  */
 class Test{
 	static private $result = array();
+	static private $current_entry;
 	static private $current_class;
 	static private $current_method;
 	static private $current_file;
 	static private $start_time;
-	static private $last_flow_output_maps = array();
+	static private $flow_output_maps;
 	
 	/**
 	 * 結果を取得する
@@ -35,6 +36,9 @@ class Test{
 		if(self::$start_time === null) self::$start_time = microtime(true);
 		return self::$start_time;
 	}
+	static public function current_entry(){
+		return self::$current_entry;
+	}
 	/**
 	 * 判定を行う
 	 * @param mixed $arg1 期待値
@@ -49,8 +53,12 @@ class Test{
 		self::$result[(empty(self::$current_file) ? $file : self::$current_file)][self::$current_class][self::$current_method][$line][] = ($result) ? array() : array(var_export($arg1,true),var_export($arg2,true));
 		return $result;
 	}
-	static public function last_flow_output_maps(){
-		return self::$last_flow_output_maps;
+	static public function flow_output_maps($entry_name=null){
+		return (isset($entry_name)) ? self::$flow_output_maps[$entry_name] : self::$flow_output_maps;
+	}
+	static public function search_path(){
+		$cwd = str_replace("\\",'/',getcwd()).'/';
+		return array($cwd,$cwd.'tests/',$cwd.'libs/');
 	}
 	/**
 	 * テストを実行する
@@ -59,18 +67,39 @@ class Test{
 	 * @param string $block_name ブロック名
 	 */
 	static final public function run($class_name,$method_name=null,$block_name=null){
-		if(!is_file($class_name) && !class_exists($class_name,true) && !function_exists($class_name)) throw new \ErrorException($class_name.' not found');
-		$doctest = is_file($class_name) ? self::get_entry_doctest($class_name) : ((strpos($class_name,"\\") !== false || ctype_upper(substr($class_name,0,1))) ? self::get_doctest($class_name) : self::get_func_doctest($class_name));
+		list($entry_path,$tests_path) = self::search_path();
+		if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true)){
+			$doctest = ((strpos($f,"\\") !== false || ctype_upper(substr($class_name,0,1))) ? self::get_doctest($f) : self::get_func_doctest($f));
+		}else if(is_file($class_name)){
+			$doctest = (strpos($class_name,'/tests/') === false) ? self::get_entry_doctest($class_name) : self::get_unittest($class_name);
+		}else{
+			if(is_file($f=$entry_path.'/'.$class_name.'.php')){
+				$doctest = self::get_entry_doctest($f);
+			}else if(is_file($f=$tests_path.str_replace('.','/',$class_name).'.php')){
+				$doctest = self::get_unittest($f);
+			}else{
+				throw new \ErrorException($class_name.' not found');
+			}
+		}
+		if(!isset(self::$flow_output_maps)){
+			self::$flow_output_maps = array();
+			foreach(new \RecursiveDirectoryIterator($entry_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
+				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
+					$src = file_get_contents($e->getFilename());
+					if((strpos($src,"\\org\\rhaco\\Flow") !== false && strpos($src,'->output(') !== false)){
+						$entry_name = substr($e->getFilename(),0,-4);
+						foreach(\org\rhaco\Flow::get_maps($e->getPathname()) as $p => $m){
+							if(isset($m['name'])) self::$flow_output_maps[$entry_name][$m['name']] = $m;
+						}
+					}
+				}
+			}
+		}
 		self::$current_file = $doctest['filename'];
 		self::$current_class = $doctest['class_name'];
+		self::$current_entry = $doctest['entry_name'];
 		self::$current_method = null;
 
-		if(is_file($class_name)){
-			self::$last_flow_output_maps = array();
-			foreach(\org\rhaco\Flow::get_maps($class_name) as $p => $m){
-				if(isset($m['name'])) self::$last_flow_output_maps[$m['name']] = $m;
-			}	
-		}
 		foreach($doctest['tests'] as $test_method_name => $tests){
 			if($method_name === null || $method_name === $test_method_name){
 				self::$current_method = $test_method_name;
@@ -83,9 +112,13 @@ class Test{
 						if($block_name === null || $block_name === $name){
 							try{
 								ob_start();
-								if(isset($tests['__setup__'])) eval($tests['__setup__'][1]);
-								eval($block);
-								if(isset($tests['__teardown__'])) eval($tests['__teardown__'][1]);
+								if($doctest['inc']){
+									include($doctest['filename']);
+								}else{
+									if(isset($tests['__setup__'])) eval($tests['__setup__'][1]);
+									eval($block);
+									if(isset($tests['__teardown__'])) eval($tests['__teardown__'][1]);
+								}
 								$result = ob_get_clean();
 								if(preg_match("/(Parse|Fatal) error:.+/",$result,$match)){
 									$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$result,$line) ? 
@@ -185,6 +218,12 @@ class Test{
 		self::clear();
 		return $result;
 	}
+	final static private function get_unittest($filename){
+		$result = array();
+		$result['@']['line'] = 0;
+		$result['@']['blocks'][] = array($filename,$filename,0);
+		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result,'inc'=>true);
+	}
 	final static private function get_entry_doctest($filename){
 		$result = array();
 		$entry = basename($filename,'.php');
@@ -202,7 +241,7 @@ class Test{
 			}
 			self::merge_setup_teardown($result);
 		}
-		return array('filename'=>$filename,'class_name'=>null,'tests'=>$result);
+		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>$entry,'tests'=>$result,'inc'=>false);
 	}
 	final static private function get_func_doctest($func_name){
 		$result = array();
@@ -226,7 +265,7 @@ class Test{
 			$result[$method_name]['line'] = $r->getStartLine();
 			$result[$method_name]['blocks'] = array();
 		}
-		return array('filename'=>$filename,'class_name'=>null,'tests'=>$result);
+		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result,'inc'=>false);
 	}
 	final static private function get_doctest($class_name){
 		$result = array();
@@ -255,7 +294,6 @@ class Test{
 					$result[$test_name]['blocks'][] = array('@',str_replace(array('<?php','?>'),array('    ','  '),$test_src));
 				}
 			}
-
 			if(is_dir($dirpath.'/test')){
 				foreach(new \RecursiveDirectoryIterator($dirpath.'/test',\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS) as $e){
 					if(substr($e->getPathName(),-4) == '.php'){
@@ -269,7 +307,7 @@ class Test{
 			}
 		}
 		self::merge_setup_teardown($result);
-		return array('filename'=>$filename,'class_name'=>$class_name,'tests'=>$result);
+		return array('filename'=>$filename,'class_name'=>$class_name,'entry_name'=>null,'tests'=>$result,'inc'=>false);
 	}
 	final static private function merge_setup_teardown(&$result){
 		if(isset($result['@']['blocks'])){
