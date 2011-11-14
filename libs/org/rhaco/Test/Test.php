@@ -112,8 +112,10 @@ class Test{
 						if($block_name === null || $block_name === $name){
 							try{
 								ob_start();
-								if($doctest['inc']){
+								if(!isset($doctest['class_name']) && !isset($doctest['entry_name'])){
+									if(is_file($f=(dirname($doctest['filename']).'/__setup__.php'))) include($f);
 									include($doctest['filename']);
+									if(is_file($f=(dirname($doctest['filename']).'/__teardown__.php'))) include($f);
 								}else{
 									if(isset($tests['__setup__'])) eval($tests['__setup__'][1]);
 									eval($block);
@@ -222,7 +224,7 @@ class Test{
 		$result = array();
 		$result['@']['line'] = 0;
 		$result['@']['blocks'][] = array($filename,$filename,0);
-		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result,'inc'=>true);
+		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result);
 	}
 	final static private function get_entry_doctest($filename){
 		$result = array();
@@ -241,7 +243,7 @@ class Test{
 			}
 			self::merge_setup_teardown($result);
 		}
-		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>$entry,'tests'=>$result,'inc'=>false);
+		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>$entry,'tests'=>$result);
 	}
 	final static private function get_func_doctest($func_name){
 		$result = array();
@@ -265,7 +267,7 @@ class Test{
 			$result[$method_name]['line'] = $r->getStartLine();
 			$result[$method_name]['blocks'] = array();
 		}
-		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result,'inc'=>false);
+		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result);
 	}
 	final static private function get_doctest($class_name){
 		$result = array();
@@ -307,7 +309,7 @@ class Test{
 			}
 		}
 		self::merge_setup_teardown($result);
-		return array('filename'=>$filename,'class_name'=>$class_name,'entry_name'=>null,'tests'=>$result,'inc'=>false);
+		return array('filename'=>$filename,'class_name'=>$class_name,'entry_name'=>null,'tests'=>$result);
 	}
 	final static private function merge_setup_teardown(&$result){
 		if(isset($result['@']['blocks'])){
