@@ -129,11 +129,11 @@ if(!function_exists('test_map_url')){
 	 * @return string
 	 */
 	function test_map_url($name){
-		$maps = \org\rhaco\Test::last_flow_output_maps();
-		
+		list($entry,$map_name) = (strpos($name,'::') !== false) ? explode('::',$name,2) : array(\org\rhaco\Test::current_entry(),$name);
+		$maps = \org\rhaco\Test::flow_output_maps($entry);
 		$args = func_get_args();
 		array_shift($args);
-		if(isset($maps[$name]) && $maps[$name]['num'] == sizeof($args)) return vsprintf($maps[$name]['pattern'],$args);
+		if(isset($maps[$map_name]) && $maps[$map_name]['num'] == sizeof($args)) return vsprintf($maps[$map_name]['pattern'],$args);
 		throw new \RuntimeException($name.'['.sizeof($args).'] not found');
 	}
 }
