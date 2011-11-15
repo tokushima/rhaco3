@@ -1,25 +1,21 @@
 <?php
 namespace org\rhaco\io\log;
 /**
- * ファイルにログを日付毎に出力するLogモジュール
+ * ファイルにログを出力するLogモジュール
  * @author tokushima
- * @conf string $path ログファイルを保存するディレクトリ
  */
-class File{
+class OneFile{
 	private $path;
 
-	static public function __import__(){
-		ini_set('log_errors','On');
-		ini_set('error_log',self::path());
+	public function __construct($path=null){
+		$this->path = self::path($path);
 	}
-	static private function path($dir=null){
-		if($dir===null) $dir = \org\rhaco\Conf::get('path',getcwd().'/work/logs');
-		if(substr(str_replace("\\",'/',$dir),-1) == '/') $dir = subustr($dir,0,-1);
+	static private function path($path=null){
+		if($path === null) $path = \org\rhaco\Conf::get('path',getcwd().'/work/output.log');
+		$path = str_replace("\\",'/',$path);
+		$dir = dirname($path);
 		if(!is_dir($dir)) mkdir($dir,0777,true);
-		return $dir.'/'.date('Ymd').'.log';
-	}
-	public function __construct($dir=null){
-		$this->path = self::path($dir);
+		return $path;
 	}
 	public function debug(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);
