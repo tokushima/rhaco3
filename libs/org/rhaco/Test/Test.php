@@ -150,6 +150,16 @@ class Test{
 				}
 			}
 		}
+		$test_name = isset($doctest['class_name']) ? str_replace("\\",'/',substr($doctest['class_name'],1)) : $doctest['entry_name'];
+		if(!empty($test_name) && is_dir($d=($tests_path.'/'.str_replace(array('.'),'/',$test_name)))){
+			foreach(new \RecursiveDirectoryIterator($d,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
+				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false
+					&& ($block_name === null || $block_name === substr($e->getFilename(),0,-4))
+				){
+					self::run($e->getPathname());
+				}
+			}
+		}
 		return new self();
 	}
 	public function __toString(){
