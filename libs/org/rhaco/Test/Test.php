@@ -73,7 +73,7 @@ class Test{
 		}else if(is_file($class_name)){
 			$doctest = (strpos($class_name,'/tests/') === false) ? self::get_entry_doctest($class_name) : self::get_unittest($class_name);
 		}else{
-			if(is_file($f=$entry_path.'/'.$class_name.'.php')){
+			if(is_file($f=$entry_path.$class_name.'.php')){
 				$doctest = self::get_entry_doctest($f);
 			}else if(is_file($f=$tests_path.str_replace('.','/',$class_name).'.php')){
 				$doctest = self::get_unittest($f);
@@ -96,8 +96,8 @@ class Test{
 			}
 		}
 		self::$current_file = $doctest['filename'];
-		self::$current_class = $doctest['class_name'];
-		self::$current_entry = $doctest['entry_name'];
+		self::$current_class = ($doctest['type'] == 1) ? $doctest['name'] : null;
+		self::$current_entry = ($doctest['type'] == 2 || $doctest['type'] == 3) ? $doctest['name'] : null;
 		self::$current_method = null;
 
 		foreach($doctest['tests'] as $test_method_name => $tests){
@@ -112,7 +112,7 @@ class Test{
 						if($block_name === null || $block_name === $name){
 							try{
 								ob_start();
-								if(!isset($doctest['class_name']) && !isset($doctest['entry_name'])){
+								if($doctest['type'] == 3){
 									if(is_file($f=(dirname($doctest['filename']).'/__setup__.php'))) include($f);
 									include($doctest['filename']);
 									if(is_file($f=(dirname($doctest['filename']).'/__teardown__.php'))) include($f);
@@ -150,13 +150,15 @@ class Test{
 				}
 			}
 		}
-		$test_name = isset($doctest['class_name']) ? str_replace("\\",'/',substr($doctest['class_name'],1)) : $doctest['entry_name'];
-		if(!empty($test_name) && is_dir($d=($tests_path.'/'.str_replace(array('.'),'/',$test_name)))){
-			foreach(new \RecursiveDirectoryIterator($d,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
-				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false
-					&& ($block_name === null || $block_name === substr($e->getFilename(),0,-4))
-				){
-					self::run($e->getPathname());
+		if($doctest['type'] == 1 || $doctest['type'] == 2){
+			$test_name = ($doctest['type'] == 1) ? str_replace("\\",'/',substr($doctest['name'],1)) : $doctest['name'];
+			if(!empty($test_name) && is_dir($d=($tests_path.str_replace(array('.'),'/',$test_name)))){
+				foreach(new \RecursiveDirectoryIterator($d,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
+					if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false
+						&& ($block_name === null || $block_name === substr($e->getFilename(),0,-4))
+					){
+						self::run($e->getPathname());
+					}
 				}
 			}
 		}
@@ -234,7 +236,8 @@ class Test{
 		$result = array();
 		$result['@']['line'] = 0;
 		$result['@']['blocks'][] = array($filename,$filename,0);
-		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result);
+		$name = (preg_match("/^.+\/tests\/(.+)\/[^\/]+\.php$/",$filename,$match)) ? $match[1] : null;
+		return array('filename'=>$filename,'type'=>3,'name'=>$name,'tests'=>$result);
 	}
 	final static private function get_entry_doctest($filename){
 		$result = array();
@@ -253,7 +256,7 @@ class Test{
 			}
 			self::merge_setup_teardown($result);
 		}
-		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>$entry,'tests'=>$result);
+		return array('filename'=>$filename,'type'=>2,'name'=>$entry,'tests'=>$result);
 	}
 	final static private function get_func_doctest($func_name){
 		$result = array();
@@ -277,7 +280,7 @@ class Test{
 			$result[$method_name]['line'] = $r->getStartLine();
 			$result[$method_name]['blocks'] = array();
 		}
-		return array('filename'=>$filename,'class_name'=>null,'entry_name'=>null,'tests'=>$result);
+		return array('filename'=>$filename,'type'=>4,'name'=>null,'tests'=>$result);
 	}
 	final static private function get_doctest($class_name){
 		$result = array();
@@ -319,7 +322,7 @@ class Test{
 			}
 		}
 		self::merge_setup_teardown($result);
-		return array('filename'=>$filename,'class_name'=>$class_name,'entry_name'=>null,'tests'=>$result);
+		return array('filename'=>$filename,'type'=>1,'name'=>$class_name,'tests'=>$result);
 	}
 	final static private function merge_setup_teardown(&$result){
 		if(isset($result['@']['blocks'])){
@@ -360,7 +363,7 @@ class Test{
 		}
 		return $var;
 	}
-	static private function fcolor($msg,$color="30"){
+	static private function fcolor($msg,$color='30'){
 		return (php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg;
 	}
 }
