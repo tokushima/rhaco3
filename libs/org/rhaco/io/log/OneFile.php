@@ -3,6 +3,7 @@ namespace org\rhaco\io\log;
 /**
  * ファイルにログを出力するLogモジュール
  * @author tokushima
+ * @conf string $path ログファイルを保存するファイルパス
  */
 class OneFile{
 	private $path;

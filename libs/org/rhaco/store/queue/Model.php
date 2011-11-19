@@ -7,9 +7,9 @@ namespace org\rhaco\store\queue;
  * @var string $type
  * @var string $data
  * @var number $lock
- * @var timestamp $fin;
+ * @var timestamp $fin
  * @var integer $priority
- * @var timestamp $create_date;
+ * @var timestamp $create_date
  */
 class Model extends \org\rhaco\Object{
 	protected $id;

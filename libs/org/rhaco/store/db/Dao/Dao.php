@@ -1,7 +1,5 @@
 <?php
 namespace org\rhaco\store\db;
-use org\rhaco\store\queue\exception\IllegalDataTypeException;
-
 use \org\rhaco\Conf;
 use \org\rhaco\Paginator;
 use \org\rhaco\store\db\Q;

@@ -2,8 +2,13 @@
 namespace org\rhaco\flow\parts\Developer;
 
 class Helper{
+	public function basename($p){
+		return basename(str_replace("\\",'/',$p));
+	}
 	public function package_name($p){
-		return str_replace(array('/','\\'),array('.','.'),$p);
+		$p = str_replace(array('/','\\'),array('.','.'),$p);
+		if(substr($p,0,1) == '.') $p = substr($p,1);
+		return $p;
 	}
 	public function type($class){
 		if(preg_match('/[A-Z]/',$class[0])){
@@ -125,5 +130,8 @@ class Helper{
 		$value = preg_replace("/!!!(.+?)!!!/ms","<span class=\"notice\">\\1</span>",$value);
 		$value = str_replace("\t","&nbsp;&nbsp;",$value);
 		return $value;
+	}
+	public function htmlspecialchars($src){
+		return htmlspecialchars($src);
 	}
 }

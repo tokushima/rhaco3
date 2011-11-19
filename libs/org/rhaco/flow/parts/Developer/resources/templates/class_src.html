@@ -1,0 +1,12 @@
+<rt:extends href="index.html" />
+
+<rt:block name="search_form" />
+
+<rt:block name="content">
+<h2 class="title"><a href="{$t.package_method_url('class_info',$package)}">{$f.package_name($package)}</a></h2>
+
+<pre class="prettyprint linenums" style="margin-top: 20px;">
+{$f.htmlspecialchars($class_src)}
+</pre>
+
+</rt:block>

@@ -5,7 +5,7 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
- * @class @{"maps":["index","libs","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list"]}
+ * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list"]}
  * @login @{"has_require":true}
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
@@ -58,24 +58,48 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * アプリケーションのマップ一覧
 	 */
 	public function index(){
-		$this->vars('maps',$this->maps());
+		$maps = array();
+		foreach($this->maps() as $k => $m){
+			if($this->search_str($m['name'],$m['class'],$m['method'],$m['url'])) $maps[$k] = $m;
+		}
+		$this->vars('maps',$maps);
+	}
+	private function search_str(){
+		$query = str_replace('　',' ',trim($this->in_vars('q')));
+		if(!empty($query)){
+			$args = func_get_args();
+			foreach(explode(' ',$query) as $q){
+				if(stripos(implode(' ',$args),$q) === false) return false;
+			}
+		}
+		return true;
 	}
 	/**
 	 * ライブラリの一覧
 	 */
-	public function libs(){
+	public function classes(){
 		$libs = array();
 		foreach(get_declared_classes() as $class){
 			$r = new \ReflectionClass($class);
 			if((!$r->isInterface() && !$r->isAbstract()) && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
 				$src = $r->getDocComment();
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$src))));
-				$todo = substr_count(file_get_contents($r->getFileName()),'T'.'ODO');
 				list($summary) = explode("\n",$document);
-				$libs[$class] = array($summary,$todo);
+				if($this->search_str($class,$document)) $libs[$class] = $summary;
 			}
 		}
 		$this->vars('packages',$libs);
+	}
+	/**
+	 * クラスのソース表示
+	 * @param string $class
+	 */
+	public function class_src($class){
+		$info = \org\rhaco\Man::class_info($class);
+		foreach(\org\rhaco\Man::class_info($class) as $k => $v){
+			$this->vars($k,$v);
+		}
+		$this->vars('class_src',file_get_contents($info['filename']));
 	}
 	/**
 	 * クラスのドキュメント
@@ -125,9 +149,9 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$name = '\\'.str_replace('/','\\',$name);
 		$order = \org\rhaco\lang\Sorter::order($this->in_vars('order'),$this->in_vars('porder'));
 		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
-		$this->vars('query',$this->in_vars('query'));
-		$this->vars('object_list',$name::find_all(Q::match($this->in_vars('query')),$paginator,Q::select_order($order,$this->in_vars('porder'))));
-		$this->vars('paginator',$paginator->cp(array('query'=>$this->in_vars('query'),'order'=>$order)));
+		$this->vars('q',$this->in_vars('q'));
+		$this->vars('object_list',$name::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder'))));
+		$this->vars('paginator',$paginator->cp(array('q'=>$this->in_vars('q'),'order'=>$order)));
 		$this->vars('model',new $name());
 		$this->vars('model_name',$name);
 	}
@@ -228,7 +252,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				$obj->type = $conf[0];
 				$obj->summary = $conf[1];
 				$obj->exists = \org\rhaco\Conf::exists($p,$n);
-				$list[$p.'@'.$n] = $obj;
+				if($this->search_str($obj->class,$obj->name,$obj->summary)) $list[$p.'@'.$n] = $obj;
 			}
 		}
 		$this->vars('object_list',$list);

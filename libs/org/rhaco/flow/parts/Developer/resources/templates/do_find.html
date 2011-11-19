@@ -1,23 +1,14 @@
 <rt:extends href="index.html" />
 
-<rt:block name="righttop">
-<li id="search">
-	<h2><a href="{$t.package_method_url('do_find',$model_name)}">{$model_name}</a></h2>
-	<form method="get" action="{$t.package_method_url('do_find',$model_name)}" rt:ref="true">
-		<fieldset>
-			<input type="text" id="seach-text" name="query" value="" />
-			<input type="submit" id="search-submit" value="Search" />
-		</fieldset>
-	</form>
-	<ul>
-		<li><a href="{$t.package_method_url('do_create',$model_name)}">create</a></li>
-	</ul>
-</li>
-</rt:block>
-
 <rt:block name="content">
+<ul class="breadcrumb">
+  <li><span style="font-weight: bold; font-size: medium;">{$f.package_name($model_name)}</span> <span class="divider">/</span></li>
+  <li><a href="{$t.package_method_url('do_find',$model_name)}">Find</a> <span class="divider">/</span></li>
+  <li><a href="{$t.package_method_url('do_create',$model_name)}">Create</a></li>
+</ul>
 
-<table class="list" rt:param="object_list" rt:var="obj">
+<rt:block name="content_body">
+<table class="list" rt:param="object_list" rt:var="obj" class="bordered-table zebra-striped" style="margin-top:20px">
 <thead>
 	<tr>
 		<th></th>
@@ -28,10 +19,10 @@
 </thead>
 <tbody>
 	<tr>
-		<td>
-			<form method="post" action="{$t.package_method_url('do_drop',$model_name)}">
+		<td style="padding: 5px; width: 60px;">
+			<form method="post" action="{$t.package_method_url('do_drop',$model_name)}" style="display:inline;">
 				{$f.primary_hidden($obj)}
-				<input type="submit" value="delete" />
+				<input type="submit" value="delete" style="" />
 			</form>
 		</td>
 		<rt:loop param="{$f.props($model,3)}" var="name">
@@ -48,8 +39,8 @@
 </tbody>
 </table>
 
-<div class="pager">
-	<rt:paginator counter="15" />
-</div>
+<rt:paginator counter="15" />
+
+</rt:block>
 
 </rt:block>

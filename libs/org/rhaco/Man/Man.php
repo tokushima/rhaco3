@@ -61,7 +61,7 @@ class Man{
 			}
 		}		
 		return array(
-				'extends'=>$extends,'static_methods'=>$static_methods,'methods'=>$methods
+				'filename'=>$r->getFileName(),'extends'=>$extends,'static_methods'=>$static_methods,'methods'=>$methods
 				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>trim(preg_replace('/@.+/','',$document))
 				);
 	}

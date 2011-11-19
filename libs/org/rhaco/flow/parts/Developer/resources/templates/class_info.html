@@ -1,112 +1,80 @@
 <rt:extends href="index.html" />
 
+<rt:block name="search_form" />
+
 <rt:block name="content">
-<div class="post">
-	<div class="post-bgtop">
-		<div class="post-bgbtm">
-			<h2 class="title">{$f.package_name($package)}</h2>
-			<rt:if param="{$extends}">
-				extends <a href="{$t.package_method_url('class_info',$extends)}">{$f.package_name($extends)}</a>
-			</rt:if>
-			<pre>{$f.pre($description)}</pre>
-		</div>
-	</div>
+<h2 class="title">
+	<a href="{$t.package_method_url('class_src',$package)}">{$f.package_name($package)}</a>
+</h2>
+<rt:if param="{$extends}">
+	extends <a href="{$t.package_method_url('class_info',$extends)}">{$f.package_name($extends)}</a>
+</rt:if>
+
+<div class="alert-message block-message" style="margin-top: 30px;">
+	{$f.pre($description)}
 </div>
 
 <rt:if param="{$static_methods}">
-<div class="post">
-	<div class="post-bgtop">
-		<div class="post-bgbtm">
-			<h2>static methods</h2>		
-			<table rt:param="{$static_methods}" rt:var="summary" rt:key="method_name">
-			<thead>
-				<tr>
-					<th>name</th>
-					<th>summary</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr class="even">
-					<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
-					<td>{$t.html($summary)}</td>
-				</tr>
-			</tbody>
-			</table>
-		</div>
-	</div>
-</div>
+	<h3>Static methods</h3>		
+	<table rt:param="{$static_methods}" rt:var="summary" rt:key="method_name" class="bordered-table zebra-striped">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td>{$t.html($summary)}</td>
+		</tr>
+	</tbody>
+	</table>
 </rt:if>
 
 <rt:if param="{$methods}">
-<div class="post">
-	<div class="post-bgtop">
-		<div class="post-bgbtm">
-			<h2>methods</h2>		
-			<table rt:param="{$methods}" rt:var="summary" rt:key="method_name">
-			<thead>
-				<tr>
-					<th>name</th>
-					<th>summary</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr class="even">
-					<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
-					<td>{$t.html($summary)}</td>
-				</tr>
-			</tbody>
-			</table>
-		</div>
-	</div>
-</div>
+	<h3>Methods</h3>
+	<table rt:param="{$methods}" rt:var="summary" rt:key="method_name" class="bordered-table zebra-striped">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td style="width:200px"><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td>{$t.html($summary)}</td>
+		</tr>
+	</tbody>
+	</table>
 </rt:if>
 
 <rt:if param="{$properties}">
-<div class="post">
-	<div class="post-bgtop">
-		<div class="post-bgbtm">
-			<h2>properties</h2>
-			<table rt:param="{$properties}" rt:var="prop" rt:key="prop_name">
-			<thead>
-				<tr>
-					<th>name</th>
-					<th>type</th>
-					<th>summary</th>
-					<th>hash</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr class="even {$t.cond_switch($prop[2],'hash_on','hash_off')}">
-					<td>{$prop_name}</td>
-					<td>{$prop[0]}</td>
-					<td>{$prop[1]}</td>
-					<td>{$t.cond_switch($prop[2],'○',' ')}</td>
-				</tr>
-			</tbody>
-			</table>
-		</div>
-	</div>
-</div>
-</rt:if>
-
-<rt:if param="{$tasks}">
-<div class="post">
-	<div class="post-bgtop">
-		<div class="post-bgbtm">
-			<h2>todo</h2>		
-			<table rt:param="{$tasks}" rt:var="task">
-			<tbody>
-				<tr class="even">
-					<td>{$task}</td>
-				</tr>
-			</tbody>
-			</table>
-		</div>
-	</div>
-</div>
+	<h3>Properties</h3>
+	<table rt:param="{$properties}" rt:var="prop" rt:key="prop_name" class="bordered-table zebra-striped">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th style="width:100px">type</th>
+			<th>summary</th>
+			<th style="width:50px;">xml</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even {$t.cond_switch($prop[2],'hash_on','hash_off')}">
+			<td>{$prop_name}</td>
+			<td>{$prop[0]}</td>
+			<td>{$prop[1]}</td>
+			<td>
+				<rt:if param="{$prop[2]}">
+				<rt:else />
+					<span class="label warning">hidden</span>
+				</rt:if>
+			</td>
+		</tr>
+	</tbody>
+	</table>
 </rt:if>
 
 </rt:block>
-
-
-
