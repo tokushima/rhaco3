@@ -68,7 +68,7 @@ class Dao{
 				\org\rhaco\store\queue\module\Dao\QueueDao::commit();
 				return $object->get();
 			}catch(\org\rhaco\store\db\exception\DaoBadMethodCallException $e){
-			}catch(\org\rhaco\store\db\exception\NotfoundException $e){
+			}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
 				throw new \org\rhaco\store\queue\exception\NotfoundException($type.' not found');
 			}
 		}

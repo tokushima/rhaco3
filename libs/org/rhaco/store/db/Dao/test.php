@@ -884,7 +884,7 @@ $obj = new UpdateModel();
 try{
 	$obj->id($s2->id()+100)->sync();
 	fail();
-}catch(\org\rhaco\store\db\exception\NotfoundException $e){
+}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
 	success();
 }
 UpdateModel::find_delete();

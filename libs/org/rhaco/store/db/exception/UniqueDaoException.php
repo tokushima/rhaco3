@@ -4,5 +4,5 @@ namespace org\rhaco\store\db\exception;
  * Daoの例外
  * @author tokushima
  */
-class UniqueException extends DaoException{
+class UniqueDaoException extends DaoException{
 }
