@@ -13,7 +13,7 @@
 	<tr>
 		<th></th>
 		<rt:loop param="{$f.props($model,3)}" var="name">
-			<th><a href="?{$paginator.query_order($name)}">{$t.trim_width($name,20,'..')}</a></th>
+			<th><a href="?{$paginator.query_order($name)}">{$t.trim_width($name,50,'..')}</a></th>
 		</rt:loop>
 	</tr>
 </thead>
@@ -30,7 +30,7 @@
 				<rt:if param="{$f.is_primary($obj,$name)}">
 					<a href="{$t.package_method_url('do_update',$model_name)}?{$f.primary_query($obj)}">{$t.trim_width($f.acr($obj,$name),20,'..')}</a>
 				<rt:else />
-					{$t.trim_width($f.acr($obj,$name),20,'..')}
+					{$t.trim_width($f.acr($obj,$name),50,'..')}
 				</rt:if>
 			</td>
 		</rt:loop>

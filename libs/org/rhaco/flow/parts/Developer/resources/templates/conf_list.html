@@ -5,6 +5,7 @@
 <table class="list" rt:param="object_list" rt:var="obj" class="zebra-striped">
 <thead>
 <tr>
+	<th>&nbsp;</th>
 	<th>class</th>
 	<th>name</th>
 	<th>type</th>
@@ -13,6 +14,11 @@
 </thead>
 <tbody>
 <tr style="{$t.cond_switch($obj->exists(),'font-weight: bold;','')}">
+	<td>
+		<rt:if param="{$obj.exists()}">
+			<span class="label success">O</span>
+		</rt:if>
+	</td>
 	<td valign="top">{$obj.class()}</td>
 	<td>{$obj.name()}</td>
 	<td>{$obj.type()}</td>

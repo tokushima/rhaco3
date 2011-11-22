@@ -11,7 +11,7 @@ class Helper{
 		return $p;
 	}
 	public function type($class){
-		if(preg_match('/[A-Z]/',$class[0])){
+		if(preg_match('/[A-Z]/',$class)){
 			switch(substr($class,-2)){
 				case "{}":
 				case "[]": $class = substr($class,0,-2);

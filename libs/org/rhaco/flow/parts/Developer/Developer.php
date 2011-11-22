@@ -81,7 +81,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$libs = array();
 		foreach(get_declared_classes() as $class){
 			$r = new \ReflectionClass($class);
-			if((!$r->isInterface() && !$r->isAbstract()) && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
+			if(strpos($r->getFileName(),\Rhaco3::libs()) !== false && strpos($r->getFileName(),\Rhaco3::libs('_')) === false 
+				&& (!$r->isInterface() && !$r->isAbstract()) && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
 				$src = $r->getDocComment();
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$src))));
 				list($summary) = explode("\n",$document);
