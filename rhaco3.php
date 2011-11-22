@@ -5,32 +5,69 @@ if(!class_exists('Rhaco3')){
  * @author tokushima
  */
 class Rhaco3{
+	static private $mode;
+	static private $common_dir;
 	static private $libs;
 	static private $rep = array('http://rhaco.org/repository/3/lib/');
 	/**
 	 * ライブラリのパスを設定する
 	 * @param string $libs_dir ライブラリのディレクトリパス
+	 * @param string $mode 実行モード
+	 * @param string $common_dir 設定ファイルのディレクトリ 
 	 */
-	static public function config_path($libs_dir=null){
-		if(self::$libs === null) self::$libs = $libs_dir.((substr($libs_dir,-1)=='/')?'':'/');
+	static public function config_path($libs_dir=null,$mode=null,$common_dir=null){
+		self::libs($libs_dir);
+		self::mode($mode);
+		self::common_dir($common_dir);
 	}
 	/**
 	 * リポジトリの場所を指定する
-	 * @param string $rep
+	 * @param string $rep リポジトリのパス
 	 */
 	static public function repository($rep){
 		array_unshift(self::$rep,$rep);
 	}
+	/**
+	 * リポジトリパスの一覧を返す
+	 * @return string[]
+	 */
 	static public function repositorys(){
 		return self::$rep;
 	}
+	/**
+	 * ライブラリのパスを設定/取得
+	 * @param string $p ライブラリのパス
+	 * @return string ライブラリのパス
+	 */
 	static public function libs($p=null){
-		if(self::$libs == null){
+		if(self::$libs === null){
 			self::$libs = __DIR__.'/libs/';
 			set_include_path(self::$libs.'_extlibs'.PATH_SEPARATOR.get_include_path());
 			define('__PEAR_DATA_DIR__',self::$libs.'_extlibs/data');
 		}
 		return self::$libs.$p;
+	}
+	/**
+	 * 実行モードを設定/取得
+	 * @param string $mode モード
+	 * @return string モード
+	 */
+	static public function mode($mode='noname'){
+		if(self::$mode === null) self::$mode = $mode;
+		return self::$mode;
+	}
+	/**
+	 * 設定ファイルのディレクトリを設定/取得
+	 * @param string $common_dir 設定ファイルのディレクトリ
+	 * @return string モード
+	 */
+	static public function common_dir($dir=null){
+		if(self::$common_dir === null){
+			$dir = str_replace("\\",'/',(empty($dir)) ? __DIR__.'/commons/' : $dir);
+			if(substr($dir,-1) != '/') $dir = $dir.'/';
+			self::$common_dir = $dir;
+		}
+		return self::$common_dir;
 	}
 }
 ini_set('display_errors','On');
@@ -66,7 +103,10 @@ spl_autoload_register(function($c){
 	return false;
 },true,false);
 if(sizeof(debug_backtrace(false))>0){
-	if(is_file($f=__DIR__.'/__settings__.php')) require_once($f);
+	if(is_file($f=(__DIR__.'/__settings__.php'))){
+		require_once($f);
+		if(Rhaco3::mode() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::mode().'.php'))) require_once($f);
+	}
 	return;
 }
 }
@@ -280,7 +320,7 @@ if(isset($_SERVER['argv'][1])){
 				if(substr($path,0,1) !== '/') $path = '/'.$path;
 				$rules = "RewriteEngine On\nRewriteBase ".$path."\n\n";
 				foreach(new DirectoryIterator(__DIR__) as $f){
-					if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_' && strpos($f->getFilename(),'rhaco3') === false && $f->getFilename() != 'index.php'){
+					if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_' && $f->getPathname() != __FILE__ && $f->getFilename() != 'index.php'){
 						$src = file_get_contents($f->getPathname());
 						if(strpos($src,'Flow') !== false && strpos($src,'patterns') !== false && strpos($src,'output') !== false){
 							$app = substr($f->getFilename(),0,-4);
@@ -311,7 +351,10 @@ if(isset($_SERVER['argv'][1])){
 				exit;
 			default:
 				if($_SERVER['argv'][1][0] == '-'){
-					if(is_file($f=__DIR__.'/__settings__.php')) require_once($f);
+					if(is_file($f=(__DIR__.'/__settings__.php'))){
+						require_once($f);
+						if(Rhaco3::mode() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::mode().'.php'))) require_once($f);
+					}
 					$package = substr($_SERVER['argv'][1],1);
 					$download(array($package),false);
 					if(is_file($f=Rhaco3::libs(str_replace('.','/',$package).'/setup.php')) || is_file($f=Rhaco3::libs('_vendors/'.str_replace('.','/',$package).'/setup.php'))){
