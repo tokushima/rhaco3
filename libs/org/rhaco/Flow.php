@@ -7,7 +7,6 @@ use \org\rhaco\Conf;
  * @conf string $template_path テンプレートファイルのベースパス
  * @conf string $media_url メディアファイルのベースURL
  * @conf boolean $secure patternsでsecure指定された場合にhttpsとするか
- * @conf string $mode アプリケーションの実行モード(任意文字列)
  */
 class Flow{
 	private $module = array();
@@ -198,16 +197,16 @@ class Flow{
 			foreach($urls as $k => $null){
 				if(preg_match("/^".(empty($k) ? '' : "\/").str_replace(array("\/",'/','@#S'),array('@#S',"\/","\/"),$k).'[\/]{0,1}$/',$pathinfo,$p)){
 					if(isset($apps[$k]['mode']) && !empty($apps[$k]['mode'])){
-						$mode = Conf::get('mode');
+						$mode = \Rhaco3::mode();
 						$bool = false;
-						foreach(explode(',',$mode) as $m){
-							if($apps[$k]['mode'] == trim($m)){
+						foreach(explode(',',$apps[$k]['mode']) as $m){
+							if($mode == trim($m)){
 								$bool = true;
 								break;
 							}
 						}
 						if(!$bool) break;
-					}					
+					}
 					array_shift($p);
 					$obj = $modules = array();
 					$current_url = \org\rhaco\Request::current_url();
@@ -341,6 +340,7 @@ class Flow{
 				foreach(\org\rhaco\Exceptions::gets($g) as $e){
 					$message = new \org\rhaco\Xml('message',$e->getMessage());
 					$message->add('group',$g);
+					// TODO rhaco2にあわせる
 					$message->add('type',get_class($e));
 					$xml->add($message);
 				}
