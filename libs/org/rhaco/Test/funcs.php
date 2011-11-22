@@ -146,3 +146,16 @@ if(!function_exists('b')){
 		return new \org\rhaco\net\Http();
 	}
 }
+if(!function_exists('xml')){
+	/**
+	 * XMLで取得する
+	 * @param $xml 取得したXmlオブジェクトを格納する変数
+	 * @param $src 対象の文字列
+	 * @param $name ノード名
+	 * @return boolean
+	 */
+	function xml(&$xml,$src,$name=null){
+		return \org\rhaco\Xml::set($xml,$src,$name);
+	}
+}
+
