@@ -340,8 +340,7 @@ class Flow{
 				foreach(\org\rhaco\Exceptions::gets($g) as $e){
 					$message = new \org\rhaco\Xml('message',$e->getMessage());
 					$message->add('group',$g);
-					// TODO rhaco2にあわせる
-					$message->add('type',get_class($e));
+					$message->add('type',basename(str_replace("\\",'/',get_class($e))));
 					$xml->add($message);
 				}
 			}

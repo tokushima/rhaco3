@@ -42,6 +42,8 @@ $flow->output(array(''
 	,'sample_flow_html'=>array(name=>'sample_flow_html',template=>'sample.html')
 	,'sample_media_flow'=>array(name=>'sample_media_flow',action=>'test.SampleMediaFlow',media_path=>'media_path')
 	,'sample_flow_exception/throw'=>array(name=>'sample_flow_exception_throw',action=>'test.SampleExceptionFlow::throw_method',error_template=>'exception_flow/error.html')
+	,'sample_flow_exception/throw/xml'=>array(name=>'sample_flow_exception_throw_xml',action=>'test.SampleExceptionFlow::throw_method')
+	,'sample_flow_exception/throw/xml/package'=>array(name=>'sample_flow_exception_package_throw_xml',action=>'test.SampleExceptionFlow::throw_method_package')	
 	,'extends_block_template/extendsA'=>array(name=>'template_super_a',template=>'template_super.html')
 	,'extends_block_template/extendsB'=>array(name=>'template_super_b',template=>'template_super.html',template_super=>'template_super_x.html')
 	
@@ -468,3 +470,19 @@ $b->do_get(test_map_url('notemplate'));
 eq(200,$b->status());
 eq('<result><abc>ABC</abc><newtag><hoge>HOGE</hoge></newtag></result>',$b->body());
 */
+
+/***
+# sample_flow_exception_throw_xml
+$b = b();
+$b->do_get(test_map_url('sample_flow_exception_throw_xml'));
+eq(403,$b->status());
+eq('<error><message group="exceptions" type="LogicException">error</message></error>',$b->body());
+*/
+/***
+# sample_flow_exception_package_throw_xml
+$b = b();
+$b->do_get(test_map_url('sample_flow_exception_package_throw_xml'));
+eq(403,$b->status());
+eq('<error><message group="exceptions" type="SampleException">sample error</message></error>',$b->body());
+*/
+
