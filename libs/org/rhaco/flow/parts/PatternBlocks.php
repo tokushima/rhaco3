@@ -32,4 +32,5 @@ class PatternBlocks implements \org\rhaco\flow\FlowInterface{
 	public function before(){}
 	public function after(){}
 	public function exception(){}
+	public function get_template_modules(){}
 }

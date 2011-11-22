@@ -73,6 +73,8 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	public function get_theme(){
 		return $this->theme;
 	}
+	public function get_template_modules(){
+	}
 	public function set_args($args){
 		$this->map_args = $args;
 	}

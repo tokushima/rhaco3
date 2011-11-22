@@ -255,6 +255,11 @@ class Flow{
 								if(\org\rhaco\Exceptions::has()) $obj->exception();
 								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
+								$ext_modules = $obj->get_template_modules();
+								if(!empty($ext_modules)){
+									if(!is_array($ext_modules)) $ext_modules = array($ext_modules);
+									foreach($ext_modules as $o) $this->template->set_object_module($o);
+								}
 							}
 						}
 						if(isset($apps[$k]['template'])){

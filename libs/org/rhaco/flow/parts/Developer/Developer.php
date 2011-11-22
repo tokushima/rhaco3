@@ -53,6 +53,9 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('f',new Developer\Helper());
 		$this->vars('is_smtp_blackhole',in_array('org\rhaco\net\mail\module\SmtpBlackholeDao',$models));
 	}
+	public function get_template_modules(){
+		return new \org\rhaco\flow\module\TwitterBootstrapPagination();
+	}
 
 	/**
 	 * アプリケーションのマップ一覧
