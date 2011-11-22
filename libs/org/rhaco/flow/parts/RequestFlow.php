@@ -32,6 +32,18 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	protected function __anon__($d){
 		self::parse_anon_json($this->anon_login,'login',$d);
 	}
+	public function user(){
+		if(func_num_args() > 0){
+			$user = func_get_arg(0);
+			if(!empty($this->anon_login['type'])){
+				$class = str_replace('.',"\\",$this->anon_login['type']);
+				if($class[0] != "\\") $class= "\\".$class;
+				if(!($user instanceof $class)) throw new \LogicException('user must be an of '.$this->anon_login['type']);
+			}
+			$this->sess->vars($this->login_id.'USER',$user);
+		}
+		return $this->sess->in_vars($this->login_id.'USER');
+	}
 	protected function theme($theme){
 		$this->theme = $theme;
 	}
@@ -79,7 +91,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * POSTされたか
 	 * @return boolean
 	 */
-	protected function is_post(){
+	public function is_post(){
 		return $this->req->is_post();
 	}
 	/**
@@ -190,7 +202,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param string $key
 	 * @param mixed $val
 	 */
-	protected function vars($key,$val){
+	public function vars($key,$val){
 		$this->req->vars($key,$val);
 	}
 	/**
@@ -199,14 +211,14 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param mixed $d 値が存在しない場合の代理値
 	 * @return mixed
 	 */
-	protected function in_vars($n,$d=null){
+	public function in_vars($n,$d=null){
 		return $this->req->in_vars($n,$d);
 	}
 	/**
 	 * 値を削除する
 	 * @param string $n 削除する定義名
 	 */
-	protected function rm_vars($n){
+	public function rm_vars($n=null){
 		call_user_func_array(array($this->req,'rm_vars'),func_get_args());
 	}
 	/**
@@ -214,7 +226,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param string $n
 	 * @return boolean
 	 */
-	protected function is_vars($n){
+	public function is_vars($n){
 		return $this->req->is_vars($n);
 	}
 	/**
@@ -332,12 +344,12 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		 * @param self $this
 		 * @return boolean
 		 */
-		if(!$this->is_post() || !$this->has_object_module('login_condition') || $this->object_module('login_condition',$this->req) === false){
+		if(!$this->is_post() || !$this->has_object_module('login_condition') || $this->object_module('login_condition',$this) === false){
 			/**
 			 * ログイン失敗
 			 * @param self $this
 			 */
-			$this->object_module('login_invalid',$this->req);
+			$this->object_module('login_invalid',$this);
 			return false;
 		}
 		$this->sessions($this->login_id,$this->login_id);
