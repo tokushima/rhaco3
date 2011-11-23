@@ -37,6 +37,7 @@ abstract class Dao extends \org\rhaco\Object{
 		$conf = Conf::get($database);
 		if(is_array($conf)) $conf = $conf[rand(0,sizeof($conf)-1)];
 		$json = empty($conf) ? null : json_decode($conf,true);
+		if(!isset($json) && !empty($conf)) throw new \LogicException('JSON error '.str_replace("\\",'.',__CLASS__).'@'.$database);
 		if(!isset(self::$_connections_[$database])){
 			try{
 				if(is_array($json)){
@@ -105,6 +106,7 @@ abstract class Dao extends \org\rhaco\Object{
 				for($i=1;$i<strlen($table_class);$i++) $anon[1] .= (ctype_lower($table_class[$i])) ? $table_class[$i] : '_'.strtolower($table_class[$i]);
 			}
 			$json = self::get_con($anon[0],$p);
+			if(!isset(self::$_connections_[$anon[0]])) throw new \RuntimeException('connection fail '.str_replace("\\",'.',get_class($this)));
 			static::set_module(self::$_connections_[$anon[0]][2]);
 			$anon[5] = isset($json['prefix']) ? $json['prefix'] : '';
 			$anon[6] = (isset($json['upper']) && $json['upper'] === true);
@@ -766,7 +768,7 @@ abstract class Dao extends \org\rhaco\Object{
 			/**
 			 * createを実行するSQL文の生成
 			 * @param self $this
-			 * @return Daq
+			 * @return org.rhaco.store.db.Daq
 			 */
 			$daq = $self::module('create_sql',$this);
 			if($this->update_query($daq) == 0) throw new DaoBadMethodCallException('failed to create');

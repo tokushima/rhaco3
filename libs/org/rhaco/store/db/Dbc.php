@@ -46,13 +46,11 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 	 */
 	public function connect(){
 		if($this->connection === null){
-			if(empty($this->type)){
-				$this->type('org.rhaco.store.db.module.Mysql');
-				if(empty($this->encode)) $this->encode('utf8');
-				if(empty($this->user)){
-					$this->user('root');
-					$this->password('root');					
-				}
+			if(empty($this->type)) $this->type('org.rhaco.store.db.module.Mysql');
+			if(empty($this->encode)) $this->encode('utf8');
+			if(empty($this->user)){
+				$this->user('root');
+				$this->password('root');
 			}
 			if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('undef type');
 			$r = new \ReflectionClass($this->type);
