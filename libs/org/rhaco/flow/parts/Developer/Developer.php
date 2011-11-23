@@ -63,7 +63,11 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	public function index(){
 		$maps = array();
 		foreach($this->maps() as $k => $m){
-			if($this->search_str($m['name'],$m['class'],$m['method'],$m['url'])) $maps[$k] = $m;
+			$q = '';
+			foreach(array('name','class','method','url','template') as $n){
+				if(isset($m[$n])) $q .= $m[$n];
+			}
+			if($this->search_str($q)) $maps[$k] = $m;
 		}
 		$this->vars('maps',$maps);
 	}
