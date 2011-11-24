@@ -53,8 +53,13 @@ class Test{
 		self::$result[(empty(self::$current_file) ? $file : self::$current_file)][self::$current_class][self::$current_method][$line][] = ($result) ? array() : array(var_export($arg1,true),var_export($arg2,true));
 		return $result;
 	}
+	/**
+	 * 取得済みのFlowの定義を返す
+	 * @param string $entry_name
+	 * @return array
+	 */
 	static public function flow_output_maps($entry_name=null){
-		return (isset($entry_name)) ? self::$flow_output_maps[$entry_name] : self::$flow_output_maps;
+		return (isset($entry_name)) ? (isset(self::$flow_output_maps[$entry_name]) ? self::$flow_output_maps[$entry_name] : null) : self::$flow_output_maps;
 	}
 	static public function search_path(){
 		$cwd = str_replace("\\",'/',getcwd()).'/';
@@ -132,16 +137,23 @@ class Test{
 								if(ob_get_level() > 0) $result = ob_get_clean();
 								list($message,$file,$line) = array($e->getMessage(),$e->getFile(),$e->getLine());
 								$trace = $e->getTrace();
+								$eval = false;
+
 								foreach($trace as $k => $t){
 									if(isset($t['class']) && isset($t['function']) && ($t['class'].'::'.$t['function']) == __METHOD__ && isset($trace[$k-2])
 										&& $trace[$k-1]['file'] == __FILE__ && isset($trace[$k-1]['function']) && $trace[$k-1]['function'] == 'eval'
 									){
 										$file = self::$current_file;
 										$line = $trace[$k-2]['line'];
+										$eval = true;
 										break;
 									}
 								}
-								self::$result[self::$current_file][self::$current_class][self::$current_method][$line][] = array("exception",$message,$file,$line);
+								if(!$eval && self::$current_file == $trace[0]['file']){
+									$file = $trace[0]['file'];
+									$line = $trace[0]['line'];
+								}
+								self::$result[self::$current_file][self::$current_class][self::$current_method][$line][] = array('exception',$message,$file,$line);
 								\org\rhaco\Log::error($e);
 							}
 							\org\rhaco\Exceptions::clear();

@@ -65,16 +65,15 @@ if(!function_exists('success')){
 	 */
 	function success(){
 		list($debug) = debug_backtrace(false);
-		\org\rhaco\Test::equals(true,true,true,$debug["line"],$debug["file"]);
+		\org\rhaco\Test::equals(true,true,true,$debug['line'],$debug['file']);
 	}
 }
 if(!function_exists('fail')){
 	/**
 	 * 失敗
 	 */
-	function fail(){
-		list($debug) = debug_backtrace(false);
-		\org\rhaco\Test::equals(false,true,true,$debug["line"],$debug["file"]);
+	function fail($msg=null){
+		throw new \LogicException('Test fail: '.$msg);
 	}
 }
 if(!function_exists('newclass')){
@@ -158,4 +157,3 @@ if(!function_exists('xml')){
 		return \org\rhaco\Xml::set($xml,$src,$name);
 	}
 }
-

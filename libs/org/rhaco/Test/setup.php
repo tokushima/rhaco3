@@ -5,17 +5,23 @@
  * @param string $m method name
  * @param string $b block name
  */
-$fcolor = function ($msg,$color="30"){
-	return (php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg;
+$error_print = function ($msg,$color='1;31'){
+	print(((php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg).PHP_EOL);
 };
 $verify_format = function($class_name,$m=null,$b=null){
 	if(php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN'){
-		$f = ' .. '.$class_name;
+		$f = ' .. '.$class_name.' ';
 		$l = strlen($f)*2;
+		$throw = null;
 		print("\033[".$l.'D'.str_repeat(' ',$l)."\033[".$l.'D');
 		print($f);
-		\org\rhaco\Test::run($class_name,$m,$b);
+		try{
+			\org\rhaco\Test::run($class_name,$m,$b);
+		}catch(\Exception $e){
+			$throw = $e;
+		}
 		print("\033[".$l.'D'.str_repeat(' ',$l)."\033[".$l.'D');
+		if(isset($throw)) throw $throw;
 	}else{
 		\org\rhaco\Test::run($class_name,$m,$b);
 	}
@@ -23,44 +29,22 @@ $verify_format = function($class_name,$m=null,$b=null){
 \org\rhaco\Test::start_time();
 if(isset($_ENV['params']['mem']) && $_ENV['params']['mem'] != '') ini_set('memory_limit',$_ENV['params']['mem']);
 if(isset($_ENV['params']['value'])){
-	$verify_format($_ENV['params']['value']
-		,(isset($_ENV['params']['m']) ? $_ENV['params']['m'] : null)
-		,(isset($_ENV['params']['b']) ? $_ENV['params']['b'] : null)
-	);
+	try{
+		$verify_format($_ENV['params']['value']
+			,(isset($_ENV['params']['m']) ? $_ENV['params']['m'] : null)
+			,(isset($_ENV['params']['b']) ? $_ENV['params']['b'] : null)
+		);
+	}catch(\Exception $e){
+		$error_print($_ENV['params']['value'].': '.$e->getMessage());
+	}
 	print(new \org\rhaco\Test());
 }else{
-	$dup = array();
-	$dirs = function($dir) use(&$dirs){
-		$base = $dir;
-		if(substr($dir,-1) == '/') $dir = substr($dir,0,-1);
-		if(substr($base,-1) != '/') $base = $base.'/';
-		$list = array();
-		if(is_file($dir)){
-			$list[str_replace($base,'',$dir)] = $dir;
-		}else{
-			if($h = opendir($dir)){
-				while($p = readdir($h)){
-					if($p != '.' && $p != '..'){
-						$s = sprintf('%s/%s',$dir,$p);
-						if(is_dir($s)){
-							$r = $dirs($s,$base);
-							$list = array_merge($list,$r);
-						}else{
-							$list[str_replace($base,'',$s)] = $s;
-						}
-					}
-				}
-				closedir($h);
-			}
-		}
-		return $list;
-	};
-	
+	$dup = array();	
 	$exceptions = array();
 	list($entry_path,$tests_path,$libs_path) = \org\rhaco\Test::search_path();
 	
-	foreach($dirs($libs_path) as $p){
-		if(substr($p,-4) == '.php'){
+	foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($libs_path,FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS),RecursiveIteratorIterator::SELF_FIRST) as $p){
+		if(substr($p->getFilename(),-4) == '.php' && strpos($p->getPathname(),'/.') === false && strpos($p->getPathname(),'/_') === false){
 			$r = str_replace("\\",'/',$p);
 			$n = substr(basename($r),0,-4);
 			$b = true;
@@ -94,7 +78,7 @@ if(isset($_ENV['params']['value'])){
 			}
 		}
 	}
-	if(!empty($exceptions)){
+	if(empty($exceptions)){
 		foreach(new \RecursiveDirectoryIterator($entry_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
 			if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
 				$src = file_get_contents($e->getFilename());
@@ -107,8 +91,6 @@ if(isset($_ENV['params']['value'])){
 				}
 			}
 		}
-	}
-	if(!empty($exceptions)){
 		foreach(new \RecursiveDirectoryIterator($tests_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
 			if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
 				try{
@@ -120,7 +102,7 @@ if(isset($_ENV['params']['value'])){
 		}
 	}
 	if(!empty($exceptions)){
-		foreach($exceptions as $k => $e) $fcolor($k.': '.$e.PHP_EOL);
+		foreach($exceptions as $k => $e) $error_print($k.': '.$e);
 	}
 	print(new \org\rhaco\Test());
 }
