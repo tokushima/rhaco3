@@ -62,12 +62,13 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function index(){
 		$maps = array();
+		$self_name = str_replace("\\",'.',__CLASS__);
 		foreach($this->maps() as $k => $m){
 			$q = '';
 			foreach(array('name','class','method','url','template') as $n){
 				if(isset($m[$n])) $q .= $m[$n];
 			}
-			if($this->search_str($q)) $maps[$k] = $m;
+			if($this->search_str($q) && (!isset($m['class']) || $m['class'] != $self_name)) $maps[$k] = $m;
 		}
 		$this->vars('maps',$maps);
 	}
@@ -263,6 +264,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				if($this->search_str($obj->class,$obj->name,$obj->summary)) $list[$p.'@'.$n] = $obj;
 			}
 		}
+		ksort($list);
 		$this->vars('object_list',$list);
 	}
 }
