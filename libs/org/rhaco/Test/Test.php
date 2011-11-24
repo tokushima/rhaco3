@@ -73,7 +73,7 @@ class Test{
 	 */
 	static final public function run($class_name,$method_name=null,$block_name=null){
 		list($entry_path,$tests_path) = self::search_path();
-		if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true)){
+		if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true) || interface_exists($f)){
 			$doctest = ((strpos($f,"\\") !== false || ctype_upper(substr($class_name,0,1))) ? self::get_doctest($f) : self::get_func_doctest($f));
 		}else if(is_file($class_name)){
 			$doctest = (strpos($class_name,'/tests/') === false) ? self::get_entry_doctest($class_name) : self::get_unittest($class_name);
