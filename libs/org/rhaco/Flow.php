@@ -66,9 +66,13 @@ class Flow{
 	 */
 	static public function get_maps($file){
 		self::$get_maps = true;
-		ob_start();
-			include($file);
-		ob_end_clean();
+		try{
+			ob_start();
+				include($file);
+			ob_end_clean();
+		}catch(\Exception $e){
+			\org\rhaco\Log::error($e);
+		}
 		return self::$output_maps;
 	}
 	/**
@@ -158,7 +162,7 @@ class Flow{
 								}
 							}
 						}
-					}catch(ReflectionException $e){
+					}catch(\ReflectionException $e){
 						throw new \InvalidArgumentException($v['class'].' not found');
 					}
 				}else{
@@ -269,6 +273,7 @@ class Flow{
 						}else if($this->has_object_module('flow_output')){
 							$this->object_module('flow_output',$obj);
 						}else{
+							if(\org\rhaco\Exceptions::has()) $this->handle_exception_xml();
 							$xml = new \org\rhaco\Xml('result',$obj);
 							$xml->output();
 						}
