@@ -245,7 +245,7 @@ class Request implements \IteratorAggregate{
 	 * @param string $newname
 	 */
 	public function move_file($file_info,$newname){
-		if(!$this->has_file($file_info)) throw new LogicException('file not found ');
+		if(!$this->has_file($file_info)) throw new \LogicException('file not found ');
 		if(!is_dir(dirname($newname))) mkdir(dirname($newname),0777,true);
 		rename($file_info['tmp_name'],$newname);
 	}
