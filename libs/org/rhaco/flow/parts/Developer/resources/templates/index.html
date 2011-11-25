@@ -81,6 +81,7 @@
 					<th style="width:200px;">name</th>
 					<th style="width:200px;">url</th>
 					<th>template</th>
+					<th>summary</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -95,6 +96,9 @@
 					<td>{$map['url']}</td>
 					<td>
 						<rt:if param="{$map['template']}">{$map['template']}</rt:if>
+					</td>
+					<td>
+						<span>{$map['summary']}</span>
 					</td>
 				</tr>
 			</tbody>

@@ -68,7 +68,19 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 			foreach(array('name','class','method','url','template') as $n){
 				if(isset($m[$n])) $q .= $m[$n];
 			}
-			if($this->search_str($q) && (!isset($m['class']) || $m['class'] != $self_name)) $maps[$k] = $m;
+			if($this->search_str($q) && (!isset($m['class']) || $m['class'] != $self_name)){
+				$m['summary'] = '';
+				if(isset($m['class']) && isset($m['method'])){
+					try{
+						$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
+						$mr = $cr->getMethod($m['method']);
+						list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment())))));
+					}catch(\ReflectionException $e){
+						$m['summary'] = $e->getMessage();
+					}
+				}
+				$maps[$k] = $m;
+			}
 		}
 		$this->vars('maps',$maps);
 	}
