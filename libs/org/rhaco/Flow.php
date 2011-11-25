@@ -7,6 +7,7 @@ use \org\rhaco\Conf;
  * @conf string $template_path テンプレートファイルのベースパス
  * @conf string $media_url メディアファイルのベースURL
  * @conf boolean $secure patternsでsecure指定された場合にhttpsとするか
+ * @conf booelan $exception_log_level Exceptionが発生した際にLogに出力するログレベル (error,warn,info,debug)
  */
 class Flow{
 	private $module = array();
@@ -279,6 +280,9 @@ class Flow{
 						}
 						exit;
 					}catch(\Exception $e){
+						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
+							\org\rhaco\Log::$level($e);
+						} 
 						if($this->has_object_module('flow_exception_output')){
 							$this->object_module('flow_exception_output',$obj,$e);
 							exit;
