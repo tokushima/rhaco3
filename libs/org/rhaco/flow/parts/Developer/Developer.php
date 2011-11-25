@@ -91,10 +91,16 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 			$r = new \ReflectionClass($class);
 			if(strpos($r->getFileName(),\Rhaco3::libs()) !== false && strpos($r->getFileName(),\Rhaco3::libs('_')) === false 
 				&& (!$r->isInterface() && !$r->isAbstract()) && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
-				$src = $r->getDocComment();
-				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$src))));
+				$class_doc = $r->getDocComment();
+				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
 				list($summary) = explode("\n",$document);
-				if($this->search_str($class,$document)) $libs[$class] = $summary;
+				if($this->search_str($class,$document)){
+					$src = file_get_contents($r->getFileName());
+					$c = new \org\rhaco\Object();
+					$c->summary = $summary;
+					$c->usemail = (strpos($src,"\\org\\rhaco\\net\\mail\\Mail") !== false);
+					$libs[$class] = $c;
+				}
 			}
 		}
 		$this->vars('packages',$libs);
