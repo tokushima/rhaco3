@@ -254,9 +254,9 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	public function mail_list(){
 		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
 		$order = $this->in_vars('order','-id');
-		$this->vars('query',$this->in_vars('query'));
-		$this->vars('object_list',\org\rhaco\net\mail\module\SmtpBlackholeDao::find_all(Q::match($this->in_vars('query')),$paginator,Q::select_order($order,$this->in_vars('porder'))));
-		$this->vars('paginator',$paginator->cp(array('query'=>$this->in_vars('query'),'order'=>$order)));
+		$this->vars('q',$this->in_vars('q'));
+		$this->vars('object_list',\org\rhaco\net\mail\module\SmtpBlackholeDao::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder'))));
+		$this->vars('paginator',$paginator->cp(array('q'=>$this->in_vars('q'),'order'=>$order)));
 	}
 	/**
 	 * メールの詳細
