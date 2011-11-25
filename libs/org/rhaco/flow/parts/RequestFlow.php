@@ -10,6 +10,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	private $package_maps = array();
 	private $maps = array();
 	private $select_map_name;
+	private $select_map;
 	private $theme;
 
 	private $sess;
@@ -52,8 +53,14 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	}
 	public function set_maps($maps){
 		$this->maps = $maps;
+		foreach($maps as $p => $m){
+			if($m['name'] == $this->select_map_name){
+				$this->select_map = $m;
+				break;
+			}
+		}
 		foreach($maps as $u => $m){
-			if(isset($maps[$this->select_map_name]['=']) && isset($m['=']) && $m['class'] == $maps[$this->select_map_name]['class']){
+			if(isset($this->select_map['=']) && isset($m['=']) && $m['class'] == $this->select_map['class']){
 				$this->package_maps[$u] = $maps[$u];
 			}
 		}
@@ -79,8 +86,8 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$this->map_args = $args;
 	}
 	public function before(){
-		if($this->has_object_module('before_flow_handle')) $this->object_module('before_flow_handle',$this);		
-		if($this->anon_login['require'] === true && $this->maps[$this->select_map_name]['method'] != 'do_login') $this->login_required(false);
+		if($this->has_object_module('before_flow_handle')) $this->object_module('before_flow_handle',$this);
+		if($this->anon_login['require'] === true && isset($this->select_map['method']) && $this->select_map['method'] != 'do_login') $this->login_required(false);
 		if($this->login_redirect) $this->redirect_login_map();
 	}
 	public function after(){
@@ -97,20 +104,44 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		return $this->req->is_post();
 	}
 	/**
-	 * 添付されたファイルがあるか
-	 * @param string $var
-	 * @return boolean
-	 */
-	protected function has_file($var){
-		return $this->req->has_file($var);
-	}
-	/**
-	 * 添付ファイルとしての情報を返す
-	 * @param string $var
+	 * 添付ファイル情報の取得
+	 * @param string $n
 	 * @return array
 	 */
-	protected function file_info($var){
-		return $this->file_info($var);
+	public function in_files($n){
+		return $this->req->in_files($n);
+	}
+	/**
+	 * 添付されたファイルがあるか
+	 * @param array $file_info
+	 * @return boolean
+	 */
+	public function has_file($file_info){
+		return $this->req->has_file($file_info);
+	}
+	/**
+	 * 添付ファイルのオリジナルファイル名の取得
+	 * @param array $file_info
+	 * @return string
+	 */
+	public function file_orginal_name($file_info){
+		return $this->req->file_orginal_name($file_info);
+	}
+	/**
+	 * 添付ファイルのファイルパスの取得
+	 * @param array $file_info
+	 * @return string
+	 */
+	public function file_path($file_info){
+		return $this->req->file_path($file_info);
+	}
+	/**
+	 * 添付ファイルを移動します
+	 * @param array $file_info
+	 * @param string $newname
+	 */
+	public function move_file($file_info,$newname){
+		return $this->req->move_file($file_info,$newname);
 	}
 	/**
 	 * クッキーへの書き出し

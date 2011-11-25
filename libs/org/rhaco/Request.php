@@ -6,6 +6,7 @@ namespace org\rhaco;
  */
 class Request implements \IteratorAggregate{
 	private $vars = array();
+	private $files = array();
 	private $args;
 
 	public function __construct(){
@@ -20,7 +21,7 @@ class Request implements \IteratorAggregate{
 					foreach($_POST as $k => $v) $this->vars[$k] = (get_magic_quotes_gpc() && is_string($v)) ? stripslashes($v) : $v;
 				}
 				if(isset($_FILES) && is_array($_FILES)){
-					foreach($_FILES as $k => $v) $this->vars[$k] = $v;
+					foreach($_FILES as $k => $v) $this->files[$k] = $v;
 				}
 			}else if(isset($_GET) && is_array($_GET)){
 				foreach($_GET as $k => $v) $this->vars[$k] = (get_magic_quotes_gpc() && is_string($v)) ? stripslashes($v) : $v;
@@ -130,26 +131,6 @@ class Request implements \IteratorAggregate{
 		return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
 	}
 	/**
-	 * 添付されたファイルがあるか
-	 * @param string $var
-	 * @return boolean
-	 */
-	public function has_file($var){
-		return isset($var['tmp_name']) && is_file($var['tmp_name']);
-	}
-	/**
-	 * 添付ファイルとしての情報を返す
-	 * @param string $var
-	 * @return array
-	 */
-	public function file_info($var){
-		return array('name'=>(isset($var['name']) ? $var['name'] : null)
-					,'path'=>(isset($var['tmp_name']) ? $var['tmp_name'] : null)
-					,'size'=>(isset($var['size']) ? $var['size'] : null)
-					,'error'=>(isset($var['error']) ? $var['error'] : null)
-				);
-	}
-	/**
 	 * クッキーへの書き出し
 	 * @param string $name 書き込む変数名
 	 * @param int $expire 有効期限(秒) (+ time)
@@ -225,5 +206,47 @@ class Request implements \IteratorAggregate{
 		}else{
 			foreach(func_get_args() as $n) unset($this->vars[$n]);
 		}
+	}
+	/**
+	 * 添付ファイル情報の取得
+	 * @param string $n
+	 * @return array
+	 */
+	public function in_files($n){
+		return array_key_exists($n,$this->files) ? $this->files[$n] :  null;
+	}
+	/**
+	 * 添付されたファイルがあるか
+	 * @param array $file_info
+	 * @return boolean
+	 */
+	public function has_file($file_info){
+		return isset($file_info['tmp_name']) && is_file($file_info['tmp_name']);
+	}
+	/**
+	 * 添付ファイルのオリジナルファイル名の取得
+	 * @param array $file_info
+	 * @return string
+	 */
+	public function file_orginal_name($file_info){
+		return isset($file_info['name']) ? $file_info['name'] : null;
+	}
+	/**
+	 * 添付ファイルのファイルパスの取得
+	 * @param array $file_info
+	 * @return string
+	 */
+	public function file_path($file_info){
+		return isset($file_info['tmp_name']) ? $file_info['tmp_name'] : null;
+	}
+	/**
+	 * 添付ファイルを移動します
+	 * @param array $file_info
+	 * @param string $newname
+	 */
+	public function move_file($file_info,$newname){
+		if(!$this->has_file($file_info)) throw new LogicException('file not found ');
+		if(!is_dir(dirname($newname))) mkdir(dirname($newname),0777,true);
+		rename($file_info['tmp_name'],$newname);
 	}
 }
