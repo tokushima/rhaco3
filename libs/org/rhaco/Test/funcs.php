@@ -76,6 +76,15 @@ if(!function_exists('fail')){
 		throw new \LogicException('Test fail: '.$msg);
 	}
 }
+if(!function_exists('notice')){
+	/**
+	 * メッセージ
+	 */
+	function notice($msg=null){
+		list($debug) = debug_backtrace(false);
+		\org\rhaco\Test::notice($msg,$debug['line'],$debug['file']);
+	}
+}
 if(!function_exists('newclass')){
 	/**
 	 * ユニークな名前でクラスを生成しインスタンスを返す
