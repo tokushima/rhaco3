@@ -9,7 +9,7 @@ namespace org\rhaco\net\xml;
  * @var org.rhaco.net.xml.atom.Author[] $author
  * @var string{} $xmlns
  */
-class Atom extends \org\rhaco\Object{
+class Atom extends \org\rhaco\net\xml\atom\Object{
 	const XMLNS = 'http://www.w3.org/2005/Atom';
 	protected $title;
 	protected $subtitle;
@@ -160,7 +160,12 @@ class Atom extends \org\rhaco\Object{
 						break;
 					default:
 						if(is_array($value)){
-							foreach($value as $v) $result->add((string)$v);
+							foreach($value as $v){
+								try{
+// TODO
+									$result->add(($v instanceof \org\rhaco\net\xml\atom\Object) ? $v->xml() : $v);
+								}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
+							}
 						}
 				}
 			}

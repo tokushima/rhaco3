@@ -11,7 +11,7 @@ namespace org\rhaco\net\xml\atom;
  * @var org.rhaco.net.xml.atom.Link[] $link
  * @var org.rhaco.net.xml.atom.Author[] $author
  */
-class Entry extends \org\rhaco\Object{
+class Entry extends \org\rhaco\net\xml\atom\Object{
 	protected $id;
 	protected $title;
 	protected $published;
@@ -24,16 +24,7 @@ class Entry extends \org\rhaco\Object{
 	protected $link;
 	protected $author;
 
-	protected function __init__(){
-		$this->published = time();
-		$this->updated = time();
-		$this->issued = time();
-	}
-	public function get($enc=false){
-		$value = sprintf('%s',$this);
-		return (($enc) ? (sprintf("<?xml version=\"1.0\" encoding=\"%s\"?>\n",mb_detect_encoding($value))) : '').$value;
-	}
-	protected function __str__(){
+	public function xml(){
 		$bool = false;
 		$result = new \org\rhaco\Xml('entry');
 		foreach($this->props() as $name => $value){
@@ -53,12 +44,16 @@ class Entry extends \org\rhaco\Object{
 						$result->add(new \org\rhaco\Xml($name,\org\rhaco\lang\Date::format_atom($value)));
 						break;
 					default:
-						if(is_array($this->{$name})){
-							foreach($this->{$name} as $o) $result->add((string)$o);
-							break;
-						}else if(is_object($this->{$name})){
-							$result->add((string)$value);
-							break;
+						if(is_array($value)){
+							foreach($value as $v){
+								try{
+									$result->add(($v instanceof \org\rhaco\net\xml\atom\Object) ? $v->xml() : (string)$v);
+								}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
+							}
+						}else if(is_object($value)){
+							try{
+								$result->add(($value instanceof \org\rhaco\net\xml\atom\Object) ? $value->xml() : $value);
+							}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
 						}else{
 							$result->add(new \org\rhaco\Xml($name,$value));
 							break;
@@ -66,7 +61,23 @@ class Entry extends \org\rhaco\Object{
 				}
 			}
 		}
-		return ($bool) ? $result->get() : '';
+		if(!$bool) throw new \org\rhaco\net\xml\atom\NotfoundException();
+		return $result;
+	}
+	protected function __init__(){
+		$this->published = time();
+		$this->updated = time();
+		$this->issued = time();
+	}
+	public function get($enc=false){
+		$value = sprintf('%s',$this);
+		return (($enc) ? (sprintf("<?xml version=\"1.0\" encoding=\"%s\"?>\n",mb_detect_encoding($value))) : '').$value;
+	}
+	protected function __str__(){
+		try{
+			return $this->xml()->get();
+		}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
+		return '';
 	}
 	public function first_href(){
 		return (!empty($this->link)) ? current($this->link)->href() : null;
