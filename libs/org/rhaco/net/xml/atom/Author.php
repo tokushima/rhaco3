@@ -4,12 +4,12 @@ namespace org\rhaco\net\xml\atom;
  * Atomのauthorモデル
  * @author tokushima
  */
-class Author extends \org\rhaco\Object{
+class Author extends \org\rhaco\net\xml\atom\Object{
 	protected $name;
 	protected $url;
 	protected $email;
-	
-	protected function __str__(){
+
+	public function xml(){
 		$bool = false;
 		$result = new \org\rhaco\Xml('author');
 		foreach($this->props() as $name => $value){
@@ -24,7 +24,14 @@ class Author extends \org\rhaco\Object{
 				}
 			}
 		}
-		return ($bool) ? $result->get() : '';
+		if(!$bool) throw new \org\rhaco\net\xml\atom\NotfoundException();
+		return $result;
+	}
+	protected function __str__(){
+		try{
+			return $this->xml()->get();
+		}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
+		return '';
 	}
 	static public function parse(&$src){
 		$result = array();

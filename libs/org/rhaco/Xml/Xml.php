@@ -13,7 +13,7 @@ class Xml implements \IteratorAggregate{
 	
 	private $plain;
 	private $pos;
-	private $esc = false;
+	private $esc = true;
 
 	public function __construct($name=null,$value=null){
 		$this->name = (string)$name;
@@ -121,6 +121,7 @@ class Xml implements \IteratorAggregate{
 	 */
 	final public function value(){
 		if(func_num_args() > 0) $this->value = $this->get_value(func_get_arg(0));
+		if(strpos($this->value,'<![CDATA[') === 0) return substr($this->value,9,-3);
 		return $this->value;
 		/***
 			$xml = new self("test");
@@ -132,7 +133,7 @@ class Xml implements \IteratorAggregate{
 			eq(1,$xml->value('1'));
 			eq(null,$xml->value(null));
 			$xml->escape(true);
-			eq("<![CDATA[<abc>123</abc>]]>",$xml->value("<abc>123</abc>"));
+			eq("<abc>123</abc>",$xml->value("<abc>123</abc>"));
 			eq("<b>123</b>",$xml->value(new self("b","123")));
 			
 			$xml = new self("test");
@@ -145,6 +146,14 @@ class Xml implements \IteratorAggregate{
 			$obj->vars('ccc',123);
 			$self = new self('abc',$obj);
 			eq('<abc><aaa>hoge</aaa><ccc>123</ccc></abc>',$self->get());
+		 */
+		/***
+			$xml = new self("test");
+			$add = new self("addxml","hoge");
+			$xml->add($add);
+			$xml->add($add->get());
+			$xml->add((string)$add);
+			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());			
 		 */
 	}
 	/**

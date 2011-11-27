@@ -4,12 +4,12 @@ namespace org\rhaco\net\xml\atom;
  * Atomのlinkモデル
  * @author tokushima
  */
-class Link extends \org\rhaco\Object{
+class Link extends \org\rhaco\net\xml\atom\Object{
 	protected $rel;
 	protected $type;
 	protected $href;
 
-	protected function __str__(){
+	public function xml(){
 		$bool = false;
 		$result = new \org\rhaco\Xml('link');
 		foreach($this->props() as $name => $value){
@@ -24,7 +24,14 @@ class Link extends \org\rhaco\Object{
 				}
 			}
 		}
-		return ($bool) ? $result->get() : '';
+		if(!$bool) throw new \org\rhaco\net\xml\atom\NotfoundException();
+		return $result;
+	}
+	protected function __str__(){
+		try{
+			return $this->xml()->get();
+		}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
+		return '';
 	}
 	static public function parse(&$src){
 		$result = array();
