@@ -4,14 +4,14 @@ namespace org\rhaco\net\xml\atom;
  * Atomのcontentモデル
  * @author tokushima
  */
-class Content extends \org\rhaco\Object{
+class Content extends \org\rhaco\net\xml\atom\Object{
 	protected $type;
 	protected $mode;
 	protected $lang;
 	protected $base;
 	protected $value;
 
-	protected function __str__(){
+	public function xml(){
 		$bool = false;
 		$result = new \org\rhaco\Xml('content');
 		foreach($this->props() as $name => $value){
@@ -32,7 +32,14 @@ class Content extends \org\rhaco\Object{
 				}
 			}
 		}
-		return ($bool) ? $result->get() : '';
+		if(!$bool) throw new \org\rhaco\net\xml\atom\NotfoundException();
+		return $result;
+	}
+	protected function __str__(){
+		try{
+			return $this->xml()->get();
+		}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
+		return '';
 	}
 	static public function parse(&$src){
 		$result = null;

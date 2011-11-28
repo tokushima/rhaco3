@@ -89,6 +89,9 @@ $flow->output(array(''
 			,'hoge'=>array(name=>'sample_flow_theme_not_hoge',action=>'test.SampleFlow::hoge',template=>'sample.html')
 		)
 	)
+	,'upload_multi'=>array(name=>'upload_multi',action=>'test.SampleFlow::upload_multi')
+	,'upload_value'=>array(name=>'upload_value',action=>'test.SampleFlow::upload_value')
+	,'upload_file'=>array(name=>'upload_file',action=>'test.SampleFlow::upload_file')
 )));
 
 

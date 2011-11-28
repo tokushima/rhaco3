@@ -4,7 +4,7 @@ Conf::set('org.rhaco.store.db.Dao','org.rhaco','{"type":"org.rhaco.store.db.modu
 Conf::set('org.rhaco.store.db.Dao','org.rhaco.store.db.Dao','{"dbname":"testA"}');
 Conf::set('org.rhaco.store.db.Dao','org.rhaco.store.db.Dao.CrossChild','{"dbname":"testB"}');
  
-Conf::set('org.rhaco.Log','level','info');
+Conf::set('org.rhaco.Log','level','error');
 
 
 \org\rhaco\Log::set_module(new \org\rhaco\io\log\Growl());

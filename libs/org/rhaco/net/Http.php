@@ -452,7 +452,7 @@ class Http{
 									.$v[1]->get()
 									."\r\n";
 					}
-					$raw = "--".$boundary."\r\n".implode("--".$boundary."\r\n",$raws)."\r\n--".$boundary."--\r\n"."\r\n";
+					$raw = "--".$boundary."\r\n".implode("--".$boundary."\r\n",$raws)."--".$boundary."--\r\n"."\r\n";
 				}
 			}
 		}
