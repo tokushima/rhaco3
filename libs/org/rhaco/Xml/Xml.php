@@ -16,8 +16,14 @@ class Xml implements \IteratorAggregate{
 	private $esc = true;
 
 	public function __construct($name=null,$value=null){
-		$this->name = (string)$name;
-		$this->value($value);
+		if($value === null && is_object($name)){
+			$n = explode('\\',get_class($name));
+			$this->name = array_pop($n);
+			$this->value($name);
+		}else{
+			$this->name = trim($name);
+			$this->value($value);
+		}
 	}
 	public function getIterator(){
 		return new \ArrayIterator($this->attr);
@@ -155,6 +161,14 @@ class Xml implements \IteratorAggregate{
 			$xml->add((string)$add);
 			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());			
 		 */
+		/***
+			$xml = new self("test");
+			$add = new self("addxml","hoge");
+			$xml->add($add);
+			$xml->add($add->get());
+			$xml->add((string)$add);
+			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());			
+		 */
 	}
 	/**
 	 * 値を追加する
@@ -185,13 +199,17 @@ class Xml implements \IteratorAggregate{
 	 * @return string
 	 */
 	final public function in_attr($n,$d=null){
-		return isset($this->attr[strtolower($n)]) ? $this->attr[strtolower($n)] : (isset($d) ? (string)$d : null);
+		return isset($this->attr[strtolower($n)]) ? html_entity_decode($this->attr[strtolower($n)],ENT_QUOTES,'UTF-8') : (isset($d) ? (string)$d : null);
 		/***
 			$x = new self("test");
 			$x->attr("abc",123);
 			eq("123",$x->in_attr("abc"));
 			eq(null,$x->in_attr("def"));
 			eq("456",$x->in_attr("ghi",456));
+			
+			$x->attr("def","'<>'");
+			eq("'<>'",$x->in_attr("def"));
+			eq('<test abc="123" def="&#039;&lt;&gt;&#039;" />',$x->get());
 		 */
 	}
 	/**
@@ -253,7 +271,7 @@ class Xml implements \IteratorAggregate{
 			eq(555,$x->in_attr("def"));
 			eq(456,$x->in_attr("abc"));
 			$x->attr("Abc","<aaa>");
-			eq("&lt;aaa&gt;",$x->in_attr("abc"));
+			eq("<aaa>",$x->in_attr("abc"));
 			$x->attr("Abc",true);
 			eq("true",$x->in_attr("abc"));
 			$x->attr("Abc",false);
