@@ -13,6 +13,7 @@ class Template{
 	private $template_super;
 	private $secure = false;
 	private $selected_template;
+	private $selected_src;
 	private $vars = array();
 
 	public function __construct($media_url=null){
@@ -149,6 +150,7 @@ class Template{
 		return $src;
 	}
 	private function replace($src,$template_name){
+		$this->selected_src = $src;
 		$this->selected_template = $template_name;
 		$src = preg_replace("/([\w])\->/","\\1__PHP_ARROW__",$src);
 		$src = str_replace(array("\\\\","\\\"","\\'"),array('__ESC_DESC__','__ESC_DQ__','__ESC_SQ__'),$src);
@@ -161,7 +163,7 @@ class Template{
 		$src = str_replace('__PHP_ARROW__','->',$src);
 		$src = $this->parse_print_variable($src);
 		$php = array(' ?>','<?php ','->');
-		$str = array('PHP_TAG_END','PHP_TAG_START','PHP_ARROW');
+		$str = array('__PHP_TAG_END__','__PHP_TAG_START__','__PHP_ARROW__');
 		$src = str_replace($php,$str,$src);
 		$src = $this->parse_url($src,$this->media_url);
 		$src = str_replace($str,$php,$src);
@@ -174,9 +176,23 @@ class Template{
 		ob_start();
 			if(is_array($this->vars) && !empty($this->vars)) extract($this->vars);			
 			eval('?><?php $_display_exception_='.((\org\rhaco\Conf::get('display_exception') === true) ? 'true' : 'false').'; ?>'.$_src_);
-		$_src_ = ob_get_clean();
-		$this->object_module('after_exec_template',$_src_);
-		return $_src_;
+		$_eval_src_ = ob_get_clean();
+
+		if(strpos($_eval_src_,'Parse error: ') !== false){
+			if(preg_match("/Parse error\:(.+?) in .+eval\(\)\'d code on line (\d+)/",$_eval_src_,$match)){
+				list($msg,$line) = array(trim($match[1]),((int)$match[2]));
+				$lines = explode("\n",$_src_);
+				$plrp = substr_count(implode("\n",array_slice($lines,0,$line)),"<?php 'PLRP'; ?>\n");				
+				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [compile]: '.trim($lines[$line-2]));
+				
+				$lines = explode("\n",$this->selected_src);
+				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [plain]: '.trim($lines[$line-2-$plrp]));
+				if(\org\rhaco\Conf::get('display_exception') === true) $_eval_src_ = $msg.' on line '.($line-$plrp).': '.trim($lines[$line-2-$plrp]);
+			}
+		}
+		$_src_ = $this->selected_src = null;
+		$this->object_module('after_exec_template',$_eval_src_);
+		return $_eval_src_;
 	}
 	private function error_handler($errno,$errstr,$errfile,$errline){
 		throw new \ErrorException($errstr,0,$errno,$errfile,$errline);
@@ -211,7 +227,6 @@ class Template{
 	}
 	private function ab_path($a,$b){
 		if($b === '' || $b === null) return $a;
-		$b = str_replace("\\",'/',$b);
 		if($a === '' || $a === null || preg_match("/^[a-zA-Z]+:/",$b)) return $b;
 		if(preg_match("/^[\w]+\:\/\/[^\/]+/",$a,$h)){
 			$a = preg_replace("/^(.+?)[".(($b[0] === '#') ? '#' : "#\?")."].*$/","\\1",$a);
@@ -267,7 +282,7 @@ class Template{
 			$base_filename = $filename;
 			$blocks = $paths = array();
 			while(Xml::set($e,'<:>'.$this->rtcomment($src).'</:>','rt:extends') !== false){
-				$href = $this->ab_path(dirname($filename),$e->in_attr('href'));
+				$href = $this->ab_path(str_replace("\\",'/',dirname($filename)),$e->in_attr('href'));
 				if(!$e->is_attr('href') || !is_file($href)) throw new \LogicException('href not found '.$filename);
 				if($filename === $href) throw new \LogicException('Infinite Recursion Error'.$filename);
 				Xml::set($bx,'<:>'.$this->rtcomment($src).'</:>',':');
@@ -287,7 +302,7 @@ class Template{
 					foreach($bx->in('rt:block') as $b) $src = str_replace($b->plain(),$b->value(),$src);
 				}
 			}else{
-				if(!empty($this->template_super)) $src = $this->read_src($this->ab_path(dirname($base_filename),$this->template_super));
+				if(!empty($this->template_super)) $src = $this->read_src($this->ab_path(str_replace("\\",'/',dirname($base_filename)),$this->template_super));
 				while(Xml::set($b,$src,'rt:block')){
 					$n = $b->in_attr('name');
 					$src = str_replace($b->plain(),(array_key_exists($n,$blocks) ? $blocks[$n] : $b->value()),$src);
@@ -539,6 +554,7 @@ class Template{
 			eq($result,$t->get($src));
 		*/
 		/***
+			# loop
 			$t = new self();
 			$src = pre('
 						<rt:loop param="abc" offset="2" limit="2" loop_counter="loop_counter" key="loop_key" var="loop_var">
@@ -771,7 +787,7 @@ class Template{
 					}
 				}else{
 					$uniq = uniqid('$I');
-					$cond = sprintf('<?php try{ %s=%s; }catch(\\Exception $e){ %s=null; } ?>',$uniq,$arg1,$uniq)
+					$cond = sprintf("<?php try{ %s=%s; }catch(\\Exception \$e){ %s=null; } ?>",$uniq,$arg1,$uniq)
 								.sprintf('<?php if(%s !== null && %s !== false && ( (!is_string(%s) && !is_array(%s)) || (is_string(%s) && %s !== "") || (is_array(%s) && !empty(%s)) ) ){ ?>',$uniq,$uniq,$uniq,$uniq,$uniq,$uniq,$uniq,$uniq);
 				}
 				$src = str_replace(
@@ -872,7 +888,7 @@ class Template{
 			$name = $this->parse_plain_variable($variable);
 			$value = '<?php try{ @print('.$name.'); ?>'
 						."<?php }catch(\\Exception \$e){ if(!isset(\$_nes_) && \$_display_exception_){print(\$e->getMessage());} } ?>";
-			$src = str_replace(array($variable."\n",$variable),array($value."\n\n",$value),$src);
+			$src = str_replace(array($variable."\n<?php",$variable),array($value."<?php 'PLRP'; ?>\n\n<?php",$value),$src);
 		}
 		return $src;
 	}
