@@ -82,7 +82,7 @@ if(!function_exists('notice')){
 	 */
 	function notice($msg=null){
 		list($debug) = debug_backtrace(false);
-		\org\rhaco\Test::notice($msg,$debug['line'],$debug['file']);
+		\org\rhaco\Test::notice((($msg instanceof \Exception) ? $msg->getMessage() : (string)$msg),$debug['line'],$debug['file']);
 	}
 }
 if(!function_exists('newclass')){
