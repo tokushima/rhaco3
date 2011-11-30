@@ -150,13 +150,13 @@ class Template{
 		return $src;
 	}
 	private function replace($src,$template_name){
-		$this->selected_src = $src;
 		$this->selected_template = $template_name;
 		$src = preg_replace("/([\w])\->/","\\1__PHP_ARROW__",$src);
 		$src = str_replace(array("\\\\","\\\"","\\'"),array('__ESC_DESC__','__ESC_DQ__','__ESC_SQ__'),$src);
 		$src = $this->replace_xtag($src);
 		$this->object_module('init_template',$src);
 		$src = $this->rtcomment($this->rtblock($this->rttemplate($src),$this->file));
+		$this->selected_src = $src;
 		$this->object_module('before_template',$src);
 		$src = $this->rtif($this->rtloop($this->rtunit($this->html_form($this->html_list($src)))));
 		$this->object_module('after_template',$src);
@@ -220,7 +220,7 @@ class Template{
 		return $src;
 	}
 	private function replace_parse_url($src,$base,$dep,$rep){
-		if(!preg_match("/(^[\w]+:\/\/)|(^PHP_TAG_START)|(^\{\\$)|(^\w+:)|(^[#\?])/",$rep)){
+		if(!preg_match("/(^[\w]+:\/\/)|(^__PHP_TAG_START)|(^\{\\$)|(^\w+:)|(^[#\?])/",$rep)){
 			$src = str_replace($dep,str_replace($rep,$this->ab_path($base,$rep),$dep),$src);
 		}
 		return $src;
@@ -1580,6 +1580,7 @@ class Template{
 	private function table_tr_even_odd($src,$name,$even_odd){
 		Xml::set($tag,'<:>'.$src.'</:>');
 		foreach($tag->in($name) as $tr){
+			$tr->escape(false);
 			$class = ' '.$tr->in_attr('class').' ';
 			if(preg_match('/[\s](even|odd)[\s]/',$class,$match)){
 				$tr->attr('class',trim(str_replace($match[0],' {$'.$even_odd.'} ',$class)));
