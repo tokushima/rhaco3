@@ -321,7 +321,7 @@ class Flow{
 			header('Location: '.$map['nomatch_redirect']);
 			exit;
 		}
-		throw new \InvalidArgumentException('`'.$pathinfo.'` bad request');
+		throw new \InvalidArgumentException(\org\rhaco\Request::current_url().' (`'.$pathinfo.'`) bad request');
 	}
 	private function print_template($template_path,$template,$media_url,$theme,$put_block,$obj,$apps,$index,$path_replace=true){
 		if($path_replace){
