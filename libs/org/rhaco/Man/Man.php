@@ -161,17 +161,19 @@ class Man{
 		if(is_dir(\Rhaco3::libs())){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::libs(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 				if(strpos($e->getPathname(),'/.') === false){
-					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
+					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'
+						&& (strpos($e->getPathname(),'/_') === false || strpos($e->getPathname(),'/_vendors') !== false)
+					){
 						try{
 							include_once($e->getPathname());
-						}catch(Exeption $ex){}
+						}catch(\Exeption $ex){}
 					}else if($e->getFilename() == 'vendors.phar'){
 						$p = new \Phar($e->getPathname());
 						foreach(new \RecursiveIteratorIterator($p) as $v){
 							if(ctype_upper(substr($v->getFilename(),0,1)) && substr($v->getFilename(),-4) == '.php'){
 								try{
 									include_once($v->getPathname());
-								}catch(Exeption $ex){}
+								}catch(\Exeption $ex){}
 							}
 						}
 					}

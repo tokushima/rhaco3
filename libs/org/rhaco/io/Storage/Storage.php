@@ -54,12 +54,8 @@ class Storage{
 	 * @param string $type
 	 */
 	static public function get_select_path($node,$type='mixed'){
-		$nodes = \org\rhaco\Conf::get_array('save_nodes');
-		if(empty($nodes)) throw new \org\rhaco\io\Storage\StorageException('ノードが設定されていません');
-		if(!in_array($node,$nodes)) throw new \org\rhaco\io\Storage\StorageException('指定のノードが設定されていません `'.$node.'`');		
 		$service = \org\rhaco\Conf::get('service_name','new_service');
 		$dir = $node.'/'.$service.'/'.$type;
-		\org\rhaco\io\File::mkdir(self::get_path($dir));
 		return $dir;
 	}
 	/**
@@ -80,6 +76,5 @@ class Storage{
 		$base_path = \org\rhaco\Conf::get('base_path');
 		if(empty($base_path)) throw new \org\rhaco\io\Storage\StorageException('ベースパスが指定されていません');
 		return \org\rhaco\net\Path::absolute(\org\rhaco\net\Path::slash($base_path,null,true),$path);
-	}
-	
+	}	
 }
