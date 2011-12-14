@@ -49,14 +49,15 @@
 	                <li class="divider"></li>
 				</rt:if>
               
-   				<rt:loop param="models" var="m">
+   				<rt:loop param="models" var="m" limit="10">
 					<li>
 						<a href="{$t.package_method_url('do_find',$m)}">
 							<span style="font-size: x-small;">{$f.package_name($m)}</span>
 						</a>
 					</li>
 				</rt:loop>
-
+	            <li class="divider"></li>
+				<li><a href="{$t.package_method_url('model_list')}">more..</a></li>
               </ul>
             </li>
           </ul>

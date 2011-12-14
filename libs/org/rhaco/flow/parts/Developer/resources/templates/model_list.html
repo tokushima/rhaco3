@@ -1,0 +1,25 @@
+<rt:extends href="index.html" />
+
+<rt:block name="content">
+<h2 class="title">Models</h2>
+
+<table rt:param="{$dao_models}" rt:key="package" rt:var="summary" class="zebra-striped">
+<thead>
+	<tr>
+		<th>package</th>
+		<th>summary</th>
+	</tr>
+</thead>
+<tbody>
+	<tr class="even">
+		<td>
+			<a href="{$t.package_method_url('do_find',$package)}">
+				{$f.package_name($package)}
+			</a>
+		</td>
+		<td>{$summary}</td>
+	</tr>
+</tbody>
+</table>
+</rt:block>
+

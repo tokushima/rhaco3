@@ -5,7 +5,7 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
- * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list"]}
+ * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list"]}
  * @login @{"has_require":true}
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
@@ -40,12 +40,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				}
 			}
 		}
-		$models = array();
-		foreach(get_declared_classes() as $class){
-			$r = new \ReflectionClass($class);
-			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')) $models[] = $class;
-		}
-		sort($models);
+		$models = $this->get_model_list();
 		$this->vars('app_name',(empty($name) ? 'App' : $name));
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
@@ -56,7 +51,34 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	public function get_template_modules(){
 		return new \org\rhaco\flow\module\TwitterBootstrapPagination();
 	}
-
+	private function get_model_list(){
+		$models = array();
+		foreach(get_declared_classes() as $class){
+			$r = new \ReflectionClass($class);
+			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')){
+				$models[] = $class;
+			}
+		}
+		sort($models);
+		return $models;
+	}
+	/**
+	 * Daoモデルの一覧
+	 */
+	public function model_list(){
+		$model_list = $this->get_model_list();
+		$list = array();
+		foreach($model_list as $m){
+			if($this->search_str($m)){
+				$r = new \ReflectionClass("\\".str_replace('.',"\\",$m));
+				$class_doc = $r->getDocComment();
+				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
+				list($summary) = explode("\n",$document);
+				$list[$m] = $summary;
+			}
+		}		
+		$this->vars('dao_models',$list);
+	}
 	/**
 	 * アプリケーションのマップ一覧
 	 */
