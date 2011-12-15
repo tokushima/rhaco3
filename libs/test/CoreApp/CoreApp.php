@@ -1,6 +1,10 @@
 <?php
 namespace test;
-
+/**
+ * テストクラス
+ * @author tokushima
+ *
+ */
 class CoreApp extends \org\rhaco\flow\parts\RequestFlow{
 	protected function __init__(){
 		$this->vars('init_var','INIT');
