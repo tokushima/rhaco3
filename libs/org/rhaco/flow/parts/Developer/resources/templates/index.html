@@ -57,7 +57,7 @@
 					</li>
 				</rt:loop>
 				
-				<rt:if param="{$t.gt($model_total,10)}">
+				<rt:if param="{$t.gte($model_total,1)}">
 		            <li class="divider"></li>
 					<li><a href="{$t.package_method_url('model_list')}">more..</a></li>
 				</rt:if>
