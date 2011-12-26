@@ -167,7 +167,7 @@ class Flow{
 						throw new \InvalidArgumentException($v['class'].' not found');
 					}
 				}else{
-					$apps[$k] = $v;
+					$apps[(string)$k] = $v;
 				}
 			}
 			list($url,$surl) = array($this->app_url,str_replace('http://','https://',$this->app_url));
