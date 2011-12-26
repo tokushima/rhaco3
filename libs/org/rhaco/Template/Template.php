@@ -319,6 +319,7 @@ class Template{
 	private function rtunit($src){
 		if(strpos($src,'rt:unit') !== false){
 			while(Xml::set($tag,$src,'rt:unit')){
+				$tag->escape(false);
 				$uniq = uniqid('');
 				$param = $tag->in_attr('param');
 				$var = '$'.$tag->in_attr('var','_var_'.$uniq);
@@ -418,6 +419,7 @@ class Template{
 	private function rtloop($src){
 		if(strpos($src,'rt:loop') !== false){
 			while(Xml::set($tag,$src,'rt:loop')){
+				$tag->escape(false);
 				$param = ($tag->is_attr('param')) ? $this->variable_string($this->parse_plain_variable($tag->in_attr('param'))) : null;
 				$offset = ($tag->is_attr('offset')) ? (ctype_digit($tag->in_attr('offset')) ? $tag->in_attr('offset') : $this->variable_string($this->parse_plain_variable($tag->in_attr('offset')))) : 1;
 				$limit = ($tag->is_attr('limit')) ? (ctype_digit($tag->in_attr('limit')) ? $tag->in_attr('limit') : $this->variable_string($this->parse_plain_variable($tag->in_attr('limit')))) : 0;
@@ -774,6 +776,7 @@ class Template{
 	private function rtif($src){
 		if(strpos($src,'rt:if') !== false){
 			while(Xml::set($tag,$src,'rt:if')){
+				$tag->escape(false);
 				if(!$tag->is_attr('param')) throw new \LogicException('if');
 				$arg1 = $this->variable_string($this->parse_plain_variable($tag->in_attr('param')));
 
@@ -995,8 +998,8 @@ class Template{
 						}
 					}
 				}
+				$src = str_replace($obj->plain(),$obj->get(),$src);
 			}
-			$src = str_replace($obj->plain(),$obj->get(),$src);
 		}
 		return $this->html_input($src);
 	}

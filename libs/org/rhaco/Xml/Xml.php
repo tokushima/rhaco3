@@ -199,7 +199,7 @@ class Xml implements \IteratorAggregate{
 	 * @return string
 	 */
 	final public function in_attr($n,$d=null){
-		return isset($this->attr[strtolower($n)]) ? html_entity_decode($this->attr[strtolower($n)],ENT_QUOTES,'UTF-8') : (isset($d) ? (string)$d : null);
+		return isset($this->attr[strtolower($n)]) ? ($this->esc ? htmlentities($this->attr[strtolower($n)],ENT_QUOTES,'UTF-8') : $this->attr[strtolower($n)]) : (isset($d) ? (string)$d : null);
 		/***
 			$x = new self("test");
 			$x->attr("abc",123);
@@ -208,8 +208,14 @@ class Xml implements \IteratorAggregate{
 			eq("456",$x->in_attr("ghi",456));
 			
 			$x->attr("def","'<>'");
-			eq("'<>'",$x->in_attr("def"));
+			
+			$x->escape(true);
+			eq("&#039;&lt;&gt;&#039;",$x->in_attr("def"));
 			eq('<test abc="123" def="&#039;&lt;&gt;&#039;" />',$x->get());
+			
+			$x->escape(false);
+			eq("'<>'",$x->in_attr("def"));
+			eq('<test abc="123" def="\'<>\'" />',$x->get());
 		 */
 	}
 	/**
@@ -259,7 +265,7 @@ class Xml implements \IteratorAggregate{
 	 * アトリビュートを設定
 	 */
 	final public function attr($key,$value){
-		$this->attr[strtolower($key)] = is_bool($value) ? (($value) ? 'true' : 'false') : ($this->esc ? htmlentities($value,ENT_QUOTES,'UTF-8') : $value);
+		$this->attr[strtolower($key)] = is_bool($value) ? (($value) ? 'true' : 'false') : $value;
 		/***
 			$x = new self("test");
 			$x->escape(true);
@@ -271,19 +277,19 @@ class Xml implements \IteratorAggregate{
 			eq(555,$x->in_attr("def"));
 			eq(456,$x->in_attr("abc"));
 			$x->attr("Abc","<aaa>");
-			eq("<aaa>",$x->in_attr("abc"));
+			eq("&lt;aaa&gt;",$x->in_attr("abc"));
 			$x->attr("Abc",true);
 			eq("true",$x->in_attr("abc"));
 			$x->attr("Abc",false);
 			eq("false",$x->in_attr("abc"));
 			$x->attr("Abc",null);
-			eq("",$x->in_attr("abc"));
+			eq(null,$x->in_attr("abc"));
 			$x->attr("ghi",null);
-			eq("",$x->in_attr("ghi"));
-			eq(array("abc"=>"","def"=>555,"ghi"=>""),iterator_to_array($x));
+			eq(null,$x->in_attr("ghi"));
+			eq(array("abc"=>null,"def"=>555,"ghi"=>null),iterator_to_array($x));
 
 			$x->attr("Jkl","Jkl");
-			eq(array("abc"=>"","def"=>555,"ghi"=>"","jkl"=>"Jkl"),iterator_to_array($x));
+			eq(array("abc"=>null,"def"=>555,"ghi"=>null,"jkl"=>"Jkl"),iterator_to_array($x));
 		 */
 	}
 	final public function plain_attr($v){
@@ -295,7 +301,7 @@ class Xml implements \IteratorAggregate{
 	public function get(){
 		if($this->name === null) throw new \LogicException('undef name');
 		$attr = '';
-		foreach($this->attr as $k => $v) $attr .= ' '.$k.'="'.$v.'"';
+		foreach($this->attr as $k => $v) $attr .= ' '.$k.'="'.$this->in_attr($k).'"';
 		return ('<'.$this->name.$attr.(implode(' ',$this->plain_attr)).(($this->close_empty && empty($this->value)) ? ' /' : '').'>')
 				.$this->value
 				.((!$this->close_empty || !empty($this->value)) ? sprintf('</%s>',$this->name) : '');
