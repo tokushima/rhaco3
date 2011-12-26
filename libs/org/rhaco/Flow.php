@@ -301,6 +301,9 @@ class Flow{
 							}else if(isset($map['error_template'])){
 								$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
+							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
+								if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
+								exit;
 							}else{
 								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->handle_exception_xml();
