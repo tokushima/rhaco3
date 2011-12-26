@@ -19,13 +19,30 @@ class Man{
 		foreach($r->getMethods() as $method){
 			if($method->getDeclaringClass()->getFileName() == $r->getFileName()){
 				if(substr($method->getName(),0,1) != '_' && $method->isPublic()){
-					list($line) = explode("\n",trim(preg_replace("/@.+/","",preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$method->getDocComment())))));
+					$method_document = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$method->getDocComment()));
+					list($method_description) = explode("\n",trim(preg_replace('/@.+/','',$method_document)));
+					if(strpos($method_description,'non-PHPdoc') !== false){
+						if(preg_match("/@see\s+(.*)/",$method_document,$match)){
+							$method_description = str_replace("\\",'.',trim($match[1]));
+							if(preg_match("/^.+\/([^\/]+)$/",$method_description,$m)) $method_description = trim($m[1]);
+							if(substr($method_description,0,1) == '.') $method_description = substr($method_description,1);
+							if(strpos($method_description,'::') !== false){
+								list($c,$m) = explode('::',str_replace(array('(',')'),'',$method_description));
+								try{
+									$i = self::method_info($c,$m);
+									list($method_description) = explode("\n",$i['description']);
+								}catch(\Exception $e){
+									$method_description = '@see '.$method_description;
+								}
+							}
+						}
+					}
 					if($method->isStatic()){
 						if($method->getDeclaringClass()->getName() == $r->getName()){
-							$static_methods[$method->getName()] = $line;
+							$static_methods[$method->getName()] = $method_description;
 						}
 					}else{
-						$methods[$method->getName()] = $line;
+						$methods[$method->getName()] = $method_description;
 					}
 				}
 			}
@@ -59,10 +76,11 @@ class Man{
 					$properties[$n] = array($m[1][$k],$dec,$hash);
 				}
 			}
-		}		
+		}
+		$description = trim(preg_replace('/@.+/','',$document));
 		return array(
 				'filename'=>$r->getFileName(),'extends'=>$extends,'static_methods'=>$static_methods,'methods'=>$methods
-				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>trim(preg_replace('/@.+/','',$document))
+				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>$description
 				);
 	}
 	/**
@@ -134,7 +152,6 @@ class Man{
 				}
 			}
 		}
-		
 		$args = array();
 		if(preg_match_all('/\$this->(map_arg|redirect_by_map)\((["\'])(.+?)\\2/',$src,$match)){
 			foreach($match[3] as $n) $args[$n] = "";
@@ -146,9 +163,10 @@ class Man{
 				}
 			}
 		}
+		$description = trim(preg_replace('/@.+/','',$document));
 		return array(
 				'package'=>$class,'method_name'=>$method,'params'=>$params,'request'=>$request,'context'=>$context
-				,'args'=>$args,'return'=>$return,'description'=>trim(preg_replace('/@.+/','',$document))
+				,'args'=>$args,'return'=>$return,'description'=>$description
 				,'is_post'=>(strpos($src,'$this->is_post()') !== false)
 				);
 	}

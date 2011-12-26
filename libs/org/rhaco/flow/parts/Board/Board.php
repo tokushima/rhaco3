@@ -1,7 +1,7 @@
 <?php
 namespace org\rhaco\flow\parts;
 /**
- * 
+ * 掲示板
  * create table board(id integer primary key autoincrement,name text,comment text,created_at text);
  * @author tokushima
  *

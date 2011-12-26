@@ -1,6 +1,7 @@
 <?php
 namespace org\rhaco\store\queue\module\Dao;
 /**
+ * キュー用のDBモデル
  * @var serial $id
  * @var number $lock
  * @var string $type

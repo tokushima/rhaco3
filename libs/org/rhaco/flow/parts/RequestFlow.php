@@ -33,6 +33,11 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	protected function __anon__($d){
 		self::parse_anon_json($this->anon_login,'login',$d);
 	}
+	/**
+	 * ログインしているユーザのモデル
+	 * @throws \LogicException
+	 * @return mixed
+	 */
 	public function user(){
 		if(func_num_args() > 0){
 			$user = func_get_arg(0);
@@ -48,9 +53,17 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	protected function theme($theme){
 		$this->theme = $theme;
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see IteratorAggregate::getIterator()
+	 */
 	public function getIterator(){
 		return $this->req->getIterator();
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::set_maps()
+	 */
 	public function set_maps($maps){
 		$this->maps = $maps;
 		foreach($maps as $p => $m){
@@ -65,6 +78,10 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			}
 		}
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::set_select_map_name()
+	 */
 	public function set_select_map_name($name){
 		$this->select_map_name = $name;
 	}
@@ -74,25 +91,53 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	protected function set_block($path){
 		$this->put_block = $path;
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::get_block()
+	 */
 	public function get_block(){
 		return $this->put_block;
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::get_theme()
+	 */
 	public function get_theme(){
 		return $this->theme;
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::get_template_modules()
+	 */
 	public function get_template_modules(){
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::set_args()
+	 */
 	public function set_args($args){
 		$this->map_args = $args;
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::before()
+	 */
 	public function before(){
 		if($this->has_object_module('before_flow_handle')) $this->object_module('before_flow_handle',$this);
 		if($this->anon_login['require'] === true && isset($this->select_map['method']) && $this->select_map['method'] != 'do_login') $this->login_required(false);
 		if($this->login_redirect) $this->redirect_login_map();
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::after()
+	 */
 	public function after(){
 		if($this->has_object_module('after_flow_handle')) $this->object_module('after_flow_handle',$this);
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::exception()
+	 */
 	public function exception(){
 		if($this->has_object_module('exception_flow_handle')) $this->object_module('exception_flow_handle',$this);
 	}

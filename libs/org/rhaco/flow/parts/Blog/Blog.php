@@ -2,7 +2,7 @@
 namespace org\rhaco\flow\parts;
 use \org\rhaco\store\db\Q;
 /**
- * Blogのパーツ
+ * Blog
  * @author tokushima
  * @class @{"maps":["index","detail","tag","atom"]}
  */

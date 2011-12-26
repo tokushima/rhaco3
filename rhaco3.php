@@ -297,22 +297,28 @@ if(isset($_SERVER['argv'][1])){
 				$list = array();
 				$len = 0;
 				foreach(Rhaco3::repositorys() as $rp){
-					$rp = str_replace('\\','/',$rp);		
+					$rp = str_replace('\\','/',$rp);
 					if(substr($rp,-1) != '/') $rp = $rp.'/';
 					print('Read repository: '.$rp.PHP_EOL);
-					$csv = file_get_contents($rp.'packages.csv');
-					foreach(explode("\n",$csv) as $line){
-						if(empty($q) || strpos(strtolower($line),$q) !== false){
-							list($pkg,$dec) = explode(',',$line);
-							$list[trim($pkg)] = trim($dec);
-							if(strlen(trim($pkg)) > $len) $len = strlen(trim($pkg));
+					try{
+						$csv = file_get_contents($rp.'packages.csv');
+						foreach(explode("\n",$csv) as $line){
+							if(empty($q) || strpos(strtolower($line),$q) !== false){
+								list($pkg,$dec) = explode(',',$line);
+								$list[trim($pkg)] = trim($dec);
+								if(strlen(trim($pkg)) > $len) $len = strlen(trim($pkg));
+							}
 						}
-					}
+					}catch(\Exception $e){}
 				}
-				ksort($list);
-				print(PHP_EOL.'Search result: '.((empty($q) ? '' : '['.$q.']')).PHP_EOL);
-				foreach($list as $pkg => $dec){
-					print(' '.str_pad($pkg,$len).' '.$dec.PHP_EOL);
+				if(empty($list)){
+					print(PHP_EOL.'No result'.PHP_EOL);
+				}else{
+					ksort($list);
+					print(PHP_EOL.'Search result: '.((empty($q) ? '' : '['.$q.']')).PHP_EOL);
+					foreach($list as $pkg => $dec){
+						print(' '.str_pad($pkg,$len).' '.$dec.PHP_EOL);
+					}
 				}
 				exit;
 			case '-htaccess':

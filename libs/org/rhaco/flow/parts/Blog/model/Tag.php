@@ -1,6 +1,7 @@
 <?php
 namespace org\rhaco\flow\parts\Blog\model;
 /**
+ * ブログ用のDBモデル
  * @author tokushima
  * @var serial $id
  * @var string $name

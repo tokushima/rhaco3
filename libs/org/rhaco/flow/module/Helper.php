@@ -262,5 +262,41 @@ class Helper{
 	 */
 	public function text($value,$length=0,$lines=0,$postfix=null){
 		return self::html(preg_replace("/<.+?>/","",$value),$length,$lines,$postfix);
-	}	
+	}
+	/**
+	 * aがbより小さい
+	 * @param integer $a
+	 * @param integer $b
+	 * @return boolean
+	 */
+	public function lt($a,$b){
+		return ($a < $b);
+	}
+	/**
+	 * aがbより小さいか等しい
+	 * @param integer $a
+	 * @param integer $b
+	 * @return boolean
+	 */
+	public function lte($a,$b){
+		return ($a <= $b);
+	}
+	/**
+	 * aがbより大きい
+	 * @param integer $a
+	 * @param integer $b
+	 * @return boolean
+	 */
+	public function gt($a,$b){
+		return ($a > $b);
+	}
+	/**
+	 * aがbより大きいか等しい
+	 * @param integer $a
+	 * @param integer $b
+	 * @return boolean
+	 */
+	public function gte($a,$b){
+		return ($a >= $b);
+	}
 }

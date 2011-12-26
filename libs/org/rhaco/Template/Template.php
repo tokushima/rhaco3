@@ -183,11 +183,11 @@ class Template{
 				list($msg,$line) = array(trim($match[1]),((int)$match[2]));
 				$lines = explode("\n",$_src_);
 				$plrp = substr_count(implode("\n",array_slice($lines,0,$line)),"<?php 'PLRP'; ?>\n");				
-				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [compile]: '.trim($lines[$line-2]));
+				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [compile]: '.trim($lines[$line-1]));
 				
 				$lines = explode("\n",$this->selected_src);
-				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [plain]: '.trim($lines[$line-2-$plrp]));
-				if(\org\rhaco\Conf::get('display_exception') === true) $_eval_src_ = $msg.' on line '.($line-$plrp).': '.trim($lines[$line-2-$plrp]);
+				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [plain]: '.trim($lines[$line-1-$plrp]));
+				if(\org\rhaco\Conf::get('display_exception') === true) $_eval_src_ = $msg.' on line '.($line-$plrp).': '.trim($lines[$line-1-$plrp]);
 			}
 		}
 		$_src_ = $this->selected_src = null;

@@ -2,6 +2,7 @@
 namespace org\rhaco\flow\parts\Blog\model;
 use \org\rhaco\store\db\Q;
 /**
+ * ブログ用のDBモデル
  * @author tokushima
  * @var serial $id
  * @var alnum $name @{"max":50}

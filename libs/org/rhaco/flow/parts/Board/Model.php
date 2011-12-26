@@ -1,6 +1,7 @@
 <?php
 namespace org\rhaco\flow\parts\Board;
 /**
+ * 掲示板用DBモデル
  * @var serial $id
  * @var string $name
  * @var text $comment @{"require":true}

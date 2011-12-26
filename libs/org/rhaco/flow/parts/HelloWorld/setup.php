@@ -1,11 +1,14 @@
 <?php
+/**
+ * Sample Hello World
+ */
 if(empty($_ENV['params']['value'])) $value = 'index';
 $dir = str_replace("\\",'/',getcwd()).'/';
 
 $path = $dir.$value.'.php';
 if(is_file($path)) throw new \InvalidArgumentException($path.': File exists');
 file_put_contents($path
-				,"<?php require dirname(__FILE__).\"/rhaco2.php\"; app(); ?>\n"
+				,"<?php require dirname(__FILE__).\"/rhaco3.php\"; app(); ?>\n"
 				."<a"."pp>\n"
 					."\t<handler>\n"
 					."\t\t<map url=\"\" class=\"yourdomain.HelloWorld\" method=\"sample\" template=\"index.html\" />\n"
