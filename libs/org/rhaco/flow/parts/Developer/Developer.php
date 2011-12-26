@@ -67,7 +67,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function model_list(){
 		$model_list = $this->get_model_list();
-		$list = array();
+		$list = $errors = array();
 		foreach($model_list as $m){
 			if($this->search_str($m)){
 				$r = new \ReflectionClass("\\".str_replace('.',"\\",$m));
@@ -75,9 +75,16 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
 				list($summary) = explode("\n",$document);
 				$list[$m] = $summary;
+				try{
+					$m::find_get();
+					$errors[$m] = null;
+				}catch(\Exception $e){
+					$errors[$m] = $e->getMessage();
+				}
 			}
-		}		
+		}
 		$this->vars('dao_models',$list);
+		$this->vars('dao_model_errors',$errors);
 	}
 	/**
 	 * アプリケーションのマップ一覧

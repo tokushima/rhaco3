@@ -13,11 +13,18 @@
 <tbody>
 	<tr class="even">
 		<td>
-			<a href="{$t.package_method_url('do_find',$package)}">
+			<rt:if param="{$dao_model_errors[$package]}">
 				{$f.package_name($package)}
-			</a>
+			<rt:else />
+				<a href="{$t.package_method_url('do_find',$package)}">
+					{$f.package_name($package)}
+				</a>
+			</rt:if>
 		</td>
 		<td>{$summary}</td>
+		<td>
+			<span style="color:#ff0000; font-weight: bold;">{$dao_model_errors[$package]}</span>
+		</td>
 	</tr>
 </tbody>
 </table>
