@@ -75,9 +75,10 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
 				list($summary) = explode("\n",$document);
 				$list[$m] = $summary;
+				$errors[$m] = null;
 				try{
 					$m::find_get();
-					$errors[$m] = null;
+				}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
 				}catch(\Exception $e){
 					$errors[$m] = $e->getMessage();
 				}
