@@ -326,13 +326,23 @@ abstract class Dao extends \org\rhaco\Object{
 
 	static private $recording_query = false;
 	static private $record_query = array();
+	/**
+	 * 発行したSQLの記録を開始する
+	 */
 	final static public function start_record(){
 		self::$recording_query = true;
 		self::$record_query = array();
 	}
+	/**
+	 * 発行したSQLの記録を終了する
+	 */
 	final static public function stop_record(){
 		self::$recording_query = false;		
 	}
+	/**
+	 * 記録したSQLを取得する
+	 * @return array
+	 */
 	final static public function recorded_query(){
 		return self::$record_query;
 	}
