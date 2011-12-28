@@ -133,8 +133,8 @@ if(isset($_SERVER['argv'][1])){
 				}
 			}
 			$s = preg_replace("/([\"\']).*?\\1/",'',$s);
-			if(preg_match_all('/use\s+([\w\\\\]+)\s*;/',$s,$m)){foreach($m[1] as $c) $z[$c] = $u[preg_replace('/^.+\\\\([^\\\\]+)$/','\\1',$c)] = $c;}
-			if(preg_match_all('/use\s+([\w\\\\]+)\s+as\s+(\w+)\s*;/',$s,$m)){foreach($m[1] as $k => $c) $z[$c] = $u[$m[2][$k]] = $c;}
+			if(preg_match_all('/use\s+([\w\\\\]+)\s*;/',$s,$m)){foreach($m[1] as $c) $z[$c] = $u[preg_replace('/^.+\\\\([^\\\\]+)$/','\\1',$c)] = (($c[0] != "\\") ? "\\" : '').$c;}
+			if(preg_match_all('/use\s+([\w\\\\]+)\s+as\s+(\w+)\s*;/',$s,$m)){foreach($m[1] as $k => $c) $z[$c] = $u[$m[2][$k]] = (($c[0] != "\\") ? "\\" : '').$c;}
 			if(preg_match_all('/\s+instanceof\s+([\\\\\w]+)/',$s,$m)){foreach($m[1] as $k => $c) $z[$c] = $c;}
 			if(preg_match_all('/\s+class_exists\(([\"\'])([\\\\\w]+)\\1/',$s,$m)){foreach($m[2] as $k => $c) $z[$c] = $c;}
 			if(preg_match('/\s+extends\s+([\\\\\w]+)/',$s,$m)) $z[$m[1]] = $m[1];
