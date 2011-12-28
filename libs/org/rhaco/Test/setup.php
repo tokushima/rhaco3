@@ -10,7 +10,7 @@ $error_print = function ($msg,$color='1;31'){
 };
 $verify_format = function($class_name,$m=null,$b=null){
 	if(php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN'){
-		$f = ' .. '.$class_name.' ';
+		$f = ' .. '.$class_name.(isset($m) ? '::'.$m : '').(isset($b) ? '#'.$b : '').' ';
 		$l = strlen($f)*2;
 		$throw = null;
 		print("\033[".$l.'D'.str_repeat(' ',$l)."\033[".$l.'D');
