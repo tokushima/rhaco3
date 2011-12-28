@@ -248,9 +248,14 @@ if(isset($_SERVER['argv'][1])){
 					if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getPathname(),-4) == '.php'){ foreach($search(file_get_contents($f->getPathname())) as $k => $v){ $argv[$v] = $f->getPathname(); } }
 				}
 			}
+			if(is_dir(Rhaco3::common_dir())){
+				foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::common_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
+					if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getPathname(),-4) == '.php'){ foreach($search(file_get_contents($f->getPathname())) as $k => $v){ $argv[$v] = $f->getPathname(); } }
+				}
+			}
 			if(is_file(__DIR__.'/__settings__.php')){
 				foreach($search(file_get_contents(__DIR__.'/__settings__.php')) as $k => $v){ $argv[$v] = $f->getPathname(); }
-			} 
+			}
 		}
 		foreach($argv as $arg => $f){
 			if(($b = class_exists($p = '\\'.str_replace('.','\\',$arg))) || ($b = interface_exists($p = '\\'.str_replace('.','\\',$arg)))){
