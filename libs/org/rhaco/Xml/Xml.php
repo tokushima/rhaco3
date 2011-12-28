@@ -301,10 +301,11 @@ class Xml implements \IteratorAggregate{
 	public function get(){
 		if($this->name === null) throw new \LogicException('undef name');
 		$attr = '';
+		$value = ($this->value === null || $this->value === '') ? null : (string)$this->value;
 		foreach($this->attr as $k => $v) $attr .= ' '.$k.'="'.$this->in_attr($k).'"';
-		return ('<'.$this->name.$attr.(implode(' ',$this->plain_attr)).(($this->close_empty && empty($this->value)) ? ' /' : '').'>')
+		return ('<'.$this->name.$attr.(implode(' ',$this->plain_attr)).(($this->close_empty && !isset($value)) ? ' /' : '').'>')
 				.$this->value
-				.((!$this->close_empty || !empty($this->value)) ? sprintf('</%s>',$this->name) : '');
+				.((!$this->close_empty || isset($value)) ? sprintf('</%s>',$this->name) : '');
 		/***
 			$x = new self("test",123);
 			eq("<test>123</test>",$x->get());

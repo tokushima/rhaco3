@@ -5,7 +5,7 @@ namespace org\rhaco\net\http;
  * @author tokushima
  */
 class Header{
-	private $header = array();
+	static private $header = array();
 	static private $send_status = false;
 
 	/**
@@ -22,10 +22,10 @@ class Header{
 	 * headerを送信する
 	 * @param string $value 
 	 */
-	public function send($key,$value){
-		if(!isset($this->header[$key])){
+	static public function send($key,$value){
+		if(!isset(self::$header[$key])){
 			header($key.': '.$value);
-			$this->header[$key] = $value;
+			self::$header[$key] = $value;
 		}
 	}	
 	/**
@@ -88,8 +88,7 @@ class Header{
 			$url = sprintf("%s?%s",$url,$requestString);
 		}
 		self::send_status(302);
-		$self = new self();
-		$self->send('Location',$url);
+		self::send('Location',$url);
 		exit;
 	}
 	/**

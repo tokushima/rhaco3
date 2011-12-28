@@ -282,7 +282,8 @@ class Flow{
 					}catch(\Exception $e){
 						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
 							\org\rhaco\Log::$level($e);
-						} 
+						}
+						if(isset($map['error_status'])) \org\rhaco\net\http\Header::send_status($map['error_status']);
 						if($this->has_object_module('flow_exception_output')){
 							$this->object_module('flow_exception_output',$obj,$e);
 							exit;
@@ -294,7 +295,6 @@ class Flow{
 							header('Location: '.$map['error_redirect']);
 							exit;
 						}else{
-							if(isset($map['error_status'])) \org\rhaco\net\http\Header::send_status($map['error_status']);
 							if(isset($apps[$k]['error_template'])){
 								$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;

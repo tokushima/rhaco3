@@ -7,10 +7,10 @@ namespace org\rhaco\lang;
 class Json{
 	/**
 	 * Jsonに変換して取得
-	 * @param mixed $variable  対象の値
+	 * @param mixed $v  対象の値
 	 * @return string
 	 */
-	static public function encode($variable){
+	static public function encode($v){
 		/***
 		 * $variable = array(1,2,3);
 		 * eq("[1,2,3]",self::encode($variable));
@@ -49,33 +49,34 @@ class Json{
 		 * $variable = array(array("aa"=>1),array("aa"=>2),array("aa"=>3));
 		 * eq('[{"aa":1},{"aa":2},{"aa":3}]',self::encode($variable));
 		 */
-		switch(gettype($variable)){
-			case "boolean": return ($variable) ? "true" : "false";
-			case "integer": return intval(sprintf("%d",$variable));
-			case "double": return floatval(sprintf("%f",$variable));
-			case "array":
+		if(is_object($v) && !($v instanceof \Traversable) && ($v instanceof \org\rhaco\Object)) $v = $v->hash();
+		switch(gettype($v)){
+			case 'boolean': return ($v) ? 'true' : 'false';
+			case 'integer': return intval(sprintf('%d',$v));
+			case 'double': return floatval(sprintf('%f',$v));
+			case 'array':
 				$list = array();
 				$i = 0;
-				foreach(array_keys($variable) as $key){
+				foreach(array_keys($v) as $key){
 					if(!ctype_digit((string)$key) || $i !== (int)$key){
-						foreach($variable as $key => $value) $list[] = sprintf("\"%s\":%s",$key,self::encode($value));
-						return sprintf("{%s}",implode(",",$list));
+						foreach($v as $key => $value) $list[] = sprintf("\"%s\":%s",$key,self::encode($value));
+						return sprintf('{%s}',implode(',',$list));
 					}
 					$i++;
 				}
-				foreach($variable as $key => $value) $list[] = self::encode($value);
-				return sprintf("[%s]",implode(",",$list));
-			case "object":
+				foreach($v as $key => $value) $list[] = self::encode($value);
+				return sprintf('[%s]',implode(',',$list));
+			case 'object':
 				$list = array();
-				foreach((($variable instanceof \Traversable) ? $variable : get_object_vars($variable)) as $key => $value){
+				foreach((($v instanceof \Traversable) ? $v : get_object_vars($v)) as $key => $value){
 					$list[] = sprintf("\"%s\":%s",$key,self::encode($value));
 				}
-				return sprintf("{%s}",implode(",",$list));
-			case "string":
-				return sprintf("\"%s\"",addslashes($variable));
+				return sprintf('{%s}',implode(',',$list));
+			case 'string':
+				return sprintf("\"%s\"",addslashes($v));
 			default:
 		}
-		return "null";
+		return 'null';
 	}
 	/**
 	 * JSONPとして出力
@@ -83,9 +84,9 @@ class Json{
 	 * @param string $callback コールバック名
 	 * @param string $encode 文字エンコード
 	 */
-	static public function output($var,$callback=null,$encode="UTF-8"){
+	static public function output($var,$callback=null,$encode='UTF-8'){
 		header('Content-Type: application/json; charset='.$encode);
-		print(str_replace(array("\r\n","\r","\n"),array("\\n"),(empty($callback) ? self::encode($var) : ($callback."(".self::encode($var).");"))));
+		print(str_replace(array("\r\n","\r","\n"),array("\\n"),(empty($callback) ? self::encode($var) : ($callback.'('.self::encode($var).');'))));
 		exit;
 	}
 	/**

@@ -396,6 +396,7 @@ if(isset($_SERVER['argv'][1])){
 							$_SERVER['argv'] = array_slice($_SERVER['argv'],2);
 							$_ENV['PATH_LIBS'] = Rhaco3::libs();
 							$_ENV['PATH_EXTLIBS'] = Rhaco3::libs('_extlibs');
+							$_ENV['PATH_VENDORS'] = Rhaco3::libs('_vendors');
 							$_ENV['params'] = array('value'=>(isset($_SERVER['argv'][0]) && substr($_SERVER['argv'][0],0,1) == '-') ? null : array_shift($_SERVER['argv']));
 							for($i=0,$argv=$_SERVER['argv'];$i<sizeof($_SERVER['argv']);$i++){
 								if($argv[$i][0] == '-') $_ENV['params'][substr($argv[$i],1)] = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';

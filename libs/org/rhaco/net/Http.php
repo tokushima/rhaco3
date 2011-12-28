@@ -38,46 +38,95 @@ class Http{
 	public function __toString(){
 		return $this->body;
 	}
+	/**
+	 * APIのベースURLを設定する
+	 * @param string $url
+	 * @return $this
+	 */
 	public function api_url($url){
 		$this->api_url = $url;
 		return $this;
 	}
+	/**
+	 * APIへ送信するキーを設定する
+	 * @param string $key
+	 * @param string $keyname
+	 * @return $this
+	 */
 	public function api_key($key,$keyname='api_key'){
 		$this->api_key = $key;
 		$this->api_key_name = $keyname;
 		return $this;
 	}
+	/**
+	 * 送信するRAWデータをセットする
+	 * @param string $raw
+	 * @return $this
+	 */
 	public function raw($raw){
 		$this->raw = $raw;
 		return $this;
 	}
+	/**
+	 * 結果のHTTPステータスを取得する
+	 * @return int
+	 */
 	public function status(){
 		return $this->status;
 	}
+	/**
+	 * 結果のBODYを取得する
+	 * @return string
+	 */
 	public function body(){
 		return $this->body;
 	}
+	/**
+	 * 結果のHEADを取得する
+	 * @return string
+	 */
 	public function head(){
 		return $this->head;
 	}
+	/**
+	 * 送信したURLを取得する
+	 * @return string
+	 */
 	public function url(){
 		return $this->url;
 	}
+	/**
+	 * 送信した生データを取得する
+	 * @return string
+	 */
 	public function cmd(){
 		return $this->cmd;
 	}
+	/**
+	 * 送信する値を取得する
+	 * @return mixed[]
+	 */
 	public function get_vars(){
 		return $this->vars;
 	}
+	/**
+	 * 送信する値を設定する
+	 * @param string $key
+	 * @param mixed $value
+	 */
 	public function vars($key,$value){
 		$this->vars[$key] = $value;
 	}
+	/**
+	 * 送信するHEADを設定する
+	 * @param string $key
+	 * @param string $value
+	 */
 	public function header($key,$value){
 		$this->header[$key] = $value;
 	}
 	/**
 	 * URLが有効かを調べる
-	 *
 	 * @param string $url 確認するURL
 	 * @return boolean
 	 */
@@ -113,6 +162,12 @@ class Http{
 		}
 		return $result;
 	}
+	/**
+	 * 配列、またはオブジェクトから値を設定する
+	 * @param mixed $array 
+	 * @throws \InvalidArgumentException
+	 * @return $this
+	 */
 	public function cp($array){
 		if(is_array($array)){
 			foreach($array as $k => $v) $this->vars[$k] = $v;			

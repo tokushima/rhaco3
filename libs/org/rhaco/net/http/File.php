@@ -21,30 +21,29 @@ class File{
 		self::output_file_content($filename,'attachment');
 	}
 	static private function output_file_content($filename,$disposition){
-		$header = new Header();
 		if(is_file($filename)){
 			$update = @filemtime($filename);			
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $update <= strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE'])){
 				\org\rhaco\net\http\Header::send_status(304);
 				exit;
 			}
-			$header->send('Last-Modified',gmdate('D, d M Y H:i:s',$update).' GMT');
-			$header->send('Content-Type',self::mime($filename).'; name='.basename($filename));
-			$header->send('Content-Disposition',$disposition.'; filename='.basename($filename));
+			\org\rhaco\net\http\Header::send('Last-Modified',gmdate('D, d M Y H:i:s',$update).' GMT');
+			\org\rhaco\net\http\Header::send('Content-Type',self::mime($filename).'; name='.basename($filename));
+			\org\rhaco\net\http\Header::send('Content-Disposition',$disposition.'; filename='.basename($filename));
 
 			if(isset($_SERVER['HTTP_RANGE']) && preg_match("/^bytes=(\d+)\-(\d+)$/",$_SERVER['HTTP_RANGE'],$range)){
 				list($null,$offset,$end) = $range;
 				$length = $end - $offset + 1;
 				
 				\org\rhaco\net\http\Header::send_status(206);
-				$header->send('Accept-Ranges','bytes');
-				$header->send('Content-length',sprint('%u',$length));
-				$header->send('Content-Range',sprintf('bytes %u-%u/%u',$offset,$end,filesize($filename)));
+				\org\rhaco\net\http\Header::send('Accept-Ranges','bytes');
+				\org\rhaco\net\http\Header::send('Content-length',sprint('%u',$length));
+				\org\rhaco\net\http\Header::send('Content-Range',sprintf('bytes %u-%u/%u',$offset,$end,filesize($filename)));
 
 				print(file_get_contents($filename,null,null,$offset,$length));
 				exit;
 			}else{
-				$header->send('Content-length',sprintf('%u',filesize($filename)));
+				\org\rhaco\net\http\Header::send('Content-length',sprintf('%u',filesize($filename)));
 				$fp = fopen($filename,'rb');
 				while(!feof($fp)){
 					echo(fread($fp,8192));
