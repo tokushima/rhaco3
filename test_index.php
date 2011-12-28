@@ -176,17 +176,17 @@ meq('/resources/media/custom_theme/bbb/123',$b->body());
 # theme_none
 $b = b();
 $b->do_get(test_map_url('theme_none'));
-meq('error',$b->body());
+eq(403,$b->status());
 
 $b = b();
 $b->vars('hoge','aaa');
 $b->do_get(test_map_url('theme_none'));
-meq('error',$b->body());
+eq(403,$b->status());
 
 $b = b();
 $b->vars('hoge','bbb');
 $b->do_get(test_map_url('theme_none'));
-meq('error',$b->body());
+eq(403,$b->status());
 */
 
 /***
