@@ -428,7 +428,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @arg string $login_redirect ログイン後にリダイレクトされるマップ名
 	 */
 	public function do_login(){
-		if($this->is_login() || $this->silent() || ($this->is_post() && $this->login())){
+		if($this->is_login() || $this->silent() || $this->login()){
 			$redirect_to = $this->in_sessions('logined_redirect_to');
 			$this->rm_sessions('logined_redirect_to');
 			/**
