@@ -27,6 +27,8 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 	private $resultset;
 	private $resultset_counter;
 
+	static private $log_level;
+	
 	/**
 	 * コンストラクタ
 	 * @param string $json 接続情報のjson文字列
@@ -38,6 +40,13 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 				if(isset($json[$k])) $this->{$k}($json[$k]);
 			}
 			$this->connect();
+		}
+		switch($log_level = \org\rhaco\Conf::get('log_level')){
+			case 'error':
+			case 'warn':
+			case 'info':
+			case 'debug':
+				self::$log_level = $log_level;
 		}
 	}
 	/**
@@ -82,6 +91,7 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 	public function commit(){
 		$this->connection->commit();
 		$this->connection->beginTransaction();
+		if(($log_level = self::$log_level) !== null) \org\rhaco\Log::$log_level('#commit');
 	}
 	/**
 	 * ロールバックする
@@ -89,6 +99,7 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 	public function rollback(){
 		$this->connection->rollBack();
 		$this->connection->beginTransaction();
+		if(($log_level = self::$log_level) !== null) \org\rhaco\Log::$log_level('#rollback');
 	}
 	/**
 	 * 文を実行する準備を行う
@@ -109,6 +120,7 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 		array_shift($args);
 		$this->statement->execute($args);
 		$errors = $this->statement->errorInfo();
+		if(($log_level = self::$log_level) !== null) \org\rhaco\Log::$log_level($sql,$args);
 		if(isset($errors[1])){
 			$this->rollback();
 			throw new \LogicException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : '').' : '.$sql);
@@ -123,9 +135,10 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 		$args = func_get_args();
 		$this->statement->execute($args);
 		$errors = $this->statement->errorInfo();
+		if(($log_level = self::$log_level) !== null) \org\rhaco\Log::$log_level('#requery',$args);
 		if(isset($errors[1])){
 			$this->rollback();
-			throw new \LogicException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : '').' : '.$sql);
+			throw new \LogicException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : '').' : #requery');
 		}
 		return $this;
 	}
