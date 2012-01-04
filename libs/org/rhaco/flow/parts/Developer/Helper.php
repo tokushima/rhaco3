@@ -92,9 +92,9 @@ class Helper{
 				case 'text': return sprintf('<textarea name="%s">%s</textarea>',$name,$obj->{$name}());
 				case 'boolean':
 					$options = array();
-					if(!$object->a($name,"require")) $options[] = '<option value=""></option>';
+					if(!$obj->prop_anon($name,'require')) $options[] = '<option value=""></option>';
 					foreach(array('true','false') as $choice) $options[] = sprintf('<option value="%s">%s</option>',$choice,$choice);
-					return sprintf('<select name="%s">%s</select>',$name,implode("",$options));
+					return sprintf('<select name="%s">%s</select>',$name,implode('',$options));
 				case 'choice':
 					$options = array();
 					if(!$obj->prop_anon($name,'require')) $options[] = '<option value=""></option>';
