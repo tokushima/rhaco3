@@ -296,9 +296,11 @@ class Flow{
 							exit;
 						}else{
 							if(isset($apps[$k]['error_template'])){
+								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
 							}else if(isset($map['error_template'])){
+								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
 							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
