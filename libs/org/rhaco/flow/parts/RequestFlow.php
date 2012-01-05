@@ -217,8 +217,8 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param array $file_info
 	 * @return string
 	 */
-	public function file_orginal_name($file_info){
-		return $this->req->file_orginal_name($file_info);
+	public function file_original_name($file_info){
+		return $this->req->file_original_name($file_info);
 	}
 	/**
 	 * 添付ファイルのファイルパスの取得

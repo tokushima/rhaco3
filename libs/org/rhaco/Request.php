@@ -235,7 +235,7 @@ class Request implements \IteratorAggregate{
 	 * @param array $file_info
 	 * @return string
 	 */
-	public function file_orginal_name($file_info){
+	public function file_original_name($file_info){
 		return isset($file_info['name']) ? $file_info['name'] : null;
 	}
 	/**
