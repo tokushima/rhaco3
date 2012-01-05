@@ -39,9 +39,6 @@ class Log extends \org\rhaco\Object{
 				self::$logs[] = new self(4,sprintf('--- end logger ( %s MByte) --- ',round(number_format((memory_get_usage() / 1024 / 1024),3),2)));
 			}
 		}
-		if(self::cur_level() >= 2){
-			foreach(\org\rhaco\Exceptions::gets() as $e) self::$logs[] = new self(2,$e);
-		}
 		self::flush();
 	}
 	static private function cur_level(){
