@@ -34,9 +34,6 @@ class File extends \org\rhaco\Object{
 	final protected function __is_fullname__(){
 		return is_file($this->fullname);
 	}
-	final protected function __is_tmp__(){
-		return is_file($this->tmp);
-	}
 	final protected function __is_error__(){
 		return (intval($this->error) > 0);
 	}
@@ -67,7 +64,6 @@ class File extends \org\rhaco\Object{
 	public function get(){
 		if($this->value !== null) return $this->value;
 		if(is_file($this->fullname)) return file_get_contents($this->fullname);
-		if(is_file($this->tmp)) return file_get_contents($this->tmp);
 		throw new \InvalidArgumentException(sprintf('permission denied `%s`',$this->fullname));
 	}
 	public function update(){
