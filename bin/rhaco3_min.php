@@ -93,6 +93,7 @@ spl_autoload_register(function($c){
 		}else if(is_file($f=$e.str_replace('_','/',$c).'.php')){require_once($f);
 		}else if(is_file($f=$e.strtolower($c).'.php')){require_once($f);
 		}else if(is_file($f=$e.strtolower($c).'.class.php')){require_once($f);
+		}else if((strpos($c,'_')!==false)&&(is_file($f=$e.implode('/',array_slice(explode('_',$c),0,-1)).'.php'))){require_once($f);
 		}else{$f=$c;}
 	}
 	if(class_exists($c,false) || interface_exists($c,false)){

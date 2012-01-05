@@ -93,6 +93,7 @@ spl_autoload_register(function($c){
 		}else if(is_file($f=$e.str_replace('_','/',$c).'.php')){require_once($f);
 		}else if(is_file($f=$e.strtolower($c).'.php')){require_once($f);
 		}else if(is_file($f=$e.strtolower($c).'.class.php')){require_once($f);
+		}else if((strpos($c,'_')!==false)&&(is_file($f=$e.implode('/',array_slice(explode('_',$c),0,-1)).'.php'))){require_once($f);
 		}else{$f=$c;}
 	}
 	if(class_exists($c,false) || interface_exists($c,false)){
@@ -133,8 +134,8 @@ if(isset($_SERVER['argv'][1])){
 				}
 			}
 			$s = preg_replace("/([\"\']).*?\\1/",'',$s);
-			if(preg_match_all('/use\s+([\w\\\\]+)\s*;/',$s,$m)){foreach($m[1] as $c) $z[$c] = $u[preg_replace('/^.+\\\\([^\\\\]+)$/','\\1',$c)] = $c;}
-			if(preg_match_all('/use\s+([\w\\\\]+)\s+as\s+(\w+)\s*;/',$s,$m)){foreach($m[1] as $k => $c) $z[$c] = $u[$m[2][$k]] = $c;}
+			if(preg_match_all('/use\s+([\w\\\\]+)\s*;/',$s,$m)){foreach($m[1] as $c) $z[$c] = $u[preg_replace('/^.+\\\\([^\\\\]+)$/','\\1',$c)] = (($c[0] != "\\") ? "\\" : '').$c;}
+			if(preg_match_all('/use\s+([\w\\\\]+)\s+as\s+(\w+)\s*;/',$s,$m)){foreach($m[1] as $k => $c) $z[$c] = $u[$m[2][$k]] = (($c[0] != "\\") ? "\\" : '').$c;}
 			if(preg_match_all('/\s+instanceof\s+([\\\\\w]+)/',$s,$m)){foreach($m[1] as $k => $c) $z[$c] = $c;}
 			if(preg_match_all('/\s+class_exists\(([\"\'])([\\\\\w]+)\\1/',$s,$m)){foreach($m[2] as $k => $c) $z[$c] = $c;}
 			if(preg_match('/\s+extends\s+([\\\\\w]+)/',$s,$m)) $z[$m[1]] = $m[1];
@@ -248,9 +249,14 @@ if(isset($_SERVER['argv'][1])){
 					if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getPathname(),-4) == '.php'){ foreach($search(file_get_contents($f->getPathname())) as $k => $v){ $argv[$v] = $f->getPathname(); } }
 				}
 			}
+			if(is_dir(Rhaco3::common_dir())){
+				foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::common_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
+					if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getPathname(),-4) == '.php'){ foreach($search(file_get_contents($f->getPathname())) as $k => $v){ $argv[$v] = $f->getPathname(); } }
+				}
+			}
 			if(is_file(__DIR__.'/__settings__.php')){
 				foreach($search(file_get_contents(__DIR__.'/__settings__.php')) as $k => $v){ $argv[$v] = $f->getPathname(); }
-			} 
+			}
 		}
 		foreach($argv as $arg => $f){
 			if(($b = class_exists($p = '\\'.str_replace('.','\\',$arg))) || ($b = interface_exists($p = '\\'.str_replace('.','\\',$arg)))){
@@ -396,6 +402,7 @@ if(isset($_SERVER['argv'][1])){
 							$_SERVER['argv'] = array_slice($_SERVER['argv'],2);
 							$_ENV['PATH_LIBS'] = Rhaco3::libs();
 							$_ENV['PATH_EXTLIBS'] = Rhaco3::libs('_extlibs');
+							$_ENV['PATH_VENDORS'] = Rhaco3::libs('_vendors');
 							$_ENV['params'] = array('value'=>(isset($_SERVER['argv'][0]) && substr($_SERVER['argv'][0],0,1) == '-') ? null : array_shift($_SERVER['argv']));
 							for($i=0,$argv=$_SERVER['argv'];$i<sizeof($_SERVER['argv']);$i++){
 								if($argv[$i][0] == '-') $_ENV['params'][substr($argv[$i],1)] = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
