@@ -942,6 +942,7 @@ class Template{
 			Xml::set($tag,'<:>'.$src.'</:>');
 			foreach($tag->in('form') as $obj){
 				if(($obj->in_attr('rt:aref') === 'true')){
+					$obj->escape(false);
 					$form = $obj->value();
 					foreach($obj->in(array('input','select')) as $tag){
 						if($tag->is_attr('name') || $tag->is_attr('id')){
