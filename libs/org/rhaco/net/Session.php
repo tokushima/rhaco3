@@ -71,7 +71,7 @@ class Session{
 	 * @return boolean
 	 */
 	public function is_vars($n){
-		return array_key_exists($n,$_SESSION);
+		return isset($_SESSION[$this->ses_n]) ? array_key_exists($n,$_SESSION[$this->ses_n]) : false;
 	}
 	/**
 	 * セッションを削除
