@@ -308,6 +308,13 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		return $this->req->is_vars($n);
 	}
 	/**
+	 * 定義済みの一覧を返す
+	 * @return array
+	 */
+	public function ar_vars(){
+		return $this->req->ar_vars();
+	}
+	/**
 	 * セッションにセットする
 	 * @param string $key
 	 * @param mixed $val
