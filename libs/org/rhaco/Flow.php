@@ -103,6 +103,7 @@ class Flow{
 						$maps_med = isset($maps['media_path']) ? $maps['media_path'] : null;
 						$maps_the = isset($maps['theme_path']) ? $maps['theme_path'] : null;
 						$maps_tem = isset($maps['template_path']) ? $maps['template_path'] : null;
+						$maps_err = isset($maps['error_template']) ? $maps['error_template'] : null;
 						$maps_mod = isset($maps['modules']) ? (is_array($maps['modules']) ? $maps['modules'] : array($maps['modules'])) : array();
 						$maps_arg = isset($maps['args']) ? (is_array($maps['args']) ? $maps['args'] : array($maps['args'])) : array();
 						foreach($maps['patterns'] as $u => $m){
@@ -111,6 +112,7 @@ class Flow{
 							if(!empty($maps_med)) $m['media_path'] = $maps_med;
 							if(!empty($maps_the)) $m['theme_path'] = $maps_the;
 							if(!empty($maps_tem)) $m['template_path'] = $maps_tem;
+							if(!empty($maps_err)) $m['error_template'] = $maps_err;
 							if(!empty($maps_mod)) $m['modules'] = array_merge($maps_mod,(isset($m['modules']) ? (is_array($m['modules']) ? $m['modules'] : array($m['modules'])) : array()));
 							if(!empty($maps_arg)) $m['args'] = array_merge($maps_arg,(isset($m['args']) ? (is_array($m['args']) ? $m['args'] : array($m['args'])) : array()));
 							$map['patterns'][$maps_url.$u] = $m;
@@ -171,12 +173,18 @@ class Flow{
 				}
 			}
 			list($url,$surl) = array($this->app_url,str_replace('http://','https://',$this->app_url));
+			$map_secure = (isset($map['secure']) && $map['secure'] === true);
+			$conf_secure = (\org\rhaco\Conf::get('secure',true) === true);
 			foreach($apps as $u => $m){
+				$m['secure'] = ($conf_secure && (((isset($m['secure']) && $m['secure'] === true)) || (!isset($m['secure']) && $map_secure)));
 				$cnt = 0;
 				$fu = \org\rhaco\net\Path::absolute(
-						((isset($m['secure']) && $m['secure'] === true && \org\rhaco\Conf::get('secure',true) === true) ? $surl : $url)
+						($m['secure'] ? $surl : $url)
 						,(empty($u)) ? '' : substr(preg_replace_callback("/([^\\\\])(\(.*?[^\\\\]\))/",function($n){return $n[1].'%s';},' '.$u,-1,$cnt),1)
 						);
+				foreach(array('template_path','media_path','theme_path') as $k){
+					if(isset($map[$k]) || isset($m[$k])) $m[$k] = \org\rhaco\net\Path::slash((isset($map[$k])?$map[$k]:''),null,true).(isset($m[$k])?$m[$k]:'');
+				}
 				$apps[$u] = array_merge($m,array(
 									'url'=>$u
 									,'format'=>$fu
@@ -348,7 +356,7 @@ class Flow{
 		$this->template->media_url($media_url);
 		$this->template->cp($obj);
 		if(isset($apps[$index]['vars'])) $this->template->cp($apps[$index]['vars']);
-		$this->template->vars('t',new \org\rhaco\flow\module\Helper($media_url,(isset($apps[$index]['name']) ? $apps[$index]['name'] : null),$apps));
+		$this->template->vars('t',new \org\rhaco\flow\module\Helper($media_url,(isset($apps[$index]['name']) ? $apps[$index]['name'] : null),$apps,$obj));
 		$src = $this->template->read($template);
 		$this->object_module('before_flow_print_template',$src);
 		print($src);
@@ -366,11 +374,15 @@ class Flow{
 		$xml->output();
 	}
 	private function str_reflection($package){
-		$class_name = substr($package,-1 * strrpos($package,'.') + 1);
+		$class_name = substr($package,strrpos($package,'.')+1);
 		try{
 			return new \ReflectionClass("\\".str_replace('.',"\\",$package));
 		}catch(\ReflectionException $e){
-			if(!empty($class_name)) return new \ReflectionClass($class_name);
+			if(!empty($class_name)){
+				try{
+					return new \ReflectionClass($class_name);
+				}catch(\ReflectionException $f){}
+			}
 			throw $e;
 		}
 	}
