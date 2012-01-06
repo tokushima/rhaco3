@@ -30,11 +30,11 @@ class OutputJson{
 		if($exception instanceof \org\rhaco\Exceptions){
 			foreach(\org\rhaco\Exceptions::groups() as $g){
 				foreach(\org\rhaco\Exceptions::gets($g) as $e){
-					$error['error'][] = array('message'=>$e->getMessage(),'group'=>$g,$type=>basename(str_replace("\\",'/',get_class($e))));
+					$error['error'][] = array('message'=>$e->getMessage(),'group'=>$g,'type'=>basename(str_replace("\\",'/',get_class($e))));
 				}
 			}
 		}else{
-			$error['error'][] = array('message'=>$exception->getMessage(),'group'=>'',$type=>basename(str_replace("\\",'/',get_class($exception))));
+			$error['error'][] = array('message'=>$exception->getMessage(),'group'=>'','type'=>basename(str_replace("\\",'/',get_class($exception))));
 		}
 		$json = \org\rhaco\lang\Json::encode($error);
 		print(($this->mode == 'jsonp') ? $this->varname.'('.$json.')' : $json);
