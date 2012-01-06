@@ -393,8 +393,8 @@ abstract class Base extends \org\rhaco\Object{
 		if($value === null) return null;
 		try{
 			switch($dao->prop_anon($name,'type')){
-				case 'timestamp': return date('Y/m/d H:i:s',(int)$value);
-				case 'date': return date('Y/m/d',(int)$value);
+				case 'timestamp': return date('Y/m/d H:i:s',$value);
+				case 'date': return date('Y/m/d',$value);
 			}
 		}catch(\Exception $e){}
 		return $value;
