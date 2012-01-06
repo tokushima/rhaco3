@@ -208,6 +208,13 @@ class Request implements \IteratorAggregate{
 		}
 	}
 	/**
+	 * 変数の一覧を返す
+	 * @return array
+	 */
+	public function ar_vars(){
+		return $this->vars;
+	}
+	/**
 	 * 添付ファイル情報の取得
 	 * @param string $n
 	 * @return array
