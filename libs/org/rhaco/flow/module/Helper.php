@@ -8,14 +8,34 @@ class Helper{
 	private $media_url;
 	private $name;
 	private $url_pattern = array();
+	private $is_login = false;
+	private $user;
 
-	public function __construct($media_url=null,$name=null,$map=array()){
+	public function __construct($media_url=null,$name=null,$map=array(),$obj=null){
 		$this->media_url = $media_url;
 		$this->name = $name;
 
 		foreach($map as $p => $m){
 			if(isset($m['name'])) $this->url_pattern[$m['name']] = $m;
 		}
+		if($obj instanceof \org\rhaco\flow\parts\RequestFlow){
+			$this->is_login = $obj->is_login();
+			$this->user = $obj->user();
+		}
+	}
+	/**
+	 * ログイン済みか
+	 * @return boolean
+	 */
+	public function is_login(){
+		return $this->is_login;
+	}
+	/**
+	 * ログインユーザを返す
+	 * @return mixed
+	 */
+	public function user(){
+		return $this->user;
 	}
 	/**
 	 * handlerのマップ名を呼び出しているURLを生成する
