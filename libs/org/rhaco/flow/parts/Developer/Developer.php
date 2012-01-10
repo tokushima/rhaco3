@@ -26,27 +26,42 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
 						try{
 							include_once($e->getPathname());
-						}catch(Exeption $ex){}
+						}catch(\Exeption $ex){}
 					}else if($e->getFilename() == 'vendors.phar'){
 						$p = new \Phar($e->getPathname());
 						foreach(new \RecursiveIteratorIterator($p) as $v){
 							if(ctype_upper(substr($v->getFilename(),0,1)) && substr($v->getFilename(),-4) == '.php'){
 								try{
 									include_once($v->getPathname());
-								}catch(Exeption $ex){}
+								}catch(\Exeption $ex){}
 							}
 						}
 					}
 				}
 			}
 		}
-		$models = $this->get_model_list();
+		
+		
+		$is_dao = $is_smtp_blackhole = false;
+		if(class_exists('\org'.'\rhaco'.'\store'.'\db'.'\Dao')){
+			$is_dao = $is_smtp_blackhole = true;
+
+			try{
+				$ref = new \ReflectionClass($smtp='\org'.'\rhaco'.'\net'.'\mail'.'\module'.'\SmtpBlackholeDao');
+				$smtp::find_get();
+			}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
+			}catch(\Exception $e){
+				$is_smtp_blackhole = false;
+			}
+		}
+		$this->vars('is_smtp_blackhole',$is_smtp_blackhole);
+		$this->vars('is_dao',$is_dao);
+		
 		$this->vars('app_name',(empty($name) ? 'App' : $name));
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
-		$this->vars('models',$models);
 		$this->vars('f',new Developer\Helper());
-		$this->vars('is_smtp_blackhole',in_array('org\rhaco\net\mail\module\SmtpBlackholeDao',$models));
+
 	}
 	public function get_template_modules(){
 		return new \org\rhaco\flow\module\TwitterBootstrapPagination();

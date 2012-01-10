@@ -27,44 +27,25 @@
         <div class="container">
           <a class="brand" href="{$t.package_method_url('index')}">{$app_name}</a>
           
-          <ul class="nav">
-            <li><a href="{$t.package_method_url('index')}">Map</a></li>
-            <li><a href="{$t.package_method_url('classes')}">Classes</a></li>
-            <li><a href="{$t.package_method_url('conf_list')}">Conf</a></li>
-          </ul>
           
           <rt:block name="search_form">
           <form class="pull-left" rt:ref="true">
             <input type="text" name="q" placeholder="Search" />
           </form>
           </rt:block>
-          
-          
-          <ul class="nav secondary-nav">
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle">Models</a>
-              <ul class="dropdown-menu">
-				<rt:if param="{$is_smtp_blackhole}">
-					<li><a href="{$t.package_method_url('mail_list')}">Mail (Smtp Blackhole)</a></li>
-	                <li class="divider"></li>
-				</rt:if>
-              
-   				<rt:loop param="models" var="m" limit="10" total="model_total">
-					<li>
-						<a href="{$t.package_method_url('do_find',$m)}">
-							<span style="font-size: x-small;">{$f.package_name($m)}</span>
-						</a>
-					</li>
-				</rt:loop>
-				
-				<rt:if param="{$t.gte($model_total,1)}">
-		            <li class="divider"></li>
-					<li><a href="{$t.package_method_url('model_list')}">more..</a></li>
-				</rt:if>
-              </ul>
-            </li>
-          </ul>
                     
+          <ul class="nav">
+            <li><a href="{$t.package_method_url('index')}">Map</a></li>
+            <li><a href="{$t.package_method_url('classes')}">Classes</a></li>
+            <li><a href="{$t.package_method_url('conf_list')}">Conf</a></li>
+			
+			<rt:if param="{$is_dao}">
+				<li><a href="{$t.package_method_url('model_list')}">Models</a></li>
+			</rt:if>
+			<rt:if param="{$is_smtp_blackhole}">
+				<li><a href="{$t.package_method_url('mail_list')}">Mail (Smtp Blackhole)</a></li>
+			</rt:if>			
+          </ul>
         </div>
       </div>
     </div>
