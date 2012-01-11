@@ -74,15 +74,18 @@ class Helper{
 		}else if($obj->prop_anon($name,'master') !== null){
 			$options = array();
 			if(!$obj->prop_anon($name,'require')) $options[] = '<option value=""></option>';
-			$master = $this->prop_anon($name,'master');
+			$master = $obj->prop_anon($name,'master');
 			if(!empty($master)){
 				$master = str_replace('.',"\\",$master);
 				if($master[0] !== "\\") $master = "\\".$master;
 				$r = new \ReflectionClass($master);
 				$mo = $r->newInstanceArgs();
 				$primarys = $mo->primary_columns();
-				foreach($master::find(Q::eq(key($primarys),$obj->{$name}())) as $dao){
-					$options[] = sprintf('<option value="%s">%s</option>',$id,$dao->str());
+				if(sizeof($primarys) != 1) return sprintf('<input name="%s" type="text" />',$name);
+				foreach($primarys as $primary) break;
+				$pri = $primary->name();
+				foreach($master::find() as $dao){
+					$options[] = sprintf('<option value="%s">%s</option>',$dao->{$pri}(),(string)$dao);
 				}
 			}			
 			return sprintf('<select name="%s">%s</select>',$name,implode('',$options));
