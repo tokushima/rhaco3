@@ -947,6 +947,7 @@ class Template{
 					foreach($obj->in(array('input','select')) as $tag){
 						if($tag->is_attr('name') || $tag->is_attr('id')){
 							$name = $this->parse_plain_variable($this->form_variable_name($tag->in_attr('name',$tag->in_attr('id'))));
+							$tag->escape(false);							
 							switch(strtolower($tag->name())){
 								case 'input':
 									switch(strtolower($tag->in_attr('type'))){
