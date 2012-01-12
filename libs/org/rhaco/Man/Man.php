@@ -51,29 +51,26 @@ class Man{
 		if(preg_match_all("/TODO[\040\t](.+)/",$src,$match)){
 			foreach($match[1] as $t) $tasks[] = trim($t);
 		}
-		
-		// TODO 
 		$modules = array();
-		if(preg_match_all("/->object_module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
-			foreach($match[2] as $v){
-				$name = $v[0];
-				$doc = substr($src,0,$v[1]);
-				$doc_end = strrpos($doc,'*'.'/');
-				if($doc_end !== false && substr_count(substr($src,$doc_end,$v[1]-$doc_end),"\n") === 1){
-					$doc_start = strrpos($doc,'/'.'**');
-					$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",substr($doc,$doc_start,$doc_end-$doc_start+2))));
-					if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
-
-					}
+		$get_desc = function(&$modules,$match,$k,$name,$src){
+			$modules[$name] = array(null,array());
+			$doc = substr($src,0,$match[0][$k][1]);
+			$doc = trim(substr($doc,0,strrpos($doc,"\n")));
+			if(substr($doc,-2) == '*'.'/'){
+				$doc = substr($doc,strrpos($doc,'/'.'**'));
+				$doc = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$doc)));
+				if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$doc,$m)){
+					foreach($m[2] as $n => $p) $modules[$name][1][] = array($m[2][$n],$m[1][$n],trim($m[3][$n]));
 				}
+				$modules[$name][0] = trim(preg_replace('/@.+/','',$doc));
 			}
+		};
+		if(preg_match_all("/->object_module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
+			foreach($match[2] as $k => $v) $get_desc($modules,$match,$k,$v[0],$src);
 		}
 		if(preg_match_all("/::module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
-			foreach($match[1] as $t) $modules[] = trim($t);
-		}
-		
-		
-		
+			foreach($match[2] as $k => $v) $get_desc($modules,$match,$k,$v[0],$src);
+		}		
 		$properties = array();
 		$ref = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$class));
 		$d = '';
@@ -104,6 +101,7 @@ class Man{
 		return array(
 				'filename'=>$r->getFileName(),'extends'=>$extends,'static_methods'=>$static_methods,'methods'=>$methods
 				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>$description
+				,'modules'=>$modules
 				);
 	}
 	/**

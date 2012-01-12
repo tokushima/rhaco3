@@ -36,8 +36,8 @@ if(isset($_ENV['params']['m'])){
 	print(' Description:');
 	print('   '.str_replace("\n","\n   ",$rtn['description']));
 	
-	list($static_methods,$methods,$properties) = array($rtn['static_methods'],$rtn['methods'],$rtn['properties']);
-	$len = \org\rhaco\lang\Text::length(array_merge(array_keys($static_methods),array_keys($methods),array_keys($properties)));
+	list($static_methods,$methods,$properties,$modules) = array($rtn['static_methods'],$rtn['methods'],$rtn['properties'],$rtn['modules']);
+	$len = \org\rhaco\lang\Text::length(array_merge(array_keys($static_methods),array_keys($methods),array_keys($properties),array_keys($modules)));
 
 	if(!empty($static_methods)){
 		print("\n".'  Static methods defined here:'.PHP_EOL);
@@ -51,5 +51,13 @@ if(isset($_ENV['params']['m'])){
 		print("\n".'  Properties defined here:'.PHP_EOL);
 		foreach($properties as $k => $v) print('    '.str_pad($k,$len).' : ('.$v[0].') '.$v[1].PHP_EOL);
 	}
+	if(!empty($modules)){
+		print("\n".'  Modules defined here:'.PHP_EOL);
+		foreach($modules as $k => $v){
+			list($summary) = explode(PHP_EOL,$v[0]);
+			print('    '.str_pad($k,$len).' : '.$summary.PHP_EOL);
+			foreach($v[1] as $p) print('    '.str_pad('',$len).'    ('.$p[1].') '.$p[0].' : '.$p[2].PHP_EOL);
+		}
+	}	
 }
 print(PHP_EOL);
