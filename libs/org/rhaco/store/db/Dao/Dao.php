@@ -763,6 +763,12 @@ abstract class Dao extends \org\rhaco\Object{
 						case 'date': $this->{$column->name()}(time()); break;
 						case 'intdate': $this->{$column->name()}(date('Ymd')); break;
 					}
+				}else if($this->prop_anon($column->name(),'auto_future_add') === true){
+					switch($this->prop_anon($column->name(),'type')){ // 2112/09/03 doraemon birthday
+						case 'timestamp':
+						case 'date': $this->{$column->name()}(4502271600); break;
+						case 'intdate': $this->{$column->name()}('21120903'); break;
+					}
 				}
 			}
 		}
