@@ -14,7 +14,7 @@ class Man{
 		$src = implode(array_slice(file($r->getFileName()),$r->getStartLine(),($r->getEndLine()-$r->getStartLine()-1)));
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$r->getDocComment())));
 		$extends = ($r->getParentClass() === false) ? null : $r->getParentClass()->getName();
-		
+
 		$methods = $static_methods = array();
 		foreach($r->getMethods() as $method){
 			if($method->getDeclaringClass()->getFileName() == $r->getFileName()){
@@ -48,9 +48,32 @@ class Man{
 			}
 		}
 		$tasks = array();
-		if(preg_match_all("/TODO[\040\t](.+)/",file_get_contents($r->getFileName()),$match)){
+		if(preg_match_all("/TODO[\040\t](.+)/",$src,$match)){
 			foreach($match[1] as $t) $tasks[] = trim($t);
 		}
+		
+		// TODO 
+		$modules = array();
+		if(preg_match_all("/->object_module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
+			foreach($match[2] as $v){
+				$name = $v[0];
+				$doc = substr($src,0,$v[1]);
+				$doc_end = strrpos($doc,'*'.'/');
+				if($doc_end !== false && substr_count(substr($src,$doc_end,$v[1]-$doc_end),"\n") === 1){
+					$doc_start = strrpos($doc,'/'.'**');
+					$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",substr($doc,$doc_start,$doc_end-$doc_start+2))));
+					if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
+
+					}
+				}
+			}
+		}
+		if(preg_match_all("/::module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
+			foreach($match[1] as $t) $modules[] = trim($t);
+		}
+		
+		
+		
 		$properties = array();
 		$ref = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$class));
 		$d = '';
