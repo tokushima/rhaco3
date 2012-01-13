@@ -400,7 +400,16 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 * @param self $this
 			 */
 			$this->object_module('after_do_login',$this);
-			if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
+			
+			if(!empty($redirect_to)){
+				foreach($this->maps as $k => $m){
+					if($m['method'] == 'do_logout'){
+						if($redirect_to == $m['format']) $redirect_to = null;
+						break;
+					}
+				}
+				if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
+			}
 			if($this->map_arg('login_redirect') !== null) $this->redirect_by_map('login_redirect');
 		}
 		if(!$this->is_login() && $this->is_post()){
@@ -414,8 +423,14 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @arg string $logout_redirect ログアウト後にリダイレクトされるマップ名
 	 */
 	public function do_logout(){
+		/**
+		 * ログアウト前処理
+		 * @param self $this
+		 */
+		$this->object_module('before_do_logout',$this);
 		$this->logout();
 		if($this->map_arg('logout_redirect') !== null) $this->redirect_by_map('logout_redirect');
+		$this->vars('login',$this->is_login());
 	}
 	/**
 	 * ログインする
@@ -469,11 +484,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * ログアウトする
 	 */
 	public function logout(){
-		/**
-		 * ログアウト前処理
-		 * @param self $this
-		 */
-		$this->object_module('before_logout',$this->req);
 		$this->rm_sessions($this->login_id.'USER');
 		$this->rm_sessions($this->login_id);
 		session_regenerate_id(true);
