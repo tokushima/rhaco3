@@ -71,3 +71,28 @@ eq('<result><user_name>hogeuser</user_name></result>',$b->body());
 $b->do_post(test_map_url('aaa'));
 eq('<result><user><nickname>hogeuser</nickname><code>1234</code></user></result>',$b->body());
 */
+
+/***
+$b = b();
+
+$b->do_post(test_map_url('logout'));
+eq(200,$b->status());
+eq(test_map_url('login'),$b->url());
+eq('<result />',$b->body());
+
+$b->vars('user_name','hogeuser');
+$b->vars('password','hogehoge');
+$b->do_post(test_map_url('login'));
+eq(200,$b->status());
+eq('<result><user_name>hogeuser</user_name></result>',$b->body());
+
+$b->do_post(test_map_url('aaa'));
+eq(200,$b->status());
+eq('<result><user><nickname>hogeuser</nickname><code>1234</code></user></result>',$b->body());
+
+$b->do_post(test_map_url('logout'));
+eq(200,$b->status());
+eq('<result><login>false</login></result>',$b->body());
+*/
+
+

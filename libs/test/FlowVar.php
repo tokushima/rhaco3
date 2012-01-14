@@ -14,6 +14,7 @@ class FlowVar extends \org\rhaco\Object{
 	 * Enter description here ...
 	 */
 	public function bbb(){
+		$n = $m = null;
 		/**
 		 * モジュールコメント
 		 * @param string $n えぬ
@@ -28,6 +29,7 @@ class FlowVar extends \org\rhaco\Object{
 	 * Enter description here ...
 	 */
 	static public function ccc(){
+		$n = $m = null;
 		/**
 		 * スタティックモジュールコメント
 		 * @param string $n えぬ

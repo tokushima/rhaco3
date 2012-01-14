@@ -18,7 +18,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	private $code;
 	private $login_id;
 	private $anon_login = array('type'=>null,'require'=>false);
-	private $login_redirect = false;
 	
 	protected function __new__(){
 		$d = debug_backtrace(false);
@@ -124,8 +123,25 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 */
 	public function before(){
 		if($this->has_object_module('before_flow_handle')) $this->object_module('before_flow_handle',$this);
-		if($this->anon_login['require'] === true && isset($this->select_map['method']) && $this->select_map['method'] != 'do_login') $this->login_required(false);
-		if($this->login_redirect) $this->redirect_login_map();
+		if($this->anon_login['require'] === true && isset($this->select_map['method']) && $this->select_map['method'] != 'do_login'){
+			if(!$this->is_login()){
+				if(!$this->is_sessions('logined_redirect_to')){
+					$current = \org\rhaco\Request::current_url();
+					foreach($this->maps as $k => $m){
+						if($m['method'] == 'do_logout'){
+							if($current == $m['format']) $current = null;
+							break;
+						}
+					}
+					if($current != null) $this->sessions('logined_redirect_to',$current);
+				}
+				$this->save_current_vars();
+				foreach($this->maps as $k => $m){
+					if($m['method'] == 'do_login') return \org\rhaco\net\http\Header::redirect($m['format']);
+				}
+				throw new \LogicException('name `login` not found');
+			}
+		}
 	}
 	/**
 	 * (non-PHPdoc)
@@ -221,26 +237,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 */
 	protected function args(){
 		return $this->req->args();
-	}
-	/**
-	 * ログインを必須とする
-	 * @param string $redirect_to リダイレクト先
-	 */
-	protected function login_required($redirect=true){
-		if(!$this->is_login()){
-			if(!$this->is_sessions('logined_redirect_to')) $this->sessions('logined_redirect_to',\org\rhaco\Request::current_url());
-			$this->save_current_vars();
-			$this->login_redirect = true;
-			if($redirect) $this->redirect_login_map();
-		}
-	}
-	private function redirect_login_map(){
-		if(!empty($this->maps)){
-			foreach($this->maps as $k => $m){
-				if($m['name'] == 'login') return \org\rhaco\net\http\Header::redirect($m['format']);
-			}
-		}
-		throw new \LogicException('name `login` not found');		
 	}
 	/**
 	 * Exceptionを保存する
@@ -400,16 +396,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 * @param self $this
 			 */
 			$this->object_module('after_do_login',$this);
-			
-			if(!empty($redirect_to)){
-				foreach($this->maps as $k => $m){
-					if($m['method'] == 'do_logout'){
-						if($redirect_to == $m['format']) $redirect_to = null;
-						break;
-					}
-				}
-				if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
-			}
+			if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
 			if($this->map_arg('login_redirect') !== null) $this->redirect_by_map('login_redirect');
 		}
 		if(!$this->is_login() && $this->is_post()){
