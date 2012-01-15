@@ -123,7 +123,14 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 */
 	public function before(){
 		if($this->has_object_module('before_flow_handle')) $this->object_module('before_flow_handle',$this);
-		if($this->anon_login['require'] === true && isset($this->select_map['method']) && $this->select_map['method'] != 'do_login'){
+		if(!$this->is_login() && $this->anon_login['require'] === true && isset($this->select_map['method']) && $this->select_map['method'] != 'do_login'){
+			if($this->has_object_module('before_login_required')) {
+				/**
+				 * login[require=true]で未ログイン時のログイン処理の前処理
+				 * @param self $this
+				 */
+				$this->object_module('before_login_required',$this);
+			}
 			if(!$this->is_login()){
 				if(!$this->is_sessions('logined_redirect_to')){
 					$current = \org\rhaco\Request::current_url();
