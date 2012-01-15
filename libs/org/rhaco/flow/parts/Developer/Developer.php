@@ -22,7 +22,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		if(is_dir(\Rhaco3::libs())){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::libs(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
-				if(strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
+				if(strpos($e->getPathname(),'/.') === false  && (strpos($e->getFileName(),\Rhaco3::libs('_')) === false || strpos($e->getFileName(),\Rhaco3::libs('_vendors')) !== false)){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
 						try{
 							include_once($e->getPathname());
@@ -40,8 +40,6 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				}
 			}
 		}
-		
-		
 		$is_dao = $is_smtp_blackhole = false;
 		if(class_exists('\org'.'\rhaco'.'\store'.'\db'.'\Dao')){
 			$is_dao = $is_smtp_blackhole = true;
@@ -134,7 +132,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		if(!empty($query)){
 			$args = func_get_args();
 			foreach(explode(' ',$query) as $q){
-				if(stripos(implode(' ',$args),$q) === false) return false;
+				if(stripos(str_replace('\\','.',implode(' ',$args)),$q) === false) return false;
 			}
 		}
 		return true;
@@ -146,7 +144,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$libs = array();
 		foreach(get_declared_classes() as $class){
 			$r = new \ReflectionClass($class);
-			if(strpos($r->getFileName(),\Rhaco3::libs()) !== false && strpos($r->getFileName(),\Rhaco3::libs('_')) === false 
+			if(strpos($r->getFileName(),\Rhaco3::libs()) !== false  && (strpos($r->getFileName(),\Rhaco3::libs('_')) === false || strpos($r->getFileName(),\Rhaco3::libs('_vendors')) !== false)
 				&& (!$r->isInterface() && !$r->isAbstract()) && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
 				$class_doc = $r->getDocComment();
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
@@ -160,6 +158,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				}
 			}
 		}
+		kssort($libs);
 		$this->vars('packages',$libs);
 	}
 	/**
