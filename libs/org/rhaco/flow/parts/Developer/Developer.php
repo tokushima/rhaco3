@@ -5,7 +5,7 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
- * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list"]}
+ * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list","class_module_info"]}
  * @login @{"has_require":true}
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
@@ -191,6 +191,19 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		foreach(\org\rhaco\Man::method_info($class,$method) as $k => $v){
 			$this->vars($k,$v);
 		}
+	}
+	/**
+	 * モジュールのドキュメント
+	 * @param string $class
+	 * @param string $module_name
+	 */
+	public function class_module_info($class,$module_name){
+		$ref = \org\rhaco\Man::class_info($class);
+		if(!isset($ref['modules'][$module_name])) throw new \LogicException($module_name.' not found');
+		$this->vars('package',$class);
+		$this->vars('module_name',$module_name);
+		$this->vars('description',$ref['modules'][$module_name][0]);
+		$this->vars('params',$ref['modules'][$module_name][1]);
 	}
 	private function get_model($name,$sync=true){
 		$r = new \ReflectionClass('\\'.str_replace('/','\\',$name));

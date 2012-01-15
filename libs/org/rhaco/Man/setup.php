@@ -30,6 +30,19 @@ if(isset($_ENV['params']['m'])){
 	}
 	print("\n".' Return:'.PHP_EOL);
 	print(sprintf('   %s %s',$rtn['return'][0],$rtn['return'][1]).PHP_EOL);
+}else if(isset($_ENV['params']['module'])){
+	$rtn = \org\rhaco\Man::class_info($_ENV['params']['value']);
+	if(!isset($rtn['modules'][$_ENV['params']['module']])) throw new \RuntimeException('module `'.$_ENV['params']['module'].'` not found');
+	$module = $rtn['modules'][$_ENV['params']['module']];
+	
+	print("\n".'class '.$_ENV['params']['value'].' in module '.$_ENV['params']['module'].':'.PHP_EOL);
+	print(' Description:'.PHP_EOL);
+	print('   '.str_replace("\n","\n   ",$module[0]).PHP_EOL);
+	print("\n".' Parameter:'.PHP_EOL);
+	$len = \org\rhaco\lang\Text::length(array_keys($module[1]));
+	foreach($module[1] as $p){
+		print('    '.str_pad('',$len).'    ('.$p[1].') '.$p[0].' : '.$p[2].PHP_EOL);
+	}	
 }else{
 	$rtn = \org\rhaco\Man::class_info($_ENV['params']['value']);
 	print("\n".'class '.$rtn['package'].':'.PHP_EOL);
@@ -56,7 +69,6 @@ if(isset($_ENV['params']['m'])){
 		foreach($modules as $k => $v){
 			list($summary) = explode(PHP_EOL,$v[0]);
 			print('    '.str_pad($k,$len).' : '.$summary.PHP_EOL);
-			foreach($v[1] as $p) print('    '.str_pad('',$len).'    ('.$p[1].') '.$p[0].' : '.$p[2].PHP_EOL);
 		}
 	}	
 }

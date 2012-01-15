@@ -77,4 +77,23 @@
 	</table>
 </rt:if>
 
+
+<rt:if param="{$methods}">
+	<h3>Modules</h3>
+	<table rt:param="{$modules}" rt:var="v" rt:key="module_name" class="bordered-table zebra-striped">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td style="width:200px"><a href="{$t.package_method_url('class_module_info',$package,$module_name)}">{$module_name}</a></td>
+			<td>{$t.html($v[0],0,1)}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
 </rt:block>
