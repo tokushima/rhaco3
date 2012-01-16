@@ -8,8 +8,8 @@ $flow = new \org\rhaco\Flow();
 $flow->output(array(''
 ,modules=>'test.flow.module.CoreTestLogin'
 ,patterns=>array(
-	'login'=>array(name=>'login',action=>'test.CoreTestLoginFlow::do_login')
-	,'logout'=>array(name=>'logout',action=>'test.CoreTestLoginFlow::do_logout')
+	'login_url'=>array(name=>'login',action=>'test.CoreTestLoginFlow::do_login')
+	,'logout_url'=>array(name=>'logout',action=>'test.CoreTestLoginFlow::do_logout')
 	,'aaa'=>array(name=>'aaa',action=>'test.CoreTestLoginFlow::aaa')
 )));
 
