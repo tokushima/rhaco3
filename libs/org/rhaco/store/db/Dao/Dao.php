@@ -30,6 +30,17 @@ abstract class Dao extends \org\rhaco\Object{
 		if(empty($this->_dao_exception_)) $this->_dao_exception_ = new DaoException();
 		return $this->_dao_exception_;
 	}
+	/**
+	 * コネクション一覧
+	 * @return org.rhaco.store.db.Dbc[]
+	 */
+	final static public function connections(){
+		$connections = array();
+		foreach(self::$_connections_ as $n => $con){
+			$connections[$n] = $con[1];
+		}
+		return $connections;
+	}
 	final static private function connection($class){
 		return self::$_connections_[self::$_co_anon_[$class][0]][1];
 	}

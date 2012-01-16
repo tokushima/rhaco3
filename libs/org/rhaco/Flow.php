@@ -282,7 +282,7 @@ class Flow{
 						}else if($this->has_object_module('flow_output')){
 							$this->object_module('flow_output',$obj);
 						}else{
-							if(\org\rhaco\Exceptions::has()) $this->handle_exception_xml();
+							\org\rhaco\Exceptions::throw_over();
 							$xml = new \org\rhaco\Xml('result',$obj);
 							$xml->output();
 						}
@@ -290,6 +290,13 @@ class Flow{
 					}catch(\Exception $e){
 						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
 							\org\rhaco\Log::$level($e);
+						}
+						if($this->has_object_module('flow_handle_exception')){
+							/**
+							 * 例外発生
+							 * @param Exception $e
+							 */
+							$this->object_module('flow_handle_exception',$e);
 						}
 						if(isset($map['error_status'])) \org\rhaco\net\http\Header::send_status($map['error_status']);
 						if($this->has_object_module('flow_exception_output')){
