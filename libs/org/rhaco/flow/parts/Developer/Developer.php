@@ -22,7 +22,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		if(is_dir(\Rhaco3::libs())){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::libs(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
-				if(strpos($e->getPathname(),'/.') === false  && (strpos($e->getFileName(),\Rhaco3::libs('_')) === false || strpos($e->getFileName(),\Rhaco3::libs('_vendors')) !== false)){
+				if(strpos($e->getPathname(),'/.') === false  && (strpos($e->getPathname(),\Rhaco3::libs('_')) === false || strpos($e->getPathname(),\Rhaco3::libs('_vendors')) !== false)){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
 						try{
 							include_once($e->getPathname());
@@ -158,7 +158,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				}
 			}
 		}
-		kssort($libs);
+		ksort($libs);
 		$this->vars('packages',$libs);
 	}
 	/**
