@@ -2,15 +2,15 @@
 /**
  * Database model
  */
-
+list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
 $package = 'model';
 
-if(isset($_ENV['params']['table'])){
+if(isset($params['table'])){
 	// TODO 指定のパッケージのcreate tableのサンプル出力
-}else if(isset($_ENV['params']['export'])){
+}else if(isset($params['export'])){
 	// TODO 全データを指定のファイルにinsert文で出力
-}else if(isset($_ENV['params']['create'])){
-	$package = $_ENV['params']['create'];
+}else if(isset($params['create'])){
+	$package = $params['create'];
 	$p = explode('.',$package);
 	
 	$class = array_pop($p);

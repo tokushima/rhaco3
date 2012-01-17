@@ -2,7 +2,8 @@
 /**
  * Sample Hello World
  */
-if(empty($_ENV['params']['value'])) $value = 'index';
+list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
+if(empty($value)) $value = 'index';
 $dir = str_replace("\\",'/',getcwd()).'/';
 
 $path = $dir.$value.'.php';

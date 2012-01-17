@@ -4,7 +4,8 @@
  * @param string $value package path
  * @param string $m method name
  */
-if(!isset($_ENV['params']['value'])){
+list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
+if(empty($value)){
 	$libs = array();
 	$len = 0;
 	foreach(\org\rhaco\Man::libs() as $k => $v){
@@ -18,9 +19,9 @@ if(!isset($_ENV['params']['value'])){
 	}
 	exit;
 }
-if(isset($_ENV['params']['m'])){
-	$rtn = \org\rhaco\Man::method_info($_ENV['params']['value'],$_ENV['params']['m']);
-	print("\n".'class '.$_ENV['params']['value'].' in method '.$rtn['method_name'].':'.PHP_EOL);
+if(isset($params['m'])){
+	$rtn = \org\rhaco\Man::method_info($value,$params['m']);
+	print("\n".'class '.$value.' in method '.$rtn['method_name'].':'.PHP_EOL);
 	print(' Description:'.PHP_EOL);
 	print('   '.str_replace("\n","\n   ",$rtn['description']).PHP_EOL);
 	print("\n".' Parameter:'.PHP_EOL);
@@ -30,12 +31,12 @@ if(isset($_ENV['params']['m'])){
 	}
 	print("\n".' Return:'.PHP_EOL);
 	print(sprintf('   %s %s',$rtn['return'][0],$rtn['return'][1]).PHP_EOL);
-}else if(isset($_ENV['params']['module'])){
-	$rtn = \org\rhaco\Man::class_info($_ENV['params']['value']);
-	if(!isset($rtn['modules'][$_ENV['params']['module']])) throw new \RuntimeException('module `'.$_ENV['params']['module'].'` not found');
-	$module = $rtn['modules'][$_ENV['params']['module']];
+}else if(isset($params['module'])){
+	$rtn = \org\rhaco\Man::class_info($value);
+	if(!isset($rtn['modules'][$params['module']])) throw new \RuntimeException('module `'.$params['module'].'` not found');
+	$module = $rtn['modules'][$params['module']];
 	
-	print("\n".'class '.$_ENV['params']['value'].' in module '.$_ENV['params']['module'].':'.PHP_EOL);
+	print("\n".'class '.$value.' in module '.$params['module'].':'.PHP_EOL);
 	print(' Description:'.PHP_EOL);
 	print('   '.str_replace("\n","\n   ",$module[0]).PHP_EOL);
 	print("\n".' Parameter:'.PHP_EOL);
@@ -44,7 +45,7 @@ if(isset($_ENV['params']['m'])){
 		print('    '.str_pad('',$len).'    ('.$p[1].') '.$p[0].' : '.$p[2].PHP_EOL);
 	}	
 }else{
-	$rtn = \org\rhaco\Man::class_info($_ENV['params']['value']);
+	$rtn = \org\rhaco\Man::class_info($value);
 	print("\n".'class '.$rtn['package'].':'.PHP_EOL);
 	print(' Description:');
 	print('   '.str_replace("\n","\n   ",$rtn['description']));

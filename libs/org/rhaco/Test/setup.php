@@ -26,16 +26,17 @@ $verify_format = function($class_name,$m=null,$b=null){
 		\org\rhaco\Test::run($class_name,$m,$b);
 	}
 };
+list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
 \org\rhaco\Test::start_time();
-if(isset($_ENV['params']['mem']) && $_ENV['params']['mem'] != '') ini_set('memory_limit',$_ENV['params']['mem']);
-if(isset($_ENV['params']['value'])){
+if(isset($params['mem']) && $params['mem'] != '') ini_set('memory_limit',$params['mem']);
+if(isset($value)){
 	try{
-		$verify_format($_ENV['params']['value']
-			,(isset($_ENV['params']['m']) ? $_ENV['params']['m'] : null)
-			,(isset($_ENV['params']['b']) ? $_ENV['params']['b'] : null)
+		$verify_format($value
+			,(isset($params['m']) ? $params['m'] : null)
+			,(isset($params['b']) ? $params['b'] : null)
 		);
 	}catch(\Exception $e){
-		$error_print($_ENV['params']['value'].': '.$e->getMessage());
+		$error_print($value.': '.$e->getMessage());
 	}
 	print(new \org\rhaco\Test());
 }else{

@@ -123,6 +123,32 @@ if(isset($_SERVER['argv'][1])){
 		}
 		print($value.PHP_EOL);
 	};
+	$get_args = function(){
+		$argv = array_slice($_SERVER['argv'],2);
+		$value = (empty($argv)) ? null : array_shift($argv);
+		$params = array();
+		for($i=0;$i<sizeof($argv);$i++){
+			if($argv[$i][0] == '-') $params[substr($argv[$i],1)] = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
+		}
+		return array($value,$params);	
+	};
+	$htaccess = function($base){
+		$base = empty($base) ? '/'.basename(getcwd()) : $base;
+		if(substr($base,0,1) !== '/') $base = '/'.$base;
+		$rules = "RewriteEngine On\nRewriteBase ".$base."\n\n";
+		foreach(new DirectoryIterator(__DIR__) as $f){
+			if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_' && $f->getPathname() != __FILE__ && $f->getFilename() != 'index.php'){
+				$src = file_get_contents($f->getPathname());
+				if(strpos($src,'Flow') !== false && strpos($src,'patterns') !== false && strpos($src,'output') !== false){
+					$app = substr($f->getFilename(),0,-4);
+					$rules .= "RewriteCond %{REQUEST_FILENAME} !-f\nRewriteCond %{REQUEST_FILENAME} !-d\nRewriteRule ^".$app."[/]{0,1}(.*)\$ ".$app.".php/\$1?%{QUERY_STRING} [L]\n\n";
+				}
+			}
+		}
+		if(is_file(getcwd().'/index.php')) $rules .= "RewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule ^(.*)\$ index.php/\$1?%{QUERY_STRING} [L]\n\n";
+		file_put_contents('.htaccess',$rules);
+		print('Writen: '.realpath('.htaccess').PHP_EOL.str_repeat('-',60).PHP_EOL.trim($rules).PHP_EOL.str_repeat('-',60).PHP_EOL);		
+	};
 	$download = function($argv,$renew) use($println){
 		$search = function($s){
 			$z = $u = array();
@@ -274,8 +300,10 @@ if(isset($_SERVER['argv'][1])){
 	};
 	try{
 		$help = (substr($_SERVER['argv'][1],-1) == '?');
-		$_SERVER['argv'][1] = ($help) ? substr($_SERVER['argv'][1],0,-1) : $_SERVER['argv'][1];
-		switch($_SERVER['argv'][1]){
+		$cmd = ($help) ? substr($_SERVER['argv'][1],0,-1) : $_SERVER['argv'][1];
+		list($value,$params) = $get_args();
+		
+		switch($cmd){
 			case '-import':
 				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
 				if(is_file(Rhaco3::libs()) || strpos(Rhaco3::libs(),'://') !== false) throw new RuntimeException(Rhaco3::libs().' is not a directory');
@@ -298,8 +326,7 @@ if(isset($_SERVER['argv'][1])){
 				exit;
 			case '-search':
 				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
-				$argv = array_slice($_SERVER['argv'],2);
-				$q = (!empty($argv)) ? strtolower($argv[0]) : '';
+				$q = (!empty($argv)) ? strtolower($value) : '';
 				$list = array();
 				$len = 0;
 				foreach(Rhaco3::repositorys() as $rp){
@@ -328,38 +355,25 @@ if(isset($_SERVER['argv'][1])){
 				}
 				exit;
 			case '-htaccess':
-				$path = isset($argv[2]) ? $argv[2] : '/'.basename(getcwd());
-				if(substr($path,0,1) !== '/') $path = '/'.$path;
-				$rules = "RewriteEngine On\nRewriteBase ".$path."\n\n";
-				foreach(new DirectoryIterator(__DIR__) as $f){
-					if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_' && $f->getPathname() != __FILE__ && $f->getFilename() != 'index.php'){
-						$src = file_get_contents($f->getPathname());
-						if(strpos($src,'Flow') !== false && strpos($src,'patterns') !== false && strpos($src,'output') !== false){
-							$app = substr($f->getFilename(),0,-4);
-							$rules .= "RewriteCond %{REQUEST_FILENAME} !-f\nRewriteCond %{REQUEST_FILENAME} !-d\nRewriteRule ^".$app."[/]{0,1}(.*)\$ ".$app.".php/\$1?%{QUERY_STRING} [L]\n\n";
-						}
-					}
-				}
-				if(is_file(getcwd().'/index.php')) $rules .= "RewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule ^(.*)\$ index.php/\$1?%{QUERY_STRING} [L]\n\n";
-				file_put_contents('.htaccess',$rules);
-				print('Writen: '.realpath('.htaccess').PHP_EOL.str_repeat('-',60).PHP_EOL.trim($rules).PHP_EOL.str_repeat('-',60).PHP_EOL);
+				$htaccess($value);
 				exit;
 			case '-settings':
+				$mode = empty($value) ? 'local' : $value;
 				$path = getcwd().'/__settings__.php';
 				$header = 'HTTP/1.1 404 Not Found';
-				if(isset($argv[2])){
-					$header = (strtolower($argv[2]) == 'fastcgi') ? 'Status: 404 Not Found' : 'Location: '.$argv[2];
-				}
+				if(isset($params['l'])) $header = (strtolower($params['l']) == 'fastcgi') ? 'Status: 404 Not Found' : 'Location: '.$params['l'];
 				$rep = sprintf("if(\$_SERVER['SCRIPT_FILENAME']==__FILE__){header('%s');exit;}",$header);
 				if(is_file($path)){
 					$str = file_get_contents($path);
 					if(preg_match("/if\(\\\$_SERVER\['SCRIPT_FILENAME'\]==__FILE__.+?;exit;\}/",$str,$m)) $str = str_replace($m[0].PHP_EOL,'',$str);
 					$str = str_replace('<?php','<?php'.PHP_EOL.$rep,$str);
+					if(!empty($mode)) $str = preg_replace("/Rhaco3::mode\(([\"\']).+\\1\)/",'Rhaco3::mode(\''.$mode.'\')',$str);
 				}else{
-					$str = '<?php'.PHP_EOL.$rep;					
+					$str = '<?php'.PHP_EOL.$rep.PHP_EOL.'Rhaco3::mode(\''.$mode.'\')'.PHP_EOL;
 				}
 				file_put_contents($path,$str);
 				print('Writen: __settings__.php'.PHP_EOL);
+				if(isset($params['htaccess'])) $htaccess($params['htaccess']);
 				exit;
 			default:
 				if($_SERVER['argv'][1][0] == '-'){
@@ -371,7 +385,7 @@ if(isset($_SERVER['argv'][1])){
 					$download(array($package),false);
 					if(is_file($f=Rhaco3::libs(str_replace('.','/',$package).'/setup.php')) || is_file($f=Rhaco3::libs('_vendors/'.str_replace('.','/',$package).'/setup.php'))){
 						if($help){
-							$params = array();
+							$help_params = array();
 							$pad = 4;
 							$pvalue = '';
 							$doc = (preg_match('/\/\*\*.+?\*\//s',file_get_contents($f),$m)) ? trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0]))) : '';
@@ -380,18 +394,18 @@ if(isset($_SERVER['argv'][1])){
 									if(preg_match("/@(\w+)\s+([^\s]+)\s+\\$(\w+)(.*)/",$m,$p)){
 										if($p[2] == '$this' || $p[2] == 'self') $p[2] = $package;
 										if($p[1] == 'param' && $p[3] == 'value'){ $pvalue = sprintf('[(%s) %s]',$p[2],trim($p[4]));
-										}else if($p[1] == 'param'){ $params[$p[3]] = array($p[2],trim($p[4])); }
+										}else if($p[1] == 'param'){ $help_params[$p[3]] = array($p[2],trim($p[4])); }
 									}else if(preg_match("/@(\w+)\s+\\$(\w+)(.*)/",$m,$p)){
-										$params[$p[2]] = array(null,trim($p[3]));
+										$help_params[$p[2]] = array(null,trim($p[3]));
 									}
 								}
-								foreach(array_keys($params) as $k){if($pad < strlen($k)){ $pad = strlen($k); }}
+								foreach(array_keys($help_params) as $k){if($pad < strlen($k)){ $pad = strlen($k); }}
 							}
 							print("\nUsage:\n");
 							print("  -".$package." ".$pvalue."\n");
-							if(!empty($params)){
+							if(!empty($help_params)){
 								print("\n  Options:\n");
-								foreach($params as $k => $v){
+								foreach($help_params as $k => $v){
 									print('    '.sprintf('-%s%s %s',str_pad($k,$pad),(empty($v[0]) ? '' : ' ('.$v[0].')'),trim($v[1]))."\n");
 								}
 							}
@@ -403,10 +417,7 @@ if(isset($_SERVER['argv'][1])){
 							$_ENV['PATH_LIBS'] = Rhaco3::libs();
 							$_ENV['PATH_EXTLIBS'] = Rhaco3::libs('_extlibs');
 							$_ENV['PATH_VENDORS'] = Rhaco3::libs('_vendors');
-							$_ENV['params'] = array('value'=>(isset($_SERVER['argv'][0]) && substr($_SERVER['argv'][0],0,1) == '-') ? null : array_shift($_SERVER['argv']));
-							for($i=0,$argv=$_SERVER['argv'];$i<sizeof($_SERVER['argv']);$i++){
-								if($argv[$i][0] == '-') $_ENV['params'][substr($argv[$i],1)] = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
-							}
+							list($_ENV['value'],$_ENV['params']) = array($value,$params);
 							include_once(dirname($f).'/'.basename(dirname($f)).'.php');
 							include_once($f);
 						}
