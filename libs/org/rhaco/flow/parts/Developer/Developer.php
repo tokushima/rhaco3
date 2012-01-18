@@ -62,7 +62,10 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 
 	}
 	public function get_template_modules(){
-		return new \org\rhaco\flow\module\TwitterBootstrapPagination();
+		return array(
+					new \org\rhaco\flow\module\TwitterBootstrapPagination()
+					,new \org\rhaco\flow\module\Exceptions()
+				);
 	}
 	private function get_model_list(){
 		$models = array();
@@ -90,10 +93,13 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				$list[$m] = $summary;
 				$errors[$m] = null;
 				try{
+					\org\rhaco\store\db\Dao::start_record();
 					$m::find_get();
+					\org\rhaco\store\db\Dao::stop_record();
 				}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
 				}catch(\Exception $e){
 					$errors[$m] = $e->getMessage();
+					\org\rhaco\Log::error(\org\rhaco\store\db\Dao::recorded_query());
 				}
 			}
 		}
@@ -275,7 +281,9 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				}else{
 					$this->redirect_by_method('do_find',$name);
 				}
-			}catch(\Exception $e){}
+			}catch(\Exception $e){
+				\org\rhaco\Log::error($e);
+			}
 		}else{
 			$obj = $this->get_model($name);
 		}
@@ -298,7 +306,9 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				}else{
 					$this->redirect_by_method('do_find',$name);
 				}
-			}catch(\Exception $e){}
+			}catch(\Exception $e){
+				\org\rhaco\Log::error($e);
+			}
 		}else{
 			$obj = $this->get_model($name,false);
 		}

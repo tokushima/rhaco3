@@ -13,6 +13,7 @@ use \org\rhaco\store\db\exception\DaoBadMethodCallException;
 /**
  * O/R Mapper
  * @author tokushima
+ * @conf string $future_date auto_future_addで定義される日付、未定義の場合は`2112/09/03 00:00:00`
  */
 abstract class Dao extends \org\rhaco\Object{
 	static private $_dao_ = array();
@@ -775,10 +776,14 @@ abstract class Dao extends \org\rhaco\Object{
 						case 'intdate': $this->{$column->name()}(date('Ymd')); break;
 					}
 				}else if($this->prop_anon($column->name(),'auto_future_add') === true){
-					switch($this->prop_anon($column->name(),'type')){ // 2112/09/03 doraemon birthday
+					$future = Conf::get('future_date','2112/09/03 00:00:00'); // 2112/09/03 doraemon birthday
+					$time = strtotime($future);
+					switch($this->prop_anon($column->name(),'type')){
 						case 'timestamp':
-						case 'date': $this->{$column->name()}(4502271600); break;
-						case 'intdate': $this->{$column->name()}('21120903'); break;
+						case 'date':
+							$this->{$column->name()}($time);
+							break;
+						case 'intdate': $this->{$column->name()}(date('Ymd',$time)); break;
 					}
 				}
 			}
