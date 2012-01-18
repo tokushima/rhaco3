@@ -5,21 +5,27 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
- * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list","class_module_info"]}
+ * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list","class_module_info","entry_list"]}
  * @login @{"has_require":true}
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
+	private function entry_desc($file){
+		$entry = substr(basename($file),0,-4);
+		if(preg_match('/\/\*\*[^\*].+?\*\//s',file_get_contents($file),$m)){
+			$doc = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$m[0])));
+			$name = (preg_match('/@name\s(.+)/',$doc,$m)) ? trim($m[1]) : null;
+			$summary = (preg_match('/@summary\s(.+)/',$doc,$m)) ? trim($m[1]) : null;
+			$description = trim(preg_replace('/@.+/','',$doc));
+			return array($entry,$name,$summary,$description);
+		}
+		return array($entry,$entry,'','');
+	}
 	protected function __init__(){
 		$name = $summary = $description = null;
 		$d = debug_backtrace(false);
 		$d = array_pop($d);
 
-		if(preg_match('/\/\*\*[^\*].+?\*\//s',file_get_contents($d['file']),$m)){
-			$doc = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$m[0])));
-			$name = (preg_match('/@name\s(.+)/',$doc,$m)) ? trim($m[1]) : null;
-			$summary = (preg_match('/@summary\s(.+)/',$doc,$m)) ? trim($m[1]) : null;
-			$description = trim(preg_replace('/@.+/','',$doc));
-		}
+		list($name,$summary,$description) = $this->entry_desc($d['file']);
 		if(is_dir(\Rhaco3::libs())){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::libs(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 				if(strpos($e->getPathname(),'/.') === false  && (strpos($e->getPathname(),\Rhaco3::libs('_')) === false || strpos($e->getPathname(),\Rhaco3::libs('_vendors')) !== false)){
@@ -351,5 +357,36 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		ksort($list);
 		$this->vars('object_list',$list);
+	}
+	public function entry_list(){
+		$trace = debug_backtrace(false);
+		$entry = array_pop($trace);
+		$entry_list = array();
+		foreach(new \DirectoryIterator(dirname($entry['file'])) as $f){
+			if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
+				$src = file_get_contents($f->getPathname());
+				if(strpos($src,'Flow') !== false && strpos($src,'patterns') !== false && strpos($src,'output') !== false && strpos($src,'class Rhaco3') === false){
+					$maps = \org\rhaco\Flow::get_maps($f->getFilename());
+					$dev_index = null;
+					foreach($maps as $m){
+						if(isset($m['class']) && isset($m['method']) 
+							&& $m['class'] == 'org.rhaco.flow.parts.Developer' && $m['method'] == 'index'
+						){
+							$dev_index = $m['format'];
+							break;
+						}
+					}
+					list($entry,$name,$summary,$description) = $this->entry_desc($f->getFilename());
+					$obj = new \org\rhaco\Object();
+					$obj->entry = $entry;
+					$obj->name = $name;
+					$obj->summary = $summary;
+					$obj->url = $dev_index;
+					
+					if($this->search_str($obj->entry,$obj->name,$obj->summary)) $entry_list[] = $obj;
+				}
+			}
+		}
+		$this->vars('object_list',$entry_list);
 	}
 }

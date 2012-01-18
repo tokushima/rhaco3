@@ -51,7 +51,6 @@ $flow->output(array(''
 	,'module_throw_exception'=>array(name=>'module_throw_exception',action=>'test.CoreApp::noop',modules=>'test.flow.module.CoreTestExceptionModule')
 	,'noop'=>array(name=>'noop',action=>'test.CoreApp::noop')
 	,'method_not_allowed'=>array(name=>'method_not_allowed',action=>'test.CoreApp::method_not_allowed')
-	,'dev'=>array(action=>'org.rhaco.flow.parts.Developer',mode=>'dev')
 	,'module_map'=>array(name=>'module_map',template=>'module_index.html',action=>'org.rhaco.flow.parts.RequestFlow::noop',modules=>'test.flow.module.CoreTestModule')
 	,'module_maps'=>array(name=>'module_maps',template=>'module_index.html',action=>'org.rhaco.flow.parts.RequestFlow::noop',modules=>'test.flow.module.CoreTestModule')
 	,'module_raise'=>array(name=>'module_raise',action=>'test.CoreApp::raise',template=>'module_index.html',modules=>'test.flow.module.CoreTestModule',error_template=>'module_exception.html')
@@ -92,6 +91,8 @@ $flow->output(array(''
 	,'upload_multi'=>array(name=>'upload_multi',action=>'test.SampleFlow::upload_multi')
 	,'upload_value'=>array(name=>'upload_value',action=>'test.SampleFlow::upload_value')
 	,'upload_file'=>array(name=>'upload_file',action=>'test.SampleFlow::upload_file')
+	
+	,'dev'=>array(action=>'org.rhaco.flow.parts.Developer',mode=>'local')
 )));
 
 

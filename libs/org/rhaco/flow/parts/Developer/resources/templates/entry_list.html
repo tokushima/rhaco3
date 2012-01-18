@@ -1,0 +1,29 @@
+<rt:extends href="index.html" />
+
+<rt:block name="content">
+<h2 class="title">Entry</h2>
+<table class="list" rt:param="object_list" rt:var="obj" class="zebra-striped">
+<thead>
+<tr>
+	<th>entry</th>
+	<th>name</th>
+	<th>summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+	<td>
+		<rt:if param='{$obj.url()}'>
+			<a href="{$obj.url()}">{$obj.entry()}</a>
+		<rt:else />
+			{$obj.entry()}
+		</rt:if>
+
+	</td>
+	<td>{$obj.name()}</td>
+	<td>{$obj.summary()}</td>
+</tr>
+</tbody>
+</table>
+
+</rt:block>
