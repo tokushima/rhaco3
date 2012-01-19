@@ -126,6 +126,10 @@ if(isset($_SERVER['argv'][1])){
 	$get_args = function(){
 		$argv = array_slice($_SERVER['argv'],2);
 		$value = (empty($argv)) ? null : array_shift($argv);
+		if(substr($value,0,1) == '-'){
+			array_unshift($argv,$value);
+			$value = null;
+		}
 		$params = array();
 		for($i=0;$i<sizeof($argv);$i++){
 			if($argv[$i][0] == '-') $params[substr($argv[$i],1)] = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
