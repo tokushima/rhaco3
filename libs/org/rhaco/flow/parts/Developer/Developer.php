@@ -5,7 +5,7 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
- * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list","class_module_info","entry_list"]}
+ * @class @{"maps":["index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list","class_module_info","entry_list","module_list"]}
  * @login @{"has_require":true}
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
@@ -26,41 +26,6 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$d = array_pop($d);
 
 		list($name,$summary,$description) = $this->entry_desc($d['file']);
-		if(is_dir(\Rhaco3::libs())){
-			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::libs(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
-				if(strpos($e->getPathname(),'/.') === false  && (strpos($e->getPathname(),\Rhaco3::libs('_')) === false || strpos($e->getPathname(),\Rhaco3::libs('_vendors')) !== false)){
-					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
-						try{
-							include_once($e->getPathname());
-						}catch(\Exeption $ex){}
-					}else if($e->getFilename() == 'vendors.phar'){
-						$p = new \Phar($e->getPathname());
-						foreach(new \RecursiveIteratorIterator($p) as $v){
-							if(ctype_upper(substr($v->getFilename(),0,1)) && substr($v->getFilename(),-4) == '.php'){
-								try{
-									include_once($v->getPathname());
-								}catch(\Exeption $ex){}
-							}
-						}
-					}
-				}
-			}
-		}
-		$is_dao = $is_smtp_blackhole = false;
-		if(class_exists('\org'.'\rhaco'.'\store'.'\db'.'\Dao')){
-			$is_dao = $is_smtp_blackhole = true;
-
-			try{
-				$ref = new \ReflectionClass($smtp='\org'.'\rhaco'.'\net'.'\mail'.'\module'.'\SmtpBlackholeDao');
-				$smtp::find_get();
-			}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
-			}catch(\Exception $e){
-				$is_smtp_blackhole = false;
-			}
-		}
-		$this->vars('is_smtp_blackhole',$is_smtp_blackhole);
-		$this->vars('is_dao',$is_dao);
-		
 		$this->vars('app_name',(empty($name) ? 'App' : $name));
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
@@ -73,26 +38,17 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 					,new \org\rhaco\flow\module\Exceptions()
 				);
 	}
-	private function get_model_list(){
-		$models = array();
-		foreach(get_declared_classes() as $class){
-			$r = new \ReflectionClass($class);
-			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')){
-				$models[] = $class;
-			}
-		}
-		sort($models);
-		return $models;
-	}
 	/**
 	 * Daoモデルの一覧
 	 */
 	public function model_list(){
-		$model_list = $this->get_model_list();
-		$list = $errors = array();
+		$list = $errors = $model_list = array();
+		foreach(\org\rhaco\Man::libs() as $package => $info){
+			if(is_subclass_of($info['class'],'\org\rhaco\store\db\Dao')) $model_list[] = $info['class'];
+		}
 		foreach($model_list as $m){
 			if($this->search_str($m)){
-				$r = new \ReflectionClass("\\".str_replace('.',"\\",$m));
+				$r = new \ReflectionClass($m);
 				$class_doc = $r->getDocComment();
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
 				list($summary) = explode("\n",$document);
@@ -154,20 +110,17 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function classes(){
 		$libs = array();
-		foreach(get_declared_classes() as $class){
-			$r = new \ReflectionClass($class);
-			if(strpos($r->getFileName(),\Rhaco3::libs()) !== false  && (strpos($r->getFileName(),\Rhaco3::libs('_')) === false || strpos($r->getFileName(),\Rhaco3::libs('_vendors')) !== false)
-				&& (!$r->isInterface() && !$r->isAbstract()) && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
-				$class_doc = $r->getDocComment();
-				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
-				list($summary) = explode("\n",$document);
-				if($this->search_str($class,$document)){
-					$src = file_get_contents($r->getFileName());
-					$c = new \org\rhaco\Object();
-					$c->summary = $summary;
-					$c->usemail = (strpos($src,"\\org\\rhaco\\net\\mail\\Mail") !== false);
-					$libs[$class] = $c;
-				}
+		foreach(\org\rhaco\Man::libs() as $info){
+			$r = new \ReflectionClass($info['class']);
+			$class_doc = $r->getDocComment();
+			$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
+			list($summary) = explode("\n",$document);
+			if($this->search_str($info['class'],$document)){
+				$src = file_get_contents($r->getFileName());
+				$c = new \org\rhaco\Object();
+				$c->summary = $summary;
+				$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
+				$libs[$info['class']] = $c;
 			}
 		}
 		ksort($libs);
@@ -327,8 +280,12 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	public function mail_list(){
 		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
 		$order = $this->in_vars('order','-id');
+		$list = array();
+		try{
+			$list = \org\rhaco\net\mail\module\SmtpBlackholeDao::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder')));
+		}catch(\Exception $e){}
 		$this->vars('q',$this->in_vars('q'));
-		$this->vars('object_list',\org\rhaco\net\mail\module\SmtpBlackholeDao::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder'))));
+		$this->vars('object_list',$list);
 		$this->vars('paginator',$paginator->cp(array('q'=>$this->in_vars('q'),'order'=>$order)));
 	}
 	/**
@@ -347,12 +304,12 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		foreach(\org\rhaco\Conf::all() as $p => $confs){
 			foreach($confs as $n => $conf){
 				$obj = new \org\rhaco\Object();
-				$obj->class = $p;
+				$obj->package = $p;
 				$obj->name = $n;
 				$obj->type = $conf[0];
 				$obj->summary = $conf[1];
 				$obj->exists = \org\rhaco\Conf::exists($p,$n);
-				if($this->search_str($obj->class,$obj->name,$obj->summary)) $list[$p.'@'.$n] = $obj;
+				if($this->search_str($obj->package,$obj->name,$obj->summary)) $list[$p.'@'.$n] = $obj;
 			}
 		}
 		ksort($list);
@@ -388,5 +345,23 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 			}
 		}
 		$this->vars('object_list',$entry_list);
+	}
+	/**
+	 * モジュールの一覧
+	 */
+	public function module_list(){
+		$list = array();
+		foreach(\org\rhaco\Man::libs() as $package => $info){
+			$i = \org\rhaco\Man::class_info($package);
+			foreach($i['modules'] as $name => $m){
+				$obj = new \org\rhaco\Object();
+				$obj->package = $package;
+				$obj->name = $name;
+				$obj->summary = $m[0];
+				
+				if($this->search_str($obj->package,$obj->name,$obj->summary)) $list[] = $obj;
+			}
+		}
+		$this->vars('object_list',$list);
 	}
 }

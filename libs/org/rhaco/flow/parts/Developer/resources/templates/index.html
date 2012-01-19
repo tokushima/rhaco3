@@ -38,14 +38,10 @@
             <li><a href="{$t.package_method_url('entry_list')}">Entry</a></li>
             <li><a href="{$t.package_method_url('index')}">Map</a></li>
             <li><a href="{$t.package_method_url('classes')}">Classes</a></li>
+            <li><a href="{$t.package_method_url('module_list')}">Module</a></li>
             <li><a href="{$t.package_method_url('conf_list')}">Conf</a></li>
-			
-			<rt:if param="{$is_dao}">
-				<li><a href="{$t.package_method_url('model_list')}">Models</a></li>
-			</rt:if>
-			<rt:if param="{$is_smtp_blackhole}">
-				<li><a href="{$t.package_method_url('mail_list')}">Mail (Smtp Blackhole)</a></li>
-			</rt:if>			
+			<li><a href="{$t.package_method_url('model_list')}">Models</a></li>
+			<li><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
           </ul>
         </div>
       </div>

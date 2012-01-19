@@ -1,27 +1,19 @@
 <rt:extends href="index.html" />
 
 <rt:block name="content">
-<h2 class="title">Conf</h2>
+<h2 class="title">Module</h2>
 <table class="list" rt:param="object_list" rt:var="obj" class="zebra-striped">
 <thead>
 <tr>
-	<th>&nbsp;</th>
 	<th>class</th>
 	<th>name</th>
-	<th>type</th>
 	<th>summary</th>
 </tr>
 </thead>
 <tbody>
-<tr style="{$t.cond_switch($obj->exists(),'font-weight: bold;','')}">
-	<td>
-		<rt:if param="{$obj.exists()}">
-			<span class="label success">O</span>
-		</rt:if>
-	</td>
+<tr>
 	<td valign="top"><a href="{$t.package_method_url('class_info',{$obj.package()})}">{$obj.package()}</a></td>
-	<td>{$obj.name()}</td>
-	<td>{$obj.type()}</td>
+	<td><a href="{$t.package_method_url('class_module_info',{$obj.package()},{$obj.name()})}">{$obj.name()}</a></td>
 	<td>{$obj.summary()}</td>
 </tr>
 </tbody>
