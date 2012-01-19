@@ -124,14 +124,14 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				if(isset($m[$n])) $q .= $m[$n];
 			}
 			if($this->search_str($q) && (!isset($m['class']) || $m['class'] != $self_name)){
-				$m['summary'] = '';
+				$m['summary'] = $m['error'] = '';
 				if(isset($m['class']) && isset($m['method'])){
 					try{
 						$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
 						$mr = $cr->getMethod($m['method']);
 						list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment())))));
 					}catch(\ReflectionException $e){
-						$m['summary'] = $e->getMessage();
+						$m['error'] = $e->getMessage();
 					}
 				}
 				$maps[$k] = $m;
