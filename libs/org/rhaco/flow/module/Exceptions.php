@@ -6,9 +6,9 @@ use \org\rhaco\Xml;
  * @author tokushima
  */
 class Exceptions{
-	public function before_template(&$src){
-		if(strpos($src,'rt:exceptions') !== false){
-			while(Xml::set($tag,$src,'rt:exceptions')){
+	private function replace($name,&$src){
+		if(strpos($src,$name) !== false){
+			while(Xml::set($tag,$src,$name)){
 				$param = $tag->in_attr('param');
 				$var = $tag->in_attr('var','rtinvalid_var'.uniqid(''));
 				$messages = $tag->in_attr('messages','rtinvalid_mes'.uniqid(''));
@@ -39,5 +39,9 @@ class Exceptions{
 							$src);
 			}
 		}
+	}
+	public function before_template(&$src){
+		$this->replace('rt:exceptions',$src);
+		$this->replace('rt:invalid',$src);
 	}
 }
