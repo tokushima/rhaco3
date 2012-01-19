@@ -135,8 +135,8 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 				if(!$this->is_sessions('logined_redirect_to')){
 					$current = \org\rhaco\Request::current_url();
 					foreach($this->maps as $k => $m){
-						if($m['name'] == 'logout'){
-							if($current == $m['format']) $current = null;
+						if(isset($m['name']) && $m['name'] == 'logout'){
+							if(isset($m['format']) && $current == $m['format']) $current = null;
 							break;
 						}
 					}
@@ -144,7 +144,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 				}
 				$this->save_current_vars();
 				foreach($this->maps as $k => $m){
-					if($m['method'] == 'do_login') return \org\rhaco\net\http\Header::redirect($m['format']);
+					if(isset($m['method']) && $m['method'] == 'do_login' && isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
 				}
 				throw new \LogicException('name `login` not found');
 			}
