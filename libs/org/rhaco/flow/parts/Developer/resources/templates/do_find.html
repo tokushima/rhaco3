@@ -4,12 +4,12 @@
 <ul class="breadcrumb">
   <li>
   	<span style="font-weight: bold; font-size: medium;">
-	  	<a href="{$t.package_method_url('class_info',{$f.package_name($model_name)})}">{$f.package_name($model_name)}</a>
+	  	<a href="{$t.package_method_url('class_info',$package)}">{$f.package_name($package)}</a>
   	</span>
   	<span class="divider">/</span>
   </li>
-  <li><a href="{$t.package_method_url('do_find',$model_name)}">Find</a> <span class="divider">/</span></li>
-  <li><a href="{$t.package_method_url('do_create',$model_name)}">Create</a></li>
+  <li><a href="{$t.package_method_url('do_find',$package)}">Find</a> <span class="divider">/</span></li>
+  <li><a href="{$t.package_method_url('do_create',$package)}">Create</a></li>
 </ul>
 
 <rt:block name="content_body">
@@ -25,7 +25,7 @@
 <tbody>
 	<tr>
 		<td style="padding: 5px; width: 60px;">
-			<form method="post" action="{$t.package_method_url('do_drop',$model_name)}" style="display:inline;">
+			<form method="post" action="{$t.package_method_url('do_drop',$package)}" style="display:inline;">
 				{$f.primary_hidden($obj)}
 				<input type="submit" value="delete" style="" />
 			</form>
@@ -33,7 +33,7 @@
 		<rt:loop param="{$f.props($model,3)}" var="name">
 			<td>
 				<rt:if param="{$f.is_primary($obj,$name)}">
-					<a href="{$t.package_method_url('do_update',$model_name)}?{$f.primary_query($obj)}">{$t.trim_width($f.acr($obj,$name),40,'..')}</a>
+					<a href="{$t.package_method_url('do_update',$package)}?{$f.primary_query($obj)}">{$t.trim_width($f.acr($obj,$name),40,'..')}</a>
 				<rt:else />
 					{$t.trim_width($f.acr($obj,$name),40,'..')}
 				</rt:if>

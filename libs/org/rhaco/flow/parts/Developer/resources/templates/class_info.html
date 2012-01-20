@@ -5,6 +5,10 @@
 <rt:block name="content">
 <h2 class="title">
 	<a href="{$t.package_method_url('class_src',$package)}">{$f.package_name($package)}</a>
+	
+	<rt:if param="is_dao">
+		<a class="btn small default" href="{$t.package_method_url('do_find',$package)}">&gt;</a>
+	</rt:if>
 </h2>
 <rt:if param="{$extends}">
 	extends <a href="{$t.package_method_url('class_info',$extends)}">{$f.package_name($extends)}</a>

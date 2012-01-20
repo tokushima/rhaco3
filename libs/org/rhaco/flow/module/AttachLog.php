@@ -4,25 +4,13 @@ namespace org\rhaco\flow\module;
  * ダウンロードログのモデル
  * @author tokushima
  * @var serial $id
- * @var string $path
- * @var string $lang
- * @var string $agent
- * @var string $referer
+ * @var string $path filepath
+ * @var string $lang HTTP_ACCEPT_LANGUAGE
+ * @var string $agent HTTP_USER_AGENT
+ * @var string $referer  HTTP_REFERER
  * @var timestamp $create_date @{"auto_now_add":true}
- * @sql 
  */
 class AttachLog extends \org\rhaco\store\db\Dao implements \IteratorAggregate{
-/*	
-CREATE TABLE `attach_log` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `path` varchar(255) DEFAULT NULL,
-  `lang` varchar(255) DEFAULT NULL,
-  `agent` varchar(255) DEFAULT NULL,
-  `referer` varchar(255) DEFAULT NULL,
-  `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
-*/
 	protected $id;
 	protected $path;
 	protected $lang;

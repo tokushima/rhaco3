@@ -44,28 +44,37 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	public function model_list(){
 		$list = $errors = $model_list = array();
 		foreach(\org\rhaco\Man::libs() as $package => $info){
-			if(is_subclass_of($info['class'],'\org\rhaco\store\db\Dao')) $model_list[] = $info['class'];
+			if($info['dir']){
+				foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($info['filename']),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
+					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
+						try{
+							include_once($e->getPathname());
+						}catch(\Exeption $ex){}
+					}
+				}
+			}			
 		}
-		foreach($model_list as $m){
-			if($this->search_str($m)){
-				$r = new \ReflectionClass($m);
+		foreach(get_declared_classes() as $class){
+			$r = new \ReflectionClass($class);
+			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,'\org'.'\rhaco'.'\store'.'\db'.'\Dao')){
 				$class_doc = $r->getDocComment();
+				$package = str_replace('\\','.',$class);
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
 				list($summary) = explode("\n",$document);
-				$list[$m] = $summary;
-				$errors[$m] = null;
+				$errors[$package] = null;
 				try{
 					\org\rhaco\store\db\Dao::start_record();
-					$m::find_get();
+					$class::find_get();
 					\org\rhaco\store\db\Dao::stop_record();
 				}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
 				}catch(\Exception $e){
-					$errors[$m] = $e->getMessage();
+					$errors[$package] = $e->getMessage();
 					\org\rhaco\Log::error(\org\rhaco\store\db\Dao::recorded_query());
 				}
+				if($this->search_str($package,$summary)) $model_list[$package] = $summary;				
 			}
 		}
-		$this->vars('dao_models',$list);
+		$this->vars('dao_models',$model_list);
 		$this->vars('dao_model_errors',$errors);
 	}
 	/**
@@ -75,11 +84,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$maps = array();
 		$self_name = str_replace("\\",'.',__CLASS__);
 		foreach($this->maps() as $k => $m){
-			$q = '';
-			foreach(array('name','class','method','url','template') as $n){
-				if(isset($m[$n])) $q .= $m[$n];
-			}
-			if($this->search_str($q) && (!isset($m['class']) || $m['class'] != $self_name)){
+			if(!isset($m['class']) || $m['class'] != $self_name){
 				$m['summary'] = $m['error'] = '';
 				if(isset($m['class']) && isset($m['method'])){
 					try{
@@ -90,7 +95,14 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 						$m['error'] = $e->getMessage();
 					}
 				}
-				$maps[$k] = $m;
+				if($this->search_str(
+					$m['name']
+					,(isset($m['class'])?$m['class']:'')
+					,(isset($m['method'])?$m['method']:'')
+					,(isset($m['template'])?$m['template']:'')
+					,$m['url']
+					,$m['summary']
+				)) $maps[$k] = $m;
 			}
 		}
 		$this->vars('maps',$maps);
@@ -110,7 +122,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function classes(){
 		$libs = array();
-		foreach(\org\rhaco\Man::libs() as $info){
+		foreach(\org\rhaco\Man::libs() as $package => $info){
 			$r = new \ReflectionClass($info['class']);
 			$class_doc = $r->getDocComment();
 			$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
@@ -120,11 +132,11 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				$c = new \org\rhaco\Object();
 				$c->summary = $summary;
 				$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
-				$libs[$info['class']] = $c;
+				$libs[$package] = $c;
 			}
 		}
 		ksort($libs);
-		$this->vars('packages',$libs);
+		$this->vars('class_list',$libs);
 	}
 	/**
 	 * クラスのソース表示
@@ -145,6 +157,9 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		foreach(\org\rhaco\Man::class_info($class) as $k => $v){
 			$this->vars($k,$v);
 		}
+		$class_name = str_replace(array('.','/'),'\\',$class);
+		if(substr($class_name,0,1) != '\\') $class_name = '\\'.$class_name;
+		$this->vars('is_dao',is_subclass_of($class_name,'\org'.'\rhaco'.'\store'.'\db'.'\Dao'));
 	}
 	/**
 	 * クラスドメソッドのキュメント
@@ -170,7 +185,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('params',$ref['modules'][$module_name][1]);
 	}
 	private function get_model($name,$sync=true){
-		$r = new \ReflectionClass('\\'.str_replace('/','\\',$name));
+		$r = new \ReflectionClass('\\'.str_replace('.','\\',$name));
 		$obj = $r->newInstance();
 		$args = null;
 		if(is_array($this->in_vars('primary'))){
@@ -194,85 +209,87 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @context Dao $model 検索対象のモデルオブジェクト
 	 * @context string $model_name 検索対象のモデルの名前
 	 */
-	public function do_find($name){
-		$name = '\\'.str_replace('/','\\',$name);
+	public function do_find($package){
+		$name = '\\'.str_replace('.','\\',$package);
 		$order = \org\rhaco\lang\Sorter::order($this->in_vars('order'),$this->in_vars('porder'));
 		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
 		$this->vars('q',$this->in_vars('q'));
 		$this->vars('object_list',$name::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder'))));
 		$this->vars('paginator',$paginator->cp(array('q'=>$this->in_vars('q'),'order'=>$order)));
 		$this->vars('model',new $name());
-		$this->vars('model_name',$name);
+		$this->vars('package',$package);
 	}
 	/**
 	 * 詳細
-	 * @param string $name モデル名
+	 * @param string $package モデル名
 	 */
-	public function do_detail($name){
-		$obj = $this->get_model($name);
+	public function do_detail($package){
+		$obj = $this->get_model($package);
 		$this->vars('object',$obj);
 		$this->vars('model',$obj);
-		$this->vars('model_name',$name);
+		$this->vars('package',$package);
 	}
 	/**
 	 * 削除
-	 * @param string $name モデル名
+	 * @param string $package モデル名
 	 */
-	public function do_drop($name){
+	public function do_drop($package){
 		if($this->is_post()){
-			$this->get_model($name)->delete();
+			$this->get_model($package)->delete();
 			\org\rhaco\net\http\Header::redirect_referer();
 		}
 	}
 	/**
 	 * 更新
-	 * @param string $name モデル名
+	 * @param string $package モデル名
 	 */
-	public function do_update($name){
+	public function do_update($package){
 		if($this->is_post()){
 			try{
-				$obj = $this->get_model($name,false);
-				$obj->set_props($this);
-				$obj->save();
-				
+				try{
+					$obj = $this->get_model($package,false);
+					$obj->set_props($this);
+					$obj->save();
+				}catch(\org\rhaco\store\db\exception\DaoBadMethodCallException $e){}
+
 				if($this->is_vars('save_and_add_another')){
-					$this->redirect_by_method('do_create',$name);
+					$this->redirect_by_method('do_create',$package);
 				}else{
-					$this->redirect_by_method('do_find',$name);
-				}
+					$this->redirect_by_method('do_find',$package);
+				}				
 			}catch(\Exception $e){
 				\org\rhaco\Log::error($e);
 			}
 		}else{
-			$obj = $this->get_model($name);
+			$obj = $this->get_model($package);
 		}
 		$this->vars('model',$obj);
-		$this->vars('model_name',$name);
+		$this->vars('package',$package);
 	}
 	/**
 	 * 作成
-	 * @param string $name モデル名
+	 * @param string $package モデル名
 	 */
-	public function do_create($name){
+	public function do_create($package){
 		if($this->is_post()){
 			try{
-				$obj = $this->get_model($name,false);
+				$obj = $this->get_model($package,false);
 				$obj->set_props($this);
 				$obj->save();
 				
 				if($this->is_vars('save_and_add_another')){
-					$this->redirect_by_method('do_create',$name);
+					$this->redirect_by_method('do_create',$package);
 				}else{
-					$this->redirect_by_method('do_find',$name);
+					$this->redirect_by_method('do_find',$package);
 				}
 			}catch(\Exception $e){
 				\org\rhaco\Log::error($e);
 			}
 		}else{
-			$obj = $this->get_model($name,false);
+			$obj = $this->get_model($package,false);
 		}
 		$this->vars('model',$obj);
-		$this->vars('model_name',$name);
+		$this->vars('package',$package);
 	}
 	/**
 	 * メールの一覧
