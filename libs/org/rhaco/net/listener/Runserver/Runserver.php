@@ -13,7 +13,7 @@ class Runserver{
 		if(empty($this->php_cmd)) $this->php_cmd = isset($_ENV['_']) ? $_ENV['_'] : 'php';
 		$this->output('checking for php('.$this->php_cmd.') ...');
 		$cmd = new \org\rhaco\Command($this->php_cmd.' -v');
-		if($cmd->is_stderr()) throw new \RuntimeException($cmd->stderr());
+		if($cmd->stderr() != null) throw new \RuntimeException($cmd->stderr());
 
 		$this->output($cmd->stdout());
 		$this->output('Development server is running at http://'.$address.':'.$port);
