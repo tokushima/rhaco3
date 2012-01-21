@@ -380,12 +380,12 @@ if(isset($_SERVER['argv'][1])){
 				if(isset($params['htaccess'])) $htaccess($params['htaccess']);
 				exit;
 			default:
-				if($_SERVER['argv'][1][0] == '-'){
+				if($cmd[0] == '-'){
 					if(is_file($f=(__DIR__.'/__settings__.php'))){
 						require_once($f);
 						if(Rhaco3::mode() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::mode().'.php'))) require_once($f);
 					}
-					$package = substr($_SERVER['argv'][1],1);
+					$package = substr($cmd,1);
 					$download(array($package),false);
 					if(is_file($f=Rhaco3::libs(str_replace('.','/',$package).'/setup.php')) || is_file($f=Rhaco3::libs('_vendors/'.str_replace('.','/',$package).'/setup.php'))){
 						if($help){
