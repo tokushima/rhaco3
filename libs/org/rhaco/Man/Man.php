@@ -11,6 +11,7 @@ class Man{
 	 */
 	static public function class_info($class){
 		$r = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$class));
+		if($r->getFilename() === false) throw new \InvalidArgumentException('`'.$class.'` file not found.');
 		$src = implode(array_slice(file($r->getFileName()),$r->getStartLine(),($r->getEndLine()-$r->getStartLine()-1)));
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$r->getDocComment())));
 		$extends = ($r->getParentClass() === false) ? null : $r->getParentClass()->getName();

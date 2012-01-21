@@ -249,6 +249,8 @@ class Flow{
 							if(isset($map['session'])) \org\rhaco\Conf::set('module',$map['session']);
 							$r = $this->str_reflection($apps[$k]['class']);
 							$obj = $r->newInstance();
+							$func_exception = null;
+							
 							if($obj instanceof \org\rhaco\Object){
 								foreach($modules as $m) $obj->set_object_module($m);
 							}
@@ -260,9 +262,12 @@ class Flow{
 								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
 							}
-							$result = call_user_func_array(array($obj,$apps[$k]['method']),$p);
-							if($result !== null) $obj = $result;
-							
+							try{
+								$result = call_user_func_array(array($obj,$apps[$k]['method']),$p);
+								if($result !== null) $obj = $result;
+							}catch(\Exception $e){
+								$func_exception = $e;
+							}						
 							if($obj instanceof \org\rhaco\flow\FlowInterface){
 								$obj->after();
 								if(\org\rhaco\Exceptions::has()) $obj->exception();
@@ -274,6 +279,7 @@ class Flow{
 									foreach($ext_modules as $o) $this->template->set_object_module($o);
 								}
 							}
+							if($func_exception instanceof \Exception) throw $func_exception;
 						}
 						if(isset($apps[$k]['template'])){
 							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
@@ -300,6 +306,11 @@ class Flow{
 						}
 						if(isset($map['error_status'])) \org\rhaco\net\http\Header::send_status($map['error_status']);
 						if($this->has_object_module('flow_exception_output')){
+							/**
+							 * 例外発生時の出力
+							 * @param mixed $obj actionで返却された値
+							 * @param Exception $e 発生した例外
+							 */
 							$this->object_module('flow_exception_output',$obj,$e);
 							exit;
 						}else if(isset($map['error_redirect'])){
@@ -317,6 +328,10 @@ class Flow{
 							}else if(isset($map['error_template'])){
 								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
+								exit;
+							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html'))){
+								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);							
+								$this->print_template(dirname($t).'/',basename($t),$this->app_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 								exit;
 							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
 								if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);

@@ -122,7 +122,13 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::before()
 	 */
 	public function before(){
-		if($this->has_object_module('before_flow_handle')) $this->object_module('before_flow_handle',$this);
+		if($this->has_object_module('before_flow_handle')){
+			/**
+			 * 前処理
+			 * @param self $this
+			 */
+			$this->object_module('before_flow_handle',$this);
+		}
 		if(!$this->is_login() && $this->anon_login['require'] === true && isset($this->select_map['name']) && $this->select_map['name'] != 'login'){
 			if($this->has_object_module('before_login_required')) {
 				/**
@@ -155,14 +161,26 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::after()
 	 */
 	public function after(){
-		if($this->has_object_module('after_flow_handle')) $this->object_module('after_flow_handle',$this);
+		if($this->has_object_module('after_flow_handle')){
+			/**
+			 * 後処理
+			 * @param self $this
+			 */
+			$this->object_module('after_flow_handle',$this);
+		}
 	}
 	/**
 	 * (non-PHPdoc)
 	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::exception()
 	 */
 	public function exception(){
-		if($this->has_object_module('exception_flow_handle')) $this->object_module('exception_flow_handle',$this);
+		if($this->has_object_module('exception_flow_handle')){
+			/**
+			 * 例外発生時の処理
+			 * @param self $this
+			 */
+			$this->object_module('exception_flow_handle',$this);
+		}
 	}
 	/**
 	 * POSTされたか
