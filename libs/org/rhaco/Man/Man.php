@@ -52,24 +52,11 @@ class Man{
 			foreach($match[1] as $t) $tasks[] = trim($t);
 		}
 		$modules = array();
-		$get_desc = function(&$modules,$match,$k,$name,$src){
-			$modules[$name] = array(null,array());
-			$doc = substr($src,0,$match[0][$k][1]);
-			$doc = trim(substr($doc,0,strrpos($doc,"\n")));
-			if(substr($doc,-2) == '*'.'/'){
-				$doc = substr($doc,strrpos($doc,'/'.'**'));
-				$doc = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$doc)));
-				if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$doc,$m)){
-					foreach($m[2] as $n => $p) $modules[$name][1][] = array($m[2][$n],$m[1][$n],trim($m[3][$n]));
-				}
-				$modules[$name][0] = trim(preg_replace('/@.+/','',$doc));
-			}
-		};
 		if(preg_match_all("/->object_module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
-			foreach($match[2] as $k => $v) $get_desc($modules,$match,$k,$v[0],$src);
+			foreach($match[2] as $k => $v) self::get_desc($modules,$match,$k,$v[0],$src,$class);
 		}
 		if(preg_match_all("/::module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
-			foreach($match[2] as $k => $v) $get_desc($modules,$match,$k,$v[0],$src);
+			foreach($match[2] as $k => $v) self::get_desc($modules,$match,$k,$v[0],$src,$class);
 		}		
 		$properties = array();
 		$ref = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$class));
@@ -93,7 +80,7 @@ class Man{
 					$dec = preg_replace('/^(.*?)@.*$/','\\1',$m[3][$k]);
 					$anon = json_decode(preg_replace('/^.*?@(.*)$/','\\1',$m[3][$k]),true);
 					$hash = !(isset($anon['hash']) && $anon['hash'] === false);
-					$properties[$n] = array($m[1][$k],$dec,$hash);
+					$properties[$n] = array(self::type($m[1][$k],$class),$dec,$hash);
 				}
 			}
 		}
@@ -118,7 +105,7 @@ class Man{
 		
 		if(preg_match("/@return\s+([^\s]+)(.*)/",$document,$match)){
 			// type, summary
-			$return = array(trim($match[1]),trim($match[2]));
+			$return = array(self::type(trim($match[1]),$class),trim($match[2]));
 		}
 		foreach($ref->getParameters() as $p){
 			$params[$p->getName()] = array(
@@ -133,7 +120,7 @@ class Man{
 		if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
 			foreach($match[0] as $k => $v){
 				if(isset($params[$match[2][$k]])){
-					$params[$match[2][$k]][0] = $match[1][$k];
+					$params[$match[2][$k]][0] = self::type($match[1][$k],$class);
 					$params[$match[2][$k]][4] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 				}
 			}
@@ -156,21 +143,19 @@ class Man{
 		if(preg_match_all("/@request\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
 			foreach($match[0] as $k => $v){
 				if(isset($request[$match[2][$k]])){
-					$request[$match[2][$k]][0] = $match[1][$k];
+					$request[$match[2][$k]][0] = self::type($match[1][$k],$class);
 					$request[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 				}
 				if(isset($context[$match[2][$k]])){
-					$context[$match[2][$k]][0] = $match[1][$k];
+					$context[$match[2][$k]][0] = self::type($match[1][$k],$class);
 					$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 				}
 			}
 		}
 		if(preg_match_all("/@context\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
 			foreach($match[0] as $k => $v){
-				if(isset($context[$match[2][$k]])){
-					$context[$match[2][$k]][0] = $match[1][$k];
-					$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
-				}
+				$context[$match[2][$k]][0] = self::type($match[1][$k],$class);
+				$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 			}
 		}
 		$args = array();
@@ -242,5 +227,25 @@ class Man{
 			}
 		}
 		return $result;
+	}
+	static private function type($type,$class){
+		if($type == 'self' || $type == '$this') $type = $class;
+		$type = str_replace('\\','.',$type);
+		if(substr($type,0,1) == '.') $type = substr($type,1);
+		return $type;
+	}
+	static private function	get_desc(&$modules,$match,$k,$name,$src,$class){
+		$modules[$name] = array(null,array());
+		$doc = substr($src,0,$match[0][$k][1]);
+		$doc = trim(substr($doc,0,strrpos($doc,"\n")));
+		if(substr($doc,-2) == '*'.'/'){
+			$doc = substr($doc,strrpos($doc,'/'.'**'));
+			$doc = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$doc)));
+			if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$doc,$m)){
+				foreach($m[2] as $n => $p) $modules[$name][1][] = array($m[2][$n],self::type($m[1][$n],$class),trim($m[3][$n]));
+			}
+			$modules[$name][0] = trim(preg_replace('/@.+/','',$doc));
+		}
+		return $modules;
 	}
 }
