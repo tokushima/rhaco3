@@ -9,6 +9,9 @@ use \org\rhaco\store\db\Q;
  * @login @{"has_require":true}
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
+	private $smtp_blackhole_dao;
+	private $dao;
+
 	private function entry_desc($file){
 		$entry = substr(basename($file),0,-4);
 		if(preg_match('/\/\*\*[^\*].+?\*\//s',file_get_contents($file),$m)){
@@ -24,13 +27,16 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$name = $summary = $description = null;
 		$d = debug_backtrace(false);
 		$d = array_pop($d);
-
+		$this->smtp_blackhole_dao = '\\'.implode('\\',array('org','rhaco','net','mail','moduel','SmtpBlackholeDao'));
+		$this->dao = '\\'.implode('\\',array('org','rhaco','store','db','Dao'));
+		
 		list($name,$summary,$description) = $this->entry_desc($d['file']);
 		$this->vars('app_name',(empty($name) ? 'App' : $name));
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
 		$this->vars('f',new Developer\Helper());
-
+		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
+		$this->vars('has_dao',class_exists($this->dao));
 	}
 	public function get_template_modules(){
 		return array(
@@ -56,26 +62,32 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		foreach(get_declared_classes() as $class){
 			$r = new \ReflectionClass($class);
-			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,'\org'.'\rhaco'.'\store'.'\db'.'\Dao')){
+			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,$this->dao)){
 				$class_doc = $r->getDocComment();
 				$package = str_replace('\\','.',$class);
 				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
 				list($summary) = explode("\n",$document);
 				$errors[$package] = null;
+				$con[$package] = true;
+				$dao = $this->dao;
 				try{
-					\org\rhaco\store\db\Dao::start_record();
+					$dao::start_record();
 					$class::find_get();
-					\org\rhaco\store\db\Dao::stop_record();
+					$dao::stop_record();
 				}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
+				}catch(\org\rhaco\store\db\exception\DaoConnectionException $e){
+					$errors[$package] = $e->getMessage();
+					$con[$package] = false;
 				}catch(\Exception $e){
 					$errors[$package] = $e->getMessage();
-					\org\rhaco\Log::error(\org\rhaco\store\db\Dao::recorded_query());
+					\org\rhaco\Log::error($dao::recorded_query());
 				}
 				if($this->search_str($package,$summary)) $model_list[$package] = $summary;				
 			}
 		}
 		$this->vars('dao_models',$model_list);
 		$this->vars('dao_model_errors',$errors);
+		$this->vars('dao_model_con',$con);
 	}
 	/**
 	 * アプリケーションのマップ一覧
@@ -157,9 +169,19 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		foreach(\org\rhaco\Man::class_info($class) as $k => $v){
 			$this->vars($k,$v);
 		}
+		$is_dao = false;
 		$class_name = str_replace(array('.','/'),'\\',$class);
 		if(substr($class_name,0,1) != '\\') $class_name = '\\'.$class_name;
-		$this->vars('is_dao',is_subclass_of($class_name,'\org'.'\rhaco'.'\store'.'\db'.'\Dao'));
+		
+		if(is_subclass_of($class_name,$this->dao)){
+			try{
+				$class_name::find_get();
+				$is_dao = true;
+			}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
+				$is_dao = true;
+			}catch(\Exception $e){}
+		}
+		$this->vars('is_dao',$is_dao);
 	}
 	/**
 	 * クラスドメソッドのキュメント
@@ -299,7 +321,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$order = $this->in_vars('order','-id');
 		$list = array();
 		try{
-			$list = \org\rhaco\net\mail\module\SmtpBlackholeDao::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder')));
+			$sbd = $this->smtp_blackhole_dao;
+			$list = $sbd::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder')));
 		}catch(\Exception $e){}
 		$this->vars('q',$this->in_vars('q'));
 		$this->vars('object_list',$list);
@@ -310,7 +333,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @param integer $id
 	 */
 	public function mail_detail($id){
-		$model = \org\rhaco\net\mail\module\SmtpBlackholeDao::find_get(Q::eq('id',$id));
+		$sbd = $this->smtp_blackhole_dao;
+		$model = $sbd::find_get(Q::eq('id',$id));
 		$this->vars('obj',$model);
 	}
 	/**

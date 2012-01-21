@@ -40,8 +40,12 @@
             <li><a href="{$t.package_method_url('classes')}">Classes</a></li>
             <li><a href="{$t.package_method_url('module_list')}">Module</a></li>
             <li><a href="{$t.package_method_url('conf_list')}">Conf</a></li>
-			<li><a href="{$t.package_method_url('model_list')}">Models</a></li>
-			<li><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
+            <rt:if param="{$has_dao}">
+				<li><a href="{$t.package_method_url('model_list')}">Models</a></li>
+			</rt:if>
+			<rt:if param="{$has_smtp_blackhole_dao}">
+				<li><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
+			</rt:if>
           </ul>
         </div>
       </div>

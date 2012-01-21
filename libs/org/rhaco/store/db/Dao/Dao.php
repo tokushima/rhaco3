@@ -10,6 +10,7 @@ use \org\rhaco\store\db\exception\NotfoundDaoException;
 use \org\rhaco\store\db\exception\RequiredDaoException;
 use \org\rhaco\store\db\exception\UniqueDaoException;
 use \org\rhaco\store\db\exception\DaoBadMethodCallException;
+use \org\rhaco\store\db\exception\DaoConnectionException;
 /**
  * O/R Mapper
  * @author tokushima
@@ -100,7 +101,7 @@ abstract class Dao extends \org\rhaco\Object{
 			if(empty($anon[0])){
 				$conf = explode("\\",$p);
 				while(Conf::get(implode('.',$conf)) === null && !empty($conf)) array_pop($conf);
-				if(empty($conf)) throw new DaoException('could not find the connection settings `'.$p.'`');
+				if(empty($conf)) throw new DaoConnectionException('could not find the connection settings `'.$p.'`');
 				$anon[0] = implode('.',$conf);
 			}
 			if(empty($anon[1])){

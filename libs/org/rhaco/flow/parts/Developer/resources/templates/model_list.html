@@ -6,6 +6,7 @@
 <table rt:param="{$dao_models}" rt:key="package" rt:var="summary" class="zebra-striped">
 <thead>
 	<tr>
+		<th>&nbsp;</th>
 		<th>package</th>
 		<th>summary</th>
 		<th>control</th>
@@ -13,6 +14,13 @@
 </thead>
 <tbody>
 	<tr class="even">
+		<td>
+			<rt:if param="{$dao_model_con[$package]}">
+				<span class="label success">O</span>
+			<rt:else />
+				<span class="label warning">X</span>
+			</rt:if>
+		</td>
 		<td>
 			<a href="{$t.package_method_url('class_info',$package)}">{$f.package_name($package)}</a>
 		</td>

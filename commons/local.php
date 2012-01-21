@@ -5,6 +5,8 @@ Conf::set('org.rhaco.store.db.Dao','org.rhaco.store.db.Dao','{"dbname":"testA"}'
 Conf::set('org.rhaco.store.db.Dao','org.rhaco.store.db.Dao.CrossChild','{"dbname":"testB"}');
 Conf::set('org.rhaco.store.db.Dao','test','{"dbname":"app"}');
  
+
+
 Conf::set('org.rhaco.Template','display_exception',true);
 Conf::set('org.rhaco.Log','level','error');
 
