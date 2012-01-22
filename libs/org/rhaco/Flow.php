@@ -293,7 +293,7 @@ class Flow{
 							$xml->output();
 						}
 						exit;
-					}catch(\Exception $e){
+					}catch(\Exception $e){ 
 						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
 							\org\rhaco\Log::$level($e);
 						}
@@ -330,7 +330,7 @@ class Flow{
 								$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
 							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html'))){
-								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);							
+								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template(dirname($t).'/',basename($t),$this->app_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 								exit;
 							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){

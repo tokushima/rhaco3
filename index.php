@@ -11,5 +11,10 @@ $flow->output(array(''
 ,nomatch_redirect=>'/'
 //,error_redirect=>'/'
 ,patterns=>array(
-	''=>array(action=>'org.rhaco.flow.parts.Developer')
+	''=>array(template=>'hoge.html')
+	,'dev'=>array(action=>'org.rhaco.flow.parts.Developer'
+				,modules=>array(
+					'org.rhaco.flow.module.LoginRequired'
+					,'org.rhaco.flow.module.SimpleAuth'
+				))
 )));

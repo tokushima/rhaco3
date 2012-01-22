@@ -46,7 +46,12 @@
 			<rt:if param="{$has_smtp_blackhole_dao}">
 				<li><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
 			</rt:if>
+			
+			<rt:if param="{$t.is_login()}">
+				<li><a href="{$t.package_method_url('do_logout')}">Logout</a></li>
+			</rt:if>
           </ul>
+          
         </div>
       </div>
     </div>

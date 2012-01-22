@@ -129,32 +129,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 */
 			$this->object_module('before_flow_handle',$this);
 		}
-		if(!$this->is_login() && $this->anon_login['require'] === true && isset($this->select_map['name']) && $this->select_map['name'] != 'login'){
-			if($this->has_object_module('before_login_required')) {
-				/**
-				 * 未ログイン時のログイン処理の前処理
-				 * @param self $this
-				 */
-				$this->object_module('before_login_required',$this);
-			}
-			if(!$this->is_login()){
-				if(!$this->is_sessions('logined_redirect_to')){
-					$current = \org\rhaco\Request::current_url();
-					foreach($this->maps as $k => $m){
-						if(isset($m['name']) && $m['name'] == 'logout'){
-							if(isset($m['format']) && $current == $m['format']) $current = null;
-							break;
-						}
-					}
-					if($current != null) $this->sessions('logined_redirect_to',$current);
-				}
-				$this->save_current_vars();
-				foreach($this->maps as $k => $m){
-					if(isset($m['method']) && $m['method'] == 'do_login' && isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
-				}
-				throw new \LogicException('name `login` not found');
-			}
-		}
+		if(!$this->is_login() && $this->anon_login['require'] === true) $this->login_required();
 	}
 	/**
 	 * (non-PHPdoc)
@@ -180,6 +155,38 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 * @param self $this
 			 */
 			$this->object_module('exception_flow_handle',$this);
+		}
+	}
+	/**
+	 * ログインしていない場合にログイン処理を実行する
+	 * @throws \LogicException
+	 */
+	public function login_required(){
+		if(!$this->is_login() && isset($this->select_map['method']) && $this->select_map['method'] != 'do_login'){
+			if($this->has_object_module('before_login_required')) {
+				/**
+				 * 未ログイン時のログイン処理の前処理
+				 * @param self $this
+				 */
+				$this->object_module('before_login_required',$this);
+			}
+			if(!$this->is_login()){
+				if(!$this->is_sessions('logined_redirect_to')){
+					$current = \org\rhaco\Request::current_url();
+					foreach($this->maps as $k => $m){
+						if((isset($m['name']) && $m['name'] == 'logout') || (isset($m['method']) && $m['method'] == 'do_logout')){
+							if(isset($m['format']) && $current == $m['format']) $current = null;
+						}
+					}
+					if($current != null) $this->sessions('logined_redirect_to',$current);
+				}
+				$this->save_current_vars();
+				foreach($this->maps as $k => $m){			
+					if(((isset($m['name']) && $m['name'] == 'login')) || (isset($m['method']) && $this->select_map['class'] == $m['class'] && $m['method'] == 'do_login') 
+						&& isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
+				}
+				throw new \LogicException('name `login` not found');
+			}
 		}
 	}
 	/**
