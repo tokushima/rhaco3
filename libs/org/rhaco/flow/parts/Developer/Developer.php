@@ -234,6 +234,15 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	public function do_find($package){
 		$name = '\\'.str_replace('.','\\',$package);
 		$order = \org\rhaco\lang\Sorter::order($this->in_vars('order'),$this->in_vars('porder'));
+		if(empty($order)){
+			$dao = new $name();
+			foreach($dao->props() as $n => $v){
+				if($dao->prop_anon($n,'primary')){
+					$order = '-'.$n;
+					break;
+				}
+			}
+		}
 		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
 		$this->vars('q',$this->in_vars('q'));
 		$this->vars('object_list',$name::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder'))));
