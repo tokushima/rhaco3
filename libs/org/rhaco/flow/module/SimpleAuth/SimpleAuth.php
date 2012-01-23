@@ -24,7 +24,7 @@ class SimpleAuth{
 		if(sizeof($this->users) % 2 !== 0) throw new SimpleAuth\SimpleAuthException();
 		for($i=0;$i<sizeof($this->users);$i+=2){
 			list($user,$pass) = array($this->users[$i],$this->users[$i+1]);
-			if($request->is_post() && $request->in_vars('username') === $user && md5(sha1($password)) === $pass){
+			if($request->is_post() && $request->in_vars('user_name') === $user && md5(sha1($password)) === $pass){
 				return true;
 			}
 		}

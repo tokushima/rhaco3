@@ -434,7 +434,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		if(!$this->is_login() && $this->is_post()){
 			\org\rhaco\net\http\Header::send_status(401);
 			if(!\org\rhaco\Exceptions::has()) \org\rhaco\Exceptions::add(new \LogicException('Unauthorized'),'do_login');
-			\org\rhaco\Exceptions::throw_over();
 		}
 	}
 	/**
