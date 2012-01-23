@@ -69,7 +69,7 @@ class Flow{
 		self::$get_maps = true;
 		try{
 			ob_start();
-				include($file);
+				include_once($file);
 			ob_end_clean();
 		}catch(\Exception $e){
 			\org\rhaco\Log::error($e);
