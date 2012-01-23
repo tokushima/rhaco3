@@ -14,7 +14,7 @@ use \org\rhaco\store\db\exception\DaoConnectionException;
 /**
  * O/R Mapper
  * @author tokushima
- * @conf string $future_date auto_future_addで定義される日付、未定義の場合は`2112/09/03 00:00:00`
+ * @conf string $future_date auto_future_addで定義される日付、未定義の場合は`2038/01/01 00:00:00`
  */
 abstract class Dao extends \org\rhaco\Object{
 	static private $_dao_ = array();
@@ -777,7 +777,7 @@ abstract class Dao extends \org\rhaco\Object{
 						case 'intdate': $this->{$column->name()}(date('Ymd')); break;
 					}
 				}else if($this->prop_anon($column->name(),'auto_future_add') === true){
-					$future = Conf::get('future_date','2112/09/03 00:00:00'); // 2112/09/03 doraemon birthday
+					$future = Conf::get('future_date','2038/01/01 00:00:00');
 					$time = strtotime($future);
 					switch($this->prop_anon($column->name(),'type')){
 						case 'timestamp':
