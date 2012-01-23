@@ -104,6 +104,7 @@ class Flow{
 						$maps_the = isset($maps['theme_path']) ? $maps['theme_path'] : null;
 						$maps_tem = isset($maps['template_path']) ? $maps['template_path'] : null;
 						$maps_err = isset($maps['error_template']) ? $maps['error_template'] : null;
+						$maps_sup = isset($maps['template_super']) ? $maps['template_super'] : null;
 						$maps_mod = isset($maps['modules']) ? (is_array($maps['modules']) ? $maps['modules'] : array($maps['modules'])) : array();
 						$maps_arg = isset($maps['args']) ? (is_array($maps['args']) ? $maps['args'] : array($maps['args'])) : array();
 						foreach($maps['patterns'] as $u => $m){
@@ -113,6 +114,7 @@ class Flow{
 							if(!empty($maps_the)) $m['theme_path'] = $maps_the;
 							if(!empty($maps_tem)) $m['template_path'] = $maps_tem;
 							if(!empty($maps_err)) $m['error_template'] = $maps_err;
+							if(!empty($maps_sup)) $m['template_super'] = $maps_sup;
 							if(!empty($maps_mod)) $m['modules'] = array_merge($maps_mod,(isset($m['modules']) ? (is_array($m['modules']) ? $m['modules'] : array($m['modules'])) : array()));
 							if(!empty($maps_arg)) $m['args'] = array_merge($maps_arg,(isset($m['args']) ? (is_array($m['args']) ? $m['args'] : array($m['args'])) : array()));
 							$map['patterns'][$maps_url.$u] = $m;
