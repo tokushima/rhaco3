@@ -123,7 +123,7 @@ class File extends \org\rhaco\Object{
 	static public function mkdir($source){
 		if(!is_dir($source)){
 			try{
-				mkdir($source,0777,true);
+				mkdir($source,0775,true);
 			}catch(\ErrorException $e){
 				throw new \InvalidArgumentException(sprintf('permission denied `%s`',$source));
 			}
@@ -242,6 +242,7 @@ class File extends \org\rhaco\Object{
 		if(empty($filename)) throw new \InvalidArgumentException(sprintf('permission denied `%s`',$filename));
 		self::mkdir(dirname($filename));
 		if(false === file_put_contents($filename,(string)$src,($lock ? LOCK_EX : 0))) throw new \InvalidArgumentException(sprintf('permission denied `%s`',$filename));
+		chmod($filename,0777);
 	}
 	/**
 	 * ファイルに追記する
