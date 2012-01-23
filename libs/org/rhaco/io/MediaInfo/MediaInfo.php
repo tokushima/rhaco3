@@ -116,7 +116,7 @@ class MediaInfo extends \org\rhaco\Object{
 						$self->height((isset($info[1]) ? $info[1] : null));
 						break;
 				}
-			}catch(ErrorException $e){
+			}catch(\ErrorException $e){
 				throw new \org\rhaco\io\MediaInfo\MediaInfoException("未対応");
 			}
 		}else{

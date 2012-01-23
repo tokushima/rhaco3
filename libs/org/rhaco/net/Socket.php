@@ -33,7 +33,7 @@ class Socket{
 		if($timeout) $this->timeout = $timeout;
 		try{
 			$this->_resource_ = fsockopen($this->address,$this->port,$errno,$errstr,$this->timeout);
-		}catch(Exception $e){
+		}catch(\Exception $e){
 			\org\rhaco\Log::error($e->getMessage());
 		}
 		if(!is_resource($this->_resource_)){

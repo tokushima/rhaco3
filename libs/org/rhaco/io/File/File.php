@@ -124,7 +124,7 @@ class File extends \org\rhaco\Object{
 		if(!is_dir($source)){
 			try{
 				mkdir($source,0777,true);
-			}catch(ErrorException $e){
+			}catch(\ErrorException $e){
 				throw new \InvalidArgumentException(sprintf('permission denied `%s`',$source));
 			}
 		}

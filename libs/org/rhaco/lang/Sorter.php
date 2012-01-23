@@ -23,7 +23,7 @@ class Sorter{
 			try{
 				foreach($list as $o) $o[$key] = isset($o[$key]) ? $o[$key] : null;
 				usort($list,create_function('$a,$b',sprintf('return ($a["%s"] %s $b["%s"]) ? -1 : 1;',$key,(($revers) ? ">" : "<"),$key)));
-			}catch(ErrorException $e){}
+			}catch(\ErrorException $e){}
 		}
 		return $list;
 		/***
@@ -87,7 +87,7 @@ class Sorter{
 			try{
 				foreach($list as $o) $o->$getter_name();
 				usort($list,create_function('$a,$b',sprintf('return ($a->%s() %s $b->%s()) ? -1 : 1;',$getter_name,(($revers) ? ">" : "<"),$getter_name)));
-			}catch(ErrorException $e){}
+			}catch(\ErrorException $e){}
 		}
 		return $list;
 		/***

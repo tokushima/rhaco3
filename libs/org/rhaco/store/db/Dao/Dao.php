@@ -867,7 +867,7 @@ abstract class Dao extends \org\rhaco\Object{
 				if($name[0] != '_' && array_key_exists($name,$vars)){
 					try{
 						$this->{$name}($value);
-					}catch(Exception $e){
+					}catch(\Exception $e){
 						$this->dao_exception()->add($e,$name);
 					}
 				}
