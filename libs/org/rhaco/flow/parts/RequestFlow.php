@@ -373,20 +373,28 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 */
 	protected function is_sessions($n){
 		return $this->sess->is_vars($n);
-	}	
+	}
 	/**
-	 * 指定されたマップ名のURLへリダイレクトする
+	 * 指定されたマップ名のURLを返す
 	 * @param string $name
+	 * @throws \LogicException
 	 */
-	protected function redirect_by_map($name){
+	protected function map_url($name){
 		$args = func_get_args();
 		$name = array_shift($args);
 		$arg = $this->map_arg($name,null);
 		if($arg === null) $arg = $name;
 		foreach($this->maps as $k => $m){
-			if($m['name'] == $arg) return \org\rhaco\net\http\Header::redirect(vsprintf($m['format'],$args));
+			if($m['name'] == $arg) return vsprintf($m['format'],$args);
 		}
 		throw new \LogicException('map `'.$arg.'` not found');
+	}
+	/**
+	 * 指定されたマップ名のURLへリダイレクトする
+	 * @param string $name
+	 */
+	protected function redirect_by_map($name){
+		\org\rhaco\net\http\Header::redirect($this->map_url($name));
 	}
 	/**
 	 * 自身のメソッドにマッピングされたURLへリダイレクトする(パッケージのみ)
