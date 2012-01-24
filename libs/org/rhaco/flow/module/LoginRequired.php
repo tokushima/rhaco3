@@ -1,4 +1,5 @@
 <?php
+namespace org\rhaco\flow\module;
 /**
  * ログインを必須とさせる
  * @author tokushima
