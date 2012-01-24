@@ -6,7 +6,6 @@ use \org\rhaco\store\db\Q;
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
  * @class @{"maps":["do_login","do_logout","index","classes","class_src","class_info","method_info","do_create","do_detail","do_drop","do_find","do_update","mail_list","mail_detail","conf_list","model_list","class_module_info","entry_list","module_list"]}
- * @login @{"has_require":true}
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	private $smtp_blackhole_dao;
