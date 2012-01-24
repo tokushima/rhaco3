@@ -26,7 +26,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$name = $summary = $description = null;
 		$d = debug_backtrace(false);
 		$d = array_pop($d);
-		$this->smtp_blackhole_dao = '\\'.implode('\\',array('org','rhaco','net','mail','moduel','SmtpBlackholeDao'));
+		$this->smtp_blackhole_dao = '\\'.implode('\\',array('org','rhaco','net','mail','module','SmtpBlackholeDao'));
 		$this->dao = '\\'.implode('\\',array('org','rhaco','store','db','Dao'));
 		
 		list($name,$summary,$description) = $this->entry_desc($d['file']);
