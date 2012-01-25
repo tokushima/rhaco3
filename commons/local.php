@@ -17,3 +17,4 @@ Conf::set('org.rhaco.flow.module.SimpleAuth','auth','user_name',md5(sha1('passwo
 \org\rhaco\io\FileChangedLog::set_module(new \org\rhaco\io\log\Growl());
 \org\rhaco\io\FileChangedLog::set_module(new \org\rhaco\io\log\File());
 
+
