@@ -7,7 +7,7 @@ if(!class_exists('Rhaco3')){
 class Rhaco3{
 	static private $mode;
 	static private $common_dir;
-	static private $libs;
+	static private $lib_dir;
 	static private $rep = array('http://rhaco.org/repository/3/lib/');
 	/**
 	 * ライブラリのパスを設定する
@@ -16,9 +16,17 @@ class Rhaco3{
 	 * @param string $common_dir 設定ファイルのディレクトリ 
 	 */
 	static public function config_path($libs_dir=null,$mode=null,$common_dir=null){
-		self::libs($libs_dir);
-		self::mode($mode);
-		self::common_dir($common_dir);
+		if(self::$mode === null && $mode !== null) self::$mode = $mode;
+		if(self::$common_dir === null && $common_dir !== null){
+			self::$common_dir = str_replace('\\','/',$common_dir);
+			if(substr(self::$common_dir,-1) != '/') self::$common_dir = self::$common_dir.'/';
+		}
+		if(self::$lib_dir === null && $libs_dir !== null){
+			self::$lib_dir = str_replace('\\','/',$libs_dir);
+			if(substr(self::$lib_dir,-1) != '/') self::$lib_dir = self::$lib_dir.'/';
+			set_include_path(self::$lib_dir.'_extlibs'.PATH_SEPARATOR.get_include_path());
+			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlibs/data');
+		}
 	}
 	/**
 	 * リポジトリの場所を指定する
@@ -35,39 +43,32 @@ class Rhaco3{
 		return self::$rep;
 	}
 	/**
-	 * ライブラリのパスを設定/取得
-	 * @param string $p ライブラリのパス
-	 * @return string ライブラリのパス
+	 * ライブラリのディレクトリ
+	 * @return string
 	 */
-	static public function libs($p=null){
-		if(self::$libs === null){
-			self::$libs = __DIR__.'/libs/';
-			set_include_path(self::$libs.'_extlibs'.PATH_SEPARATOR.get_include_path());
-			define('__PEAR_DATA_DIR__',self::$libs.'_extlibs/data');
+	static public function lib_dir(){
+		if(self::$lib_dir === null){
+			self::$lib_dir = __DIR__.'/libs/';
+			set_include_path(self::$lib_dir.'_extlibs'.PATH_SEPARATOR.get_include_path());
+			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlibs/data');
 		}
-		return self::$libs.$p;
+		return self::$lib_dir;
+	}
+	/**
+	 * 設定ファイルのディレクトリ
+	 * @return string
+	 */
+	static public function common_dir(){
+		if(self::$common_dir === null) self::$common_dir = __DIR__.'/commons/';
+		return self::$common_dir;
 	}
 	/**
 	 * 実行モードを設定/取得
-	 * @param string $mode モード
 	 * @return string モード
 	 */
-	static public function mode($mode='noname'){
-		if(self::$mode === null) self::$mode = $mode;
+	static public function mode(){
+		if(self::$mode === null) self::$mode = 'local';
 		return self::$mode;
-	}
-	/**
-	 * 設定ファイルのディレクトリを設定/取得
-	 * @param string $common_dir 設定ファイルのディレクトリ
-	 * @return string モード
-	 */
-	static public function common_dir($dir=null){
-		if(self::$common_dir === null){
-			$dir = str_replace("\\",'/',(empty($dir)) ? __DIR__.'/commons/' : $dir);
-			if(substr($dir,-1) != '/') $dir = $dir.'/';
-			self::$common_dir = $dir;
-		}
-		return self::$common_dir;
 	}
 }
 ini_set('display_errors','On');
@@ -83,12 +84,12 @@ spl_autoload_register(function($c){
 	$p = str_replace('\\','/',$c);
 	if(ctype_upper($p[0]) || preg_match('/^(.+)\/([A-Z][\w_]*)$/',$p,$m)){
 		foreach(array('','_vendors/') as $q){
-			if(is_file($f=Rhaco3::libs($q.$p.'.php'))){require_once($f);break;
-			}else if(isset($m[2]) && is_file($f=Rhaco3::libs($q.$p.'/'.$m[2].'.php'))){require_once($f);break;}
+			if(is_file($f=(Rhaco3::lib_dir().$q.$p.'.php'))){require_once($f);break;
+			}else if(isset($m[2]) && is_file($f=(Rhaco3::lib_dir().$q.$p.'/'.$m[2].'.php'))){require_once($f);break;}
 		}
 	}
 	if(!class_exists($c,false) && !interface_exists($c,false)){
-		$e = Rhaco3::libs('_extlibs/');
+		$e = Rhaco3::lib_dir().'_extlibs/';
 		if(is_file($f=$e.$p.'.php')){require_once($f);
 		}else if(is_file($f=$e.str_replace('_','/',$c).'.php')){require_once($f);
 		}else if(is_file($f=$e.strtolower($c).'.php')){require_once($f);

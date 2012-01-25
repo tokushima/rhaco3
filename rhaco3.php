@@ -7,7 +7,7 @@ if(!class_exists('Rhaco3')){
 class Rhaco3{
 	static private $mode;
 	static private $common_dir;
-	static private $libs;
+	static private $lib_dir;
 	static private $rep = array('http://rhaco.org/repository/3/lib/');
 	/**
 	 * ライブラリのパスを設定する
@@ -16,9 +16,17 @@ class Rhaco3{
 	 * @param string $common_dir 設定ファイルのディレクトリ 
 	 */
 	static public function config_path($libs_dir=null,$mode=null,$common_dir=null){
-		self::libs($libs_dir);
-		self::mode($mode);
-		self::common_dir($common_dir);
+		if(self::$mode === null && $mode !== null) self::$mode = $mode;
+		if(self::$common_dir === null && $common_dir !== null){
+			self::$common_dir = str_replace('\\','/',$common_dir);
+			if(substr(self::$common_dir,-1) != '/') self::$common_dir = self::$common_dir.'/';
+		}
+		if(self::$lib_dir === null && $libs_dir !== null){
+			self::$lib_dir = str_replace('\\','/',$libs_dir);
+			if(substr(self::$lib_dir,-1) != '/') self::$lib_dir = self::$lib_dir.'/';
+			set_include_path(self::$lib_dir.'_extlibs'.PATH_SEPARATOR.get_include_path());
+			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlibs/data');
+		}
 	}
 	/**
 	 * リポジトリの場所を指定する
@@ -35,39 +43,32 @@ class Rhaco3{
 		return self::$rep;
 	}
 	/**
-	 * ライブラリのパスを設定/取得
-	 * @param string $p ライブラリのパス
-	 * @return string ライブラリのパス
+	 * ライブラリのディレクトリ
+	 * @return string
 	 */
-	static public function libs($p=null){
-		if(self::$libs === null){
-			self::$libs = __DIR__.'/libs/';
-			set_include_path(self::$libs.'_extlibs'.PATH_SEPARATOR.get_include_path());
-			define('__PEAR_DATA_DIR__',self::$libs.'_extlibs/data');
+	static public function lib_dir(){
+		if(self::$lib_dir === null){
+			self::$lib_dir = __DIR__.'/libs/';
+			set_include_path(self::$lib_dir.'_extlibs'.PATH_SEPARATOR.get_include_path());
+			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlibs/data');
 		}
-		return self::$libs.$p;
+		return self::$lib_dir;
+	}
+	/**
+	 * 設定ファイルのディレクトリ
+	 * @return string
+	 */
+	static public function common_dir(){
+		if(self::$common_dir === null) self::$common_dir = __DIR__.'/commons/';
+		return self::$common_dir;
 	}
 	/**
 	 * 実行モードを設定/取得
-	 * @param string $mode モード
 	 * @return string モード
 	 */
-	static public function mode($mode='noname'){
-		if(self::$mode === null) self::$mode = $mode;
+	static public function mode(){
+		if(self::$mode === null) self::$mode = 'local';
 		return self::$mode;
-	}
-	/**
-	 * 設定ファイルのディレクトリを設定/取得
-	 * @param string $common_dir 設定ファイルのディレクトリ
-	 * @return string モード
-	 */
-	static public function common_dir($dir=null){
-		if(self::$common_dir === null){
-			$dir = str_replace("\\",'/',(empty($dir)) ? __DIR__.'/commons/' : $dir);
-			if(substr($dir,-1) != '/') $dir = $dir.'/';
-			self::$common_dir = $dir;
-		}
-		return self::$common_dir;
 	}
 }
 ini_set('display_errors','On');
@@ -83,12 +84,12 @@ spl_autoload_register(function($c){
 	$p = str_replace('\\','/',$c);
 	if(ctype_upper($p[0]) || preg_match('/^(.+)\/([A-Z][\w_]*)$/',$p,$m)){
 		foreach(array('','_vendors/') as $q){
-			if(is_file($f=Rhaco3::libs($q.$p.'.php'))){require_once($f);break;
-			}else if(isset($m[2]) && is_file($f=Rhaco3::libs($q.$p.'/'.$m[2].'.php'))){require_once($f);break;}
+			if(is_file($f=(Rhaco3::lib_dir().$q.$p.'.php'))){require_once($f);break;
+			}else if(isset($m[2]) && is_file($f=(Rhaco3::lib_dir().$q.$p.'/'.$m[2].'.php'))){require_once($f);break;}
 		}
 	}
 	if(!class_exists($c,false) && !interface_exists($c,false)){
-		$e = Rhaco3::libs('_extlibs/');
+		$e = Rhaco3::lib_dir().'_extlibs/';
 		if(is_file($f=$e.$p.'.php')){require_once($f);
 		}else if(is_file($f=$e.str_replace('_','/',$c).'.php')){require_once($f);
 		}else if(is_file($f=$e.strtolower($c).'.php')){require_once($f);
@@ -197,9 +198,9 @@ if(isset($_SERVER['argv'][1])){
 			if(isset($imported[$package])) return true;
 			$imported[$package] = true;
 			$dl = str_replace('/','_',$package);
-			$dp = Rhaco3::libs('_download/');
-			$ep = Rhaco3::libs('_download/extract/'.$package.'/');
-			$vp = Rhaco3::libs('_vendors/');
+			$dp = Rhaco3::lib_dir().'_download/';
+			$ep = Rhaco3::lib_dir().'_download/extract/'.$package.'/';
+			$vp = Rhaco3::lib_dir().'_vendors/';
 
 			foreach(Rhaco3::repositorys() as $rp){
 				try{
@@ -270,12 +271,12 @@ if(isset($_SERVER['argv'][1])){
 		$argv = array_flip($argv);
 		if(empty($argv)){
 			foreach(new DirectoryIterator(__DIR__) as $f){
-				if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getFilename(),-4) == '.php' && strpos($f->getPathname(),Rhaco3::libs()) === false){
+				if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getFilename(),-4) == '.php' && strpos($f->getPathname(),Rhaco3::lib_dir()) === false){
 					foreach($search(file_get_contents($f->getPathname())) as $k => $v) $argv[$v] = $f->getPathname();
 				}
 			}
-			if(is_dir(Rhaco3::libs())){
-				foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::libs(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
+			if(is_dir(Rhaco3::lib_dir())){
+				foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::lib_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
 					if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getPathname(),-4) == '.php'){ foreach($search(file_get_contents($f->getPathname())) as $k => $v){ $argv[$v] = $f->getPathname(); } }
 				}
 			}
@@ -292,12 +293,12 @@ if(isset($_SERVER['argv'][1])){
 			if(($b = class_exists($p = '\\'.str_replace('.','\\',$arg))) || ($b = interface_exists($p = '\\'.str_replace('.','\\',$arg)))){
 				if($renew){
 					$r = new ReflectionClass($p);
-					$b = (strpos($r->getFilename(),Rhaco3::libs('_vendors')) === false);
+					$b = (strpos($r->getFilename(),(Rhaco3::lib_dir().'_vendors')) === false);
 				}
 			}
 			if(!$b && !$pkg($imported,$arg)) $error[$arg] = $f;
 		}
-		$rm(Rhaco3::libs('_download/'),true);
+		$rm((Rhaco3::lib_dir().'_download/'),true);
 		if(!empty($error)){
 			foreach($error as $p => $f) print('not found: '.(is_int($f) ? '' : $f.(' in ')).$p.PHP_EOL);
 		}
@@ -310,7 +311,7 @@ if(isset($_SERVER['argv'][1])){
 		switch($cmd){
 			case '-import':
 				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
-				if(is_file(Rhaco3::libs()) || strpos(Rhaco3::libs(),'://') !== false) throw new RuntimeException(Rhaco3::libs().' is not a directory');
+				if(is_file(Rhaco3::lib_dir()) || strpos(Rhaco3::lib_dir(),'://') !== false) throw new RuntimeException(Rhaco3::lib_dir().' is not a directory');
 				$argv = array_slice($_SERVER['argv'],2);
 				$download($argv,true);
 				exit;
@@ -320,8 +321,8 @@ if(isset($_SERVER['argv'][1])){
 				$phar = new Phar($path,0,'libs.phar');
 				print('Writen: '.$path.PHP_EOL);
 				$phar->setDefaultStub((isset($phar['cli.php']) ? 'cli.php' : '<?php return; __HALT_COMPILER();'),(isset($phar['web.php']) ? 'web.php' : '<?php return; __HALT_COMPILER();'));
-				foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::libs(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
-					$phar->addFile($f->getPathname(),str_replace(Rhaco3::libs(),'',$f->getPathname()));
+				foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::lib_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
+					$phar->addFile($f->getPathname(),str_replace(Rhaco3::lib_dir(),'',$f->getPathname()));
 					print(' Add: '.$f->getPathname().PHP_EOL);
 				}
 				$phar->compress(Phar::GZ,'phar.gz');
@@ -387,7 +388,7 @@ if(isset($_SERVER['argv'][1])){
 					}
 					$package = substr($cmd,1);
 					$download(array($package),false);
-					if(is_file($f=Rhaco3::libs(str_replace('.','/',$package).'/setup.php')) || is_file($f=Rhaco3::libs('_vendors/'.str_replace('.','/',$package).'/setup.php'))){
+					if(is_file($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/setup.php')) || is_file($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/setup.php'))){
 						if($help){
 							$help_params = array();
 							$pad = 4;
@@ -418,9 +419,9 @@ if(isset($_SERVER['argv'][1])){
 							print('    '.str_replace("\n","\n    ",$doc)."\n\n");
 						}else{
 							$_SERVER['argv'] = array_slice($_SERVER['argv'],2);
-							$_ENV['PATH_LIBS'] = Rhaco3::libs();
-							$_ENV['PATH_EXTLIBS'] = Rhaco3::libs('_extlibs');
-							$_ENV['PATH_VENDORS'] = Rhaco3::libs('_vendors');
+							$_ENV['PATH_LIB_DIR'] = Rhaco3::lib_dir();
+							$_ENV['PATH_EXTLIB_DIR'] = Rhaco3::lib_dir().'_extlibs';
+							$_ENV['PATH_VENDOR_DIR'] = Rhaco3::lib_dir().'_vendors';
 							list($_ENV['value'],$_ENV['params']) = array($value,$params);
 							include_once(dirname($f).'/'.basename(dirname($f)).'.php');
 							include_once($f);
@@ -437,14 +438,14 @@ if(isset($_SERVER['argv'][1])){
 }
 $list = array('import'=>'Download package','phar'=>'Create a phar libs','search'=>'Search package','htaccess'=>'Create .htaccess','settings'=>'Create __settings__.php');
 $len = 8;
-if(is_dir(Rhaco3::libs())){
-	foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::libs(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
+if(is_dir(Rhaco3::lib_dir())){
+	foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::lib_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
 		if($f->isFile() && substr($f->getPathname(),-4) == '.php' 
 			&& basename(dirname($f->getPathname())) === $f->getBasename('.php') && preg_match('/^[A-Z].*/',$f->getBasename('.php'))
 			&& is_file(dirname($f->getPathname()).'/setup.php')
 			&& (strpos($f->getPathname(),'/_') === false || strpos($f->getPathname(),'/_vendors/') !== false)
 		){
-			$package = str_replace(array(Rhaco3::libs(),'/'),array('','.'),dirname($f->getPathname()));
+			$package = str_replace(array(Rhaco3::lib_dir(),'/'),array('','.'),dirname($f->getPathname()));
 			if(strpos($package,'_vendors.') === 0) $package = substr($package,9);
 			if($len < strlen($package)) $len = strlen($package);
 			list($summary) = (preg_match('/\/\*\*.+?\*\//s',file_get_contents(dirname($f->getPathname()).'/setup.php'),$m)) ? explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0])))) : '';

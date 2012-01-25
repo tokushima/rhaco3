@@ -416,8 +416,7 @@ eq(403,$b->status());
 nmeq('INDEX',$b->body());
 
 meq('BEFORE_FLOW_HANDLE',$b->body());
-// Flowが完了する前にこける
-nmeq('AFTER_FLOW_HANDLE',$b->body());
+meq('[EXCEPTION]',$b->body());
 
 meq('INIT_TEMPLATE',$b->body());
 meq('BEFORE_TEMPLATE',$b->body());

@@ -15,7 +15,7 @@ if(isset($params['table'])){
 	
 	$class = array_pop($p);
 	$namespace = implode('\\',$p);
-	$path = Rhaco3::libs(implode('/',$p).'/'.$class.'.php');
+	$path = Rhaco3::lib_dir().implode('/',$p).'/'.$class.'.php';
 	
 $model_src = <<<'__SRC__'
 <?php
