@@ -1,7 +1,7 @@
 <?php
 namespace org\rhaco\flow\parts;
 /**
- * Requestを継承したFlowモジュール
+ * Requestを含むFlowインタフェース
  * @author tokushima
  */
 class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\rhaco\flow\FlowInterface{
