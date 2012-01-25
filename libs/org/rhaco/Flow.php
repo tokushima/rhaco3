@@ -288,6 +288,10 @@ class Flow{
 						}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html')){
 							$this->print_template(dirname($t).'/',basename($t),$this->app_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 						}else if($this->has_object_module('flow_output')){
+							/**
+							 * 結果出力
+							 * @param mixed $obj
+							 */
 							$this->object_module('flow_output',$obj);
 						}else{
 							\org\rhaco\Exceptions::throw_over();
@@ -331,11 +335,11 @@ class Flow{
 								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
-							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html'))){
+							}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html')){
 								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template(dirname($t).'/',basename($t),$this->app_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 								exit;
-							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
+							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
 								if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
 								exit;
 							}else{
