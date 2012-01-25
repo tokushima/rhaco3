@@ -11,11 +11,11 @@ class Rhaco3{
 	static private $rep = array('http://rhaco.org/repository/3/lib/');
 	/**
 	 * ライブラリのパスを設定する
-	 * @param string $libs_dir ライブラリのディレクトリパス
 	 * @param string $mode 実行モード
+	 * @param string $libs_dir ライブラリのディレクトリパス
 	 * @param string $common_dir 設定ファイルのディレクトリ 
 	 */
-	static public function config_path($libs_dir=null,$mode=null,$common_dir=null){
+	static public function config_path($mode=null,$libs_dir=null,$common_dir=null){
 		if(self::$mode === null && $mode !== null) self::$mode = $mode;
 		if(self::$common_dir === null && $common_dir !== null){
 			self::$common_dir = str_replace('\\','/',$common_dir);
