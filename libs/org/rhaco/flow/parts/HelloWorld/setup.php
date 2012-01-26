@@ -2,7 +2,6 @@
 /**
  * Sample Hello World
  */
-list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
 if(empty($value)) $value = 'index';
 $dir = str_replace("\\",'/',getcwd()).'/';
 

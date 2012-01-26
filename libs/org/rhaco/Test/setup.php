@@ -26,7 +26,6 @@ $verify_format = function($class_name,$m=null,$b=null){
 		\org\rhaco\Test::run($class_name,$m,$b);
 	}
 };
-list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
 \org\rhaco\Test::start_time();
 if(isset($params['mem']) && $params['mem'] != '') ini_set('memory_limit',$params['mem']);
 if(isset($value)){

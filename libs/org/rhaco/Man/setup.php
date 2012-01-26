@@ -4,7 +4,6 @@
  * @param string $value package path
  * @param string $m method name
  */
-list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
 if(empty($value)){
 	$libs = array();
 	$len = 0;

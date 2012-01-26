@@ -4,7 +4,6 @@
  * @param string $value package path [pear.php.net/PEAR]
  * @param string $state state [stable]
  */
-list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
 if(empty($value)) throw new RuntimeException('Invalid argument');
 $output_path = (isset($_ENV['PATH_EXTLIBS'])) ? $_ENV['PATH_EXTLIBS'] : getcwd();
 if(!is_file($output_path.'PEAR.php')) \org\rhaco\Pear::install('pear.php.net/PEAR','stable',$output_path);	

@@ -2,9 +2,7 @@
 /**
  * Database model
  */
-list($value,$params) = array(isset($_ENV['value'])?$_ENV['value']:null,isset($_ENV['params'])?$_ENV['params']:array());
 $package = 'model';
-
 if(isset($params['table'])){
 	// TODO 指定のパッケージのcreate tableのサンプル出力
 }else if(isset($params['export'])){
