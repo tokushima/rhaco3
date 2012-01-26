@@ -374,7 +374,7 @@ if(isset($_SERVER['argv'][1])){
 					$str = str_replace('<?php','<?php'.PHP_EOL.$rep,$str);
 					if(!empty($mode)) $str = preg_replace("/Rhaco3::config_path\(([\"\']).+\\1\)/",'Rhaco3::config_path(\''.$mode.'\')',$str);
 				}else{
-					$str = '<?php'.PHP_EOL.$rep.PHP_EOL.'Rhaco3::config_path(\''.$mode.'\')'.PHP_EOL;
+					$str = '<?php'.PHP_EOL.$rep.PHP_EOL.'Rhaco3::config_path(\''.$mode.'\');'.PHP_EOL;
 				}
 				file_put_contents($path,$str);
 				print('Writen: __settings__.php'.PHP_EOL);
