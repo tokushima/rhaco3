@@ -16,9 +16,6 @@ namespace org\rhaco\io\log;
 class MailSender{
 	private $template_base;
 
-	protected function __init__(){
-		$this->template_base = \org\rhaco\Conf::get('template_base');
-	}
 	public function debug(\org\rhaco\Log $log){
 		$this->send('debug',$log);
 	}
@@ -32,10 +29,10 @@ class MailSender{
 		$this->send('error',$log);
 	}
 	protected function send($level,\org\rhaco\Log $log){
+		if(empty($this->template_base)) $this->template_base = \org\rhaco\Conf::get('template_base');
 		$template = \org\rhaco\net\Path::absolute($this->template_base,$level.'_log.xml');
 		if(is_file($template)){
 			$mail = new \org\rhaco\net\mail\Mail();
-			$mail->to($member->email());
 			$mail->send_template($template,array('log'=>$log,'env'=>new \org\rhaco\lang\Env()));
 		}
 	}
