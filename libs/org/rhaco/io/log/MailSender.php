@@ -13,7 +13,7 @@ namespace org\rhaco\io\log;
  * @author tokushima
  *
  */
-class LogMailSender{
+class MailSender{
 	private $template_base;
 
 	protected function __init__(){
