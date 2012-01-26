@@ -9,14 +9,9 @@ class OneFile{
 	private $path;
 
 	public function __construct($path=null){
-		$this->path = self::path($path);
-	}
-	static private function path($path=null){
-		if($path === null) $path = \org\rhaco\Conf::get('path',getcwd().'/work/output.log');
-		$path = str_replace("\\",'/',$path);
-		$dir = dirname($path);
+		$this->path = (empty($path)) ? \org\rhaco\Conf::get('path',getcwd().'/work/output.log') : $path;
+		$dir = dirname($this->path);
 		if(!is_dir($dir)) mkdir($dir,0777,true);
-		return $path;
 	}
 	public function debug(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);

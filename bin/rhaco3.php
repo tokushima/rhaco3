@@ -372,9 +372,9 @@ if(isset($_SERVER['argv'][1])){
 					$str = file_get_contents($path);
 					if(preg_match("/if\(\\\$_SERVER\['SCRIPT_FILENAME'\]==__FILE__.+?;exit;\}/",$str,$m)) $str = str_replace($m[0].PHP_EOL,'',$str);
 					$str = str_replace('<?php','<?php'.PHP_EOL.$rep,$str);
-					if(!empty($mode)) $str = preg_replace("/Rhaco3::mode\(([\"\']).+\\1\)/",'Rhaco3::mode(\''.$mode.'\')',$str);
+					if(!empty($mode)) $str = preg_replace("/Rhaco3::config_path\(([\"\']).+\\1\)/",'Rhaco3::config_path(\''.$mode.'\')',$str);
 				}else{
-					$str = '<?php'.PHP_EOL.$rep.PHP_EOL.'Rhaco3::mode(\''.$mode.'\')'.PHP_EOL;
+					$str = '<?php'.PHP_EOL.$rep.PHP_EOL.'Rhaco3::config_path(\''.$mode.'\')'.PHP_EOL;
 				}
 				file_put_contents($path,$str);
 				print('Writen: __settings__.php'.PHP_EOL);
