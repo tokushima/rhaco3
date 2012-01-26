@@ -33,7 +33,6 @@ class Conf{
 	}
 	/**
 	 * 定義情報を取得する
-	 * @param string $class
 	 * @param string $key
 	 * @param mixed $default
 	 */
@@ -45,8 +44,24 @@ class Conf{
 		return self::exists($class,$key) ? self::$value[$class][$key] : $default;
 	}
 	/**
+	 * 定義情報をJsonで取得する
+	 * @param string $key
+	 */
+	static public function get_json($key){
+		list(,$d) = debug_backtrace(false);
+		$class = str_replace("\\",'.',$d['class']);
+		if($class[0] === '.') $class = substr($class,1);
+		if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
+		$conf = self::exists($class,$key) ? self::$value[$class][$key] : $default;
+		if($conf === null) return null;
+		$json = json_decode($conf,true);
+		if($json === null) throw new \LogicException('JSON error: '.$key);
+		return $json;
+	}
+	
+	/**
+	 * // TODO なくす予定
 	 * 定義情報を配列で取得する
-	 * @param string $class
 	 * @param string $key
 	 * @param mixed $option 
 	 */

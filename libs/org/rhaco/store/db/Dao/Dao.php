@@ -47,10 +47,14 @@ abstract class Dao extends \org\rhaco\Object{
 		return self::$_connections_[self::$_co_anon_[$class][0]][1];
 	}
 	final static private function get_con($database,$class){
-		$conf = Conf::get($database);
-		if(is_array($conf)) $conf = $conf[rand(0,sizeof($conf)-1)];
-		$json = empty($conf) ? null : json_decode($conf,true);
-		if(!isset($json) && !empty($conf)) throw new \LogicException('JSON error '.str_replace("\\",'.',__CLASS__).'@'.$database);
+		// TODO
+//		$conf = Conf::get($database);
+//		if(is_array($conf)) $conf = $conf[rand(0,sizeof($conf)-1)];
+//		$json = empty($conf) ? null : json_decode($conf,true);
+//		if(!isset($json) && !empty($conf)) throw new \LogicException('JSON error '.str_replace("\\",'.',__CLASS__).'@'.$database);
+		$condef = Conf::get_json('connection');
+		$json = $condef[$database];
+		
 		if(!isset(self::$_connections_[$database])){
 			try{
 				if(is_array($json)){
@@ -99,8 +103,13 @@ abstract class Dao extends \org\rhaco\Object{
 							,null,false,false
 						);
 			if(empty($anon[0])){
+				// TODO
 				$conf = explode("\\",$p);
-				while(Conf::get(implode('.',$conf)) === null && !empty($conf)) array_pop($conf);
+				
+//				while(Conf::get(implode('.',$conf)) === null && !empty($conf)) array_pop($conf);
+				$condef = Conf::get_json('connection');
+				while(!isset($condef[implode('.',$conf)]) && !empty($conf)) array_pop($conf);
+				
 				if(empty($conf)) throw new DaoConnectionException('could not find the connection settings `'.$p.'`');
 				$anon[0] = implode('.',$conf);
 			}
