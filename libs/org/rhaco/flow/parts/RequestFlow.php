@@ -428,7 +428,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @arg string $login_redirect ログイン後にリダイレクトされるマップ名
 	 */
 	public function do_login(){
-		if($this->is_login() || $this->silent() || ($this->is_post() && $this->login())){
+		if($this->is_login() || $this->silent() || $this->login()){
 			$redirect_to = $this->in_sessions('logined_redirect_to');
 			$this->rm_sessions('logined_redirect_to');
 			/**
@@ -470,12 +470,12 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		 * @param self $this
 		 * @return boolean
 		 */
-		if(!$this->is_post() || !$this->has_object_module('login_condition') || $this->object_module('login_condition',$this) === false){
+		if(!$this->is_post() || !$this->has_object_module('login_condition') || $this->object_module('login_condition',$this->req) === false){
 			/**
 			 * ログイン失敗
 			 * @param self $this
 			 */
-			$this->object_module('login_invalid',$this);
+			$this->object_module('login_invalid',$this->req);
 			return false;
 		}
 		$this->sessions($this->login_id,$this->login_id);
