@@ -68,7 +68,7 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 				) as $obj){
 			$object_list[] = $obj->set_object_module($this);
 		}
-		list($title,$url) = \org\rhaco\Conf::get_array('atom',2);
+		list($title,$url) = \org\rhaco\Conf::get('atom',null,array('title','url'));
 		\org\rhaco\net\xml\Atom::convert($title,$url,$object_list)->output();
 	}
 	/**

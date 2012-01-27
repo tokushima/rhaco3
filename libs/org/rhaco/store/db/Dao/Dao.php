@@ -47,23 +47,16 @@ abstract class Dao extends \org\rhaco\Object{
 		return self::$_connections_[self::$_co_anon_[$class][0]][1];
 	}
 	final static private function get_con($database,$class){
-		// TODO
-//		$conf = Conf::get($database);
-//		if(is_array($conf)) $conf = $conf[rand(0,sizeof($conf)-1)];
-//		$json = empty($conf) ? null : json_decode($conf,true);
-//		if(!isset($json) && !empty($conf)) throw new \LogicException('JSON error '.str_replace("\\",'.',__CLASS__).'@'.$database);
-		$condef = Conf::get_json('connection');
-		$json = $condef[$database];
-		
+		$def = Conf::get('connection');
 		if(!isset(self::$_connections_[$database])){
 			try{
-				if(is_array($json)){
-					if(isset($json['con'])){
-						self::get_con($json['con'],$class);
-						self::$_connections_[$database] = self::$_connections_[$json['con']];
-						return $json;
+				if(is_array($def[$database])){
+					if(isset($def[$database]['con'])){
+						self::get_con($def[$database]['con'],$class);
+						self::$_connections_[$database] = self::$_connections_[$def[$database]['con']];
+						return $def[$database];
 					}
-					$dbc = new Dbc($json);
+					$dbc = new Dbc($def[$database]);
 					$con = array(false,$dbc->connect());
 					$r = new \ReflectionClass($con[1]->type());
 					$con[2] = $r->newInstanceArgs(array($con[1]->encode()));
@@ -73,7 +66,7 @@ abstract class Dao extends \org\rhaco\Object{
 				throw $e;
 			}
 		}
-		return $json;
+		return $def[$database];
 	}
 	final protected function __new__(){
 		if(func_num_args() == 1){
@@ -103,13 +96,9 @@ abstract class Dao extends \org\rhaco\Object{
 							,null,false,false
 						);
 			if(empty($anon[0])){
-				// TODO
 				$conf = explode("\\",$p);
-				
-//				while(Conf::get(implode('.',$conf)) === null && !empty($conf)) array_pop($conf);
-				$condef = Conf::get_json('connection');
-				while(!isset($condef[implode('.',$conf)]) && !empty($conf)) array_pop($conf);
-				
+				$def = Conf::get('connection');
+				while(!isset($def[implode('.',$conf)]) && !empty($conf)) array_pop($conf);
 				if(empty($conf)) throw new DaoConnectionException('could not find the connection settings `'.$p.'`');
 				$anon[0] = implode('.',$conf);
 			}

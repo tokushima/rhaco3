@@ -12,21 +12,17 @@ class SimpleAuth{
 	}
 	/**
 	 * 
-	 * @conf string $auth string ユーザ,string md5(sha1(パスワード))
+	 * @conf string{} $auth ユーザ:md5(sha1(パスワード))
 	 * @param \org\rhaco\flow\parts\RequestFlow $request
 	 * @return boolean
 	 */
-	public function login_condition(\org\rhaco\flow\parts\RequestFlow $request){
-		if(empty($this->users)) $this->users = \org\rhaco\Conf::get_array('auth');
-
-		$password = $request->in_vars('password');
-		$request->rm_vars('password');
-		if(sizeof($this->users) % 2 !== 0) throw new SimpleAuth\SimpleAuthException();
-		for($i=0;$i<sizeof($this->users);$i+=2){
-			list($user,$pass) = array($this->users[$i],$this->users[$i+1]);
-			if($request->is_post() && $request->in_vars('user_name') === $user && md5(sha1($password)) === $pass){
-				return true;
-			}
+	public function login_condition(\org\rhaco\flow\parts\RequestFlow $req){
+		if(empty($this->users)) $this->users = \org\rhaco\Conf::get('auth');
+		if($req->is_post() 
+			&& isset($this->users[$req->in_vars('user_name')]) 
+			&& $this->users[$req->in_vars('user_name')] == md5(sha1($req->in_vars('password')))
+		){
+			return true;
 		}
 		return false;
 	}

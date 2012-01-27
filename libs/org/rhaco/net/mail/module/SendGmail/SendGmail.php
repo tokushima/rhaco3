@@ -12,7 +12,7 @@ class SendGmail extends \org\rhaco\Object{
 	private $resource;
 
 	protected function __new__($login=null,$password=null){
-		list($this->login,$this->password) = \org\rhaco\Conf::get_array('account',2);
+		list($this->login,$this->password) = \org\rhaco\Conf::get('account',null,array('login','password'));
 		if(isset($login)){
 			$this->login = $login;
 			$this->password = $password;

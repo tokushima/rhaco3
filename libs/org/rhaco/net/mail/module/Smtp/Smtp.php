@@ -19,8 +19,7 @@ class Smtp extends \org\rhaco\net\Socket{
 
 	protected function __new__($hostname=null,$username=null,$password=null,$port=25,$timeout=5){
 		if($hostname === null){
-			list($hostname,$port,$timeout) = \org\rhaco\Conf::get_array('host',3);
-			list($username,$password) = \org\rhaco\Conf::get_array('account',2);
+			list($hostname,$port,$timeout,$username,$password) = \org\rhaco\Conf::get('server',null,array('host','port','timeout','username','password'));
 			if($port === null) $port = 25;
 			if($timeout === null) $timeout = 5;
 		}

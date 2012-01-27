@@ -3,18 +3,18 @@ namespace org\rhaco\io;
 /**
  * ストレージへの操作
  * @author tokushima
+ * @conf string[] $save_nodes ノードのパス配列
+ * @conf string $service_name サービス名（フォルダ名）
  */
 class Storage{
 	/**
 	 * ランダムなノードのパスを返す
 	 * ディレクトリが存在しなかった場合はディレクトリを作成する
 	 * @param string $type
-	 * @conf string[] $save_nodes ノードのパス配列
-	 * @conf string $service_name サービス名（フォルダ名）
 	 * @return string
 	 */
 	static public function get_save_path($type='mixed'){
-		$nodes = \org\rhaco\Conf::get_array('save_nodes');
+		$nodes = \org\rhaco\Conf::get('save_nodes');
 		if(empty($nodes)) throw new \org\rhaco\io\Storage\StorageException('ノードが設定されていません');
 		$service = \org\rhaco\Conf::get('service_name','new_service');
 		$dir = \org\rhaco\net\Path::slash($nodes[rand(1,sizeof($nodes))-1],false,true).$service.'/'.$type.'/'.date('Y/md/H');
@@ -26,7 +26,7 @@ class Storage{
 	 * @throws RuntimeException
 	 */
 	static public function test(){
-		$nodes = \org\rhaco\Conf::get_array('save_nodes');
+		$nodes = \org\rhaco\Conf::get('save_nodes');
 		if(empty($nodes)) throw new \org\rhaco\io\Storage\StorageException('ノードが設定されていません');
 		$service = \org\rhaco\Conf::get('service_name','new_service');
 		foreach($nodes as $node){

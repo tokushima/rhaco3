@@ -36,60 +36,19 @@ class Conf{
 	 * @param string $key
 	 * @param mixed $default
 	 */
-	static public function get($key,$default=null){
+	static public function get($key,$default=null,$return_vars=null){
 		list(,$d) = debug_backtrace(false);
 		$class = str_replace("\\",'.',$d['class']);
 		if($class[0] === '.') $class = substr($class,1);
 		if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
-		return self::exists($class,$key) ? self::$value[$class][$key] : $default;
-	}
-	/**
-	 * 定義情報をJsonで取得する
-	 * @param string $key
-	 */
-	static public function get_json($key){
-		list(,$d) = debug_backtrace(false);
-		$class = str_replace("\\",'.',$d['class']);
-		if($class[0] === '.') $class = substr($class,1);
-		if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
-		$conf = self::exists($class,$key) ? self::$value[$class][$key] : $default;
-		if($conf === null) return null;
-		$json = json_decode($conf,true);
-		if($json === null) throw new \LogicException('JSON error: '.$key);
-		return $json;
-	}
-	
-	/**
-	 * // TODO なくす予定
-	 * 定義情報を配列で取得する
-	 * @param string $key
-	 * @param mixed $option 
-	 */
-	static public function get_array($key,$option=null){
-		list(,$d) = debug_backtrace(false);
-		$class = str_replace("\\",'.',$d['class']);
-		if($class[0] === '.') $class = substr($class,1);
-		if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
-		$r = self::exists($class,$key) ? self::$value[$class][$key] : null;
-		if(!isset($r)) $r = array();
-		if(!is_array($r)) $r = array($r);
-		if(isset($option)){
-			if(is_array($option)){
-				$names_cnt = sizeof($option);
-				$result_cnt = sizeof($r);
-				$chunk = array();
-				for($i=0;$i<$result_cnt;$i+=$names_cnt){
-					$c = array();
-					foreach($option as $k => $name) $c[$name] = isset($r[$i+$k]) ? $r[$i+$k] : null;
-					$chunk[] = $c;
-				}
-				$r = $chunk;
-			}else if(is_int($option)){
-				$num = $option-sizeof($r);
-				if($num > 0) $r = array_merge($r,array_fill(0,$num,null));
-			}
+		$result = self::exists($class,$key) ? self::$value[$class][$key] : $default;
+		if(is_array($return_vars)){
+			if(empty($return_vars) && !is_array($result)) return array($result);
+			$result_vars = array();
+			foreach($return_vars as $var_name) $result_vars[] = isset($result[$var_name]) ? $result[$var_name] : null;
+			return $result_vars;
 		}
-		return $r;
+		return $result;
 	}
 	/**
 	 * Configの一覧を取得する
@@ -99,7 +58,7 @@ class Conf{
 		$conf_get = function($filename){
 			$src = file_get_contents($filename);
 			$gets = array();
-			if(preg_match_all('/[^\w]Conf::'.'(get|get_array)\(([\"\'])(.+?)\\2/',$src,$m)){
+			if(preg_match_all('/[^\w]Conf::'.'(get)\(([\"\'])(.+?)\\2/',$src,$m)){
 				foreach($m[3] as $k => $n){
 					if(!isset($gets[$n])) $gets[$n] = array('string','');
 				}
