@@ -27,7 +27,7 @@ class SampleFlow extends \org\rhaco\flow\parts\RequestFlow{
 			$this->rm_vars();
 			
 			$mv = getcwd().'/'.md5(microtime());			
-			$this->vars('original_name1',$this->file_orginal_name($file_info1));
+			$this->vars('original_name1',$this->file_original_name($file_info1));
 			$this->vars('size1',filesize($this->file_path($file_info1)));
 			$this->vars('has1',$this->has_file($file_info1));
 
@@ -51,7 +51,7 @@ class SampleFlow extends \org\rhaco\flow\parts\RequestFlow{
 			$this->vars('get_data2',$value2);
 			
 			$mv = getcwd().'/'.md5(microtime());			
-			$this->vars('original_name1',$this->file_orginal_name($file_info1));
+			$this->vars('original_name1',$this->file_original_name($file_info1));
 			$this->vars('size1',filesize($this->file_path($file_info1)));
 			$this->vars('has1',$this->has_file($file_info1));
 
@@ -62,7 +62,7 @@ class SampleFlow extends \org\rhaco\flow\parts\RequestFlow{
 			unlink($mv);
 			
 			$mv = getcwd().'/'.md5(microtime());			
-			$this->vars('original_name2',$this->file_orginal_name($file_info2));
+			$this->vars('original_name2',$this->file_original_name($file_info2));
 			$this->vars('size2',filesize($this->file_path($file_info2)));
 			$this->vars('has2',$this->has_file($file_info2));
 
