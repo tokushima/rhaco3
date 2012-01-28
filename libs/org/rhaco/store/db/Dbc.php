@@ -29,16 +29,13 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 
 	/**
 	 * コンストラクタ
-	 * @param string $json 接続情報のjson文字列
+	 * @param string{} $def 接続情報の配列
 	 */
-	public function __new__($json=null){
-		if(is_string($json)) $json = empty($json) ? null : json_decode($json,true);
-		if(is_array($json)){
-			foreach(array('type','host','dbname','user','password','port','sock','encode') as $k){
-				if(isset($json[$k])) $this->{$k}($json[$k]);
-			}
-			$this->connect();
+	public function __new__(array $def){
+		foreach(array('type','host','dbname','user','password','port','sock','encode') as $k){
+			if(isset($def[$k])) $this->{$k}($def[$k]);
 		}
+		$this->connect();
 	}
 	/**
 	 * 接続
