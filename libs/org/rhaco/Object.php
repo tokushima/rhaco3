@@ -63,16 +63,16 @@ class Object{
 	}
 	final static private function _class_anon($c,$d){
 		self::$_m[1][$c] = array();
-		self::parse_anon_json(self::$_m[1][$c],'class',$d);
+		self::parse_anon(self::$_m[1][$c],'class',$d);
 	}
 	/**
-	 * アノテーションのJSONをデコードしてすべて取得
+	 * アノテーションをデコードしてすべて取得
 	 * @param array $result
 	 * @param string $name
 	 * @param string $d
 	 * @throws \LogicException
 	 */
-	final static protected function parse_anon_json(array &$result,$name,$d){
+	final static protected function parse_anon(array &$result,$name,$d){
 		if(preg_match_all("/@".$name."\s.*@(\{.*\})/",$d,$m)){
 			foreach($m[1] as $j){
 				$p = json_decode($j,true);

@@ -30,7 +30,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$this->login_id = $this->code.'_LOGIN_';
 	}
 	protected function __anon__($d){
-		self::parse_anon_json($this->anon_login,'login',$d);
+		self::parse_anon($this->anon_login,'login',$d);
 	}
 	/**
 	 * ログインしているユーザのモデル
