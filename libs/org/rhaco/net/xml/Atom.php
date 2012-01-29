@@ -4,9 +4,9 @@ namespace org\rhaco\net\xml;
  * Atom1.0を扱う
  * @author tokushima
  * @var timestamp $updated
- * @var org.rhaco.net.xml.atom.Link[] $link
- * @var org.rhaco.net.xml.atom.Entry[] $entry
- * @var org.rhaco.net.xml.atom.Author[] $author
+ * @var atom.Link[] $link
+ * @var atom.Entry[] $entry
+ * @var atom.Author[] $author
  * @var string{} $xmlns
  */
 class Atom extends \org\rhaco\net\xml\atom\Object{
@@ -162,7 +162,6 @@ class Atom extends \org\rhaco\net\xml\atom\Object{
 						if(is_array($value)){
 							foreach($value as $v){
 								try{
-// TODO
 									$result->add(($v instanceof \org\rhaco\net\xml\atom\Object) ? $v->xml() : $v);
 								}catch(\org\rhaco\net\xml\atom\NotfoundException $e){}
 							}

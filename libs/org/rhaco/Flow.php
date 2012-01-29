@@ -141,6 +141,8 @@ class Flow{
 						$n = isset($v['name']) ? $v['name'] : $v['class'];
 						$r = new \ReflectionClass(str_replace('.',"\\",$v['class']));
 						$canon = array();
+						
+						// TODO
 						if(class_exists('\org\rhaco\Object') && $r->isSubclassOf('\org\rhaco\Object')){
 							$canon = call_user_func_array(array($r->getName(),'anon'),array('maps',array()));
 						}else{

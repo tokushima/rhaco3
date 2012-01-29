@@ -9,47 +9,77 @@ class Object{
 	private $_im = array(array(),array());
 	protected $_;
 
+	/**
+	 * クラスのアノテーションを取得する
+	 * @param string $n アノテーション名
+	 * @param mixed $df デフォルト値
+	 * @return mixed
+	 */
+	final static public function anon($n,$df=null){
+		// TODO
+		if(!isset(self::$_m[1][get_called_class()])){
+			$d = '';
+			$r = new \ReflectionClass(get_called_class());
+			while($r->getName() != __CLASS__){
+				$d = $r->getDocComment().$d;
+				$r = $r->getParentClass();
+			}
+			self::_class_anon(get_called_class(),$d);
+		}
+		return isset(self::$_m[1][get_called_class()][$n]) ? self::$_m[1][get_called_class()][$n] : $df;
+	}
+	final static public function anon_decode(array $anon,$name,$d,$in_type=false,$ns=null){
+		// TODO
+		$decode_func = function($s,$name){
+			if(empty($s)) return array();
+			$d = json_decode($s,true);
+			if(!is_array($d)) throw new \InvalidArgumentException('JSON error $'.$name.' @'.$s);
+			return $d;
+		};
+		if($in_type && preg_match_all("/@".$name."\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
+			foreach($m[2] as $k => $n){
+				$as = (false !== ($s=strpos($m[3][$k],'@{'))) ? substr($m[3][$k],$s+1,strrpos($m[3][$k],'}')-$s) : null;
+				$decode = $decode_func($as,$n);
+				$anon[$n] = (isset($anon[$n])) ? array_merge($anon[$n],$decode) : $decode;
+				list($anon[$n]['type'],$anon[$n]['attr']) = (false != ($h = strpos($m[1][$k],'{}')) || false !== ($l = strpos($m[1][$k],'[]'))) ? array(substr($m[1][$k],0,-2),(isset($h) && $h !== false) ? 'h' : 'a') : array($m[1][$k],null);
+				if(!ctype_lower($t=$anon[$n]['type'])){
+					if($t[0]!='\\') $t='\\'.$t;
+					if(!class_exists($t=str_replace('.','\\',$t))){
+						if(!class_exists($t='\\'.$ns.$t)) throw new \InvalidArgumentException($t.' '.$anon[$n]['type'].' not found');
+					}
+					$anon[$n]['type'] = (($t[0] !== '\\') ? '\\' : '').str_replace('.','\\',$t);
+				}
+			}
+		}else if(preg_match_all("/@".$name."\s.*@(\{.*\})/",$d,$m)){
+			foreach($m[1] as $j){
+				$decode = $decode_func($j,$name);
+				$anon = array_merge($anon,$decode);
+			}
+		}
+		return $anon;
+	}
+	final static private function _class_anon($c,$d){
+		self::$_m[1][$c] = array();
+		self::$_m[1][$c] = self::anon_decode(self::$_m[1][$c],'class',$d);
+	}
 	final public function __construct(){
 		$c = get_class($this);
 		if(!isset(self::$_m[0][$c])){
 			self::$_m[0][$c] = array();
 			$d = null;
-			$r = new \ReflectionClass($this);
-			while($r->getName() != __CLASS__){
-				$d = $r->getDocComment().$d;
-				$r = $r->getParentClass();
+			$t = new \ReflectionClass($this);
+			$ns = $t->getNamespaceName();
+			while($t->getName() != __CLASS__){
+				$d = $t->getDocComment().$d;
+				$t = $t->getParentClass();
 			}
 			$d = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$d));
-			if(preg_match_all("/@var\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
-				foreach($m[2] as $k => $n){
-					$p = (false !== ($s = strpos($m[3][$k],'@{'))) ? json_decode(substr($m[3][$k],$s+1,strrpos($m[3][$k],'}')-$s),true) : array();
-					if(!is_array($p)) throw new \LogicException('JSON error `'.$n.'`');
-					self::$_m[0][$c][$n] = (isset(self::$_m[0][$c][$n])) ? array_merge(self::$_m[0][$c][$n],$p) : $p;
-					if(false != ($h = strpos($m[1][$k],'{}')) || false !== ($l = strpos($m[1][$k],'[]'))){
-						self::$_m[0][$c][$n]['type'] = substr($m[1][$k],0,-2);
-						self::$_m[0][$c][$n]['attr'] = (isset($h) && $h !== false) ? 'h' : 'a';
-					}else{
-						self::$_m[0][$c][$n]['type'] = $m[1][$k];
-					}
-					foreach(array_keys(self::$_m[0][$c]) as $n){
-						if(self::$_m[0][$c][$n]['type'] == 'serial'){
-							self::$_m[0][$c][$n]['primary'] = true;
-						}else if(self::$_m[0][$c][$n]['type'] == 'choice' && method_exists($this,'__choices_'.$n.'__')){
-							self::$_m[0][$c][$n]['choices'] = $this->{'__choices_'.$n.'__'}();
-						}
-					}
-					if(!ctype_lower(self::$_m[0][$c][$n]['type'])){
-						$t = str_replace('.','\\',self::$_m[0][$c][$n]['type']);
-						if(strpos($t,'\\') === false){
-							try{
-								$r = new \ReflectionClass($this);
-								if(class_exists($r->getNamespaceName().'\\'.$t)) $t = $r->getNamespaceName().'\\'.$t;							
-							}catch(ErrorException $e){
-								if(class_exists('\\'.$t)) $t = '\\'.$t;
-							}
-						}
-						self::$_m[0][$c][$n]['type'] = (($r->getNamespaceName() != '' && $t[0] !== '\\') ? '\\' : '').str_replace('.','\\',$t);
-					}
+			self::$_m[0][$c] = self::anon_decode(self::$_m[0][$c],'var',$d,true,$ns);
+			foreach(array_keys(self::$_m[0][$c]) as $n){
+				if(self::$_m[0][$c][$n]['type'] == 'serial'){
+					self::$_m[0][$c][$n]['primary'] = true;
+				}else if(self::$_m[0][$c][$n]['type'] == 'choice' && method_exists($this,'__choices_'.$n.'__')){
+					self::$_m[0][$c][$n]['choices'] = $this->{'__choices_'.$n.'__'}();
 				}
 			}
 			if(!isset(self::$_m[1][$c])) self::_class_anon($c,$d);
@@ -60,26 +90,6 @@ class Object{
 			call_user_func_array(array($this,'__new__'),$args);
 		}
 		if(method_exists($this,'__init__')) $this->__init__();
-	}
-	final static private function _class_anon($c,$d){
-		self::$_m[1][$c] = array();
-		self::parse_anon(self::$_m[1][$c],'class',$d);
-	}
-	/**
-	 * アノテーションをデコードしてすべて取得
-	 * @param array $result
-	 * @param string $name
-	 * @param string $d
-	 * @throws \LogicException
-	 */
-	final static protected function parse_anon(array &$result,$name,$d){
-		if(preg_match_all("/@".$name."\s.*@(\{.*\})/",$d,$m)){
-			foreach($m[1] as $j){
-				$p = json_decode($j,true);
-				if(!is_array($p)) throw new \LogicException('JSON error @'.$name);
-				$result = array_merge($result,$p);
-			}
-		}
 	}
 	final public function __call($n,$args){
 		if($n[0] != '_'){
@@ -573,24 +583,6 @@ class Object{
 	}
 	final public function __toString(){
 		return (method_exists($this,'__str__')) ? (string)$this->__str__() : get_class($this);
-	}
-	/**
-	 * クラスのアノテーションを取得する
-	 * @param string $n アノテーション名
-	 * @param mixed $df デフォルト値
-	 * @return mixed
-	 */
-	final static public function anon($n,$df=null){
-		if(!isset(self::$_m[1][get_called_class()])){
-			$d = '';
-			$r = new \ReflectionClass(get_called_class());
-			while($r->getName() != __CLASS__){
-				$d = $r->getDocComment().$d;
-				$r = $r->getParentClass();
-			}
-			self::_class_anon(get_called_class(),$d);
-		}
-		return isset(self::$_m[1][get_called_class()][$n]) ? self::$_m[1][get_called_class()][$n] : $df;
 	}
 	/**
 	 * クラスモジュールを追加する

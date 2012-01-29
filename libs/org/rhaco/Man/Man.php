@@ -75,6 +75,7 @@ class Man{
 				}
 			}
 		}
+// TODO
 		if(preg_match_all("/@var\s([\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
 			foreach($m[2] as $k => $n){
 				if(isset($properties[$n])){

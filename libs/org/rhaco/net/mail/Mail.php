@@ -9,8 +9,8 @@ use \org\rhaco\io\File;
  * @var string{} $to
  * @var string{} $cc
  * @var string{} $bcc
- * @var File{} $attach
- * @var File{} $image
+ * @var org.rhaco.io.File{} $attach
+ * @var org.rhaco.io.File{} $image
  * @var choice $encode @{"choices":["jis","utf8","sjis"]}
  */
 class Mail extends \org\rhaco\Object{
