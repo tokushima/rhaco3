@@ -67,22 +67,16 @@ class Man{
 			if(($ref = $ref->getParentClass()) === false) break;
 		}
 		$d = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$d));
+		$anon = \org\rhaco\Object::anon_decode($d,'var',$r->getNamespaceName(),'summary');
 		foreach($r->getProperties() as $prop){
 			if(!$prop->isPrivate()){
 				$name = $prop->getName();
 				if($name[0] != '_' && !$prop->isStatic()){
-					$properties[$name] = array('mixed',null,null);
-				}
-			}
-		}
-// TODO
-		if(preg_match_all("/@var\s([\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
-			foreach($m[2] as $k => $n){
-				if(isset($properties[$n])){
-					$dec = preg_replace('/^(.*?)@.*$/','\\1',$m[3][$k]);
-					$anon = json_decode(preg_replace('/^.*?@(.*)$/','\\1',$m[3][$k]),true);
-					$hash = !(isset($anon['hash']) && $anon['hash'] === false);
-					$properties[$n] = array(self::type($m[1][$k],$class),$dec,$hash);
+					$properties[$name] = array(
+											(isset($anon[$name]['type']) ? self::type($anon[$name]['type'],$class) : 'mixed')
+											,(isset($anon[$name]['summary']) ? $anon[$name]['summary'] : null)
+											,!(isset($anon[$name]['hash']) && $anon[$name]['hash'] === false)
+										);
 				}
 			}
 		}

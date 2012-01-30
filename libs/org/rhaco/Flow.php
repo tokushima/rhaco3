@@ -141,8 +141,6 @@ class Flow{
 						$n = isset($v['name']) ? $v['name'] : $v['class'];
 						$r = new \ReflectionClass(str_replace('.',"\\",$v['class']));
 						$canon = array();
-						
-						// TODO
 						if(class_exists('\org\rhaco\Object') && $r->isSubclassOf('\org\rhaco\Object')){
 							$canon = call_user_func_array(array($r->getName(),'anon'),array('maps',array()));
 						}else{
@@ -151,13 +149,8 @@ class Flow{
 								$d = $r->getDocComment().$d;
 								$r = $r->getParentClass();
 							}
-							if(preg_match_all("/@class\s.*@(\{.*\})/",$d,$m)){
-								foreach($m[1] as $j){
-									$p = json_decode($j,true);
-									if(is_array($p)) $canon = array_merge($canon,$p);
-								}
-							}
-							$canon = isset($canon['maps']) ? $canon['maps'] : array();
+							$anon = \org\rhaco\Object::anon_decode($d,'class');
+							$canon = isset($anon['maps']) ? $anon['maps'] : array();
 						}
 						$canon = array_flip($canon);
 						foreach($r->getMethods() as $m){

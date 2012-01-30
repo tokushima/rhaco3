@@ -16,51 +16,56 @@ class Object{
 	 * @return mixed
 	 */
 	final static public function anon($n,$df=null){
-		// TODO
-		if(!isset(self::$_m[1][get_called_class()])){
+		$c = get_called_class();
+		if(!isset(self::$_m[1][$c])){
 			$d = '';
-			$r = new \ReflectionClass(get_called_class());
+			$r = new \ReflectionClass($c);
 			while($r->getName() != __CLASS__){
 				$d = $r->getDocComment().$d;
 				$r = $r->getParentClass();
 			}
-			self::_class_anon(get_called_class(),$d);
+			self::$_m[1][$c] = self::anon_decode($d,'class');
 		}
-		return isset(self::$_m[1][get_called_class()][$n]) ? self::$_m[1][get_called_class()][$n] : $df;
+		return isset(self::$_m[1][$c][$n]) ? self::$_m[1][$c][$n] : $df;
 	}
-	final static public function anon_decode(array $anon,$name,$d,$in_type=false,$ns=null){
-		// TODO
+	/**
+	 * アノテーション文字列をデコードする
+	 * @param text $d デコード対象となる文字列
+	 * @param string $name デコード対象のアノテーション名
+	 * @param string $ns_name 型宣言を取得する場合の名前空間
+	 * @param string $doc_name 説明を取得する場合の添字
+	 * @throws \InvalidArgumentException
+	 */
+	final static public function anon_decode($d,$name,$ns_name=null,$doc_name=null){
+		$result = array();
 		$decode_func = function($s,$name){
 			if(empty($s)) return array();
 			$d = json_decode($s,true);
 			if(!is_array($d)) throw new \InvalidArgumentException('JSON error $'.$name.' @'.$s);
 			return $d;
 		};
-		if($in_type && preg_match_all("/@".$name."\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
+		if($ns_name !== null && preg_match_all("/@".$name."\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
 			foreach($m[2] as $k => $n){
 				$as = (false !== ($s=strpos($m[3][$k],'@{'))) ? substr($m[3][$k],$s+1,strrpos($m[3][$k],'}')-$s) : null;
+				
 				$decode = $decode_func($as,$n);
-				$anon[$n] = (isset($anon[$n])) ? array_merge($anon[$n],$decode) : $decode;
-				list($anon[$n]['type'],$anon[$n]['attr']) = (false != ($h = strpos($m[1][$k],'{}')) || false !== ($l = strpos($m[1][$k],'[]'))) ? array(substr($m[1][$k],0,-2),(isset($h) && $h !== false) ? 'h' : 'a') : array($m[1][$k],null);
-				if(!ctype_lower($t=$anon[$n]['type'])){
+				$result[$n] = (isset($result[$n])) ? array_merge($result[$n],$decode) : $decode;
+
+				if(!empty($doc_name)) $result[$n][$doc_name] = ($s===false) ? $m[3][$k] : substr($m[3][$k],0,$s);
+				list($result[$n]['type'],$result[$n]['attr']) = (false != ($h = strpos($m[1][$k],'{}')) || false !== ($l = strpos($m[1][$k],'[]'))) ? array(substr($m[1][$k],0,-2),(isset($h) && $h !== false) ? 'h' : 'a') : array($m[1][$k],null);
+				if(!ctype_lower($t=$result[$n]['type'])){
 					if($t[0]!='\\') $t='\\'.$t;
-					if(!class_exists($t=str_replace('.','\\',$t))){
-						if(!class_exists($t='\\'.$ns.$t)) throw new \InvalidArgumentException($t.' '.$anon[$n]['type'].' not found');
-					}
-					$anon[$n]['type'] = (($t[0] !== '\\') ? '\\' : '').str_replace('.','\\',$t);
+					if(!class_exists($t=str_replace('.','\\',$t)) && !class_exists($t='\\'.$ns_name.$t)) throw new \InvalidArgumentException($t.' '.$result[$n]['type'].' not found');
+					$result[$n]['type'] = (($t[0] !== '\\') ? '\\' : '').str_replace('.','\\',$t);
 				}
 			}
 		}else if(preg_match_all("/@".$name."\s.*@(\{.*\})/",$d,$m)){
 			foreach($m[1] as $j){
 				$decode = $decode_func($j,$name);
-				$anon = array_merge($anon,$decode);
+				$result = array_merge($result,$decode);
 			}
 		}
-		return $anon;
-	}
-	final static private function _class_anon($c,$d){
-		self::$_m[1][$c] = array();
-		self::$_m[1][$c] = self::anon_decode(self::$_m[1][$c],'class',$d);
+		return $result;
 	}
 	final public function __construct(){
 		$c = get_class($this);
@@ -74,7 +79,7 @@ class Object{
 				$t = $t->getParentClass();
 			}
 			$d = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$d));
-			self::$_m[0][$c] = self::anon_decode(self::$_m[0][$c],'var',$d,true,$ns);
+			self::$_m[0][$c] = self::anon_decode($d,'var',$ns);
 			foreach(array_keys(self::$_m[0][$c]) as $n){
 				if(self::$_m[0][$c][$n]['type'] == 'serial'){
 					self::$_m[0][$c][$n]['primary'] = true;
@@ -82,7 +87,6 @@ class Object{
 					self::$_m[0][$c][$n]['choices'] = $this->{'__choices_'.$n.'__'}();
 				}
 			}
-			if(!isset(self::$_m[1][$c])) self::_class_anon($c,$d);
 			if(method_exists($this,'__anon__')) $this->__anon__($d);
 		}
 		if(method_exists($this,'__new__')){

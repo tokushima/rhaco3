@@ -17,7 +17,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	private $req;
 	private $code;
 	private $login_id;
-	private $anon_login = array('type'=>null,'require'=>false);
+	private $anon_login;
 	
 	protected function __new__(){
 		$d = debug_backtrace(false);
@@ -30,8 +30,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$this->login_id = $this->code.'_LOGIN_';
 	}
 	protected function __anon__($d){
-		// TODO
-		$this->anon_login = self::anon_decode($this->anon_login,'login',$d);
+		$this->anon_login = self::anon_decode($d,'login');
 	}
 	/**
 	 * ログインしているユーザのモデル
@@ -41,7 +40,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	public function user(){
 		if(func_num_args() > 0){
 			$user = func_get_arg(0);
-			if(!empty($this->anon_login['type'])){
+			if(isset($this->anon_login['type']) && !empty($this->anon_login['type'])){
 				$class = str_replace('.',"\\",$this->anon_login['type']);
 				if($class[0] != "\\") $class= "\\".$class;
 				if(!($user instanceof $class)) throw new \LogicException('user must be an of '.$this->anon_login['type']);
@@ -130,7 +129,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 */
 			$this->object_module('before_flow_handle',$this);
 		}
-		if(!$this->is_login() && $this->anon_login['require'] === true) $this->login_required();
+		if(!$this->is_login() && isset($this->anon_login['require']) && $this->anon_login['require'] === true) $this->login_required();
 	}
 	/**
 	 * (non-PHPdoc)
