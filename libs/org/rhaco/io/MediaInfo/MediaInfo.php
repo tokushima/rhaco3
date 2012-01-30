@@ -4,7 +4,7 @@ namespace org\rhaco\io;
  * Exif情報
  * @author tokushima
  * @see http://www.sno.phy.queensu.ca/~phil/exiftool/
- * @var choice $type @{"choices":["photo","video"]}
+ * @var choice $type @['choices'=>['photo','video']]
  * @var string $name
  * @var string $filename
  * @var integer $width
@@ -17,7 +17,7 @@ namespace org\rhaco\io;
  * @var number $latitude
  * @var number $rotation
  * @var time $duration
- * @var mixed{} $raw @{"hash":false}
+ * @var mixed{} $raw @['hash'=>false]
  * @conf string $cmd exiftoolのパス
  */
 class MediaInfo extends \org\rhaco\Object{

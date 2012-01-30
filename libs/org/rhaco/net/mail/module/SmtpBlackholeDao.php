@@ -10,7 +10,7 @@ namespace org\rhaco\net\mail\module;
  * @var string $subject
  * @var text $message
  * @var text $manuscript
- * @var timestamp $create_date @{"auto_now_add":true}
+ * @var timestamp $create_date @['auto_now_add'=>true]
  */
 class SmtpBlackholeDao extends \org\rhaco\store\db\Dao{
 	protected $id;

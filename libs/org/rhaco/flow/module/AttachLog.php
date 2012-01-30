@@ -8,7 +8,7 @@ namespace org\rhaco\flow\module;
  * @var string $lang HTTP_ACCEPT_LANGUAGE
  * @var string $agent HTTP_USER_AGENT
  * @var string $referer  HTTP_REFERER
- * @var timestamp $create_date @{"auto_now_add":true}
+ * @var timestamp $create_date @['auto_now_add'=>true]
  */
 class AttachLog extends \org\rhaco\store\db\Dao implements \IteratorAggregate{
 	protected $id;

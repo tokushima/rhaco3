@@ -29,7 +29,7 @@ foreach($columns as $column){
 }
 
 /**
- * @var mixed $extra_value @{"extra":true}
+ * @var mixed $extra_value @['extra'=>true]
  */
 class ExtraInitHasParent extends InitHasParent{
 	protected $extra_value;
@@ -68,9 +68,9 @@ foreach(DateTime::find() as $o){
 }
 
 /**
- * @var timestamp $ts @{"auto_now_add":true}
- * @var date $date @{"auto_now_add":true}
- * @var intdate $idate @{"auto_now_add":true}
+ * @var timestamp $ts @['auto_now_add'=>true]
+ * @var date $date @['auto_now_add'=>true]
+ * @var intdate $idate @['auto_now_add'=>true]
  */
 class AddNowDateTime extends DateTime{
 }
@@ -89,9 +89,9 @@ foreach(AddNowDateTime::find() as $o){
 }
 
 /**
- * @var timestamp $ts @{"auto_now":true}
- * @var date $date @{"auto_now":true}
- * @var intdate $idate @{"auto_now":true}
+ * @var timestamp $ts @['auto_now'=>true]
+ * @var date $date @['auto_now'=>true]
+ * @var intdate $idate @['auto_now'=>true]
  */
 class AddDateTime extends DateTime{
 }
@@ -111,9 +111,9 @@ foreach(AddNowDateTime::find() as $o){
 
 /**
  * @var serial $id
- * @var string $code1 @{"auto_code_add":true}
- * @var string $code2 @{"auto_code_add":true,"max":10}
- * @var string $code3 @{"auto_code_add":true,"max":40}
+ * @var string $code1 @['auto_code_add'=>true]
+ * @var string $code2 @['auto_code_add'=>true,'max'=>10]
+ * @var string $code3 @['auto_code_add'=>true,'max'=>40]
  */
 class UniqueCode extends Dao{
 	protected $id;
@@ -140,9 +140,9 @@ foreach(UniqueCode::find() as $o){
 
 /**
  * @var serial $id
- * @var string $code1 @{"auto_code_add":true,"ctype":"digit"}
- * @var string $code2 @{"auto_code_add":true,"max":10,"ctype":"digit"}
- * @var string $code3 @{"auto_code_add":true,"max":40,"ctype":"digit"}
+ * @var string $code1 @['auto_code_add'=>true,'ctype'=>'digit']
+ * @var string $code2 @['auto_code_add'=>true,'max'=>10,'ctype'=>'digit']
+ * @var string $code3 @['auto_code_add'=>true,'max'=>40,'ctype'=>'digit']
  */
 class UniqueCodeDigit extends UniqueCode{
 	protected $id;
@@ -171,9 +171,9 @@ foreach(UniqueCodeDigit::find() as $o){
 
 /**
  * @var serial $id
- * @var string $code1 @{"auto_code_add":true,"ctype":"alpha"}
- * @var string $code2 @{"auto_code_add":true,"max":10,"ctype":"alpha"}
- * @var string $code3 @{"auto_code_add":true,"max":40,"ctype":"alpha"}
+ * @var string $code1 @['auto_code_add'=>true,'ctype'=>'alpha']
+ * @var string $code2 @['auto_code_add'=>true,'max'=>10,'ctype'=>'alpha']
+ * @var string $code3 @['auto_code_add'=>true,'max'=>40,'ctype'=>'alpha']
  */
 class UniqueCodeAlpha extends UniqueCode{
 	protected $id;
@@ -202,8 +202,8 @@ foreach(UniqueCodeAlpha::find() as $o){
 
 
 /**
- * @var integer $id1 @{"primary":true}
- * @var integer $id2 @{"primary":true}
+ * @var integer $id1 @['primary'=>true]
+ * @var integer $id2 @['primary'=>true]
  * @var string $value
  */
 class DoublePrimary extends Dao{
@@ -223,8 +223,8 @@ eq("hoge",$p->id1(1)->id2(1)->sync()->value());
 
 /**
  * @var serial $id
- * @var string $value1 @{"max":3,"min":2}
- * @var number $value2 @{"max":3,"min":2}
+ * @var string $value1 @['max'=>3,'min'=>2]
+ * @var number $value2 @['max'=>3,'min'=>2]
  */
 class LimitVerify extends Dao{
 	protected $id;
@@ -276,7 +276,7 @@ try{
 
 /**
  * @var serial $id
- * @var integer $u1 @{"unique_together":"u2"}
+ * @var integer $u1 @['unique_together'=>'u2']
  * @var integer $u2
  */
 class UniqueVerify extends Dao{
@@ -321,7 +321,7 @@ try{
 
 /**
  * @var serial $id
- * @var integer $u1 @{"unique_together":["u2","u3"]}
+ * @var integer $u1 @['unique_together'=>['u2','u3']]
  * @var integer $u2
  * @var integer $u3
  */
@@ -445,7 +445,7 @@ class AbcFind extends Find{
 /**
  * @var serial $id
  * @var integer $parent_id
- * @var string $value @{"cond":"parent_id(find.id)","column":"value1"}
+ * @var string $value @['cond'=>'parent_id(find.id)','column'=>'value1']
  */
 class RefFind extends Dao{
 	protected $id;
@@ -455,7 +455,7 @@ class RefFind extends Dao{
 /**
  * @var serial $id
  * @var integer $parent_id
- * @var string $value @{"cond":"parent_id(ref_find.id.parent_id,find.id)","column":"value1"}
+ * @var string $value @['cond'=>'parent_id(ref_find.id.parent_id,find.id)','column'=>'value1']
  */
 class RefRefFind extends Dao{
 	protected $id;
@@ -463,10 +463,10 @@ class RefRefFind extends Dao{
 	protected $value;
 }
 /**
- * @class @{"table":"ref_find"}
+ * @class @['table'=>'ref_find']
  * @var serial $id
  * @var integer $parent_id
- * @var Find $parent @{"cond":"parent_id()id"}
+ * @var Find $parent @['cond'=>'parent_id()id']
  */
 class HasFind extends Dao{
 	protected $id;
@@ -524,7 +524,7 @@ class ManyChild extends Dao{
 /**
  * @var serial $id
  * @var string $value
- * @var ManyChild[] $children @{"cond":"id()parent_id"}
+ * @var ManyChild[] $children @['cond'=>'id()parent_id']
  */
 class ManyParent extends Dao{
 	protected $id;
@@ -589,9 +589,9 @@ JoinC::find_delete();
 
 
 /**
- * @class @{"table":"join_a"}
+ * @class @['table'=>'join_a']
  * @var serial $id
- * @var string $name @{"column":"name","cond":"id(join_c.a_id.b_id,join_b.id)"}
+ * @var string $name @['column'=>'name','cond'=>'id(join_c.a_id.b_id,join_b.id)']
  */
 class JoinABC extends Dao{
 	protected $id;
@@ -919,7 +919,7 @@ class CrossParent extends Dao{
 /**
  * @var serial $id
  * @var integer $parent_id
- * @var CrossParent $parent @{"cond":"parent_id()id"}
+ * @var CrossParent $parent @['cond'=>'parent_id()id']
  */
 class CrossChild extends Dao{
 	protected $id;
@@ -954,7 +954,7 @@ Replication::find_delete();
 Replication::commit();
 
 /**
- * @class @{"table":"replication","update":false,"create":false,"delete":false}
+ * @class @['table'=>'replication','update'=>false,'create'=>false,'delete'=>false]
  * @var serial $id
  * @var string $value
  */

@@ -6,8 +6,8 @@ namespace org\rhaco\net\mail\module;
  * @author yabeken
  * @var string $username
  * @var string $password
- * @var string $response @{"set":false}
- * @var integer $response_code @{"set":false}
+ * @var string $response @['set'=>false]
+ * @var integer $response_code @['set'=>false]
  * @conf string[] $host smtpサーバ情報 hostname,port,timeout(sec)
  * @conf string[] $account smtpサーバへの接続情報 username,password
  */

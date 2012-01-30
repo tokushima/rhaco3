@@ -40,13 +40,13 @@ class Object{
 		$result = array();
 		$decode_func = function($s,$name){
 			if(empty($s)) return array();
-			$d = json_decode($s,true);
+			$d = eval('return '.str_replace(array('[',']'),array('array(',')'),$s).';');
 			if(!is_array($d)) throw new \InvalidArgumentException('annotation error $'.$name.' @'.$s);
 			return $d;
 		};
 		if($ns_name !== null && preg_match_all("/@".$name."\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
 			foreach($m[2] as $k => $n){
-				$as = (false !== ($s=strpos($m[3][$k],'@{'))) ? substr($m[3][$k],$s+1,strrpos($m[3][$k],'}')-$s) : null;
+				$as = (false !== ($s=strpos($m[3][$k],'@['))) ? substr($m[3][$k],$s+1,strrpos($m[3][$k],']')-$s) : null;
 				
 				$decode = $decode_func($as,$n);
 				$result[$n] = (isset($result[$n])) ? array_merge($result[$n],$decode) : $decode;
@@ -59,7 +59,7 @@ class Object{
 					$result[$n]['type'] = (($t[0] !== '\\') ? '\\' : '').str_replace('.','\\',$t);
 				}
 			}
-		}else if(preg_match_all("/@".$name."\s.*@(\{.*\})/",$d,$m)){
+		}else if(preg_match_all("/@".$name."\s.*@(\[.*\])/",$d,$m)){
 			foreach($m[1] as $j){
 				$decode = $decode_func($j,$name);
 				$result = array_merge($result,$decode);
@@ -110,8 +110,8 @@ class Object{
 							@var number[] $bbb
 						 	@var string{} $ccc
 							@var timestamp $eee
-							@var string $fff @{"column":"Acol","table":"BTbl"}
-							@var string $ggg @{"set":false}
+							@var string $fff @["column"=>"Acol","table"=>"BTbl"]
+							@var string $ggg @["set"=>false]
 							@var boolean $hhh
 							-----------------------------------------------------------
 							class * extends self{
@@ -248,7 +248,7 @@ class Object{
 						@var boolean $ee
 						@var timestamp $ff
 						@var time $gg
-						@var choice $hh @{"choices":["abc","def"]}
+						@var choice $hh @["choices"=>["abc","def"]]
 						@var string{} $ii
 						@var string[] $jj
 						@var email $kk
@@ -257,7 +257,7 @@ class Object{
 						@var intdate $nn
 						@var integer $oo
 						@var text $pp
-						@var number $qq @{"decimal_places":2}
+						@var number $qq @["decimal_places"=>2]
 						----------------------------------------------------
 						class * extends self{
 							protected $aa;
@@ -700,7 +700,7 @@ class Object{
 			eq(array("aaa"=>"hoge","bbb"=>"1","ccc"=>"123"),$obj1->hash());
 
 			$obj2 = newclass(sprintf('
-							@var serial $aaa @{"hash":false}
+							@var serial $aaa @["hash"=>false]
 							@var number $bbb
 							-----------------------------------
 							class * extends %s{

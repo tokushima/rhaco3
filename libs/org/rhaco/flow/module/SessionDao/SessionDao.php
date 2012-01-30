@@ -4,7 +4,7 @@ use \org\rhaco\store\db\Q;
 /**
  * Daoでセッションを扱うRequestモジュール
  * @author tokushima
- * @var string $id @{"primary":true}
+ * @var string $id @['primary'=>true]
  * @var text $text
  * @var number $expires
  */

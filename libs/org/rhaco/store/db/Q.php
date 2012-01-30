@@ -3,11 +3,11 @@ namespace org\rhaco\store\db;
 /**
  * 条件
  * @author tokushima
- * @var number $type @{"set":false}
- * @var number $param @{"set":false}
- * @var Q[] $and_block @{"set":false}
- * @var Q[] $order_by @{"set":false}
- * @var org.rhaco.Paginator $paginator @{"set":false}
+ * @var number $type @['set'=>false]
+ * @var number $param @['set'=>false]
+ * @var Q[] $and_block @['set'=>false]
+ * @var Q[] $order_by @['set'=>false]
+ * @var org.rhaco.Paginator $paginator @['set'=>false]
  */
 class Q extends \org\rhaco\Object{
 	const EQ = 1;

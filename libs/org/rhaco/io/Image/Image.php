@@ -7,8 +7,8 @@ namespace org\rhaco\io;
  * @author riaf <riafweb@gmail.com>
  * @var integer $width 画像の幅
  * @var integer $height 画像の高さ
- * @var choice $type 画像の種類 @{"choices":["jpg","gif","png","bmp"]}
- * @var number $quality 品質 0-10 @{"max":10}
+ * @var choice $type 画像の種類 @['choices'=>['jpg','gif','png','bmp']]
+ * @var number $quality 品質 0-10 @['max'=>10]
  * @var boolean $resample リサイズ時に再サンプリングを行う
  */
 class Image extends \org\rhaco\Object{

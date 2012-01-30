@@ -22,8 +22,8 @@ namespace %s;
  * document
  * @var serial $id
  * @var string $value
- * @var timestamp $create_date @{"auto_now_add":true}
- * @var timestamp $update_date @{"auto_now":true}
+ * @var timestamp $create_date @['auto_now_add'=>true]
+ * @var timestamp $update_date @['auto_now'=>true]
  */
 class %s extends \org\rhaco\store\db\Dao{
 	protected $id;

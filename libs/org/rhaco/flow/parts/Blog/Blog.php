@@ -4,7 +4,7 @@ use \org\rhaco\store\db\Q;
 /**
  * Blog
  * @author tokushima
- * @class @{"maps":["index","detail","tag","atom"]}
+ * @class @['maps'=>['index','detail','tag','atom']]
  */
 class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	protected function __init__(){

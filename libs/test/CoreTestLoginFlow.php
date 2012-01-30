@@ -2,7 +2,7 @@
 namespace test;
 /**
  * 
- * @login ログイン @{"require":true,"type":"org.rhaco.Object"}
+ * @login ログイン @['require'=>true,'type'=>'org.rhaco.Object']
  */
 class CoreTestLoginFlow extends \org\rhaco\flow\parts\RequestFlow{
 	public function aaa(){

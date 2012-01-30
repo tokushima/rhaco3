@@ -8,14 +8,14 @@ use \org\rhaco\net\Query;
  * @var integer $limit 終了位置
  * @var integer $current 現在位置
  * @var integer $total 合計
- * @var integer $first 最初のページ番号 @{"set":false}
- * @var integer $last 最後のページ番号 @{"set":false}
+ * @var integer $first 最初のページ番号 @['set'=>false]
+ * @var integer $last 最後のページ番号 @['set'=>false]
  * @var string $query_name pageを表すクエリの名前
  * @var mixed{} $vars query文字列とする値
  * @var mixed[] $contents １ページ分の内容
- * @var integer $contents_length コンテンツのサイズ @{"set":false}
- * @var boolean $dynamic ダイナミックページネーションとするか @{"set":false}
- * @var string $marker 現在の基点値 @{"set":false}
+ * @var integer $contents_length コンテンツのサイズ @['set'=>false]
+ * @var boolean $dynamic ダイナミックページネーションとするか @['set'=>false]
+ * @var string $marker 現在の基点値 @['set'=>false]
  * @var string $order 最後のソートキー
  */
 class Paginator extends \org\rhaco\Object{

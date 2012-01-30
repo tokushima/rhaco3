@@ -11,7 +11,7 @@ use \org\rhaco\io\File;
  * @var string{} $bcc
  * @var org.rhaco.io.File{} $attach
  * @var org.rhaco.io.File{} $image
- * @var choice $encode @{"choices":["jis","utf8","sjis"]}
+ * @var choice $encode @['choices'=>['jis','utf8','sjis']]
  */
 class Mail extends \org\rhaco\Object{
 	protected $subject;
