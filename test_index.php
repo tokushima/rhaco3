@@ -1,5 +1,13 @@
 <?php
 include_once('rhaco3.php');
+
+foreach(array(
+		'name','mode','template','modules','vars','args','action','redirect'
+		,'template_super','template_path','media_path','theme_path'
+		,'patterns','nomatch_redirect','error_redirect','error_status','error_template','session','secure') as $d){
+	if(!defined($d)) define($d,$d);
+}
+
 /**
  * @name rhaco.org
  * @summary site

@@ -1,16 +1,17 @@
 <?php
 include_once('rhaco3.php');
+
 /**
  * @name rhaco.org
  * @summary site
  */
 $flow = new \org\rhaco\Flow();
 $flow->output(array(''
-,modules=>'test.flow.module.CoreTestLogin'
-,patterns=>array(
-	'login_url'=>array(name=>'login',action=>'test.CoreTestLoginFlow::do_login')
-	,'logout_url'=>array(name=>'logout',action=>'test.CoreTestLoginFlow::do_logout')
-	,'aaa'=>array(name=>'aaa',action=>'test.CoreTestLoginFlow::aaa')
+,'modules'=>'test.flow.module.CoreTestLogin'
+,'patterns'=>array(
+	'login_url'=>array('name'=>'login','action'=>'test.CoreTestLoginFlow::do_login')
+	,'logout_url'=>array('name'=>'logout','action'=>'test.CoreTestLoginFlow::do_logout')
+	,'aaa'=>array('name'=>'aaa','action'=>'test.CoreTestLoginFlow::aaa')
 )));
 
 /***
