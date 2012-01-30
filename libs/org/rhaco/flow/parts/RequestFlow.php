@@ -394,7 +394,8 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param string $name
 	 */
 	protected function redirect_by_map($name){
-		\org\rhaco\net\http\Header::redirect($this->map_url($name));
+		$args = func_get_args();
+		\org\rhaco\net\http\Header::redirect(call_user_func_array(array($this,'map_url'),$args));
 	}
 	/**
 	 * 自身のメソッドにマッピングされたURLへリダイレクトする(パッケージのみ)
