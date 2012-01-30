@@ -41,7 +41,7 @@ class Object{
 		$decode_func = function($s,$name){
 			if(empty($s)) return array();
 			$d = json_decode($s,true);
-			if(!is_array($d)) throw new \InvalidArgumentException('JSON error $'.$name.' @'.$s);
+			if(!is_array($d)) throw new \InvalidArgumentException('annotation error $'.$name.' @'.$s);
 			return $d;
 		};
 		if($ns_name !== null && preg_match_all("/@".$name."\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
