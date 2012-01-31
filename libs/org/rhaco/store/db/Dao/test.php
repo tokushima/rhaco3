@@ -7,10 +7,6 @@ use \org\rhaco\store\db\Column;
 use \org\rhaco\Log;
 use \org\rhaco\store\db\exception\DaoExceptions;
 
-// Settings
-//\org\rhaco\Conf::set("org.rhaco.store.db.Dao","org.rhaco.store.db.Dao",'{"type":"org.rhaco.store.db.module.Mysql","dbname":"testA","encode":"utf8","user":"root","password":"root"}');
-//\org\rhaco\Conf::set("org.rhaco.store.db.Dao","org.rhaco.store.db.Dao.CrossChild",'{"type":"org.rhaco.store.db.module.Mysql","dbname":"testB","encode":"utf8","user":"root","password":"root"}');
-
 
 /**
  * @var serial $id

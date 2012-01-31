@@ -40,7 +40,7 @@ class Object{
 		$result = array();
 		$decode_func = function($s,$name){
 			if(empty($s)) return array();
-			$d = eval('return '.str_replace(array('[',']'),array('array(',')'),$s).';');
+			$d = @eval('return '.str_replace(array('[',']'),array('array(',')'),$s).';');
 			if(!is_array($d)) throw new \InvalidArgumentException('annotation error $'.$name.' @'.$s);
 			return $d;
 		};
