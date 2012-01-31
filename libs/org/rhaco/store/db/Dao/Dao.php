@@ -99,8 +99,8 @@ abstract class Dao extends \org\rhaco\Object{
 				$conf = explode("\\",$p);
 				$def = Conf::get('connection');
 				while(!isset($def[implode('.',$conf)]) && !empty($conf)) array_pop($conf);
-				if(empty($conf)) throw new DaoConnectionException('could not find the connection settings `'.$p.'`');
-				$anon[0] = implode('.',$conf);
+				if(empty($conf) && !isset($def['*'])) throw new DaoConnectionException('could not find the connection settings `'.$p.'`');
+				$anon[0] = empty($conf) ? '*' : implode('.',$conf);
 			}
 			if(empty($anon[1])){
 				$table_class = $p;
