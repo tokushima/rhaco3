@@ -18,12 +18,24 @@ class Command{
 			$this->close();
 		}
 	}
+	/**
+	 * 実行結果の取得
+	 * @return string
+	 */
 	public function stdout(){
 		return $this->stdout;
 	}
+	/**
+	 * エラーの取得
+	 * @reutrn string
+	 */
 	public function stderr(){
 		return $this->stderr;
 	}
+	/**
+	 * 実行していたプロセスの終了状態を取得
+	 * @return string
+	 */
 	public function end_code(){
 		return $this->end_code;
 	}

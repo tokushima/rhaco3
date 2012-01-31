@@ -112,7 +112,10 @@ class Template{
 		if(!is_file($file) && strpos($file,'://') === false) throw new \InvalidArgumentException($file.' not found');
 		$this->file = $file;
 		$cname = md5($this->template_super.$this->put_block.$this->file.$this->selected_template);
-		
+		/**
+		 * キャッシュのチェック
+		 * @param string $cname キャッシュ名
+		 */
 		if(!$this->has_object_module('has_template_cahce') || $this->object_module('has_template_cahce',$cname) !== true){
 			if(!empty($this->put_block)){
 				$src = $this->read_src($this->put_block);
@@ -126,8 +129,18 @@ class Template{
 				$src = $this->read_src($this->file);
 			}
 			$src = $this->replace($src,$template_name);
+			/**
+			 * キャッシュにセットする
+			 * @param string $cname キャッシュ名
+			 * @param string $src 作成されたテンプレート
+			 */
 			$this->object_module('set_template_cahce',$cname,$src);
-		}else{			
+		}else{
+			/**
+			 * キャッシュから取得する
+			 * @param string $cname キャッシュ名
+			 * @return string
+			 */
 			$src = $this->object_module('get_template_cahce',$cname);
 		}
 		return $this->execute($src);
@@ -154,11 +167,23 @@ class Template{
 		$src = preg_replace("/([\w])\->/","\\1__PHP_ARROW__",$src);
 		$src = str_replace(array("\\\\","\\\"","\\'"),array('__ESC_DESC__','__ESC_DQ__','__ESC_SQ__'),$src);
 		$src = $this->replace_xtag($src);
+		/**
+		 * テンプレート作成の初期化
+		 * @param string $src
+		 */
 		$this->object_module('init_template',$src);
 		$src = $this->rtcomment($this->rtblock($this->rttemplate($src),$this->file));
 		$this->selected_src = $src;
+		/**
+		 * テンプレート作成の前処理
+		 * @param string $src
+		 */
 		$this->object_module('before_template',$src);
 		$src = $this->rtif($this->rtloop($this->rtunit($this->html_form($this->html_list($src)))));
+		/**
+		 * テンプレート作成の後処理
+		 * @param string $src
+		 */
 		$this->object_module('after_template',$src);
 		$src = str_replace('__PHP_ARROW__','->',$src);
 		$src = $this->parse_print_variable($src);
@@ -171,6 +196,10 @@ class Template{
 		return $src;
 	}
 	private function exec($_src_){
+		/**
+		 * 実行前処理
+		 * @param string $_src_
+		 */
 		$this->object_module('before_exec_template',$_src_);
 		$this->vars('_t_',new Template\Helper());
 		ob_start();
@@ -191,6 +220,10 @@ class Template{
 			}
 		}
 		$_src_ = $this->selected_src = null;
+		/**
+		 * 実行後処理
+		 * @param string $_eval_src_
+		 */
 		$this->object_module('after_exec_template',$_eval_src_);
 		return $_eval_src_;
 	}
@@ -296,6 +329,10 @@ class Template{
 				$src = $this->rttemplate($this->replace_xtag($this->read_src($filename = $href)));
 				$this->selected_template = $e->in_attr('name');
 			}
+			/**
+			 * ブロック展開の前処理
+			 * @param string $src
+			 */
 			$this->object_module('before_block_template',$src);
 			if(empty($blocks)){
 				if(Xml::set($bx,'<:>'.$src.'</:>')){

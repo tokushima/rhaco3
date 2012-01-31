@@ -52,7 +52,8 @@ class Request implements \IteratorAggregate{
 		}
 	}
 	/**
-	 * @see http://jp2.php.net/manual/ja/class.iteratoraggregate.php
+	 * (non-PHPdoc)
+	 * @see IteratorAggregate::getIterator()
 	 */
 	public function getIterator(){
 		return new \ArrayIterator($this->vars);

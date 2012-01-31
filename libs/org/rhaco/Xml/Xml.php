@@ -25,6 +25,10 @@ class Xml implements \IteratorAggregate{
 			$this->value($value);
 		}
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see IteratorAggregate::getIterator()
+	 */
 	public function getIterator(){
 		return new \ArrayIterator($this->attr);
 	}
@@ -292,6 +296,10 @@ class Xml implements \IteratorAggregate{
 			eq(array("abc"=>null,"def"=>555,"ghi"=>null,"jkl"=>"Jkl"),iterator_to_array($x));
 		 */
 	}
+	/**
+	 * 値の無いアトリビュートを設定
+	 * @param string $v
+	 */
 	final public function plain_attr($v){
 		$this->plain_attr[] = $v;
 	}

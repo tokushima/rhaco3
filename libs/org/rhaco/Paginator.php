@@ -118,6 +118,12 @@ class Paginator extends \org\rhaco\Object{
 			eq(10,$p->which_last(3));
 		 */
 	}
+	/**
+	 * 
+	 * 配列またはオブジェクトを展開してvarsにセットする
+	 * @param mixed $obj
+	 * @return self $this
+	 */
 	public function cp($obj){
 		if(!empty($obj)){
 			if($obj instanceof Object){
@@ -335,6 +341,11 @@ class Paginator extends \org\rhaco\Object{
 		if($this->contents_length >= $this->limit) return true;
 		return false;
 	}
+	/**
+	 * コンテンツを追加する
+	 * @param mixed $mixed
+	 * @return self $this
+	 */
 	public function add($mixed){
 		$this->contents($mixed);
 		return $this;

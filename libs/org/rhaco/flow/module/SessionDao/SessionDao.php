@@ -2,11 +2,11 @@
 namespace org\rhaco\flow\module;
 use \org\rhaco\store\db\Q;
 /**
- * Daoでセッションを扱うRequestモジュール
+ * Daoでセッションを扱うモジュール
  * @author tokushima
  * @var string $id @['primary'=>true]
- * @var text $text
- * @var number $expires
+ * @var text $data
+ * @var timestamp $expires
  */
 class SessionDao extends \org\rhaco\store\db\Dao{
 	protected $id;
@@ -23,7 +23,6 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		$this->data = ($value === null) ? '' : $value;
 	}
 	/**
-	 * Requestのモジュール
 	 * @param string $session_name
 	 * @param string $id
 	 * @param string $save_path
@@ -36,7 +35,6 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return false;
 	}
 	/**
-	 * Requestのモジュール
 	 * @param string $id
 	 * @return string
 	 */
@@ -50,7 +48,6 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return '';
 	}
 	/**
-	 * Requestのモジュール
 	 * @param string $id
 	 * @param string $sess_data
 	 * @return boolean
@@ -69,7 +66,6 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return false;
 	}
 	/**
-	 * Requestのモジュール
 	 * @param string $id
 	 * @return boolean
 	 */
@@ -86,13 +82,12 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return false;
 	}
 	/**
-	 * Requestのモジュール
 	 * @param int $maxlifetime
 	 * @return boolean
 	 */
 	public function session_gc($maxlifetime){
 		try{
-			static::find_delete(Q::lt("expires",time() - $maxlifetime));
+			static::find_delete(Q::lt('expires',time() - $maxlifetime));
 			static::commit();
 			return true;
 		}catch(\Exception $e){

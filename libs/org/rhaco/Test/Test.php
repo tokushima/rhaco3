@@ -36,6 +36,10 @@ class Test{
 		if(self::$start_time === null) self::$start_time = microtime(true);
 		return self::$start_time;
 	}
+	/**
+	 * 現在実行中のエントリ
+	 * @return string
+	 */
 	static public function current_entry(){
 		return self::$current_entry;
 	}
@@ -70,6 +74,10 @@ class Test{
 	static public function flow_output_maps($entry_name=null){
 		return (isset($entry_name)) ? (isset(self::$flow_output_maps[$entry_name]) ? self::$flow_output_maps[$entry_name] : null) : self::$flow_output_maps;
 	}
+	/**
+	 * テスト対象の取得
+	 * @return string[]
+	 */
 	static public function search_path(){
 		$cwd = str_replace("\\",'/',getcwd()).'/';
 		return array($cwd,$cwd.'tests/',$cwd.'libs/');
