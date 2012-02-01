@@ -294,9 +294,12 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 			$obj = $this->get_model($package);
 		}
 		// TODO
-		$this->vars('model',$obj);
+		$this->vars('_model',$obj);
 		$this->vars('package',$package);
-		foreach($obj->props() as $k => $v) $this->vars($k,$v);
+		foreach($obj->props() as $k => $v){
+			$fm = 'fm_'.$k;
+			$this->vars($k,$obj->$fm());
+		}
 	}
 	/**
 	 * 作成

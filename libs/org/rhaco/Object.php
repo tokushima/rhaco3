@@ -849,7 +849,7 @@ class Object{
 				return (($h == 0) ? '' : $h.':').(sprintf('%02d:%02d',$i,$s)).(($m == 0) ? '' : '.'.$m);
 			case 'intdate': if($v === null) return null;
 							return str_replace(array('Y','m','d'),array(substr($v,0,-4),substr($v,-4,2),substr($v,-2,2)),(empty($f) ? 'Y/m/d' : $f));
-			case 'boolean': return ($v) ? (isset($d) ? $d : '') : (empty($f) ? 'false' : $f);
+			case 'boolean': return ($v) ? (isset($d) ? $d : 'true') : (empty($f) ? 'false' : $f);
 		}
 		return $v;
 	}

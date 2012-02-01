@@ -4,10 +4,10 @@
 
 <form method="post" id="update_form" rt:aref="true">
 <table>
-<rt:loop param="{$f.props($model)}" var="name">
+<rt:loop param="{$f.props($_model)}" var="name">
 <tr>
 	<th>{$t.trim_width($name,20,'..')}</th>
-	<td>{$f.form($model,$name)}</td>
+	<td>{$f.form($_model,$name)}</td>
 </tr>
 </rt:loop>
 </table>
