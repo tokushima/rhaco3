@@ -68,7 +68,13 @@
 	<tbody>
 		<tr class="even {$t.cond_switch($prop[2],'hash_on','hash_off')}">
 			<td>{$prop_name}</td>
-			<td>{$prop[0]}</td>
+			<td>
+				<rt:if param="{$f.type($prop[0])}">
+					<a href="{$t.package_method_url('class_info',$f.type($prop[0]))}">{$prop[0]}</a>
+				<rt:else />
+					{$prop[0]}
+				</rt:if>
+			</td>
 			<td>{$prop[1]}</td>
 			<td>
 				<rt:if param="{$prop[2]}">
