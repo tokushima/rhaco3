@@ -267,9 +267,11 @@ class Xml implements \IteratorAggregate{
 	}
 	/**
 	 * アトリビュートを設定
+	 * @return self $this
 	 */
 	final public function attr($key,$value){
 		$this->attr[strtolower($key)] = is_bool($value) ? (($value) ? 'true' : 'false') : $value;
+		return $this;
 		/***
 			$x = new self("test");
 			$x->escape(true);
