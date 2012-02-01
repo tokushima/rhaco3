@@ -144,6 +144,23 @@ class Template{
 			$src = $this->object_module('get_template_cahce',$cname);
 		}
 		return $this->execute($src);
+		/***
+			$src = pre('
+						abc {$abc}
+						def {$def}
+						ghi {$ghi}
+					');
+			$result = pre('
+						abc 123
+						def 456
+						ghi 789
+						');
+			$t = new self();
+			$t->vars("abc",123);
+			$t->vars("def",456);
+			$t->vars("ghi",789);
+			eq($result,$t->get($src));
+		*/
 	}
 	private function cname(){
 		return md5($this->put_block.$this->file.$this->selected_template);
@@ -928,7 +945,8 @@ class Template{
 			$name = $this->parse_plain_variable($variable);
 			$value = '<?php try{ @print('.$name.'); ?>'
 						."<?php }catch(\\Exception \$e){ if(!isset(\$_nes_) && \$_display_exception_){print(\$e->getMessage());} } ?>";
-			$src = str_replace(array($variable."\n<?php",$variable),array($value."<?php 'PLRP'; ?>\n\n<?php",$value),$src);
+			$src = str_replace(array($variable."\n",$variable),array($value."<?php 'PLRP'; ?>\n\n",$value),$src);
+			$src = str_replace($variable,$value,$src);
 		}
 		return $src;
 	}
