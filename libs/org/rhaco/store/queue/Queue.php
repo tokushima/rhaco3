@@ -95,7 +95,7 @@ class Queue extends \org\rhaco\Object{
 	/**
 	 * 終了したものを削除する
 	 * @param string $type
-	 * @param timstamp $fin
+	 * @param timestamp $fin
 	 */
 	static public function clean($type,$fin=null){
 		static::module('clean',$type,$fin);
