@@ -2,9 +2,6 @@
 namespace org\rhaco\flow\parts\Developer;
 
 class Helper{
-	public function basename($p){
-		return basename(str_replace("\\",'/',$p));
-	}
 	public function package_name($p){
 		$p = str_replace(array('/','\\'),array('.','.'),$p);
 		if(substr($p,0,1) == '.') $p = substr($p,1);
@@ -69,6 +66,7 @@ class Helper{
 		return $obj->prop_anon($name,'primary');
 	}
 	public function form(\org\rhaco\store\db\Dao $obj,$name){
+		// TODO
 		if(method_exists($obj,'form_'.$name)){
 			return $obj->{'form_'.$name}();
 		}else if($obj->prop_anon($name,'master') !== null){
@@ -104,35 +102,9 @@ class Helper{
 					foreach($obj->prop_anon($name,'choices') as $choice) $options[] = sprintf('<option value="%s">%s</option>',$choice,$choice);
 					return sprintf('<select name="%s">%s</select>',$name,implode('',$options));
 				default:
-					$value = $obj->{$name}();
-					if(!empty($value)){
-						switch($obj->prop_anon($name,'type')){
-							case 'timestamp':
-								$value = empty($value) ? null : date('Y/m/d H:i:s',$value);
-								break;
-							case 'date':
-								$value = empty($value) ? null : date('Y/m/d',$value);
-								break;
-							case 'time':
-								if(!empty($value)){
-									$h = floor($value / 3600);
-									$i = floor(($value - ($h * 3600)) / 60);
-									$s = (int)($value - ($h * 3600) - ($i * 60));
-									$m = str_replace('0.','',$value - ($h * 3600) - ($i * 60) - $s);
-									$value = (($h == 0) ? '' : $h.':').(($i == 0) ? '' : sprintf('%02d',$i).':').sprintf("%02d",$s).(($m == 0) ? '' : '.'.$m);
-								}
-								break;
-						}
-					}
-					return sprintf('<input name="%s" type="text" value="%s" />',$name,$value);
+					return sprintf('<input name="%s" type="text" format="%s" />',$name,$obj->prop_anon($name,'type'));
 			}
 		}
-	}
-	public function pre($value){
-		$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);
-		$value = preg_replace("/!!!(.+?)!!!/ms","<span class=\"notice\">\\1</span>",$value);
-		$value = str_replace("\t","&nbsp;&nbsp;",$value);
-		return $value;
 	}
 	public function htmlspecialchars($src){
 		return htmlspecialchars($src);

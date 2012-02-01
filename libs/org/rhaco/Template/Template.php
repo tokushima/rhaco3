@@ -220,7 +220,7 @@ class Template{
 		$this->object_module('before_exec_template',$_src_);
 		$this->vars('_t_',new Template\Helper());
 		ob_start();
-			if(is_array($this->vars) && !empty($this->vars)) extract($this->vars);			
+			if(is_array($this->vars) && !empty($this->vars)) extract($this->vars);
 			eval('?><?php $_display_exception_='.((\org\rhaco\Conf::get('display_exception') === true) ? 'true' : 'false').'; ?>'.$_src_);
 		$_eval_src_ = ob_get_clean();
 
@@ -993,44 +993,33 @@ class Template{
 	}
 	private function html_reform($src){
 		if(strpos($src,'rt:aref') !== false){
-			$bool = false;
 			Xml::set($tag,'<:>'.$src.'</:>');
 			foreach($tag->in('form') as $obj){
-				if(($obj->in_attr('rt:aref') === 'true')){
+				if($obj->is_attr('rt:aref')){
+					$bool = ($obj->in_attr('rt:aref') === 'true');
+					$obj->rm_attr('rt:aref');
 					$obj->escape(false);
-					$form = $obj->value();
-					foreach($obj->in(array('input','select')) as $tag){
-						if($tag->is_attr('name') || $tag->is_attr('id')){
-							$name = $this->parse_plain_variable($this->form_variable_name($tag->in_attr('name',$tag->in_attr('id'))));
-							$tag->escape(false);							
-							switch(strtolower($tag->name())){
-								case 'input':
-									switch(strtolower($tag->in_attr('type'))){
-										case 'radio':
-										case 'checkbox':
-											$tag->plain_attr($this->check_selected($name,sprintf("'%s'",$this->parse_plain_variable($tag->in_attr('value','true'))),'checked'));
-											$form = str_replace($tag->plain(),$tag->get(),$form);
-											$bool = true;
-									}
-									break;
-								case 'select':
-									$select = $tag->value();
-									foreach($tag->in('option') as $option){
-										$option->plain_attr($this->check_selected($name,sprintf("'%s'",$this->parse_plain_variable($option->in_attr('value'))),'selected'));
-										$select = str_replace($option->plain(),$option->get(),$select);
-									}
-									$tag->value($select);
-									$form = str_replace($tag->plain(),$tag->get(),$form);
-									$bool = true;
+					$value = $obj->get();
+					
+					if($bool){
+						foreach($obj->in(array('input','select','textarea')) as $tag){
+							if(!$tag->is_attr('rt:ref') && ($tag->is_attr('name') || $tag->is_attr('id'))){
+								switch(strtolower($tag->in_attr('type','text'))){
+									case 'button':
+									case 'submit':
+									case 'file':
+										break;
+									default:
+										$tag->attr('rt:ref','true');
+										$obj->value(str_replace($tag->plain(),$tag->get(),$obj->value()));
+								}
 							}
 						}
+						$value = $this->exec($this->parse_print_variable($this->html_input($obj->get())));
 					}
-					$obj->rm_attr('rt:aref');
-					$obj->value($form);
-					$src = str_replace($obj->plain(),$obj->get(),$src);
+					$src = str_replace($obj->plain(),$value,$src);
 				}
 			}
-			return ($bool) ? $this->exec($src) : $src;
 		}
 		return $src;
 	}
@@ -1120,7 +1109,6 @@ class Template{
 								$option->escape(false);
 								$value = $this->parse_plain_variable($option->in_attr('value'));
 								if(empty($value) || $value[0] != '$') $value = sprintf("'%s'",$value);
-								$option->rm_attr('selected');
 								$option->rm_attr('selected');
 								$option->plain_attr($this->check_selected($name,$value,'selected'));
 								$select = str_replace($option->plain(),$option->get(),$select);
@@ -1261,6 +1249,63 @@ class Template{
 
 		*/
 		/***
+			#reform
+			$src = pre('
+						<form rt:aref="true">
+							<input type="text" name="{$aaa_name}" />
+							<input type="checkbox" name="{$bbb_name}" value="hoge" />hoge
+							<input type="checkbox" name="{$bbb_name}" value="fuga" checked="checked" />fuga
+							<input type="checkbox" name="{$eee_name}" value="true" checked />foo
+							<input type="checkbox" name="{$fff_name}" value="false" />foo
+							<input type="submit" />
+							<textarea name="{$aaa_name}"></textarea>
+
+							<select name="{$ddd_name}" size="5" multiple>
+								<option value="123" selected="selected">123</option>
+								<option value="456">456</option>
+								<option value="789" selected>789</option>
+							</select>
+							<select name="{$XYZ_name}" rt:param="xyz"></select>
+						</form>
+					');
+			$result = pre('
+						<form>
+							<input type="text" name="aaa" value="hogehoge" />
+							<input type="checkbox" name="bbb[]" value="hoge" checked="checked" />hoge
+							<input type="checkbox" name="bbb[]" value="fuga" />fuga
+							<input type="checkbox" name="eee[]" value="true" checked="checked" />foo
+							<input type="checkbox" name="fff[]" value="false" checked="checked" />foo
+							<input type="submit" />
+							<textarea name="aaa">hogehoge</textarea>
+
+							<select name="ddd[]" size="5" multiple="multiple">
+								<option value="123">123</option>
+								<option value="456" selected="selected">456</option>
+								<option value="789" selected="selected">789</option>
+							</select>
+							<select name="XYZ"><option value="A">456</option><option value="B" selected="selected">789</option><option value="C">010</option></select>
+						</form>
+						');
+			$t = new self();
+			$t->vars("aaa_name","aaa");
+			$t->vars("bbb_name","bbb");
+			$t->vars("XYZ_name","XYZ");
+			$t->vars("xyz_name","xyz");
+			$t->vars("ddd_name","ddd");
+			$t->vars("eee_name","eee");
+			$t->vars("fff_name","fff");
+			
+			$t->vars("aaa","hogehoge");
+			$t->vars("bbb","hoge");
+			$t->vars("XYZ","B");
+			$t->vars("xyz",array("A"=>"456","B"=>"789","C"=>"010"));
+			$t->vars("ddd",array("456","789"));
+			$t->vars("eee",true);
+			$t->vars("fff",false);
+			eq($result,$t->get($src));
+
+		 */
+		/***
 			# textarea
 			$src = pre('
 							<form>
@@ -1374,8 +1419,8 @@ class Template{
 	private function check_selected($name,$value,$selected){
 		return sprintf('<?php if('
 					.'isset(%s) && (%s === %s '
-										.' || (ctype_digit((string)%s) && %s == %s)'
-										.' || ((%s == "true" || %s == "false") ? (%s === (%s == "true")) : false)'
+										.' || (ctype_digit((string)%s) && %s === (string)%s)'
+										.' || ((%s === "true" || %s === "false") ? (%s === (%s == "true")) : false)'
 										.' || in_array(%s,((is_array(%s)) ? %s : (is_null(%s) ? array() : array(%s))),true) '
 									.') '
 					.'){print(" %s=\"%s\"");} ?>'
