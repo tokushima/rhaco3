@@ -66,7 +66,6 @@ class Helper{
 		return $obj->prop_anon($name,'primary');
 	}
 	public function form(\org\rhaco\store\db\Dao $obj,$name){
-		// TODO
 		if(method_exists($obj,'form_'.$name)){
 			return $obj->{'form_'.$name}();
 		}else if($obj->prop_anon($name,'master') !== null){
