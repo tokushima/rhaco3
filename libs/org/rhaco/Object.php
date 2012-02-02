@@ -98,9 +98,9 @@ class Object{
 	final public function __call($n,$args){
 		if($n[0] != '_'){
 			list($c,$p) = (in_array($n,array_keys(get_object_vars($this)))) ? array((empty($args) ? 'get' : 'set'),$n) : (preg_match("/^([a-z]+)_([a-zA-Z].*)$/",$n,$m) ? array($m[1],$m[2]) : array(null,null));
-			if(method_exists($this,'___'.$c.'___')){
+			if(method_exists($this,$am=('___'.$c.'___'))){
 				$this->_ = $p;
-				return call_user_func_array(array($this,(method_exists($this,'__'.$c.'_'.$p.'__') ? '__'.$c.'_'.$p.'__' : '___'.$c.'___')),$args);
+				return call_user_func_array(array($this,(method_exists($this,$m=('__'.$c.'_'.$p.'__')) ? $m : $am)),$args);
 			}
 		}
 		throw new \ErrorException(get_class($this).'::'.$n.' method not found');
@@ -581,6 +581,31 @@ class Object{
 			$obj->qq(123456789.1);
 			eq(123456789.1,$obj->qq());			
 		*/
+		/***
+			$obj1 = newclass('
+							@var integer $aaa
+							@var boolean $bbb
+							@var integer $ccc
+							@var timestamp $ddd
+							-----------------------------------------------------------
+							class * extends self{
+								protected $aaa;
+								protected $bbb;
+								protected $ccc;
+								protected $ddd;
+								
+								protected function __get_ccc__(){
+									$this->ddd(time());
+									return 2;
+								}
+							}
+						');
+			$obj1->aaa(5);
+			$obj1->bbb(true);
+			eq(5,$obj1->fm_aaa());
+			eq('true',$obj1->fm_bbb());
+			eq(2,$obj1->fm_ccc());
+		*/
 	}
 	final public function __destruct(){
 		if(method_exists($this,'__del__')) $this->__del__();
@@ -836,8 +861,9 @@ class Object{
 		}
 	}
 	final private function ___fm___($f=null,$d=null){
-		$v = $this->___get___();
-		switch($this->prop_anon($this->_,'type')){
+		$p = $this->_;
+		$v = (method_exists($this,$m=('__get_'.$p.'__'))) ? call_user_func(array($this,$m)) : $this->___get___();
+		switch($this->prop_anon($p,'type')){
 			case 'timestamp': return ($v === null) ? null : (date((empty($f) ? 'Y/m/d H:i:s' : $f),(int)$v));
 			case 'date': return ($v === null) ? null : (date((empty($f) ? 'Y/m/d' : $f),(int)$v));
 			case 'time':
