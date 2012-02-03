@@ -369,6 +369,11 @@ class Template{
 	private function rtcomment($src){
 		while(Xml::set($tag,$src,'rt:comment')) $src = str_replace($tag->plain(),'',$src);
 		return $src;
+		/***
+			$src = '123<rt:comment>aaaaaaaa</rt:comment>456';
+			$t = new self();
+			eq('123456',$t->get($src));
+		 */
 	}
 	private function rtunit($src){
 		if(strpos($src,'rt:unit') !== false){
