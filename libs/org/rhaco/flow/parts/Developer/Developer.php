@@ -47,7 +47,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * Daoモデルの一覧
 	 */
 	public function model_list(){
-		$list = $errors = $model_list = array();
+		$list = $errors = $model_list = $con = array();
 		foreach(\org\rhaco\Man::libs() as $package => $info){
 			if($info['dir']){
 				foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($info['filename']),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){

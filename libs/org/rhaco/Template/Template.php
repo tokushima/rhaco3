@@ -988,7 +988,7 @@ class Template{
 				if(preg_match_all("/([\"\'])([^\\1]+?)\\1/",$v,$match)){
 					foreach($match[2] as $value) $tmp = str_replace($value,str_replace('.','__PERIOD__',$value),$tmp);
 				}
-				$src = str_replace($v,str_replace('.','->',substr($tmp,1,-1)),$src);
+				$src = str_replace($v,preg_replace('/(\w)\./','\\1->',substr($tmp,1,-1)),$src);
 			}
 		}
 		return str_replace('[]','',str_replace('__PERIOD__','.',$src));
