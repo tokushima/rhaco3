@@ -98,7 +98,7 @@ class Helper{
 				case 'choice':
 					$options = array();
 					if(!$obj->prop_anon($name,'require')) $options[] = '<option value=""></option>';
-					foreach($obj->prop_anon($name,'choices') as $choice) $options[] = sprintf('<option value="%s">%s</option>',$choice,$choice);
+					foreach($obj->prop_anon($name,'choices') as $k => $v) $options[] = sprintf('<option value="%s">%s</option>',$k,$v);
 					return sprintf('<select name="%s">%s</select>',$name,implode('',$options));
 				default:
 					return sprintf('<input name="%s" type="text" format="%s" />',$name,$obj->prop_anon($name,'type'));

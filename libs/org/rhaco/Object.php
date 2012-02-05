@@ -888,6 +888,7 @@ class Object{
 			case 'intdate': if($v === null) return null;
 							return str_replace(array('Y','m','d'),array(substr($v,0,-4),substr($v,-4,2),substr($v,-2,2)),(empty($f) ? 'Y/m/d' : $f));
 			case 'boolean': return ($v) ? (isset($d) ? $d : 'true') : (empty($f) ? 'false' : $f);
+			case 'choice': return array_key_exists($v,$c=$this->prop_anon($p,'choices')) ? $c[$v] : $v;
 		}
 		return $v;
 	}
