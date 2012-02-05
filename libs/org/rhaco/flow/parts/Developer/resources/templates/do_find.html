@@ -26,7 +26,7 @@
 	<tr>
 		<td style="padding: 5px; width: 60px;">
 			<form method="post" action="{$t.package_method_url('do_drop',$package)}" style="display:inline;">
-				{$f.primary_hidden($obj)}
+				{$t.noop($f.primary_hidden($obj))}
 				<input type="submit" value="delete" style="" />
 			</form>
 		</td>

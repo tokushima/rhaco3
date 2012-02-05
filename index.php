@@ -13,8 +13,8 @@ $flow->output(array(''
 	''=>array('template'=>'hoge.html')
 	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer'
 				,'modules'=>array(
-					'org.rhaco.flow.module.LoginRequired'
-					,'org.rhaco.flow.module.SimpleAuth'
+//					'org.rhaco.flow.module.LoginRequired'
+//					,'org.rhaco.flow.module.SimpleAuth'
 				))
 )));
 
