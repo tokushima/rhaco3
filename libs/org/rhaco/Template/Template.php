@@ -1424,7 +1424,7 @@ class Template{
 	private function check_selected($name,$value,$selected){
 		return sprintf('<?php if('
 					.'isset(%s) && (%s === %s '
-										.' || (ctype_digit((string)%s) && %s === (string)%s)'
+										.' || (ctype_digit((string)%s) && (string)%s === (string)%s)'
 										.' || ((%s === "true" || %s === "false") ? (%s === (%s == "true")) : false)'
 										.' || in_array(%s,((is_array(%s)) ? %s : (is_null(%s) ? array() : array(%s))),true) '
 									.') '
