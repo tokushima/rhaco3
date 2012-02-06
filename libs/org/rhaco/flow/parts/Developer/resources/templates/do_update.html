@@ -6,7 +6,7 @@
 <table>
 <rt:loop param="{$f.props($model)}" var="name">
 <tr>
-	<th>{$t.trim_width($name,20,'..')}</th>
+	<th>{$t.trim_width($name,50,'..')}</th>
 	<td>{$t.noop($f.form($model,$name))}</td>
 </tr>
 </rt:loop>
