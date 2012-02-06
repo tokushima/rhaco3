@@ -12,7 +12,7 @@ class DaoException extends \Exception{
 	 * @param Exception $exception 例外
 	 * @param string $group グループ名
 	 */
-	public function add(DaoException $exception,$group=null){
+	public function add(\Exception $exception,$group=null){
 		if(empty($group)) $group = 'exceptions';
 		$this->e[$group][] = $exception;
 	}
