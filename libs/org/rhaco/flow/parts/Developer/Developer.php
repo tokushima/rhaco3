@@ -29,7 +29,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$this->smtp_blackhole_dao = '\\'.implode('\\',array('org','rhaco','net','mail','module','SmtpBlackholeDao'));
 		$this->dao = '\\'.implode('\\',array('org','rhaco','store','db','Dao'));
 		
-		list($name,$summary,$description) = $this->entry_desc($d['file']);
+		list($entry,$name,$summary,$description) = $this->entry_desc($d['file']);
 		$this->vars('app_name',(empty($name) ? 'App' : $name));
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
