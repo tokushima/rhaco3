@@ -83,13 +83,8 @@ class Object{
 			foreach(array_keys(self::$_m[0][$c]) as $n){
 				if(self::$_m[0][$c][$n]['type'] == 'serial'){
 					self::$_m[0][$c][$n]['primary'] = true;
-				}else if(self::$_m[0][$c][$n]['type'] == 'choice'){
-					if(method_exists($this,'__choices_'.$n.'__')) self::$_m[0][$c][$n]['choices'] = $this->{'__choices_'.$n.'__'}();
-					if(isset(self::$_m[0][$c][$n]['choices']) && is_array(self::$_m[0][$c][$n]['choices'])){
-						if(isset(self::$_m[0][$c][$n]['choices'][0]) && isset(self::$_m[0][$c][$n]['choices'][sizeof(self::$_m[0][$c][$n]['choices'])-1])){
-							self::$_m[0][$c][$n]['choices'] = array_combine(array_values(self::$_m[0][$c][$n]['choices']),array_values(self::$_m[0][$c][$n]['choices']));
-						}
-					}
+				}else if(self::$_m[0][$c][$n]['type'] == 'choice' && method_exists($this,'__choices_'.$n.'__')){
+					self::$_m[0][$c][$n]['choices'] = $this->{'__choices_'.$n.'__'}();
 				}
 			}
 			if(method_exists($this,'__anon__')) $this->__anon__($d);
@@ -254,7 +249,6 @@ class Object{
 						@var timestamp $ff
 						@var time $gg
 						@var choice $hh @["choices"=>["abc","def"]]
-						@var choice $hhh @["choices"=>[123=>"abc",456=>"def"]]
 						@var string{} $ii
 						@var string[] $jj
 						@var email $kk
@@ -275,7 +269,6 @@ class Object{
 							protected $ff;
 							protected $gg;
 							protected $hh;
-							protected $hhh;
 							protected $ii;
 							protected $jj;
 							protected $kk;
@@ -384,11 +377,6 @@ class Object{
 			eq(false,$obj->is_hh());
 			$obj->hh("abc");
 			eq(true,$obj->is_hh());
-
-			eq(false,$obj->is_hhh());
-			eq(array(123=>"abc",456=>"def"),$obj->prop_anon("hhh","choices"));			
-			$obj->hhh(123);
-			eq(true,$obj->is_hhh());
 
 			eq(false,$obj->is_ii());
 			eq(false,$obj->is_ii("hoge"));
@@ -851,7 +839,7 @@ class Object{
 					case 'choice':
 						$v = is_bool($v) ? (($v) ? 'true' : 'false') : $v;
 						$ch = $this->prop_anon($this->_,'choices');
-						if(!isset($ch) || !isset($ch[$v])) throw new \InvalidArgumentException('must be an of '.$t);
+						if(!isset($ch) || !in_array($v,$ch,true)) throw new \InvalidArgumentException('must be an of '.$t);
 						return $v;
 					case 'mixed': return $v;
 					default:
@@ -888,7 +876,6 @@ class Object{
 			case 'intdate': if($v === null) return null;
 							return str_replace(array('Y','m','d'),array(substr($v,0,-4),substr($v,-4,2),substr($v,-2,2)),(empty($f) ? 'Y/m/d' : $f));
 			case 'boolean': return ($v) ? (isset($d) ? $d : 'true') : (empty($f) ? 'false' : $f);
-			case 'choice': return array_key_exists($v,$c=$this->prop_anon($p,'choices')) ? $c[$v] : $v;
 		}
 		return $v;
 	}
