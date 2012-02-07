@@ -152,7 +152,7 @@ if(isset($_SERVER['argv'][1])){
 		}
 		if(is_file(getcwd().'/index.php')) $rules .= "RewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule ^(.*)\$ index.php/\$1?%{QUERY_STRING} [L]\n\n";
 		file_put_contents('.htaccess',$rules);
-		print('Writen: '.realpath('.htaccess').PHP_EOL.str_repeat('-',60).PHP_EOL.trim($rules).PHP_EOL.str_repeat('-',60).PHP_EOL);		
+		print('Written: '.realpath('.htaccess').PHP_EOL.str_repeat('-',60).PHP_EOL.trim($rules).PHP_EOL.str_repeat('-',60).PHP_EOL);		
 	};
 	$download = function($argv,$renew) use($println){
 		$search = function($s){
@@ -319,7 +319,7 @@ if(isset($_SERVER['argv'][1])){
 				if(!Phar::canWrite()) die('write operations disabled by the php.ini setting phar.readonly'.PHP_EOL.' > php -d phar.readonly=0 '.basename(__FILE__).' '.$_SERVER['argv'][1].PHP_EOL);
 				$path = __DIR__.'/libs_'.date('Ymd_Hi').'.phar';
 				$phar = new Phar($path,0,'libs.phar');
-				print('Writen: '.$path.PHP_EOL);
+				print('Written: '.$path.PHP_EOL);
 				$phar->setDefaultStub((isset($phar['cli.php']) ? 'cli.php' : '<?php return; __HALT_COMPILER();'),(isset($phar['web.php']) ? 'web.php' : '<?php return; __HALT_COMPILER();'));
 				foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::lib_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
 					$phar->addFile($f->getPathname(),str_replace(Rhaco3::lib_dir(),'',$f->getPathname()));
@@ -377,7 +377,7 @@ if(isset($_SERVER['argv'][1])){
 					$str = '<?php'.PHP_EOL.$rep.PHP_EOL.'Rhaco3::config_path(\''.$mode.'\');'.PHP_EOL;
 				}
 				file_put_contents($path,$str);
-				print('Writen: __settings__.php'.PHP_EOL);
+				print('Written: __settings__.php'.PHP_EOL);
 				if(isset($params['htaccess'])) $htaccess($params['htaccess']);
 				exit;
 			default:
