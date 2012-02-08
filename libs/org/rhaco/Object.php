@@ -681,20 +681,26 @@ class Object{
 	final public function props(){
 		$r = array();
 		foreach(get_object_vars($this) as $n => $v){
-			if($n[0] != '_') $r[$n] = $v;
+			if($n[0] != '_') $r[$n] = $this->{$n}();
 		}
 		return $r;
 		/***
 			$obj = newclass('
 							class * extends self{
-								public $aaa;
-								protected $bbb;
-								private $ccc;
-								protected $ddd;
-								protected $_eee;
+								public $aaa = 1;
+								protected $bbb = 2;
+								private $ccc = 3;
+								protected $ddd = 4;
+								protected $_eee = 5;
+								protected $fff;
+								
+								protected function __get_fff__(){
+									return 6;
+								}
 							}
 						');
-			eq(array("aaa","bbb","ddd"),array_keys($obj->props()));
+			eq(array("aaa","bbb","ddd","fff"),array_keys($obj->props()));
+			eq(array(1,2,4,6),array_values($obj->props()));
 		*/
 	}
 	/**
