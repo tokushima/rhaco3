@@ -524,24 +524,24 @@ class Template{
 				while(Xml::set($subtag,$value,'rt:first')){
 					$value = str_replace($subtag->plain(),sprintf('<?php if(isset(%s)%s){ ?>%s<?php } ?>',$first
 					,(($subtag->in_attr('last') === 'false') ? sprintf(' && (%s !== 1) ',$total) : '')
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*[\/]{0,1}>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}
 				while(Xml::set($subtag,$value,'rt:middle')){
 					$value = str_replace($subtag->plain(),sprintf('<?php if(!isset(%s) && !isset(%s)){ ?>%s<?php } ?>',$first,$last
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*[\/]{0,1}>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}
 				while(Xml::set($subtag,$value,'rt:last')){
 					$value = str_replace($subtag->plain(),sprintf('<?php if(isset(%s)%s){ ?>%s<?php } ?>',$last
 					,(($subtag->in_attr('first') === 'false') ? sprintf(' && (%s !== 1) ',$vtotal) : '')
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*[\/]{0,1}>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}
 				while(Xml::set($subtag,$value,'rt:fill')){
 					$is_fill = true;
 					$value = str_replace($subtag->plain(),sprintf('<?php if(%s > %s){ ?>%s<?php } ?>',$lcountname,$total
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*[\/]{0,1}>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}				
 				$value = $this->rtif($value);
-				if(preg_match("/^(.+)<rt\:else[\s]*\/>(.+)$/ims",$value,$match)){
+				if(preg_match("/^(.+)<rt\:else[\s]*[\/]{0,1}>(.+)$/ims",$value,$match)){
 					list(,$value,$empty_value) = $match;
 				}
 				$src = str_replace(
@@ -772,6 +772,12 @@ class Template{
 			$result = pre('EMPTY');
 			$t->vars("abc",array());
 			eq($result,$t->get($src));
+			
+			$t = new self();
+			$src = pre('<rt:loop param="abc">aaaaaa<rt:else>EMPTY</rt:loop>');
+			$result = pre('EMPTY');
+			$t->vars("abc",array());
+			eq($result,$t->get($src));
 		*/
 		/***
 			# fill
@@ -855,7 +861,7 @@ class Template{
 				$src = str_replace(
 							$tag->plain()
 							,'<?php try{ ?>'.$cond
-								.preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$tag->value())
+								.preg_replace("/<rt\:else[\s]*[\/]{0,1}>/i","<?php }else{ ?>",$tag->value())
 							."<?php } ?>"
 							."<?php }catch(\\Exception \$e){ if(!isset(\$_nes_) && \$_display_exception_){print(\$e->getMessage());} } ?>"
 							,$src
