@@ -43,35 +43,37 @@ if(isset($value)){
 	$exceptions = array();
 	list($entry_path,$tests_path,$libs_path) = \org\rhaco\Test::search_path();
 	
-	foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($libs_path,FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS),RecursiveIteratorIterator::SELF_FIRST) as $p){
-		if(substr($p->getFilename(),-4) == '.php' && strpos($p->getPathname(),'/.') === false && strpos($p->getPathname(),'/_') === false){
-			$r = str_replace("\\",'/',$p);
-			$n = substr(basename($r),0,-4);
-			$b = true;
-	
-			if(ctype_upper($n[0])){
-				foreach($dup as $d){
-					if(strpos($r,$d) === 0){
-						$b = false;
-						break;
-					}
-				}
-				if($b){
-					if(preg_match("/^(.*)\/(\w+)\/(\w+)\.php$/",$r,$m) && $m[2] == $m[3] && !preg_match('/[A-Z]/',str_replace($libs_path,'',$m[1]))){
-						$dir = dirname($r);
-						$dup[] = $dir.'/';
-						$class_name = "\\".str_replace(array($libs_path,'/'),array('',"\\"),$dir);
-						try{
-							$verify_format($class_name);
-						}catch(\Exception $e){
-							$exceptions[$class_name] = $e->getMessage();
+	if(is_dir($libs_path)){
+		foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($libs_path,FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS),RecursiveIteratorIterator::SELF_FIRST) as $p){
+			if(substr($p->getFilename(),-4) == '.php' && strpos($p->getPathname(),'/.') === false && strpos($p->getPathname(),'/_') === false){
+				$r = str_replace("\\",'/',$p);
+				$n = substr(basename($r),0,-4);
+				$b = true;
+		
+				if(ctype_upper($n[0])){
+					foreach($dup as $d){
+						if(strpos($r,$d) === 0){
+							$b = false;
+							break;
 						}
-					}else if(!preg_match('/[A-Z]/',str_replace($libs_path,'',dirname($r)))){
-						$class_name = "\\".str_replace(array($libs_path,'/'),array('',"\\"),substr($r,0,-4));
-						try{
-							$verify_format($class_name);
-						}catch(\Exception $e){
-							$exceptions[$class_name] = $e->getMessage();
+					}
+					if($b){
+						if(preg_match("/^(.*)\/(\w+)\/(\w+)\.php$/",$r,$m) && $m[2] == $m[3] && !preg_match('/[A-Z]/',str_replace($libs_path,'',$m[1]))){
+							$dir = dirname($r);
+							$dup[] = $dir.'/';
+							$class_name = "\\".str_replace(array($libs_path,'/'),array('',"\\"),$dir);
+							try{
+								$verify_format($class_name);
+							}catch(\Exception $e){
+								$exceptions[$class_name] = $e->getMessage();
+							}
+						}else if(!preg_match('/[A-Z]/',str_replace($libs_path,'',dirname($r)))){
+							$class_name = "\\".str_replace(array($libs_path,'/'),array('',"\\"),substr($r,0,-4));
+							try{
+								$verify_format($class_name);
+							}catch(\Exception $e){
+								$exceptions[$class_name] = $e->getMessage();
+							}
 						}
 					}
 				}
@@ -79,24 +81,28 @@ if(isset($value)){
 		}
 	}
 	if(empty($exceptions)){
-		foreach(new \RecursiveDirectoryIterator($entry_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
-			if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
-				$src = file_get_contents($e->getFilename());
-				if((strpos($src,"\\org\\rhaco\\Flow") !== false && strpos($src,'->output(') !== false)){
+		if(is_dir($entry_path)){
+			foreach(new \RecursiveDirectoryIterator($entry_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
+				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
+					$src = file_get_contents($e->getFilename());
+					if((strpos($src,"\\org\\rhaco\\Flow") !== false && strpos($src,'->output(') !== false)){
+						try{
+							$verify_format($e->getPathname());
+						}catch(\Exception $exception){
+							$exceptions[$e->getFilename()] = $exception->getMessage();
+						}
+					}
+				}
+			}
+		}
+		if(is_dir($tests_path)){
+			foreach(new \RecursiveDirectoryIterator($tests_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
+				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
 					try{
 						$verify_format($e->getPathname());
 					}catch(\Exception $exception){
 						$exceptions[$e->getFilename()] = $exception->getMessage();
 					}
-				}
-			}
-		}
-		foreach(new \RecursiveDirectoryIterator($tests_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
-			if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
-				try{
-					$verify_format($e->getPathname());
-				}catch(\Exception $exception){
-					$exceptions[$e->getFilename()] = $exception->getMessage();
 				}
 			}
 		}
