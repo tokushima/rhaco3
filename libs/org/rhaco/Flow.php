@@ -32,9 +32,10 @@ class Flow{
 		$this->app_dir = str_replace("\\",'/',$this->app_dir);
 		if(substr($this->app_dir,-1) != '/') $this->app_dir .= '/';
 		if(substr($this->app_url,-1) != '/') $this->app_url .= '/';
-		$this->template_path = Conf::get('template_path',$this->app_dir.'resources/templates/');
-		$this->media_url = Conf::get('media_url');
-		if(empty($this->media_url)) $this->media_url = $this->app_url.'resources/media/';		
+		$this->template_path = str_replace("\\",'/',Conf::get('template_path',$this->app_dir.'resources/templates/'));
+		if(substr($this->template_path,-1) != '/') $this->template_path .= '/';
+		$this->media_url = str_replace("\\",'/',Conf::get('media_url',$this->app_url.'resources/media/'));
+		if(substr($this->media_url,-1) != '/') $this->media_url .= '/';
 		if(($branch = substr(basename($f),0,-4)) !== 'index') $this->app_url = $this->app_url.$branch.'/';
 		$this->template = new Template();
 	}
