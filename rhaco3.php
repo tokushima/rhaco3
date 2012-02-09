@@ -231,21 +231,23 @@ if(isset($_SERVER['argv'][1])){
 											 $b);
 							if(!empty($d['name'])){
 								if($d['name'][0] == '/') $d['name'] = substr($d['name'],1);
-								$path = $ep.$d['name'];
-								switch((int)$d['typeflg']){
-									case 0:
-										$size = base_convert($d['size'],8,10);
-										if(!is_dir(dirname($path))) mkdir(dirname($path),0777,true);
-										for($i=0;$i<=$size;$i+=512){
-											$s = (($i+512>$size)?$size-$i:512);
-											file_put_contents($path,gzread($fp,$s),FILE_APPEND);
-											if($s < 512) gzread($fp,512-$s);
-										}
-										touch($path,base_convert($d['mtime'],8,10));
-										break;
-									case 5:
-										if(!is_dir($path)) mkdir($path,0777,true);
-										break;
+								if(ctype_alnum($d['name'][0])){
+									$path = $ep.$d['name'];
+									switch((int)$d['typeflg']){
+										case 0:
+											$size = base_convert($d['size'],8,10);
+											if(!is_dir(dirname($path))) mkdir(dirname($path),0777,true);
+											for($i=0;$i<=$size;$i+=512){
+												$s = (($i+512>$size)?$size-$i:512);
+												file_put_contents($path,gzread($fp,$s),FILE_APPEND);
+												if($s < 512) gzread($fp,512-$s);
+											}
+											touch($path,base_convert($d['mtime'],8,10));
+											break;
+										case 5:
+											if(!is_dir($path)) mkdir($path,0777,true);
+											break;
+									}
 								}
 							}
 						}
