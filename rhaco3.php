@@ -365,6 +365,10 @@ if(isset($_SERVER['argv'][1])){
 				$htaccess($value);
 				exit;
 			case '-settings':
+				if(isset($params['import'])){
+					$download(array(),true);
+					print(PHP_EOL);
+				}
 				$mode = empty($value) ? 'local' : $value;
 				$path = getcwd().'/__settings__.php';
 				$header = 'HTTP/1.1 404 Not Found';
