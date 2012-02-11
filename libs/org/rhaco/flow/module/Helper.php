@@ -95,6 +95,16 @@ class Helper{
 		return (strpos($this->name(),$pattern) === 0) ? $true : $false;
 	}
 	/**
+	 * マッチしたパターンが$patternで後方一致なら$trueを、違うなら$falseを返す
+	 * @param string $pattern 比較する文字列
+	 * @param string $true 一致した場合に返す文字列
+	 * @param string $false 一致しなかった場合に返す文字列
+	 * @return string
+	 */
+	public function endswith_pattern_switch($pattern,$true='on',$false=''){
+		return (strrpos($this->name(),$pattern) === (strlen($this->name())-strlen($pattern))) ? $true : $false;
+	}
+	/**
 	 * 真偽値により$trueまたは$falseを返す
 	 * @param boolean $cond 真偽値
 	 * @param string $true 真の場合に返す文字列

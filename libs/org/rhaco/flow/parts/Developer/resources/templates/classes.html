@@ -1,18 +1,18 @@
 <rt:extends href="index.html" />
 
 <rt:block name="content">
-<h2 class="title">Classes</h2>
+<h2>Classes</h2>
 
-<table rt:param="{$class_list}" rt:var="c" rt:key="package" class="zebra-striped">
+<table rt:param="{$class_list}" rt:var="c" rt:key="package">
 <thead>
 	<tr>
-		<th style="width:300px;">package</th>
+		<th>package</th>
 		<th>summary</th>
 		<th>&nbsp;</th>
 	</tr>
 </thead>
 <tbody>
-	<tr class="even">
+	<tr>
 		<td><a href="{$t.package_method_url('class_info',$package)}">{$package}</a></td>
 		<td>{$t.html($c.summary())}</td>
 		<td>

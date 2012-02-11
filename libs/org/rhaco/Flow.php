@@ -382,6 +382,10 @@ class Flow{
 		if(isset($apps[$index]['vars'])) $this->template->cp($apps[$index]['vars']);
 		$this->template->vars('t',new \org\rhaco\flow\module\Helper($media_url,(isset($apps[$index]['name']) ? $apps[$index]['name'] : null),$apps,$obj));
 		$src = $this->template->read($template);
+		/**
+		 * テンプレートの出力
+		 * @param string $src
+		 */
 		$this->object_module('before_flow_print_template',$src);
 		print($src);
 	}

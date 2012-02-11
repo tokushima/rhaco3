@@ -3,22 +3,22 @@
 <rt:block name="content">
 <h2 class="title">Models</h2>
 
-<table rt:param="{$dao_models}" rt:key="package" rt:var="summary" class="zebra-striped">
+<table rt:param="{$dao_models}" rt:key="package" rt:var="summary">
 <thead>
 	<tr>
 		<th>&nbsp;</th>
 		<th>package</th>
 		<th>summary</th>
-		<th>control</th>
 	</tr>
 </thead>
 <tbody>
-	<tr class="even">
+	<tr>
 		<td>
 			<rt:if param="{$dao_model_con[$package]}">
-				<span class="label success">O</span>
-			<rt:else />
-				<span class="label warning">X</span>
+				<rt:if param="{$dao_model_errors[$package]}">
+				<rt:else />
+					<a class="icon-list" href="{$t.package_method_url('do_find',$package)}"></a>
+				</rt:if>
 			</rt:if>
 		</td>
 		<td>
@@ -29,12 +29,6 @@
 			<rt:if param="{$dao_model_errors[$package]}">
 				<rt:if param="{$summary}"><br /></rt:if>
 				<span style="color:#ff0000; font-weight: bold;">{$dao_model_errors[$package]}</span>
-			</rt:if>
-		</td>
-		<td>
-			<rt:if param="{$dao_model_errors[$package]}">
-			<rt:else />
-				<a class="btn small default" href="{$t.package_method_url('do_find',$package)}">&gt;</a>
 			</rt:if>
 		</td>
 	</tr>

@@ -2,7 +2,7 @@
 
 <rt:block name="content">
 <h2 class="title">Conf</h2>
-<table class="list" rt:param="object_list" rt:var="obj" class="zebra-striped">
+<table rt:param="object_list" rt:var="obj">
 <thead>
 <tr>
 	<th>&nbsp;</th>
@@ -16,7 +16,7 @@
 <tr style="{$t.cond_switch($obj->exists(),'font-weight: bold;','')}">
 	<td>
 		<rt:if param="{$obj.exists()}">
-			<span class="label success">O</span>
+			<span class="icon-ok"></span>
 		</rt:if>
 	</td>
 	<td valign="top"><a href="{$t.package_method_url('class_info',{$obj.package()})}">{$obj.package()}</a></td>

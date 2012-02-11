@@ -13,7 +13,7 @@
 </ul>
 
 <rt:block name="content_body">
-<table class="list" rt:param="object_list" rt:var="obj" class="bordered-table zebra-striped" style="margin-top:20px">
+<table rt:param="object_list" rt:var="obj">
 <thead>
 	<tr>
 		<th></th>
@@ -27,7 +27,7 @@
 		<td style="padding: 5px; width: 60px;">
 			<form method="post" action="{$t.package_method_url('do_drop',$package)}" style="display:inline;">
 				{$t.noop($f.primary_hidden($obj))}
-				<input type="submit" value="delete" style="" />
+				<input type="submit" value="delete" />
 			</form>
 		</td>
 		<rt:loop param="{$f.props($model,3)}" var="name">

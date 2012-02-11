@@ -14,13 +14,13 @@
 	</rt:if>
 </h2>
 
-<div class="alert-message block-message">
+<div class="alert alert-info">
 	{$t.html($description)}
 </div>
 
 <rt:if param="{$params}">
 	<h3>Params</h3>		
-	<table rt:param="{$params}" rt:var="param" rt:key="param_name" class="bordered-table zebra-striped">
+	<table rt:param="{$params}" rt:var="param" rt:key="param_name">
 	<thead>
 		<tr>
 			<th style="width:200px">name</th>
@@ -51,7 +51,7 @@
 
 <rt:if param="{$request}">
 	<h3>Request</h3>		
-	<table rt:param="{$request}" rt:var="arg" rt:key="name" class="bordered-table zebra-striped">
+	<table rt:param="{$request}" rt:var="arg" rt:key="name">
 	<thead>
 		<tr>
 			<th style="width:200px">name</th>
@@ -77,7 +77,7 @@
 
 <rt:if param="{$context}">
 	<h3>Context</h3>		
-	<table rt:param="{$context}" rt:var="arg" rt:key="name" class="bordered-table zebra-striped">
+	<table rt:param="{$context}" rt:var="arg" rt:key="name">
 	<thead>
 		<tr>
 			<th style="width:200px">name</th>
@@ -103,7 +103,7 @@
 
 <rt:if param="{$args}">
 	<h3>Arg</h3>		
-	<table rt:param="{$args}" rt:var="summary" rt:key="name" class="bordered-table zebra-striped">
+	<table rt:param="{$args}" rt:var="summary" rt:key="name">
 	<thead>
 		<tr>
 			<th style="width:200px">name</th>
@@ -121,7 +121,7 @@
 
 <rt:if param="{$return}">
 	<h3>Return</h3>		
-	<table class="bordered-table zebra-striped">
+	<table>
 	<thead>
 		<tr>
 			<th style="width:200px">type</th>

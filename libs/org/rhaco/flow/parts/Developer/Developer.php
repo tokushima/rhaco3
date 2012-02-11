@@ -41,6 +41,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		return array(
 					new \org\rhaco\flow\module\TwitterBootstrapPagination()
 					,new \org\rhaco\flow\module\Exceptions()
+					,new Developer\Formatter()
 				);
 	}
 	/**
