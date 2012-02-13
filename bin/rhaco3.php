@@ -239,7 +239,7 @@ if(isset($_SERVER['argv'][1])){
 											if(!is_dir(dirname($path))) mkdir(dirname($path),0777,true);
 											for($i=0;$i<=$size;$i+=512){
 												$s = (($i+512>$size)?$size-$i:512);
-												file_put_contents($path,gzread($fp,$s),FILE_APPEND);
+												if($s > 0) file_put_contents($path,gzread($fp,$s),FILE_APPEND);
 												if($s < 512) gzread($fp,512-$s);
 											}
 											touch($path,base_convert($d['mtime'],8,10));
