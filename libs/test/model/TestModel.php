@@ -1,7 +1,6 @@
 <?php
 namespace test\model;
 /**
- * キュー用のDBモデル
  * @var serial $id
  * @var number $number
  * @bar integer $integer
