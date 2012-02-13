@@ -154,7 +154,7 @@ if(isset($_SERVER['argv'][1])){
 		file_put_contents('.htaccess',$rules);
 		print('Written: '.realpath('.htaccess').PHP_EOL.str_repeat('-',60).PHP_EOL.trim($rules).PHP_EOL.str_repeat('-',60).PHP_EOL);		
 	};
-	$download = function($argv,$renew) use($println){
+	$download = function($argv,$renew) use($println){		
 		$search = function($s){
 			$z = $u = array();
 			$s = preg_replace("/\/\*.+?\*\//s",'',$s);
@@ -233,26 +233,31 @@ if(isset($_SERVER['argv'][1])){
 								if($d['name'][0] == '/') $d['name'] = substr($d['name'],1);
 								if(ctype_alnum($d['name'][0])){
 									$path = $ep.$d['name'];
-									switch((int)$d['typeflg']){
-										case 0:
-											$size = base_convert($d['size'],8,10);
-											if(!is_dir(dirname($path))) mkdir(dirname($path),0777,true);
-											for($i=0;$i<=$size;$i+=512){
-												$s = (($i+512>$size)?$size-$i:512);
-												if($s > 0) file_put_contents($path,gzread($fp,$s),FILE_APPEND);
-												if($s < 512) gzread($fp,512-$s);
-											}
-											touch($path,base_convert($d['mtime'],8,10));
-											break;
-										case 5:
-											if(!is_dir($path)) mkdir($path,0777,true);
-											break;
+									if(ctype_digit($d['typeflg'])){
+										switch((int)$d['typeflg']){
+											case 0:
+												$size = base_convert($d['size'],8,10);
+												if(!is_dir(dirname($path))) mkdir(dirname($path),0777,true);
+												for($i=0;$i<=$size;$i+=512){
+													$s = ($i+512>$size) ? $size - $i : 512;
+													if($s > 0){
+														file_put_contents($path,gzread($fp,$s),FILE_APPEND);
+														if($s < 512) gzread($fp,512-$s);
+													}
+												}
+												touch($path,base_convert($d['mtime'],8,10));
+												break;
+											case 5:
+												if(!is_dir($path)) mkdir($path,0777,true);
+												break;
+										}
 									}
 								}
 							}
 						}
 						gzclose($fp);
 						$required = array();
+						if(!is_dir($ep)) return false;
 						foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($ep,FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
 							$so = str_replace($ep,$vp,$f->getPathname());
 							if(!is_dir(dirname($f->getPathname()))) mkdir(dirname($f->getPathname()),0777,true);
@@ -265,11 +270,13 @@ if(isset($_SERVER['argv'][1])){
 						$println('installed: '.$package.' ('.$rp.')');
 						return true;
 					}
-				}catch(Exception $e){}
+				}catch(Exception $e){
+					$println($rp.$dl.'.tgz'.' => '.$e->getMessage(),false);
+				}
 			}
 			return false;
 		};
-		$error = $imported = array();
+		$error = $invalid = $imported = array();
 		$argv = array_flip($argv);
 		if(empty($argv)){
 			foreach(new DirectoryIterator(__DIR__) as $f){
@@ -292,17 +299,25 @@ if(isset($_SERVER['argv'][1])){
 			}
 		}
 		foreach($argv as $arg => $f){
+			ob_start();
 			if(($b = class_exists($p = '\\'.str_replace('.','\\',$arg))) || ($b = interface_exists($p = '\\'.str_replace('.','\\',$arg)))){
 				if($renew){
 					$r = new ReflectionClass($p);
 					$b = (strpos($r->getFilename(),(Rhaco3::lib_dir().'_vendors')) === false);
 				}
 			}
-			if(!$b && !$pkg($imported,$arg)) $error[$arg] = $f;
+			if(ob_get_clean() != ''){
+				$invalid[$arg] = $f;
+			}else if(!$b && !$pkg($imported,$arg)){
+				$error[$arg] = $f;
+			}
 		}
 		$rm((Rhaco3::lib_dir().'_download/'),true);
 		if(!empty($error)){
-			foreach($error as $p => $f) print('not found: '.(is_int($f) ? '' : $f.(' in ')).$p.PHP_EOL);
+			foreach($error as $p => $f) $println('not found: '.(is_int($f) ? '' : $f.(' in ')).$p,false);
+		}
+		if(!empty($invalid)){
+			foreach($invalid as $p => $f) $println('invalid source: '.(is_int($f) ? '' : $f.(' in ')).$p,false);
 		}
 	};
 	try{
