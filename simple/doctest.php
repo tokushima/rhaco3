@@ -64,7 +64,7 @@ class Doctest{
 		self::$current_file = $doctest['filename'];
 		self::$current_class = $doctest['class_name'];
 		self::$current_method = null;
-		
+
 		foreach($doctest['tests'] as $test_method_name => $tests){
 			if($method_name === null || $method_name === $test_method_name){
 				self::$current_method = $test_method_name;
@@ -363,7 +363,7 @@ if(isset($_SERVER['argv'][1]) && sizeof(debug_backtrace()) == 0){
 		include($target);
 		if(isset($op['i'])){
 			foreach((is_array($op['i']) ? $op['i'] : array($op['i'])) as $i) include($i);
-		}		
+		}
 		print(
 			Doctest::run(
 				preg_replace("/\.php/",'',basename($target))

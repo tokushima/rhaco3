@@ -14,7 +14,7 @@ class Template{
 	private $vars = array();
 
 	public function __construct($media_url=null){
-		if(!class_exists('XmlObject')) throw RuntimeException('XmlObject not found');
+		if(!class_exists('XmlObject')) throw new RuntimeException('XmlObject not found');
 		if($media_url !== null) $this->media_url($media_url);
 	}
 	/**
@@ -73,7 +73,7 @@ class Template{
 	 * @param string $file
 	 */
 	final public function put_block($file){
-		if(!is_file($file)) throw InvalidArgumentException($file.' not found');
+		if(!is_file($file)) throw new InvalidArgumentException($file.' not found');
 		$this->put_block = $file;
 	}
 	/**
@@ -432,24 +432,24 @@ class Template{
 				while(XmlObject::set($subtag,$value,'rt:first')){
 					$value = str_replace($subtag->plain(),sprintf('<?php if(isset(%s)%s){ ?>%s<?php } ?>',$first
 					,(($subtag->in_attr('last') === 'false') ? sprintf(' && (%s !== 1) ',$total) : '')
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}
 				while(XmlObject::set($subtag,$value,'rt:middle')){
 					$value = str_replace($subtag->plain(),sprintf('<?php if(!isset(%s) && !isset(%s)){ ?>%s<?php } ?>',$first,$last
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}
 				while(XmlObject::set($subtag,$value,'rt:last')){
 					$value = str_replace($subtag->plain(),sprintf('<?php if(isset(%s)%s){ ?>%s<?php } ?>',$last
 					,(($subtag->in_attr('first') === 'false') ? sprintf(' && (%s !== 1) ',$vtotal) : '')
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}
 				while(XmlObject::set($subtag,$value,'rt:fill')){
 					$is_fill = true;
 					$value = str_replace($subtag->plain(),sprintf('<?php if(%s > %s){ ?>%s<?php } ?>',$lcountname,$total
-					,preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
+					,preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
 				}				
 				$value = $this->rtif($value);
-				if(preg_match("/^(.+)<rt\:else[\s]*\/>(.+)$/ims",$value,$match)){
+				if(preg_match("/^(.+)<rt\:else[\s]*.*?>(.+)$/ims",$value,$match)){
 					list(,$value,$empty_value) = $match;
 				}
 				$src = str_replace(
@@ -683,6 +683,12 @@ class Template{
 			$result = pre('EMPTY');
 			$t->vars("abc",array());
 			eq($result,$t->get($src));
+			
+			$t = new self();
+			$src = pre('<rt:loop param="abc">aaaaaa<rt:else>EMPTY</rt:loop>');
+			$result = pre('EMPTY');
+			$t->vars("abc",array());
+			eq($result,$t->get($src));
 		*/
 		/***
 			# fill
@@ -765,7 +771,7 @@ class Template{
 				$src = str_replace(
 							$tag->plain()
 							,'<?php try{ ?>'.$cond
-								.preg_replace("/<rt\:else[\s]*\/>/i","<?php }else{ ?>",$tag->value())
+								.preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$tag->value())
 							."<?php } ?>"."<?php }catch(Exception \$e){ if(!isset(\$_nes_)){print('".$this->exception_str."');} } ?>"
 							,$src
 						);
