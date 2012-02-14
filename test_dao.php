@@ -3,6 +3,10 @@ include_once('rhaco3.php');
 
 $flow = new \org\rhaco\Flow();
 $flow->output(array(''
+,'modules'=>array(
+	'org.rhaco.flow.module.LoginRequiredAlways'
+	,'org.rhaco.flow.module.Dao'
+)
 ,'patterns'=>array(
 	'insert'=>array('name'=>'insert','action'=>'test.flow.Model::insert')
 	,'update'=>array('name'=>'update','action'=>'test.flow.Model::update')
