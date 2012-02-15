@@ -13,7 +13,7 @@ class File{
 		ini_set('error_log',self::path());
 	}
 	static private function path($dir=null){
-		if($dir===null) $dir = \org\rhaco\Conf::get('path',getcwd().'/work/logs');
+		if($dir===null) $dir = \org\rhaco\Conf::get('path',\org\rhaco\io\File::work_path('logs'));
 		if(substr(str_replace("\\",'/',$dir),-1) == '/') $dir = subustr($dir,0,-1);
 		if(!is_dir($dir)) mkdir($dir,0777,true);
 		return $dir.'/'.date('Ymd').'.log';

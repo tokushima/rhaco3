@@ -1,6 +1,6 @@
 <?php
 /**
- * ファイルが監視し更新時に通知する
+ * ファイルを監視し更新時に通知する
  * @param string $value 
  * @param null $error
  */

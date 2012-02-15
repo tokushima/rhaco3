@@ -314,7 +314,7 @@ class Mail extends \org\rhaco\Object{
 	 * @return $this
 	 */
 	public function set_template($template_path,$vars=array()){
-		$template_path = \org\rhaco\net\Path::absolute(\org\rhaco\Conf::get('template_base_path',getcwd()),$template_path);		
+		$template_path = \org\rhaco\net\Path::absolute(\org\rhaco\Conf::get('template_base_path',\org\rhaco\io\File::resource_path('mail')),$template_path);		
 		if(!is_file($template_path)) throw new \InvalidArgumentException($template_path.' not found');
 		if(\org\rhaco\Xml::set($xml,file_get_contents($template_path),'mail')){
 			$from = $xml->f('from');

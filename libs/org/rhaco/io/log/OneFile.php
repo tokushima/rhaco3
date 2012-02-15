@@ -9,7 +9,7 @@ class OneFile{
 	private $path;
 
 	public function __construct($path=null){
-		$this->path = (empty($path)) ? \org\rhaco\Conf::get('path',getcwd().'/work/output.log') : $path;
+		$this->path = (empty($path)) ? \org\rhaco\Conf::get('path',\org\rhaco\io\File::work_path('output.log')) : $path;
 		$dir = dirname($this->path);
 		if(!is_dir($dir)) mkdir($dir,0777,true);
 	}
