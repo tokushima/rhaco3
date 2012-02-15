@@ -24,10 +24,10 @@
 </thead>
 <tbody>
 	<tr>
-		<td style="padding: 5px; width: 60px;">
-			<form method="post" action="{$t.package_method_url('do_drop',$package)}" style="display:inline;">
+		<td style="width: 60px;">
+			<form method="post" action="{$t.package_method_url('do_drop',$package)}" style="margin:0;">
 				{$t.noop($f.primary_hidden($obj))}
-				<input type="submit" value="delete" />
+				<input type="submit" value="delete" class="btn" style="margin:0; padding-top: 0; padding-bottom: 0; " />
 			</form>
 		</td>
 		<rt:loop param="{$f.props($model,3)}" var="name">
