@@ -11,7 +11,6 @@ use \org\rhaco\Conf;
  */
 class Flow{
 	private $module = array();
-	private $app_dir;
 	private $app_url;
 	private $media_url;
 	private $template_path;
@@ -20,19 +19,13 @@ class Flow{
 	static private $get_maps = false;
 	static private $output_maps = array();
 	
-	public function __construct($app_dir=null,$app_url=null){
+	public function __construct($app_url=null){
 		list($d) = debug_backtrace(false);
 		$f = str_replace("\\",'/',$d['file']);
-		$this->app_dir = $app_dir;
 		$this->app_url = Conf::get('app_url',$app_url);
-		if(empty($this->app_url)){
-			$this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
-		}
-		if(empty($this->app_dir)) $this->app_dir = dirname($f);
-		$this->app_dir = str_replace("\\",'/',$this->app_dir);
-		if(substr($this->app_dir,-1) != '/') $this->app_dir .= '/';
+		if(empty($this->app_url)) $this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
 		if(substr($this->app_url,-1) != '/') $this->app_url .= '/';
-		$this->template_path = str_replace("\\",'/',Conf::get('template_path',$this->app_dir.'resources/templates/'));
+		$this->template_path = str_replace("\\",'/',Conf::get('template_path',\org\rhaco\io\File::resource_path('templates')));
 		if(substr($this->template_path,-1) != '/') $this->template_path .= '/';
 		$this->media_url = str_replace("\\",'/',Conf::get('media_url',$this->app_url.'resources/media/'));
 		if(substr($this->media_url,-1) != '/') $this->media_url .= '/';
