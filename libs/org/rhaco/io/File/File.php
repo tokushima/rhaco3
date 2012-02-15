@@ -10,6 +10,8 @@ namespace org\rhaco\io;
  * @var string $ext 拡張子
  * @var string $mime ファイルのコンテントタイプ
  * @var text $value 内容
+ * @conf string $work_dir ワーキングディレクトリを設定する
+ * @conf string $resource_dir リソースディレクトリを設定する
  */
 class File extends \org\rhaco\Object{
 	protected $fullname;
@@ -319,5 +321,23 @@ class File extends \org\rhaco\Object{
 			return $path;
 		}
 		return uniqid($prefix,true);
+	}
+	/**
+	 * ワーキングディレクトリを返す
+	 * @return string
+	 */
+	static public function work_path($path=null){
+		$dir = str_replace("\\",'/',\org\rhaco\Conf::get('work_dir',getcwd().'/work/'));
+		if(substr($dir,-1) != '/') $dir = $dir.'/';
+		return $dir.$path;
+	}
+	/**
+	 * リソースディレクトリを返す
+	 * @return string
+	 */
+	static public function resource_path($path=null){
+		$dir = str_replace("\\",'/',\org\rhaco\Conf::get('resource_dir',getcwd().'/resources/'));
+		if(substr($dir,-1) != '/') $dir = $dir.'/';
+		return $dir.$path;
 	}
 }
