@@ -38,6 +38,13 @@ class Helper{
 		return $this->user;
 	}
 	/**
+	 * 現在のURLを返す
+	 * @return string
+	 */
+	public function current_url(){
+		return \org\rhaco\Request::current_url();
+	}
+	/**
 	 * handlerのマップ名を呼び出しているURLを生成する
 	 * 引数を与える事も可能
 	 * @param string $name マップ名
