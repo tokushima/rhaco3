@@ -29,7 +29,7 @@ class MailSender{
 		$this->send('error',$log);
 	}
 	protected function send($level,\org\rhaco\Log $log){
-		if(empty($this->template_base)) $this->template_base = \org\rhaco\Conf::get('template_base');
+		if(empty($this->template_base)) $this->template_base = \org\rhaco\Conf::get('template_base',\org\rhaco\io\File::resource_path('log_mail'));
 		$template = \org\rhaco\net\Path::absolute($this->template_base,$level.'_log.xml');
 		if(is_file($template)){
 			$mail = new \org\rhaco\net\mail\Mail();
