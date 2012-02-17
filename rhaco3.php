@@ -328,9 +328,9 @@ if(isset($_SERVER['argv'][1])){
 		switch($cmd){
 			case '-import':
 				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
+				if(isset($params['repository'])) Rhaco3::repository($params['repository']);
 				if(is_file(Rhaco3::lib_dir()) || strpos(Rhaco3::lib_dir(),'://') !== false) throw new RuntimeException(Rhaco3::lib_dir().' is not a directory');
-				$argv = array_slice($_SERVER['argv'],2);
-				$download($argv,true);
+				$download(empty($value) ? array() : array($value),true);
 				exit;
 			case '-phar':
 				if(!Phar::canWrite()) die('write operations disabled by the php.ini setting phar.readonly'.PHP_EOL.' > php -d phar.readonly=0 '.basename(__FILE__).' '.$_SERVER['argv'][1].PHP_EOL);
@@ -348,7 +348,8 @@ if(isset($_SERVER['argv'][1])){
 				exit;
 			case '-search':
 				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
-				$q = (!empty($argv)) ? strtolower($value) : '';
+				if(isset($params['repository'])) Rhaco3::repository($params['repository']);
+				$q = strtolower($value);
 				$list = array();
 				$len = 0;
 				foreach(Rhaco3::repositorys() as $rp){
@@ -380,7 +381,8 @@ if(isset($_SERVER['argv'][1])){
 				$htaccess($value);
 				exit;
 			case '-settings':
-				if(isset($params['import'])){
+				if(isset($params['repository'])) Rhaco3::repository($params['repository']);
+				if(isset($params['import']) || isset($params['repository'])){
 					$download(array(),true);
 					print(PHP_EOL);
 				}
@@ -396,6 +398,9 @@ if(isset($_SERVER['argv'][1])){
 					if(!empty($mode)) $str = preg_replace("/Rhaco3::config_path\(([\"\']).+\\1\)/",'Rhaco3::config_path(\''.$mode.'\')',$str);
 				}else{
 					$str = '<?php'.PHP_EOL.$rep.PHP_EOL.'Rhaco3::config_path(\''.$mode.'\');'.PHP_EOL;
+				}
+				if(isset($params['repository']) && !preg_match("/Rhaco3::repository\(([\"\'])".preg_quote($params['repository'],'/')."\\1\)/",$str)){
+					$str = $str.'Rhaco3::repository(\''.$params['repository'].'\');'.PHP_EOL;
 				}
 				file_put_contents($path,$str);
 				print('Written: __settings__.php'.PHP_EOL);
