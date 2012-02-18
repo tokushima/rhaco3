@@ -38,7 +38,9 @@ class Paginator extends \org\rhaco\Object{
 	private $prop;
 	private $next_c;
 	private $prev_c;
-	private $count_p = null;
+	private $marker_start = false;
+	private $marker_pre = array();
+	
 	
 	protected function __get_query_name__(){
 		return (empty($this->query_name)) ? 'page' : $this->query_name;
@@ -75,6 +77,20 @@ class Paginator extends \org\rhaco\Object{
 			$self->marker = substr($marker,1);
 		}
 		return $self;
+		/***	
+			$p = self::dynamic_contents(2,'C');
+			$p->add('A');
+			$p->add('B');
+			$p->add('C');
+			$p->add('D');
+			$p->add('E');
+			$p->add('F');
+			$p->add('G');
+			eq('A',$p->prev());
+			eq('E',$p->next());
+			eq('page=-A',$p->query_prev());
+			eq(array('C','D'),$p->contents());
+		 */
 	}
 	protected function __new__($paginate_by=20,$current=1,$total=0){
 		$this->limit($paginate_by);
@@ -153,7 +169,7 @@ class Paginator extends \org\rhaco\Object{
 	 * @return integer
 	 */
 	public function prev(){
-		if($this->dynamic) return $this->prev_c;
+		if($this->dynamic) return $this->prev_c();
 		return $this->current - 1;
 		/***
 			$p = new self(10,2,100);
@@ -181,7 +197,7 @@ class Paginator extends \org\rhaco\Object{
 	 * @return boolean
 	 */
 	public function is_prev(){
-		if($this->dynamic) return isset($this->prev_c);
+		if($this->dynamic) return ($this->prev_c() !== null);
 		return ($this->current > 1);
 		/***
 			$p = new self(10,1,100);
@@ -199,7 +215,7 @@ class Paginator extends \org\rhaco\Object{
 	public function query_prev(){
 		return Query::get(array_merge(
 							$this->ar_vars()
-							,array($this->query_name()=>(($this->dynamic) ? (isset($this->prev_c) ? "-".$this->prev_c : null) : $this->prev()))
+							,array($this->query_name()=>(($this->dynamic) ? (($this->prev_c() !== null) ? '-'.$this->mn($this->prev_c()) : null) : $this->prev()))
 						));
 		/***
 			$p = new self(10,3,100);
@@ -330,40 +346,47 @@ class Paginator extends \org\rhaco\Object{
 			$p = new self(4,2,10);
 			eq(1,$p->first());
 			eq(3,$p->last());
-			eq(true,$p->has_range());			
+			eq(true,$p->has_range());
 		 */
-	}
-	/**
-	 * limit分のコンテンツがあるか
-	 * @return boolean
-	 */
-	public function is_filled(){
-		if($this->contents_length >= $this->limit) return true;
-		return false;
 	}
 	/**
 	 * コンテンツを追加する
 	 * @param mixed $mixed
-	 * @return self $this
+	 * @return boolean
 	 */
 	public function add($mixed){
 		$this->contents($mixed);
-		return $this;
+		return ($this->contents_length <= $this->limit);
+	}
+	private function mn($v){
+		return isset($this->prop) ? 
+				(is_array($v) ? $v[$this->prop] : (is_object($v) ? (($v instanceof Object) ? $v->{$this->prop}() : $v->{$this->prop}) : null)) :
+				$v;
+	}
+	private function prev_c(){
+		if(!isset($this->prev_c) && sizeof($this->marker_pre) > 0) $this->prev_c = array_shift($this->marker_pre);
+		return $this->prev_c;
 	}
 	protected function __set_contents__($mixed){
 		if($this->dynamic){
-			if($this->contents_length <= $this->limit){
-				$this->contents_length++;
-	
-				if($this->contents_length > $this->limit){
-					$this->finish_c();
-				}else{
-					if($this->asc){
-						array_push($this->contents,$mixed);
+			if(!$this->marker_start && $this->marker == $this->mn($mixed)) $this->marker_start = true;
+			if($this->marker_start){
+				if($this->contents_length <= $this->limit){
+					$this->contents_length++;
+					
+					if($this->contents_length > $this->limit){
+						$this->next_c = $mixed;
 					}else{
-						array_unshift($this->contents,$mixed);
+						if($this->asc){
+							array_push($this->contents,$mixed);
+						}else{
+							array_unshift($this->contents,$mixed);
+						}
 					}
 				}
+			}else{
+				if(sizeof($this->marker_pre) >= $this->limit) array_shift($this->marker_pre);
+				$this->marker_pre[] = $mixed;
 			}
 		}else{
 			$this->total($this->total+1);
@@ -372,100 +395,6 @@ class Paginator extends \org\rhaco\Object{
 				array_push($this->contents,$mixed);
 			}
 		}
-	}
-	/**
-	 * order by asc
-	 * @return boolean
-	 */
-	public function is_asc(){
-		return $this->asc;
-	}
-	/**
-	 * order by desc
-	 * @return boolean
-	 */
-	public function is_desc(){
-		return !$this->asc;
-	}
-	/**
-	 * n > marker 
-	 * @return boolean
-	 */
-	public function is_gt(){
-		return $this->asc;		
-	}
-	/**
-	 * n < marker
-	 * @return boolean
-	 */
-	public function is_lt(){
-		return !$this->asc;
-	}
-	/**
-	 * contentsがlimitに達していない場合にさらに要求をするか
-	 * @return boolean
-	 */
-	public function more(){
-		if(!$this->dynamic) return false;
-		if($this->contents_length > $this->limit) return false;		
-		if($this->count_p !== null){
-			if($this->count_p === $this->contents_length){
-				$this->finish_c();
-				return false;
-			}
-			$this->offset = $this->offset + $this->limit;
-		}
-		$this->count_p = $this->contents_length;
-		return true;
-		/***
-			$p = self::dynamic_contents(4);
-			foreach(array(range(3,8),range(21,50)) as $list){
-				foreach($list as $v){
-					if($v % 3 === 0){
-						if($p->add($v)->is_filled()) break;
-					}
-				}
-				if(!$p->more()) break;
-			}
-			eq(array(3,6,21,24),$p->contents());
-
-			$p = self::dynamic_contents(4,"20");
-			$list = range(1,50);
-			if($p->is_desc()) krsort($list);
-			foreach($list as $v){
-				if(($p->is_gt() && $v > $p->marker())
-					|| ($p->is_lt() && $v < $p->marker())
-				){
-					if($v % 3 === 0){
-						if($p->add($v)->is_filled()) break;
-					}
-				}
-			}
-			eq(array(21,24,27,30),$p->contents());
-			
-			$p = self::dynamic_contents(4,"-20");
-			$list = range(1,50);
-			if($p->is_desc()) krsort($list);
-			foreach($list as $v){
-				if(($p->is_gt() && $v > $p->marker())
-					|| ($p->is_lt() && $v < $p->marker())
-				){
-					if($v % 3 === 0){
-						if($p->add($v)->is_filled()) break;
-					}
-				}
-			}
-			eq(array(9,12,15,18),$p->contents());
-		 */
-	}
-	private function finish_c(){
-		if(isset($this->contents[$this->limit-1])) $this->next_c = $this->mn($this->contents[$this->limit-1]);		
-		if(isset($this->contents[0]) && ((!$this->asc && $this->contents_length > $this->limit) || ($this->asc && $this->is_marker()))) $this->prev_c = $this->mn($this->contents[0]);
-	}
-	private function mn($v){
-		return isset($this->prop) ? 
-				(is_array($v) ? $v[$this->prop] : (is_object($v) ? (($v instanceof Object) ? $v->{$this->prop}() : $v->{$this->prop}) : null)) :
-				$v;
 	}
 	/***
 		$p = new self(3,2);
