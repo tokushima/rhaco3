@@ -67,7 +67,8 @@ class Xml implements \IteratorAggregate{
 	 * 要素名
 	 * @return string
 	 */	
-	final public function name(){
+	final public function name($name=null){
+		if(isset($name)) $this->name = $name;
 		return $this->name;
 	}
 	private function get_value($v){
