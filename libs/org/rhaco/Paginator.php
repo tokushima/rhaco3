@@ -5,13 +5,13 @@ use \org\rhaco\net\Query;
  * ページを管理するモデル
  * @author tokushima
  */
-class Paginator{
+class Paginator implements \IteratorAggregate{
 	private $query_name = 'page';
 	private $vars = array();
 	private $current;
+	private $offset;
 	private $limit;
 	private $order;
-	private $offset;
 	private $total;
 	private $first;
 	private $last;
@@ -19,6 +19,22 @@ class Paginator{
 	private $dynamic = false;
 	private $tmp = array(null,null,array(),null,false);
 
+	public function getIterator(){
+		return new \ArrayIterator(array(
+						'current'=>$this->current()
+						,'limit'=>$this->limit()
+						,'offset'=>$this->offset()
+						,'total'=>$this->total()
+						,'order'=>$this->order()
+				));
+		/***
+			$p = new self(10,3);
+			$p->total(100);
+			$re = array();
+			foreach($p as $k => $v) $re[$k] = $v;
+			eq(array('current'=>3,'limit'=>10,'offset'=>20,'total'=>100,'order'=>null),$re);
+		 */
+	}
 	/**
 	 * pageを表すクエリの名前
 	 * @param string $name
