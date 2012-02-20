@@ -4,43 +4,169 @@ use \org\rhaco\net\Query;
 /**
  * ページを管理するモデル
  * @author tokushima
- * @var integer $offset 開始位置
- * @var integer $limit 終了位置
- * @var integer $total 合計
- * @var integer $first 最初のページ番号 @['set'=>false]
- * @var integer $last 最後のページ番号 @['set'=>false]
- * @var mixed $current 現在位置
- * @var string $query_name pageを表すクエリの名前
- * @var mixed{} $vars query文字列とする値
- * @var mixed[] $contents １ページ分の内容
- * @var boolean $dynamic ダイナミックページネーションとするか @['set'=>false]
- * @var string $order 最後のソートキー
  */
-class Paginator extends \org\rhaco\Object{
-	protected $query_name = 'page';
-	protected $vars = array();
-	protected $current;
-	protected $limit;	
-	protected $order;
-	protected $offset;
-	protected $total;
-	protected $first;
-	protected $last;
-	protected $contents = array();
-	protected $dynamic = false;
-	private $dynamic_vars = array(null,null,array(),null,false);
+class Paginator{
+	private $query_name = 'page';
+	private $vars = array();
+	private $current;
+	private $limit;
+	private $order;
+	private $offset;
+	private $total;
+	private $first;
+	private $last;
+	private $contents = array();
+	private $dynamic = false;
+	private $tmp = array(null,null,array(),null,false);
 
+	/**
+	 * pageを表すクエリの名前
+	 * @param string $name
+	 * @return string
+	 */
+	public function query_name($name=null){
+		if(isset($name)) $this->query_name = $name;
+		return (empty($this->query_name)) ? 'page' : $this->query_name;
+	}
+	/**
+	 * query文字列とする値をセットする
+	 * @param string $key
+	 * @param string $value
+	 */
+	public function vars($key,$value){
+		$this->vars[$key] = $value;
+	}
+	/**
+	 * 現在位置
+	 * @param integer $value
+	 * @return mixed
+	 */
+	public function current($value=null){
+		if(isset($value) && !$this->dynamic){
+			$value = intval($value);
+			$this->current = ($value === 0) ? 1 : $value;
+			$this->offset = $this->limit * round(abs($this->current - 1));
+		}
+		return $this->current;
+	}
+	/**
+	 * 終了位置
+	 * @param integer $value
+	 * @return integer
+	 */
+	public function limit($value=null){
+		if(isset($value)) $this->limit = $value;
+		return $this->limit;
+	}
+	/**
+	 * 開始位置
+	 * @param integer $value
+	 * @return integer
+	 */
+	public function offset($value=null){
+		if(isset($value)) $this->offset = $value;
+		return $this->offset;
+	}
+	/**
+	 * 最後のソートキー
+	 * @param string $value
+	 * return string
+	 */
+	public function order($value=null){
+		if(isset($value)) $this->order = $value;
+		return $this->order;
+	}
+	/**
+	 * 合計
+	 * @param integer $value
+	 * @return integer
+	 */
+	public function total($value=null){
+		if(isset($value) && !$this->dynamic){
+			$this->total = intval($value);
+			$this->first = 1;
+			$this->last = ($this->total == 0 || $this->limit == 0) ? 0 : intval(ceil($this->total / $this->limit));
+		}
+		return $this->total;
+	}
+	/**
+	 * 最初のページ番号
+	 * @return integer
+	 */
+	public function first(){
+		return $this->first;
+	}
+	/**
+	 * 最後のページ番号
+	 * @return integer
+	 */
+	public function last(){
+		return $this->last;
+	}
+	/**
+	 * 指定のページ番号が最初のページか
+	 * @param integer $page
+	 * @return boolean
+	 */
+	public function is_first($page){
+		return ($this->which_first($page) !== $this->first);
+	}
+	/**
+	 * 指定のページ番号が最後のページか
+	 * @param integer $page
+	 * @return boolean
+	 */
+	public function is_last($page){
+		return ($this->which_last($page) !== $this->last());
+	}
+	/**
+	 * 動的コンテンツのPaginaterか
+	 * @return boolean
+	 */
+	public function is_dynamic(){
+		return $this->dynamic;
+	}
+	/**
+	 * コンテンツ
+	 * @param mixed $mixed
+	 * @return array
+	 */
+	public function contents($mixed=null){
+		if(isset($mixed)){
+			if($this->dynamic){
+				if(!$this->tmp[4] && $this->current == (isset($this->tmp[3]) ? (isset($mixed[$this->tmp[3]]) ? $mixed[$this->tmp[3]] : null) : $mixed)) $this->tmp[4] = true;
+				if($this->tmp[4]){
+					if($this->tmp[0] === null && ($size=sizeof($this->contents)) <= $this->limit){
+						if(($size+1) > $this->limit){
+							$this->tmp[0] = $mixed;
+						}else{
+							$this->contents[] = $mixed;
+						}
+					}
+				}else{
+					if(sizeof($this->tmp[2]) >= $this->limit) array_shift($this->tmp[2]);
+					$this->tmp[2][] = $mixed;
+				}
+			}else{
+				$this->total($this->total+1);
+				if($this->page_first() <= $this->total && $this->total <= ($this->offset + $this->limit)){
+					$this->contents[] = $mixed;
+				}
+			}
+		}
+		return $this->contents;
+	}
 	/**
 	 * 動的コンテンツのPaginater
 	 * @param integer $paginate_by １ページの要素数
 	 * @param string $marker 基点となる値
-	 * @param string $prop 対象とするプロパティ名
+	 * @param string $key 対象とするキー
 	 * @return self
 	 */
-	static public function dynamic_contents($paginate_by=20,$marker=null,$prop=null){
+	static public function dynamic_contents($paginate_by=20,$marker=null,$key=null){
 		$self = new self($paginate_by);
 		$self->dynamic = true;
-		$self->dynamic_vars[3] = $prop;
+		$self->tmp[3] = $key;
 		$self->current = $marker;
 		$self->total = $self->first = $self->last = null;
 		return $self;
@@ -61,7 +187,7 @@ class Paginator extends \org\rhaco\Object{
 			eq(null,$p->last());
 		 */
 	}
-	protected function __new__($paginate_by=20,$current=1,$total=0){
+	public function __construct($paginate_by=20,$current=1,$total=0){
 		$this->limit($paginate_by);
 		$this->total($total);
 		$this->current($current);
@@ -139,9 +265,6 @@ class Paginator extends \org\rhaco\Object{
 			eq(2,$p->total());
 		 */
 	}
-	protected function __get_query_name__(){
-		return (empty($this->query_name)) ? 'page' : $this->query_name;
-	}
 	/**
 	 * 
 	 * 配列をvarsにセットする
@@ -149,7 +272,7 @@ class Paginator extends \org\rhaco\Object{
 	 * @return self $this
 	 */
 	public function cp(array $array){
-		foreach($obj as $name => $value){
+		foreach($array as $name => $value){
 			if(ctype_alpha($name[0])) $this->vars[$name] = (string)$value;
 		}
 		return $this;
@@ -159,7 +282,7 @@ class Paginator extends \org\rhaco\Object{
 	 * @return integer
 	 */
 	public function next(){
-		if($this->dynamic) return $this->dynamic_vars[0];
+		if($this->dynamic) return $this->tmp[0];
 		return $this->current + 1;
 		/***
 			$p = new self(10,1,100);
@@ -172,8 +295,8 @@ class Paginator extends \org\rhaco\Object{
 	 */
 	public function prev(){
 		if($this->dynamic){
-			if(!isset($this->dynamic_vars[1]) && sizeof($this->dynamic_vars[2]) > 0) $this->dynamic_vars[1] = array_shift($this->dynamic_vars[2]);
-			return $this->dynamic_vars[1];
+			if(!isset($this->tmp[1]) && sizeof($this->tmp[2]) > 0) $this->tmp[1] = array_shift($this->tmp[2]);
+			return $this->tmp[1];
 		}
 		return $this->current - 1;
 		/***
@@ -186,7 +309,7 @@ class Paginator extends \org\rhaco\Object{
 	 * @return boolean
 	 */
 	public function is_next(){
-		if($this->dynamic) return isset($this->dynamic_vars[0]);
+		if($this->dynamic) return isset($this->tmp[0]);
 		return ($this->last > $this->current);
 		/***
 			$p = new self(10,1,100);
@@ -218,9 +341,10 @@ class Paginator extends \org\rhaco\Object{
 	 * @return string
 	 */
 	public function query_prev(){
+		$prev = $this->prev();
 		return Query::get(array_merge(
-							$this->ar_vars()
-							,array($this->query_name()=>(($this->dynamic) ? $this->mn($this->prev()) : $this->prev()))
+							$this->vars
+							,array($this->query_name()=>($this->dynamic && isset($this->tmp[3]) ? (isset($prev[$this->tmp[3]]) ? $prev[$this->tmp[3]] : null) : $prev))
 						));
 		/***
 			$p = new self(10,3,100);
@@ -235,8 +359,8 @@ class Paginator extends \org\rhaco\Object{
 	 */
 	public function query_next(){
 		return Query::get(array_merge(
-							$this->ar_vars()
-							,array($this->query_name()=>(($this->dynamic) ? $this->dynamic_vars[0] : $this->next()))
+							$this->vars
+							,array($this->query_name()=>(($this->dynamic) ? $this->tmp[0] : $this->next()))
 						));
 		/***
 			$p = new self(10,3,100);
@@ -252,12 +376,12 @@ class Paginator extends \org\rhaco\Object{
 	 * @return string
 	 */
 	public function query_order($order){
-		if($this->is_vars('order')){
-			$this->order = $this->in_vars('order');
-			$this->rm_vars('order');
+		if(isset($this->vars['order'])){
+			$this->order = $this->vars['order'];
+			unset($this->vars['order']);
 		}
 		return Query::get(array_merge(
-							$this->ar_vars()
+							$this->vars
 							,array('order'=>$order,'porder'=>$this->order())
 						));
 		/***
@@ -280,18 +404,11 @@ class Paginator extends \org\rhaco\Object{
 	 * @return string
 	 */
 	public function query($current){
-		return Query::get(array_merge($this->ar_vars(),array($this->query_name()=>$current)));
+		return Query::get(array_merge($this->vars,array($this->query_name()=>$current)));
 		/***
 			$p = new self(10,1,100);
 			eq("page=3",$p->query(3));
 		 */
-	}
-	protected function __set_current__($value){
-		if(!$this->dynamic){
-			$value = intval($value);
-			$this->current = ($value === 0) ? 1 : $value;
-			$this->offset = $this->limit * round(abs($this->current - 1));
-		}
 	}
 	/**
 	 * コンテンツを追加する
@@ -302,40 +419,6 @@ class Paginator extends \org\rhaco\Object{
 		$this->contents($mixed);
 		return (sizeof($this->contents) <= $this->limit);
 	}
-	private function mn($v){
-		return isset($this->dynamic_vars[3]) ? 
-				(is_array($v) ? $v[$this->dynamic_vars[3]] : (is_object($v) ? (($v instanceof Object) ? $v->{$this->dynamic_vars[3]}() : $v->{$this->dynamic_vars[3]}) : null)) :
-				$v;
-	}
-	protected function __set_contents__($mixed){
-		if($this->dynamic){
-			if(!$this->dynamic_vars[4] && $this->current == $this->mn($mixed)) $this->dynamic_vars[4] = true;
-			if($this->dynamic_vars[4]){
-				if($this->dynamic_vars[0] === null && ($size=sizeof($this->contents)) <= $this->limit){
-					if(($size+1) > $this->limit){
-						$this->dynamic_vars[0] = $mixed;
-					}else{
-						$this->contents[] = $mixed;
-					}
-				}
-			}else{
-				if(sizeof($this->dynamic_vars[2]) >= $this->limit) array_shift($this->dynamic_vars[2]);
-				$this->dynamic_vars[2][] = $mixed;
-			}
-		}else{
-			$this->total($this->total+1);
-			if($this->page_first() <= $this->total && $this->total <= ($this->offset + $this->limit)){
-				$this->contents[] = $mixed;
-			}
-		}
-	}
-	protected function __set_total__($total){
-		if(!$this->dynamic){
-			$this->total = intval($total);
-			$this->first = 1;
-			$this->last = ($this->total == 0 || $this->limit == 0) ? 0 : intval(ceil($this->total / $this->limit));
-		}
-	}	
 	/**
 	 * 現在のページの最初の位置
 	 * @return integer
@@ -351,12 +434,6 @@ class Paginator extends \org\rhaco\Object{
 	public function page_last(){
 		if($this->dynamic) return null;
 		return (($this->offset + $this->limit) < $this->total) ? ($this->offset + $this->limit) : $this->total;
-	}
-	protected function __is_first__($paginate){
-		return ($this->which_first($paginate) !== $this->first);
-	}
-	protected function __is_last__($paginate){
-		return ($this->which_last($paginate) !== $this->last());
 	}
 	/**
 	 * ページの最初の位置を返す
