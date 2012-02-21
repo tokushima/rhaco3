@@ -7,7 +7,7 @@ use \org\rhaco\Conf;
  * @conf string $template_path テンプレートファイルのベースパス
  * @conf string $media_url メディアファイルのベースURL
  * @conf boolean $secure patternsでsecure指定された場合にhttpsとするか
- * @conf booelan $exception_log_level Exceptionが発生した際にLogに出力するログレベル (error,warn,info,debug)
+ * @conf string $exception_log_level Exceptionが発生した際にLogに出力するログレベル (error,warn,info,debug)
  */
 class Flow{
 	private $module = array();
