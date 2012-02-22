@@ -39,12 +39,12 @@ abstract class Dao extends \org\rhaco\Object{
 	final static public function connections(){
 		$connections = array();
 		foreach(self::$_connections_ as $n => $con){
-			$connections[$n] = $con[1];
+			$connections[$n] = $con;
 		}
 		return $connections;
 	}
 	final static private function connection($class){
-		return self::$_connections_[self::$_co_anon_[$class][0]][1];
+		return self::$_connections_[self::$_co_anon_[$class][0]];
 	}
 	final static private function get_con($database,$class){
 		$def = Conf::get('connection');
@@ -56,11 +56,7 @@ abstract class Dao extends \org\rhaco\Object{
 						self::$_connections_[$database] = self::$_connections_[$def[$database]['con']];
 						return $def[$database];
 					}
-					$dbc = new Dbc($def[$database]);
-					$con = array(false,$dbc->connect());
-					$r = new \ReflectionClass($con[1]->type());
-					$con[2] = $r->newInstanceArgs(array($con[1]->encode()));
-					self::$_connections_[$database] = $con;
+					self::$_connections_[$database] = new Dbc($def[$database]);
 				}
 			}catch(\Exception $e){
 				throw $e;
@@ -116,12 +112,12 @@ abstract class Dao extends \org\rhaco\Object{
 				$anon[1] = strtolower($table_class[0]);
 				for($i=1;$i<strlen($table_class);$i++) $anon[1] .= (ctype_lower($table_class[$i])) ? $table_class[$i] : '_'.strtolower($table_class[$i]);
 			}
-			$json = self::get_con($anon[0],$p);
+			$config = self::get_con($anon[0],$p);
 			if(!isset(self::$_connections_[$anon[0]])) throw new \RuntimeException('connection fail '.str_replace("\\",'.',get_class($this)));
-			static::set_module(self::$_connections_[$anon[0]][2]);
-			$anon[5] = isset($json['prefix']) ? $json['prefix'] : '';
-			$anon[6] = (isset($json['upper']) && $json['upper'] === true);
-			$anon[7] = (isset($json['lower']) && $json['lower'] === true);
+			static::set_module(self::$_connections_[$anon[0]]->connection_module());
+			$anon[5] = isset($config['prefix']) ? $config['prefix'] : '';
+			$anon[6] = (isset($config['upper']) && $config['upper'] === true);
+			$anon[7] = (isset($config['lower']) && $config['lower'] === true);
 			self::$_co_anon_[$p] = $anon;
 			self::$_co_anon_[$p][1] = self::set_table_name(self::$_co_anon_[$p][1],$p);
 		}		

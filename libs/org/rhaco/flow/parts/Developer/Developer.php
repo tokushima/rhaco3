@@ -42,6 +42,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 					new \org\rhaco\flow\module\TwitterBootstrapPagination()
 					,new \org\rhaco\flow\module\Exceptions()
 					,new Developer\Formatter()
+					,new \org\rhaco\flow\module\Dao()
 				);
 	}
 	/**

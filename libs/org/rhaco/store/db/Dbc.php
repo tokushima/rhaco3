@@ -26,7 +26,8 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 	private $statement;
 	private $resultset;
 	private $resultset_counter;
-
+	private $connection_module;
+	
 	/**
 	 * コンストラクタ
 	 * @param string{} $def 接続情報の配列
@@ -51,13 +52,19 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 			}
 			if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('undef type');
 			$r = new \ReflectionClass($this->type);
-			$module = $r->newInstanceArgs(array($this->encode));
-			$this->set_object_module($module);
+			$this->connection_module = $r->newInstanceArgs(array($this->encode));
+			$this->set_object_module($this->connection_module);
 			$this->connection = $this->object_module('connect',$this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
 			if(empty($this->connection)) throw new \RuntimeException('connection fail '.$this->dbname);
 			$this->connection->beginTransaction();
 		}
 		return $this;
+	}
+	/**
+	 * 接続モジュール
+	 */
+	public function connection_module(){
+		return $this->connection_module;
 	}
 	protected function __set_type__($type){
 		if(!empty($type)){
