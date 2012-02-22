@@ -309,12 +309,13 @@ class Xml implements \IteratorAggregate{
 	/**
 	 * XML文字列を返す
 	 */
-	public function get(){
+	public function get($encoding=null){
 		if($this->name === null) throw new \LogicException('undef name');
 		$attr = '';
 		$value = ($this->value === null || $this->value === '') ? null : (string)$this->value;
 		foreach($this->attr as $k => $v) $attr .= ' '.$k.'="'.$this->in_attr($k).'"';
-		return ('<'.$this->name.$attr.(implode(' ',$this->plain_attr)).(($this->close_empty && !isset($value)) ? ' /' : '').'>')
+		return ((empty($encoding)) ? '' : '<?xml version="1.0" encoding="'.$encoding.'" ?'.'>'.PHP_EOL)
+				.('<'.$this->name.$attr.(implode(' ',$this->plain_attr)).(($this->close_empty && !isset($value)) ? ' /' : '').'>')
 				.$this->value
 				.((!$this->close_empty || isset($value)) ? sprintf('</%s>',$this->name) : '');
 		/***

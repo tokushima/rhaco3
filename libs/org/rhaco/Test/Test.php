@@ -18,13 +18,13 @@ class Test{
 	 * 結果を取得する
 	 * @return string{}
 	 */
-	final public function get(){
+	final static public function get(){
 		return self::$result;
 	}
 	/**
 	 * 結果をクリアする
 	 */
-	final public static function clear(){
+	final static public function clear(){
 		self::$result = array();
 		self::$start_time = microtime(true);
 	}
@@ -32,7 +32,7 @@ class Test{
 	 * 開始時間
 	 * @return integer
 	 */
-	static public function start_time(){
+	final static public function start_time(){
 		if(self::$start_time === null) self::$start_time = microtime(true);
 		return self::$start_time;
 	}
@@ -40,7 +40,7 @@ class Test{
 	 * 現在実行中のエントリ
 	 * @return string
 	 */
-	static public function current_entry(){
+	final static public function current_entry(){
 		return self::$current_entry;
 	}
 	/**
@@ -52,7 +52,7 @@ class Test{
 	 * @param string $file ファイル名
 	 * @return boolean
 	 */
-	final public static function equals($arg1,$arg2,$eq,$line,$file=null){
+	final static public function equals($arg1,$arg2,$eq,$line,$file=null){
 		$result = ($eq) ? (self::expvar($arg1) === self::expvar($arg2)) : (self::expvar($arg1) !== self::expvar($arg2));
 		self::$result[(empty(self::$current_file) ? $file : self::$current_file)][self::$current_class][self::$current_method][$line][] = ($result) ? array() : array(var_export($arg1,true),var_export($arg2,true));
 		return $result;
@@ -63,7 +63,7 @@ class Test{
 	 * @param int $line 行番号
 	 * @param string $file ファイル名
 	 */
-	final public static function notice($msg,$line,$file=null){
+	final static public function notice($msg,$line,$file=null){
 		self::$result[(empty(self::$current_file) ? $file : self::$current_file)][self::$current_class][self::$current_method][$line][] = array('notice',$msg,$file,$line);
 	}
 	/**
@@ -197,7 +197,6 @@ class Test{
 		$result = '';
 		$tab = '  ';
 		$success = $fail = $none = 0;
-		$cli = (isset($_SERVER['argc']) && !empty($_SERVER['argc']) && substr(PHP_OS,0,3) != 'WIN');
 
 		foreach(self::$result as $file => $f){
 			foreach($f as $class => $c){
