@@ -611,7 +611,7 @@ abstract class Dao extends \org\rhaco\Object{
 		$query->add(new Paginator(1,1));
 		if(!empty($args)) call_user_func_array(array($query,'add'),$args);
 		foreach(self::get_statement_iterator($dao,$query) as $d) return $d;
-		throw new NotfoundDaoException(get_class($dao).' not found');
+		throw new NotfoundDaoException(basename(str_replace("\\",'/',get_class($dao))).' not found');
 	}
 	/**
 	 * サブクエリを取得する
