@@ -193,6 +193,70 @@ class Test{
 		}
 		return new self();
 	}
+	/**
+	 * 
+	 * テスト結果をXMLで取得する
+	 * @return org.rhaco.Xml
+	 */
+	static public function xml($name=null){
+		$xml = new \org\rhaco\Xml('testsuite');
+		if(!empty($name)) $xml->attr('name',$name);
+		
+		$count = $success = $fail = $none = $exception = 0;
+		foreach(\org\rhaco\Test::get() as $file => $f){
+			$case = new \org\rhaco\Xml('testcase');
+			$case->close_empty(false);
+			$case->attr('name',$file);
+			
+			foreach($f as $class => $c){
+				foreach($c as $method => $m){
+					foreach($m as $line => $r){
+						foreach($r as $l){
+							$count++;
+							switch(sizeof($l)){
+								case 0:
+									$success++;
+									break;
+								case 1:
+									$none++;
+									break;
+								case 2:
+									$fail++;
+									$x = new \org\rhaco\Xml('failure');
+									$x->attr('line',$line);
+									ob_start();
+										var_dump($l[1]);
+										$content = ob_get_contents();
+									ob_end_clean();
+									$x->value('Line. '.$line.' '.$method.': '."\n".$content);
+									$case->add($x);
+									break;
+								case 4:
+									$exception++;
+									$x = new \org\rhaco\Xml('failure');
+									$x->attr('line',$line);
+									$x->value(
+											'Line. '.$line.' '.$method.': '.$l[0]."\n".
+											$l[1]."\n\n".$l[2].':'.$l[3]
+									);
+									$case->add($x);
+									break;
+							}
+						}
+					}
+				}
+			}		
+			$xml->add($case);
+		}
+		$xml->attr('failures',$fail);
+		$xml->attr('tests',$count);
+		$xml->attr('errors',$exception);
+		$xml->attr('skipped',$none);
+		$xml->attr('time',round((microtime(true) - (float)\org\rhaco\Test::start_time()),4));
+		$xml->add(new \org\rhaco\Xml('system-out'));
+		$xml->add(new \org\rhaco\Xml('system-err'));
+		return $xml;
+	}
 	public function __toString(){
 		$result = '';
 		$tab = '  ';

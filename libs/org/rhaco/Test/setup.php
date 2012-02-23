@@ -37,7 +37,6 @@ if(isset($value)){
 	}catch(\Exception $e){
 		$error_print($value.': '.$e->getMessage());
 	}
-	print(new \org\rhaco\Test());
 }else{
 	$dup = array();	
 	$exceptions = array();
@@ -110,64 +109,14 @@ if(isset($value)){
 	if(!empty($exceptions)){
 		foreach($exceptions as $k => $e) $error_print($k.': '.$e);
 	}
-	
-	if(isset($params['xml'])){
-		$xml = new \org\rhaco\Xml('testsuite');
-		$xml->attr('name',$value);
-		
-		$count = $success = $fail = $none = $exception = 0;
-		foreach(\org\rhaco\Test::get() as $file => $f){
-			$case = new \org\rhaco\Xml('testcase');
-			$case->close_empty(false);
-			$case->attr('name',$file);
-			
-			foreach($f as $class => $c){
-				foreach($c as $method => $m){
-					foreach($m as $line => $r){
-						foreach($r as $l){
-							$count++;
-							switch(sizeof($l)){
-								case 0:
-									$success++;
-									break;
-								case 1:
-									$none++;
-									break;
-								case 2:
-									$fail++;
-									
-									ob_start();
-										var_dump($l[1]);
-										ob_get_contents();
-									ob_end_clean();
-									break;
-								case 4:
-									$exception++;
-									$x = new \org\rhaco\Xml('failure');
-									$x->attr('type','');
-									$x->attr('message','');									
-									$x->value(
-											'['.$line.']'.$method.': '.$l[0]."\n".
-											$l[1]."\n\n".$tab.$l[2].':'.$l[3]
-									);
-									$case->add($x);
-									break;
-							}
-						}
-					}
-				}
-			}		
-			$xml->add($case);
-		}
-		$xml->attr('failures',$fail);
-		$xml->attr('tests',$count);
-		$xml->attr('errors',$exception);
-		$xml->attr('skipped',$none);
-		$xml->attr('time',round((microtime(true) - (float)\org\rhaco\Test::start_time()),4));
-		$xml->add(new \org\rhaco\Xml('system-out'));
-		$xml->add(new \org\rhaco\Xml('system-err'));
-		print($xml->get('UTF-8'));
+}
+if(isset($params['xml'])){
+	if(!empty($params['xml'])){
+		if(!is_dir(dirname($params['xml']))) mkdir(dirname($params['xml']),0777,true);
+		file_put_contents($params['xml'],\org\rhaco\Test::xml($value)->get('UTF-8'));
 	}else{
-		print(new \org\rhaco\Test());
+		print(\org\rhaco\Test::xml($value)->get('UTF-8'));
 	}
+}else{
+	print(new \org\rhaco\Test());
 }
