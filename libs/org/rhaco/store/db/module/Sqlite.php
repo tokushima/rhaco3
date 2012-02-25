@@ -24,4 +24,49 @@ class Sqlite extends Base{
 	public function last_insert_id_sql(){
 		return \org\rhaco\store\db\Daq::get('select last_insert_rowid() as last_insert_id;');
 	}
+	/**
+	 * create table
+	 * @param org.rhaco.store.db.Dao $dao
+	 */
+	public function create_table_sql(\org\rhaco\store\db\Dao $dao){
+		$quote = function($name){
+			return '`'.$name.'`';
+		};
+		$to_column_type = function($dao,$type,$name) use($quote){
+			switch($type){
+				case '':
+				case 'mixed':
+				case 'string':
+				case 'alnum':
+				case 'text':
+					return $quote($name).' TEXT';
+				case 'number':
+					return $quote($name).' REAL';
+				case 'serial': return $quote($name).' INTEGER PRIMARY KEY';
+				case 'boolean':
+				case 'timestamp':
+				case 'date':
+				case 'time':
+				case 'intdate': 
+				case 'integer': return $quote($name).' INTEGER';
+				case 'email':
+				case 'choice': return $quote($name).' TEXT';
+				default: throw new \InvalidArgumentException('undefined type `'.$type.'`');
+			}
+		};
+		$columndef = array();
+		$sql = 'create table '.$quote($dao->table()).'('.PHP_EOL;
+		foreach($dao->props() as $prop_name => $v){
+			if($this->create_table_prop_cond($dao,$prop_name)){
+				$column_str = '  '.$to_column_type($dao,$dao->prop_anon($prop_name,'type'),$prop_name);
+				$column_str .= (($dao->prop_anon($prop_name,'require') === true) ? ' not' : '').' null ';
+				
+				$columndef[] = $column_str;
+				if($dao->prop_anon($prop_name,'primary') === true || $dao->prop_anon($prop_name,'type') == 'serial') $primary[] = $quote($prop_name);
+			}
+		}
+		$sql .= implode(','.PHP_EOL,$columndef).PHP_EOL;
+		$sql .= ' );'.PHP_EOL;
+		return $sql;
+	}
 }

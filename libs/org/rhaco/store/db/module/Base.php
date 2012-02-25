@@ -417,4 +417,13 @@ abstract class Base extends \org\rhaco\Object{
 	protected function quotation($name){
 		return $this->quotation.$name.$this->quotation;
 	}
+	/**
+	 * create table
+	 * @param org.rhaco.store.db.Dao $dao
+	 */
+	public function create_table_sql(\org\rhaco\store\db\Dao $dao){
+	}
+	protected function create_table_prop_cond(\org\rhaco\store\db\Dao $dao,$prop_name){
+		return ($dao->prop_anon($prop_name,'extra') !== true && $dao->prop_anon($prop_name,'cond') === null);
+	}
 }

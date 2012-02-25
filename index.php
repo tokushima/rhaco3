@@ -3,8 +3,8 @@ include_once('rhaco3.php');
 /**
  * @name rhaco3 repository
  * @summary rhaco3のライブラリ群
- * さまざまなライブラリ
- * これまでもこれからも
+ * ああああああああああ
+ * いいいいいいいいいい
  */
 $flow = new \org\rhaco\Flow();
 $flow->output(array(''

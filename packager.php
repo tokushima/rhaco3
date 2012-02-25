@@ -117,7 +117,7 @@ foreach($list[0] as $p){
 					break;
 				}
 			}
-			if($b && strpos(file_get_contents($r),'@unfinished') === false){
+			if($b && strpos(file_get_contents($r),'@incomplete') === false){
 				if(preg_match("/^(.*)\/(\w+)\/(\w+)\.php$/",$r,$m) && $m[2] == $m[3] && !preg_match('/[A-Z]/',str_replace($input_path,'',$m[1]))){
 					$dir = dirname($r);
 					$dup[] = $dir.'/';

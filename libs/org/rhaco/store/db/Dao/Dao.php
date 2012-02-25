@@ -154,7 +154,7 @@ abstract class Dao extends \org\rhaco\Object{
 						if(!empty($conds_string)){
 							foreach(explode(',',$conds_string) as $key => $cond){
 								$tcc = explode('.',$cond,3);
-								if(sizeof($tcc) < 2) throw new \LogicException('JSON error `'.$name.'`');
+								if(sizeof($tcc) < 2) throw new \LogicException('annotation error : `'.$name.'`');
 								if(sizeof($tcc) === 3){
 									list($t,$c1,$c2) = $tcc;
 									$ref_table = self::set_table_name($t,$p);
@@ -170,13 +170,13 @@ abstract class Dao extends \org\rhaco\Object{
 							}
 						}
 						if($is_has_many){
-							if(empty($has_var)) throw new \LogicException('JSON error `'.$name.'`');
+							if(empty($has_var)) throw new \LogicException('annotation error : `'.$name.'`');
 							$dao = new $column_type(array('_class_id_'=>$p.'___'.self::$_cnt_++));
 							$_has_many_conds_[$name] = array($dao,$has_var,$self_var);
 						}else{
 							$self_db = true;
 							if($is_has){
-								if(empty($has_var)) throw new \LogicException('JSON error `'.$name.'`');
+								if(empty($has_var)) throw new \LogicException('annotation error : `'.$name.'`');
 								$dao = new $column_type(array('_class_id_'=>($p.'___'.self::$_cnt_++),'_hierarchy_'=>$has_hierarchy));
 								$this->{$name}($dao);
 								if($dao->table() == $this->table()){
