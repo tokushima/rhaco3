@@ -3,7 +3,7 @@
 <rt:block name="content">
 <h2 class="title">Models</h2>
 
-<table rt:param="{$dao_models}" rt:key="package" rt:var="summary">
+<table rt:param="{$dao_models}" rt:key="package" rt:var="summary" rt:counter="count">
 <thead>
 	<tr>
 		<th>&nbsp;</th>
@@ -16,9 +16,32 @@
 		<td>
 			<rt:if param="{$dao_model_con[$package]}">
 				<rt:if param="{$dao_model_errors[$package]}">
+					<a class="icon-pencil" href="{$t.package_method_url('do_sql',$package)}?create_sql"></a>
 				<rt:else />
 					<a class="icon-list" href="{$t.package_method_url('do_find',$package)}"></a>
 				</rt:if>
+			<rt:else>
+				<div id="modal_{$count}" class="modal hide fade" style="display: none; ">
+					<div class="modal-header">
+						<a class="close" data-dismiss="modal">x</a>
+						<h3>Connection settings</h3>
+					</div>
+					
+					<form style=" padding:10px;">
+						<textarea style="width:98%; height: 100px;">
+\org\rhaco\Conf::set('org.rhaco.store.db.Dao','connection',array(
+  '{$package}'=>array(
+    'type'=>'org.rhaco.store.db.module.Mysql',
+    'dbname'=>'app'
+  )
+);
+						</textarea>
+					</form>
+					<div class="modal-footer">
+						<a href="#" class="btn" data-dismiss="modal">Close</a>
+					</div>
+	          	</div>
+				<a class="icon-warning-sign" data-toggle="modal" href="#modal_{$count}"></a>
 			</rt:if>
 		</td>
 		<td>

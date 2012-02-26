@@ -5,7 +5,7 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
- * @class @['maps'=>['do_login','do_logout','index','classes','class_src','class_info','method_info','do_create','do_detail','do_drop','do_find','do_update','mail_list','mail_detail','conf_list','model_list','class_module_info','entry_list','module_list']]
+ * @class @['maps'=>['do_login','do_logout','index','classes','class_src','class_info','method_info','do_create','do_detail','do_drop','do_find','do_update','do_sql','mail_list','mail_detail','conf_list','model_list','class_module_info','entry_list','module_list']]
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	private $smtp_blackhole_dao;
@@ -326,6 +326,61 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		$this->vars('model',$obj);
 		$this->vars('package',$package);
+	}
+	static public function get_dao_connection($package){
+		if(!is_object($package)){
+			$r = new \ReflectionClass('\\'.str_replace('.','\\',$package));
+			$package = $r->newInstance();
+		}		
+		if(!is_subclass_of($package,'\org\rhaco\store\db\Dao')) throw new \RuntimeException('not Dao');
+	
+		$connections = \org\rhaco\store\db\Dao::connections();
+		$conf = explode("\\",get_class($package));
+		while(!isset($connections[implode('.',$conf)]) && !empty($conf)) array_pop($conf);
+	
+		if(empty($conf)){
+			if(!array_search('*',$keys)) throw new \RuntimeException(get_class($package).' connection not found');
+			$conf = array('*');
+		}
+		$conf = implode('.',$conf);	
+		foreach($connections as $k => $con){
+			if($k == $conf) return $con;
+		}		
+	}
+	/**
+	 * SQLを実行する
+	 * @param string $package
+	 */
+	public function do_sql($package){
+		$con = self::get_dao_connection($package);
+		$result_list = $keys = array();
+		$sql = $this->in_vars('sql');
+		$count = 0;
+		
+		if($this->is_vars('create_sql')){
+			$r = new \ReflectionClass('\\'.str_replace('.','\\',$package));
+			$dao = $r->newInstance();
+			$sql = $con->connection_module()->create_table_sql($dao);
+			$this->rm_vars('create_sql');
+			$this->vars('sql',$sql);
+		}		
+		if($this->is_post() && !empty($sql)){
+			$con->query($sql);
+
+			foreach($con as $k => $v){
+				if(empty($keys)) $keys = array_keys($v);
+				$result_list[] = $v;
+				$count++;
+				
+				if($count >= 100) break;
+			}
+			$this->rm_vars('sql');
+			$this->vars('excute_sql',$sql);
+		}
+		$this->vars('result_keys',$keys);
+		$this->vars('result_list',$result_list);
+		$this->vars('package',$package);
+		$this->vars('maximum',($count >= 100));
 	}
 	/**
 	 * メールの一覧

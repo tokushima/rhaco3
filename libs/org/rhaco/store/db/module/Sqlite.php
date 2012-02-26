@@ -54,7 +54,7 @@ class Sqlite extends Base{
 				default: throw new \InvalidArgumentException('undefined type `'.$type.'`');
 			}
 		};
-		$columndef = array();
+		$columndef = $primary = array();
 		$sql = 'create table '.$quote($dao->table()).'('.PHP_EOL;
 		foreach($dao->props() as $prop_name => $v){
 			if($this->create_table_prop_cond($dao,$prop_name)){
