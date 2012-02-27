@@ -60,7 +60,7 @@ class Mysql extends Base{
 				case 'integer': return $quote($name).' int';
 				case 'email': return $quote($name).' varchar(255)';
 				case 'choice': return $quote($name).' varchar(255)';
-				default: throw new InvalidArgumentException('undefined type `'.$type.'`');
+				default: throw new \InvalidArgumentException('undefined type `'.$type.'`');
 			}
 		};
 		$columndef = $primary = array();
