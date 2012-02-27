@@ -105,6 +105,47 @@ class Helper{
 			}
 		}
 	}
+	public function filter(\org\rhaco\store\db\Dao $obj,$name){
+		if($obj->prop_anon($name,'master') !== null){
+			$options = array();
+			$options[] = '<option value=""></option>';
+			$master = $obj->prop_anon($name,'master');
+			if(!empty($master)){
+				$master = str_replace('.',"\\",$master);
+				if($master[0] !== "\\") $master = "\\".$master;
+				$r = new \ReflectionClass($master);
+				$mo = $r->newInstanceArgs();
+				$primarys = $mo->primary_columns();
+				if(sizeof($primarys) != 1) return sprintf('<input name="%s" type="text" />',$name);
+				foreach($primarys as $primary) break;
+				$pri = $primary->name();
+				foreach($master::find() as $dao){
+					$options[] = sprintf('<option value="%s">%s</option>',$dao->{$pri}(),(string)$dao);
+				}
+			}			
+			return sprintf('<select name="%s">%s</select>',$name,implode('',$options));
+		}else{
+			// TODO
+			$type = $obj->prop_anon($name,'type');
+			switch($type){
+				case 'boolean':
+					$options = array();
+					$options[] = '<option value=""></option>';
+					foreach(array('true','false') as $choice) $options[] = sprintf('<option value="%s">%s</option>',$choice,$choice);
+					return sprintf('<select name="search_%s_%s">%s</select>',$type,$name,implode('',$options));
+				case 'choice':
+					$options = array();
+					$options[] = '<option value=""></option>';
+					foreach($obj->prop_anon($name,'choices') as $v) $options[] = sprintf('<option value="%s">%s</option>',$v,$v);
+					return sprintf('<select name="search_%s_%s">%s</select>',$type,$name,implode('',$options));
+				case 'timestamp':
+				case 'date':
+					return sprintf('<input name="search_%s_from_%s" type="text" class="short" />',$type,$name).' : '.sprintf('<input name="search_%s_to_%s" type="text" class="short" />',$type,$name);
+				default:
+					return sprintf('<input name="search_%s_%s" type="text"　/>',$type,$name);
+			}
+		}
+	}
 	public function htmlspecialchars($src){
 		return htmlspecialchars($src);
 	}

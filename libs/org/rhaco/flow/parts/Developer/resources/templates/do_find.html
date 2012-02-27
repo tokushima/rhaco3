@@ -1,6 +1,12 @@
 <rt:extends href="index.html" />
 
 <rt:block name="content">
+<style type="text/css">
+ .search_form input{ margin-bottom: 0; width: 90%; }
+ .search_form .short{ width:30%; }
+</style>
+
+
 <ul class="breadcrumb">
   <li>
   	<span style="font-weight: bold; font-size: medium;">
@@ -14,6 +20,30 @@
 </ul>
 
 <rt:block name="content_body">
+
+<div id="filter" class="modal hide fade" style="display: none;">
+	<form method="post" name="search_clear_frm">
+	</form>
+	<form method="post" name="search_frm" rt:aref="true" class="search_form">
+	<input type="hidden" name="search" value="true" rt:ref="false" />
+	<div class="modal-header">
+		<a class="btn" href="#" onClick="document.search_frm.submit()"><i class="icon-search"></i> Search</a>
+		<a class="btn" href="#" onClick="document.search_clear_frm.submit()"><i class="icon-trash"></i> Clear</a>
+	</div>
+	<div class="modal-body">
+		<table>
+			<rt:loop param="{$f.props($model)}" var="name">
+			<tr>
+				<td>{$t.trim_width($name,50,'..')}</td>
+				<td>{$t.noop($f.filter($model,$name))}</td>
+			</tr>
+			</rt:loop>
+		</table>
+	</div>
+	</form>
+</div>
+<a class="icon-search" data-toggle="modal" href="#filter"></a>
+
 <table rt:param="object_list" rt:var="obj">
 <thead>
 	<tr>
@@ -45,7 +75,7 @@
 </tbody>
 </table>
 
-<rt:paginator counter="15" />
+<rt:paginator />
 
 </rt:block>
 

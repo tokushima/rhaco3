@@ -20,8 +20,7 @@
 	}
 </script>
 <style type="text/css">
- .connection_setting{ padding: 5px; }
- .connection_setting input{ margin-bottom: 0; width: 450px; }
+ .connection_setting input{ margin: 0; width: 90%; }
 </style>
 
 <h2 class="title">Models</h2>
@@ -45,51 +44,51 @@
 				</rt:if>
 			<rt:else>
 				<div id="modal_{$count}" class="modal hide fade" style="display: none;">
+					<form class="connection_setting" id="modal_{$count}_form">
 					<div class="modal-header">
-						<a class="close" data-dismiss="modal">x</a>
 						<h3>Connection settings</h3>
 					</div>
-
-					<form class="connection_setting" id="modal_{$count}_form">
+					<div class="modal-body">
 						<textarea style="width:98%; height: 80px;" name="sample" onclick="this.select()">
 						</textarea>
 						<p style="color:#c3325f; margin-left:10px;">copy to __settings__.php or commons/{$app_mode}.php</p>
 						
 						<table>
-							<tr>
-								<td>type</td>
-								<td><input type="text" name="type"  value="org.rhaco.store.db.module.Mysql"　onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')"/></td>
-							</tr>
-							<tr>
-								<td>host</td>
-								<td><input type="text" name="host"  value="localhost" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
-							</tr>
-							<tr>
-								<td>dbname</td>
-								<td><input type="text" name="dbname" value="{$app_dirname}" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
-							</tr>
-							<tr>
-								<td>user</td>
-								<td><input type="text" name="user" value="root" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
-							</tr>
-							<tr>
-								<td>password</td>
-								<td><input type="text" name="password" value="root"  onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
-							</tr>
-							<tr>
-								<td>port/sock</td>
-								<td>
-									<select name="port_sock" onChange="port_sock_default(this.form,'{$package}')" style="width: 70px;">
-										<option value="port">port</option>
-										<option value="sock">sock</option>
-									</select>
-									<input type="text" name="port_sock_value" value="3306" style="width: 380px;" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
-							</tr>
-							<tr>
-								<td>encode</td>
-								<td><input type="text" name="encode" value="utf8" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
-							</tr>
+						<tr>
+							<td>type</td>
+							<td><input type="text" name="type"  value="org.rhaco.store.db.module.Mysql"　onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')"/></td>
+						</tr>
+						<tr>
+							<td>host</td>
+							<td><input type="text" name="host"  value="localhost" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>dbname</td>
+							<td><input type="text" name="dbname" value="{$app_dirname}" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>user</td>
+							<td><input type="text" name="user" value="root" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>password</td>
+							<td><input type="text" name="password" value="root"  onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>port/sock</td>
+							<td>
+								<select name="port_sock" onChange="port_sock_default(this.form,'{$package}')" style="width: 70px;">
+									<option value="port">port</option>
+									<option value="sock">sock</option>
+								</select>
+								<input type="text" name="port_sock_value" value="3306" style="width: 70%;" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>encode</td>
+							<td><input type="text" name="encode" value="utf8" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
 						</table>
+					</div>
 					</form>
 	          	</div>
 				<a class="icon-warning-sign" data-toggle="modal" href="#modal_{$count}" onClick="conf_sample(modal_{$count}_form,'{$package}')"></a>
