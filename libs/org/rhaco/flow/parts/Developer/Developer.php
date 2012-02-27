@@ -339,9 +339,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$connections = \org\rhaco\store\db\Dao::connections();
 		$conf = explode("\\",get_class($package));
 		while(!isset($connections[implode('.',$conf)]) && !empty($conf)) array_pop($conf);
-	
 		if(empty($conf)){
-			if(!array_search('*',$keys)) throw new \RuntimeException(get_class($package).' connection not found');
+			if(!isset($connections['*'])) throw new \RuntimeException(get_class($package).' connection not found');
 			$conf = array('*');
 		}
 		$conf = implode('.',$conf);	
