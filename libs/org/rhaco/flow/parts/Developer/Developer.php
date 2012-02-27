@@ -33,6 +33,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('app_name',(empty($name) ? 'App' : $name));
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
+		$this->vars('app_dirname',basename(dirname($d['file'])));
+		$this->vars('app_mode',\Rhaco3::mode());
 		$this->vars('f',new Developer\Helper());
 		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
 		$this->vars('has_dao',class_exists($this->dao));
