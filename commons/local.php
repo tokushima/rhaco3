@@ -4,7 +4,7 @@ Conf::set('org.rhaco.store.db.Dao','connection',array(
 		'org.rhaco'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app')
 		,'org.rhaco.store.db.Dao'=>array('dbname'=>'testA')
 		,'org.rhaco.store.db.Dao.CrossChild'=>array('dbname'=>'testB')
-//		,'test'=>array('dbname'=>'app')
+		,'test'=>array('dbname'=>'app')
 ));
 
 
