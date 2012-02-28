@@ -60,15 +60,20 @@ class Flow{
 	 * @return array
 	 */
 	static public function get_maps($file){
-		self::$get_maps = true;
-		try{
-			ob_start();
-				include_once($file);
-			ob_end_clean();
-		}catch(\Exception $e){
-			\org\rhaco\Log::error($e);
+		$key = basename($file);
+		if(!isset(self::$output_maps[$key])){
+			self::$get_maps = true;
+			self::$output_maps[$key] = array();
+			
+			try{
+				ob_start();
+					include_once($file);
+				ob_end_clean();
+			}catch(\Exception $e){
+				\org\rhaco\Log::error($e);
+			}
 		}
-		return self::$output_maps;
+		return self::$output_maps[$key];
 	}
 	/**
 	 * 出力する
@@ -147,11 +152,12 @@ class Flow{
 							$canon = isset($anon['maps']) ? $anon['maps'] : array();
 						}
 						$canon = array_flip($canon);
+						$suffix = isset($v['suffix']) ? $v['suffix'] : '';
 						foreach($r->getMethods() as $m){
 							if($m->isPublic() && !$m->isStatic() && substr($m->getName(),0,1) != '_' && (empty($canon) || isset($canon[$m->getName()]))){
 								$url = $k.(($m->getName() == 'index') ? '' : (($k == '') ? '' : '/').$m->getName()).str_repeat('/(.+)',$m->getNumberOfRequiredParameters());
 								for($i=0;$i<=$m->getNumberOfParameters()-$m->getNumberOfRequiredParameters();$i++){
-									$apps[$url] = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename())));
+									$apps[$url.$suffix] = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename())));
 									$url .= '/(.+)';
 								}
 							}
@@ -184,7 +190,8 @@ class Flow{
 								));
 			}
 			if(self::$get_maps){
-				self::$output_maps = $apps;
+				list($d) = debug_backtrace(false);
+				self::$output_maps[basename($d['file'])] = $apps;
 				self::$get_maps = false;
 				return;
 			}
@@ -288,7 +295,7 @@ class Flow{
 							$xml->output();
 						}
 						exit;
-					}catch(\Exception $e){ 
+					}catch(\Exception $e){
 						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
 							\org\rhaco\Log::$level($e);
 						}
@@ -351,7 +358,11 @@ class Flow{
 			header('Location: '.$map['nomatch_redirect']);
 			exit;
 		}
-		throw new \InvalidArgumentException(\org\rhaco\Request::current_url().' (`'.$pathinfo.'`) bad request');
+		if(($level = \org\rhaco\Conf::get('notfound_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
+			\org\rhaco\Log::$level(\org\rhaco\Request::current_url().' (`'.$pathinfo.'`) bad request');
+		}
+		\org\rhaco\net\http\Header::send_status(404);
+		exit;
 	}
 	private function print_template($template_path,$template,$media_url,$theme,$put_block,$obj,$apps,$index,$path_replace=true){
 		if($path_replace){

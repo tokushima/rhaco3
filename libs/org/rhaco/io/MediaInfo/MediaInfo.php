@@ -137,17 +137,25 @@ class MediaInfo extends \org\rhaco\Object{
 		$data = trim(\org\rhaco\Command::out($cmd.' '.$filename));
 		foreach(explode("\n",$data) as $line){
 			list($label,$value) = explode(':',$line,2);
-			$exif[trim($label)] = trim($value);
+			if(!isset($exif[trim($label)])) $exif[trim($label)] = trim($value);
 			$self->raw(trim($label),trim($value));
 		}
 		$self->filename(isset($exif['File Name']) ? $exif['File Name'] : basename($filename));
 		$self->size(sprintf('%u',@filesize($filename)));
 		$self->width(isset($exif['Image Width ']) ? $exif['Image Width '] : (isset($info[0]) ? $info[0] : null));
 		$self->height(isset($exif['Image Height']) ? $exif['Image Height'] : (isset($info[1]) ? $info[1] : null));
+		
+		$create_date = null;
 		if(isset($exif['Create Date'])){
-			$self->create_date($exif['Create Date']);
+			$create_date = $exif['Create Date'];
+		}else if(isset($exif['Date/Time Original'])){
+			$create_date = $exif['Date/Time Original'];
 		}else if(isset($exif['Modify Date  Date'])){
-			$self->create_date($exif['Modify Date ']);
+			$create_date = $exif['Modify Date'];
+		}
+		if(!empty($create_date)){
+			if(preg_match('/(\d{4}[^\d]\d{2}[^\d]\d{2} \d{2}[^\d]\d{2}[^\d]\d{2})/',$create_date,$m)) $create_date = $m[1];
+			$self->create_date($create_date);
 		}
 		if(isset($exif['Make'])){
 			$self->make($exif['Make']);
