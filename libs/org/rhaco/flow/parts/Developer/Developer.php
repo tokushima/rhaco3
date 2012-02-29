@@ -396,8 +396,10 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 			$this->vars('sql',$sql);
 		}		
 		if($this->is_post() && !empty($sql)){
-			$con->query($sql);
-
+			foreach(explode(';',$sql) as $q){
+				$q = trim($q);
+				if(!empty($q)) $con->query($q);
+			}
 			foreach($con as $k => $v){
 				if(empty($keys)) $keys = array_keys($v);
 				$result_list[] = $v;
