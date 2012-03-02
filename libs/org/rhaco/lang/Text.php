@@ -141,26 +141,12 @@ class Text{
 			eq("aAbBcAde",self::fstring("a{1}b{2}c{1}d{4}e","A","B","C"));
 		 */
 	}
-	/**
-	 * ANSI Colorを適用する
-	 * @param string $value
-	 * @param string $fmt
-	 */
-	static public function ansi_color($value,$fmt=null){
-		if(substr(PHP_OS,0,3) == 'WIN'){
-			$value = mb_convert_encoding($value,'UTF-8','SJIS');
-		}else if($fmt !== null){
-			$fmt = ($fmt === true) ? '1;34' : (($fmt === false) ? '1;31' : $fmt);
-			$value = "\033[".$fmt.'m'.$value."\033[0m";
-		}
-		return $value;
-	}
+
 	/**
 	 * 出力する
 	 * @param string $value
-	 * @param string $fmt
 	 */
-	static public function println($value,$fmt=null){
-		print(self::ansi_color($value,$fmt).PHP_EOL);
-	}	
+	static public function println($value){
+		print($value.PHP_EOL);
+	}
 }

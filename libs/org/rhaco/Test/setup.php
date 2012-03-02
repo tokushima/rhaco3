@@ -13,14 +13,14 @@ $verify_format = function($class_name,$m=null,$b=null){
 		$f = ' .. '.$class_name.(isset($m) ? '::'.$m : '').(isset($b) ? '#'.$b : '').' ';
 		$l = strlen($f)*2;
 		$throw = null;
-		print("\033[".$l.'D'.str_repeat(' ',$l)."\033[".$l.'D');
+		print("\033[".$l.'D'."\033[0K");
 		print($f);
 		try{
 			\org\rhaco\Test::run($class_name,$m,$b);
 		}catch(\Exception $e){
 			$throw = $e;
 		}
-		print("\033[".$l.'D'.str_repeat(' ',$l)."\033[".$l.'D');
+		print("\033[".$l.'D'."\033[0K");
 		if(isset($throw)) throw $throw;
 	}else{
 		\org\rhaco\Test::run($class_name,$m,$b);
