@@ -5,7 +5,7 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
- * @class @['maps'=>['do_login','do_logout','index','classes','class_src','class_info','method_info','do_create','do_detail','do_drop','do_find','do_update','do_sql','mail_list','mail_detail','conf_list','model_list','class_module_info','entry_list','module_list']]
+ * @class @['automaps'=>true]
  */
 class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	private $smtp_blackhole_dao;
@@ -49,6 +49,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	}
 	/**
 	 * Daoモデルの一覧
+	 * @automap
 	 */
 	public function model_list(){
 		$list = $errors = $model_list = $con = array();
@@ -94,6 +95,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	}
 	/**
 	 * アプリケーションのマップ一覧
+	 * @automap
 	 */
 	public function index(){
 		$maps = array();
@@ -134,6 +136,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	}
 	/**
 	 * ライブラリの一覧
+	 * @automap
 	 */
 	public function classes(){
 		$libs = array();
@@ -156,6 +159,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * クラスのソース表示
 	 * @param string $class
+	 * @automap
 	 */
 	public function class_src($class){
 		$info = \org\rhaco\Man::class_info($class);
@@ -167,6 +171,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * クラスのドキュメント
 	 * @param string $class
+	 * @automap
 	 */
 	public function class_info($class){
 		foreach(\org\rhaco\Man::class_info($class) as $k => $v){
@@ -190,6 +195,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * クラスドメソッドのキュメント
 	 * @param string $class
 	 * @param string $method
+	 * @automap
 	 */
 	public function method_info($class,$method){
 		foreach(\org\rhaco\Man::method_info($class,$method) as $k => $v){
@@ -200,6 +206,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * モジュールのドキュメント
 	 * @param string $class
 	 * @param string $module_name
+	 * @automap
 	 */
 	public function class_module_info($class,$module_name){
 		$ref = \org\rhaco\Man::class_info($class);
@@ -222,6 +229,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * 検索
 	 * 
 	 * @param string $name モデル名
+	 * @automap
 	 * 
 	 * @request string $order ソート順
 	 * @request int $page ページ番号
@@ -286,6 +294,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 詳細
 	 * @param string $package モデル名
+	 * @automap
 	 */
 	public function do_detail($package){
 		$obj = $this->get_model($package);
@@ -296,6 +305,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 削除
 	 * @param string $package モデル名
+	 * @automap
 	 */
 	public function do_drop($package){
 		if($this->is_post()){
@@ -306,6 +316,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 更新
 	 * @param string $package モデル名
+	 * @automap
 	 */
 	public function do_update($package){
 		if($this->is_post()){
@@ -337,6 +348,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 作成
 	 * @param string $package モデル名
+	 * @automap
 	 */
 	public function do_create($package){
 		if($this->is_post()){
@@ -381,6 +393,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * SQLを実行する
 	 * @param string $package
+	 * @automap
 	 */
 	public function do_sql($package){
 		$con = self::get_dao_connection($package);
@@ -417,6 +430,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	}
 	/**
 	 * メールの一覧
+	 * @automap
 	 */
 	public function mail_list(){
 		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
@@ -433,6 +447,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * メールの詳細
 	 * @param integer $id
+	 * @automap
 	 */
 	public function mail_detail($id){
 		$sbd = $this->smtp_blackhole_dao;
@@ -441,6 +456,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	}
 	/**
 	 * Confの一覧
+	 * @automap
 	 */
 	public function conf_list(){
 		$list = array();
@@ -458,6 +474,10 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		ksort($list);
 		$this->vars('object_list',$list);
 	}
+	/**
+	 * エントリ一覧
+	 * @automap
+	 */
 	public function entry_list(){
 		$trace = debug_backtrace(false);
 		$entry = array_pop($trace);
@@ -491,6 +511,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	}
 	/**
 	 * モジュールの一覧
+	 * @automap
 	 */
 	public function module_list(){
 		$list = array();

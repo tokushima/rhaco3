@@ -3,6 +3,7 @@ namespace org\rhaco\flow\parts;
 /**
  * Requestを含むFlowインタフェース
  * @author tokushima
+ * 
  */
 class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\rhaco\flow\FlowInterface{
 	private $put_block;
@@ -427,6 +428,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	/**
 	 * ログイン
 	 * @arg string $login_redirect ログイン後にリダイレクトされるマップ名
+	 * @automap
 	 */
 	public function do_login(){
 		if($this->is_login() || $this->silent() || ($this->is_post() && $this->login())){
@@ -448,6 +450,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	/**
 	 * ログアウト
 	 * @arg string $logout_redirect ログアウト後にリダイレクトされるマップ名
+	 * @automap
 	 */
 	public function do_logout(){
 		/**

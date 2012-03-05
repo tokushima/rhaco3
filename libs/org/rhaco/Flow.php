@@ -138,10 +138,12 @@ class Flow{
 				if(isset($v['class']) && !isset($v['method'])){
 					try{
 						$n = isset($v['name']) ? $v['name'] : $v['class'];
-						$r = new \ReflectionClass(str_replace('.',"\\",$v['class']));
-						$canon = array();
+						$r = new \ReflectionClass(str_replace('.',"\\",$v['class']));						
+						
+						// TODO 
+						$automaps = false;
 						if(class_exists('\org\rhaco\Object') && $r->isSubclassOf('\org\rhaco\Object')){
-							$canon = call_user_func_array(array($r->getName(),'anon'),array('maps',array()));
+							$automaps = call_user_func_array(array($r->getName(),'anon'),array('automaps',false));
 						}else{
 							$d = '';
 							while($r->getParentClass() !== false){
@@ -149,15 +151,16 @@ class Flow{
 								$r = $r->getParentClass();
 							}
 							$anon = \org\rhaco\Object::anon_decode($d,'class');
-							$canon = isset($anon['maps']) ? $anon['maps'] : array();
+							$automaps = isset($anon['automaps']) ? (boolean)$anon['automaps'] : false;
 						}
-						$canon = array_flip($canon);
 						$suffix = isset($v['suffix']) ? $v['suffix'] : '';
 						foreach($r->getMethods() as $m){
-							if($m->isPublic() && !$m->isStatic() && substr($m->getName(),0,1) != '_' && (empty($canon) || isset($canon[$m->getName()]))){
+							if($m->isPublic() && !$m->isStatic() && substr($m->getName(),0,1) != '_'
+								&& (!$automaps || preg_match('/@automap[\s]*/',$m->getDocComment()))
+							 ){
 								$url = $k.(($m->getName() == 'index') ? '' : (($k == '') ? '' : '/').$m->getName()).str_repeat('/(.+)',$m->getNumberOfRequiredParameters());
 								for($i=0;$i<=$m->getNumberOfParameters()-$m->getNumberOfRequiredParameters();$i++){
-									$apps[$url.$suffix] = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename())));
+									$apps[$url.$suffix] = array_merge($v,array('name'=>$n.'/'.$m->getName().'/'.$i,'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename())));
 									$url .= '/(.+)';
 								}
 							}
