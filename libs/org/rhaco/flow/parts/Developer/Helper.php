@@ -125,7 +125,6 @@ class Helper{
 			}			
 			return sprintf('<select name="%s">%s</select>',$name,implode('',$options));
 		}else{
-			// TODO
 			$type = $obj->prop_anon($name,'type');
 			switch($type){
 				case 'boolean':
