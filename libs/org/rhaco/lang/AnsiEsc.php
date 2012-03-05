@@ -31,8 +31,10 @@ class AnsiEsc{
 	 * 出力する
 	 * @param string $value
 	 * @param mixed $fmt
+	 * @param integer $indent
 	 */
-	static public function println($value,$fmt=null){
+	static public function println($value,$fmt=null,$indent=0){
+		if($indent > 0) $value = str_repeat(' ',$indent).implode(PHP_EOL.str_repeat(' ',$indent),explode(PHP_EOL,$value));
 		print(self::color($value,$fmt).PHP_EOL);
 	}	
 }

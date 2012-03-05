@@ -146,7 +146,16 @@ class Text{
 	 * 出力する
 	 * @param string $value
 	 */
-	static public function println($value){
+	static public function println($value,$indent=0){
+		if($indent > 0) $value = str_repeat(' ',$indent).implode(PHP_EOL.str_repeat(' ',$indent),explode(PHP_EOL,$value));
 		print($value.PHP_EOL);
+	}
+	/**
+	 * PHPドキュメントから内容を取得
+	 * @param string $doc
+	 * @return string
+	 */
+	static public function doctrim($doc){
+		return trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$doc)));		
 	}
 }
