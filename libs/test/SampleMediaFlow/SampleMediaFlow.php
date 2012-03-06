@@ -2,6 +2,9 @@
 namespace test;
 
 class SampleMediaFlow extends \org\rhaco\flow\parts\RequestFlow{
+	/**
+	 * @automap
+	 */
 	public function index(){
 		if($this->is_vars('view')){
 			$theme = 'default';
@@ -13,6 +16,10 @@ class SampleMediaFlow extends \org\rhaco\flow\parts\RequestFlow{
 			$this->theme($theme);
 		}
 	}
+	/**
+	 * 
+	 * @automap
+	 */
 	public function hoge(){
 	}
 }

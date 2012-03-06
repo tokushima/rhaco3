@@ -48,10 +48,11 @@ class Mail extends \org\rhaco\Object{
 			$mail->to("test1@rhaco.org","abc");
 			$mail->to("test2@rhaco.org");
 			$mail->to("test3@rhaco.org","ghi");
-			eq(array('test1@rhaco.org'=>'"abc" <test1@rhaco.org>',
-					'test2@rhaco.org'=>'"test2@rhaco.org" <test2@rhaco.org>',
-					'test3@rhaco.org'=>'"ghi" <test3@rhaco.org>',)
-					,$mail->to());
+			eq(array(
+				'test1@rhaco.org' => '"=?ISO-2022-JP?B?YWJj?=" <test1@rhaco.org>',
+				'test2@rhaco.org' => '"test2@rhaco.org" <test2@rhaco.org>',
+				'test3@rhaco.org' => '"=?ISO-2022-JP?B?Z2hp?=" <test3@rhaco.org>',
+			),$mail->to());
 		*/
 	}
 	protected function __set_cc__($mail,$name=""){
@@ -61,10 +62,11 @@ class Mail extends \org\rhaco\Object{
 			$mail->cc("test1@rhaco.org","abc");
 			$mail->cc("test2@rhaco.org");
 			$mail->cc("test3@rhaco.org","ghi");
-			eq(array('test1@rhaco.org'=>'"abc" <test1@rhaco.org>',
-					'test2@rhaco.org'=>'"test2@rhaco.org" <test2@rhaco.org>',
-					'test3@rhaco.org'=>'"ghi" <test3@rhaco.org>',)
-					,$mail->cc());
+			eq(array(
+				'test1@rhaco.org' => '"=?ISO-2022-JP?B?YWJj?=" <test1@rhaco.org>',
+				'test2@rhaco.org' => '"test2@rhaco.org" <test2@rhaco.org>',
+				'test3@rhaco.org' => '"=?ISO-2022-JP?B?Z2hp?=" <test3@rhaco.org>',
+			),$mail->cc());
 		*/
 	}
 	protected function __set_bcc__($mail,$name=""){
@@ -74,10 +76,11 @@ class Mail extends \org\rhaco\Object{
 			$mail->bcc("test1@rhaco.org","abc");
 			$mail->bcc("test2@rhaco.org");
 			$mail->bcc("test3@rhaco.org","ghi");
-			eq(array('test1@rhaco.org'=>'"abc" <test1@rhaco.org>',
-					'test2@rhaco.org'=>'"test2@rhaco.org" <test2@rhaco.org>',
-					'test3@rhaco.org'=>'"ghi" <test3@rhaco.org>',)
-					,$mail->bcc());
+			eq(array(
+				'test1@rhaco.org'=>'"=?ISO-2022-JP?B?YWJj?=" <test1@rhaco.org>',
+				'test2@rhaco.org'=>'"test2@rhaco.org" <test2@rhaco.org>',
+				'test3@rhaco.org'=>'"=?ISO-2022-JP?B?Z2hp?=" <test3@rhaco.org>',
+			),$mail->bcc());
 		*/
 	}
 	protected function __set_return_path__($mail){

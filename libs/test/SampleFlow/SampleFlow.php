@@ -2,6 +2,9 @@
 namespace test;
 
 class SampleFlow extends \org\rhaco\flow\parts\RequestFlow{
+	/**
+	 * @automap
+	 */
 	public function index(){
 		if($this->is_vars("view")){
 			$theme = "default";
@@ -13,14 +16,26 @@ class SampleFlow extends \org\rhaco\flow\parts\RequestFlow{
 			$this->theme($theme);
 		}
 	}
+	/**
+	 * 
+	 * @automap
+	 */
 	public function hoge(){
 	}
+	/**
+	 * 
+	 * @automap
+	 */
 	public function upload_value(){
 		$value1 = $this->in_vars('value1');
 		
 		$this->rm_vars();
 		$this->vars('get_data1',$value1);
 	}
+	/**
+	 * 
+	 * @automap
+	 */
 	public function upload_file(){
 		if($this->is_post()){
 			$file_info1 = $this->in_files('upfile1');			
@@ -39,6 +54,10 @@ class SampleFlow extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		
 	}
+	/**
+	 * 
+	 * @automap
+	 */
 	public function upload_multi(){
 		if($this->is_post()){
 			$value1 = $this->in_vars('value1');
