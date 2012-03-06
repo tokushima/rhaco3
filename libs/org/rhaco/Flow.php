@@ -138,33 +138,28 @@ class Flow{
 				if(isset($v['class']) && !isset($v['method'])){
 					try{
 						$n = isset($v['name']) ? $v['name'] : $v['class'];
-						$r = new \ReflectionClass(str_replace('.',"\\",$v['class']));						
-						
-						// TODO 
-						$automaps = false;
-						if(class_exists('\org\rhaco\Object') && $r->isSubclassOf('\org\rhaco\Object')){
-							$automaps = call_user_func_array(array($r->getName(),'anon'),array('automaps',false));
-						}else{
-							$d = '';
-							while($r->getParentClass() !== false){
-								$d = $r->getDocComment().$d;
-								$r = $r->getParentClass();
-							}
-							$anon = \org\rhaco\Object::anon_decode($d,'class');
-							$automaps = isset($anon['automaps']) ? (boolean)$anon['automaps'] : false;
-						}
+						$r = new \ReflectionClass(str_replace('.',"\\",$v['class']));
 						$suffix = isset($v['suffix']) ? $v['suffix'] : '';
+						$automaps = $methodmaps = array();
 						foreach($r->getMethods() as $m){
-							if($m->isPublic() && !$m->isStatic() && substr($m->getName(),0,1) != '_'
-								&& (!$automaps || preg_match('/@automap[\s]*/',$m->getDocComment()))
-							 ){
-								$url = $k.(($m->getName() == 'index') ? '' : (($k == '') ? '' : '/').$m->getName()).str_repeat('/(.+)',$m->getNumberOfRequiredParameters());
-								for($i=0;$i<=$m->getNumberOfParameters()-$m->getNumberOfRequiredParameters();$i++){
-									$apps[$url.$suffix] = array_merge($v,array('name'=>$n.'/'.$m->getName().'/'.$i,'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename())));
-									$url .= '/(.+)';
+							if($m->isPublic() && !$m->isStatic() && substr($m->getName(),0,1) != '_'){
+								$automap = (boolean)preg_match('/@automap[\s]*/',$m->getDocComment());								
+								if(empty($automaps) || $automap){
+									$url = $k.(($m->getName() == 'index') ? '' : (($k == '') ? '' : '/').$m->getName()).str_repeat('/(.+)',$m->getNumberOfRequiredParameters());
+									for($i=0;$i<=$m->getNumberOfParameters()-$m->getNumberOfRequiredParameters();$i++){
+										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName().'/'.$i,'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename())));
+										if($automap){
+											$automaps[$url.$suffix] = $mapvar;
+										}else{
+											$methodmaps[$url.$suffix] = $mapvar;
+										}
+										$url .= '/(.+)';
+									}
 								}
 							}
 						}
+						$apps = array_merge($apps,(empty($automaps) ? $methodmaps : $automaps));
+						unset($automaps,$methodmaps);
 					}catch(\ReflectionException $e){
 						throw new \InvalidArgumentException($v['class'].' not found');
 					}

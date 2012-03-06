@@ -11,6 +11,7 @@ $flow->output(array(''
 ,'nomatch_redirect'=>'/'
 ,'patterns'=>array(
 	''=>array('template'=>'hoge.html')
+	,'model'=>array('action'=>'test.flow.Model')
 	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer'
 				,'modules'=>array(
 //					'org.rhaco.flow.module.LoginRequired'
