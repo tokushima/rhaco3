@@ -414,7 +414,7 @@ if(isset($_SERVER['argv'][1])){
 					}
 					$package = substr($cmd,1);
 					$download(array($package),false);
-					if(is_file($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/setup.php')) || is_file($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/setup.php'))){
+					if(is_file($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/cmd.php')) || is_file($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/cmd.php'))){
 						if($help){
 							$help_params = array();
 							$pad = 4;
@@ -468,13 +468,13 @@ if(is_dir(Rhaco3::lib_dir())){
 	foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::lib_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
 		if($f->isFile() && substr($f->getPathname(),-4) == '.php' 
 			&& basename(dirname($f->getPathname())) === $f->getBasename('.php') && preg_match('/^[A-Z].*/',$f->getBasename('.php'))
-			&& is_file(dirname($f->getPathname()).'/setup.php')
+			&& is_file(dirname($f->getPathname()).'/cmd.php')
 			&& (strpos($f->getPathname(),'/_') === false || strpos($f->getPathname(),'/_vendors/') !== false)
 		){
 			$package = str_replace(array(Rhaco3::lib_dir(),'/'),array('','.'),dirname($f->getPathname()));
 			if(strpos($package,'_vendors.') === 0) $package = substr($package,9);
 			if($len < strlen($package)) $len = strlen($package);
-			list($summary) = (preg_match('/\/\*\*.+?\*\//s',file_get_contents(dirname($f->getPathname()).'/setup.php'),$m)) ? explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0])))) : '';
+			list($summary) = (preg_match('/\/\*\*.+?\*\//s',file_get_contents(dirname($f->getPathname()).'/cmd.php'),$m)) ? explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0])))) : '';
 			$list[$package] = $summary;
 		}
 	}
