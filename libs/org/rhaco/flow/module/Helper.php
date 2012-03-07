@@ -7,16 +7,18 @@ namespace org\rhaco\flow\module;
 class Helper{
 	private $media_url;
 	private $name;
+	private $map_name;
 	private $url_pattern = array();
 	private $is_login = false;
 	private $user;
 
-	public function __construct($media_url=null,$name=null,$map=array(),$obj=null){
+	public function __construct($media_url=null,$name=null,$num=0,$map=array(),$obj=null){
 		$this->media_url = $media_url;
 		$this->name = $name;
+		$this->map_name = $name.'#'.$num;
 
 		foreach($map as $p => $m){
-			if(isset($m['name'])) $this->url_pattern[$m['name']] = $m;
+			if(isset($m['name'])) $this->url_pattern[$m['name'].'#'.$m['num']] = $m;
 		}
 		if($obj instanceof \org\rhaco\flow\parts\RequestFlow){
 			$this->is_login = $obj->is_login();
@@ -53,7 +55,8 @@ class Helper{
 	public function map_url($name){
 		$args = func_get_args();
 		array_shift($args);
-		if(isset($this->url_pattern[$name]) && $this->url_pattern[$name]['num'] == sizeof($args)) return vsprintf($this->url_pattern[$name]['pattern'],$args);
+		$n = $name.'#'.sizeof($args);
+		if(isset($this->url_pattern[$n])) return vsprintf($this->url_pattern[$n]['pattern'],$args);
 	}
 	/**
 	 * handlerでpackageを呼び出してる場合にメソッド名でURLを生成する
@@ -64,9 +67,10 @@ class Helper{
 	public function package_method_url($name){
 		$args = func_get_args();
 		array_shift($args);
-		if(isset($this->url_pattern[$this->name()]) && isset($this->url_pattern[$this->name()]['='])){
-			$p = $this->url_pattern[$this->name()];
+		if(isset($this->url_pattern[$this->map_name]) && isset($this->url_pattern[$this->map_name]['='])){
+			$p = $this->url_pattern[$this->map_name];
 			$n = sizeof($args);
+			
 			foreach($this->url_pattern as $m){
 				if(isset($m['=']) && $m['class'] == $p['class'] && $m['method'] == $name && $m['num'] == $n){
 					return call_user_func_array(array($this,'map_url'),array_merge(array($m['name']),$args));

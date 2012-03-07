@@ -123,6 +123,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::before()
 	 */
 	public function before(){
+		if(method_exists($this,'__before__')) $this->__before__();
 		if($this->has_object_module('before_flow_handle')){
 			/**
 			 * 前処理
@@ -137,6 +138,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @see libs/org/rhaco/flow/org\rhaco\flow.FlowInterface::after()
 	 */
 	public function after(){
+		if(method_exists($this,'__after__')) $this->__after__();
 		if($this->has_object_module('after_flow_handle')){
 			/**
 			 * 後処理

@@ -384,7 +384,7 @@ class Flow{
 		$this->template->media_url($media_url);
 		$this->template->cp($obj);
 		if(isset($apps[$index]['vars'])) $this->template->cp($apps[$index]['vars']);
-		$this->template->vars('t',new \org\rhaco\flow\module\Helper($media_url,(isset($apps[$index]['name']) ? $apps[$index]['name'] : null),$apps,$obj));
+		$this->template->vars('t',new \org\rhaco\flow\module\Helper($media_url,$apps[$index]['name'],$apps[$index]['num'],$apps,$obj));
 		$src = $this->template->read($template);
 		/**
 		 * テンプレートの出力
