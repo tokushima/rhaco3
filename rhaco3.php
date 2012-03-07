@@ -502,6 +502,6 @@ if(is_dir(Rhaco3::lib_dir())){
 		}
 	}
 }
-$println(PHP_EOL.'Commands: ',true);
+print(PHP_EOL.'Commands: '.PHP_EOL);
 foreach($list as $p => $s) print('  '.str_pad($p,$len).' : '.$s.PHP_EOL);
 exit;

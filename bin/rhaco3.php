@@ -115,7 +115,8 @@ if(sizeof(debug_backtrace(false))>0){
 ##
 if(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD'])){header('HTTP/1.1 404 Not Found');exit;}
 if(isset($_SERVER['argv'][1])){
-	$println = function($value,$fmt=null){
+	$println = function($value,$fmt=null,$indent=0){
+		if($indent > 0) $value = str_repeat(' ',$indent).implode(PHP_EOL.str_repeat(' ',$indent),explode(PHP_EOL,$value));
 		if(substr(PHP_OS,0,3) == 'WIN'){
 			$value = mb_convert_encoding($value,'UTF-8','SJIS');
 		}else if($fmt !== null){
@@ -321,6 +322,7 @@ if(isset($_SERVER['argv'][1])){
 		}
 	};
 	try{
+		set_time_limit(0);
 		$help = (substr($_SERVER['argv'][1],-1) == '?');
 		$cmd = ($help) ? substr($_SERVER['argv'][1],0,-1) : $_SERVER['argv'][1];
 		list($value,$params) = $get_args();
@@ -414,7 +416,9 @@ if(isset($_SERVER['argv'][1])){
 					}
 					$package = substr($cmd,1);
 					$download(array($package),false);
-					if(is_file($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/setup.php')) || is_file($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/setup.php'))){
+					if(is_file($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/cmd.php')) || is_dir($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/cmd'))
+						|| is_file($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/cmd.php')) || is_dir($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/cmd'))
+					){
 						if($help){
 							$help_params = array();
 							$pad = 4;
@@ -450,15 +454,32 @@ if(isset($_SERVER['argv'][1])){
 							$_ENV['PATH_VENDOR_DIR'] = Rhaco3::lib_dir().'_vendors';
 							list($_ENV['value'],$_ENV['params']) = array($value,$params);
 							include_once(dirname($f).'/'.basename(dirname($f)).'.php');
-							include_once($f);
+
+							if(is_file($f)){
+								include_once($f);
+							}else if(is_dir($f)){
+								if(is_file($cmdf=$f.'/'.$value.'.php')){
+									if(is_file($f.'/__setup__.php')) require_once($f.'/__setup__.php');
+									include($cmdf);
+								}else{
+									foreach(new \DirectoryIterator($f) as $f){
+										if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
+											$println(substr($f->getFileName(),0,-4),true);
+											if(preg_match('/\/\*\*(.+?)\*\//ms',file_get_contents($f->getPathname()),$m)){
+												$println(trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1]))),null,2);
+											}
+										}
+									}
+								}
+							}
 						}
 					}else{
-						throw new RuntimeException('Setup not found `'.$package.'`');
+						throw new \RuntimeException('Command not found `'.$package.'`');
 					}
 				}
 		}
-	}catch(Exception $e){
-		print($e->getMessage().PHP_EOL);
+	}catch(\Exception $e){
+		$println($e->getMessage(),false);
 	}
 	exit;
 }
@@ -466,16 +487,18 @@ $list = array('import'=>'Download package','phar'=>'Create a phar libs','search'
 $len = 8;
 if(is_dir(Rhaco3::lib_dir())){
 	foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Rhaco3::lib_dir(),FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS)) as $f){
+		$dir = dirname($f->getPathname());
 		if($f->isFile() && substr($f->getPathname(),-4) == '.php' 
-			&& basename(dirname($f->getPathname())) === $f->getBasename('.php') && preg_match('/^[A-Z].*/',$f->getBasename('.php'))
-			&& is_file(dirname($f->getPathname()).'/setup.php')
+			&& basename($dir) === $f->getBasename('.php') && preg_match('/^[A-Z].*/',$f->getBasename('.php'))
 			&& (strpos($f->getPathname(),'/_') === false || strpos($f->getPathname(),'/_vendors/') !== false)
+			&& (is_file($dir.'/cmd.php') || is_dir($dir.'/cmd'))
 		){
-			$package = str_replace(array(Rhaco3::lib_dir(),'/'),array('','.'),dirname($f->getPathname()));
+			$package = str_replace(array(Rhaco3::lib_dir(),'/'),array('','.'),$dir);
 			if(strpos($package,'_vendors.') === 0) $package = substr($package,9);
 			if($len < strlen($package)) $len = strlen($package);
-			list($summary) = (preg_match('/\/\*\*.+?\*\//s',file_get_contents(dirname($f->getPathname()).'/setup.php'),$m)) ? explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0])))) : '';
-			$list[$package] = $summary;
+			$doc = is_file($dir.'/cmd.php') ? file_get_contents($dir.'/cmd.php') : (is_file($dir.'/cmd/__setup__.php') ? file_get_contents($dir.'/cmd/__setup__.php') : null);
+			list($summary) = (preg_match('/\/\*\*.+?\*\//s',$doc,$m)) ? explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0])))) : '';
+			$list[$package] = (empty($summary) && is_dir($dir.'/cmd')) ? 'There are multiple commands' : $summary;
 		}
 	}
 }
