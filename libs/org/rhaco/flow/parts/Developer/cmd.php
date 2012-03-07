@@ -1,4 +1,7 @@
 <?php
+/**
+ * Developer tool
+ */
 if(isset($params['create_table'])){
 	$package = $params['create_table'];
 	$r = new \ReflectionClass('\\'.str_replace('.','\\',$package));
