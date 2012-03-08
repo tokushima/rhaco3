@@ -453,14 +453,14 @@ if(isset($_SERVER['argv'][1])){
 							$_ENV['PATH_EXTLIB_DIR'] = Rhaco3::lib_dir().'_extlibs';
 							$_ENV['PATH_VENDOR_DIR'] = Rhaco3::lib_dir().'_vendors';
 							list($_ENV['value'],$_ENV['params']) = array($value,$params);
-							include_once(dirname($f).'/'.basename(dirname($f)).'.php');
+							require_once(dirname($f).'/'.basename(dirname($f)).'.php');
 
 							if(is_file($f)){
-								include_once($f);
+								require_once($f);
 							}else if(is_dir($f)){
 								if(is_file($cmdf=$f.'/'.$value.'.php')){
 									if(is_file($f.'/__setup__.php')) require_once($f.'/__setup__.php');
-									include($cmdf);
+									require($cmdf);
 								}else{
 									$println('Commands: ');
 									foreach(new \DirectoryIterator($f) as $f){
@@ -484,6 +484,7 @@ if(isset($_SERVER['argv'][1])){
 	}
 	exit;
 }
+if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
 $list = array('import'=>'Download package','phar'=>'Create a phar libs','search'=>'Search package','htaccess'=>'Create .htaccess','settings'=>'Create __settings__.php');
 $len = 8;
 if(is_dir(Rhaco3::lib_dir())){
