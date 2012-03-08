@@ -462,11 +462,12 @@ if(isset($_SERVER['argv'][1])){
 									if(is_file($f.'/__setup__.php')) require_once($f.'/__setup__.php');
 									include($cmdf);
 								}else{
+									$println('Commands: ');
 									foreach(new \DirectoryIterator($f) as $f){
 										if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
-											$println(substr($f->getFileName(),0,-4),true);
+											$println(substr($f->getFileName(),0,-4),true,2);
 											if(preg_match('/\/\*\*(.+?)\*\//ms',file_get_contents($f->getPathname()),$m)){
-												$println(trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1]))),null,2);
+												$println(trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1]))),null,4);
 											}
 										}
 									}
