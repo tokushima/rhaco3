@@ -34,7 +34,7 @@ class OutputJson{
 				}
 			}
 		}else{
-			$error['error'][] = array('message'=>$exception->getMessage(),'group'=>'','type'=>basename(str_replace("\\",'/',get_class($exception))));
+			$error['error'][] = array('message'=>$exception->getMessage(),'group'=>'exceptions','type'=>basename(str_replace("\\",'/',get_class($exception))));
 		}
 		$json = \org\rhaco\lang\Json::encode($error);
 		print(($this->mode == 'jsonp') ? $this->varname.'('.$json.')' : $json);
