@@ -12,10 +12,8 @@ $flow->output(array(''
 ,'patterns'=>array(
 	''=>array('template'=>'hoge.html')
 	,'model'=>array('action'=>'test.flow.Model')
-	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer'
-				,'modules'=>array(
-//					'org.rhaco.flow.module.LoginRequired'
-//					,'org.rhaco.flow.module.SimpleAuth'
-				))
+	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer')
+	,'dev/do_find/(.+)/xml'=>array('action'=>'org.rhaco.flow.parts.Developer::do_find')
+	,'dev/do_detail/(.+)/xml'=>array('action'=>'org.rhaco.flow.parts.Developer::do_detail')
 )));
 
