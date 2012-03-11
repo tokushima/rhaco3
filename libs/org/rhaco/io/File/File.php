@@ -219,7 +219,7 @@ class File extends \org\rhaco\Object{
 			}
 			return $bool;
 		}else{
-			$dest = (is_dir($dest))	? $dest.$filename : $dest;
+			$dest = (is_dir($dest))	? $dest.basename($source) : $dest;
 			if(is_writable(dirname($dest))){
 				copy($source,$dest);
 			}
