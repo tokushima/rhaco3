@@ -84,7 +84,7 @@ class Template{
 	final public function media_url(){
 		if(func_num_args() > 0){
 			$this->media_url = str_replace("\\",'/',(string)func_get_arg(0));
-			if(substr($this->media_url,-1) !== '/') $this->media_url = $this->media_url.'/';
+			if(!empty($this->media_url) && substr($this->media_url,-1) !== '/') $this->media_url = $this->media_url.'/';
 		}
 		return $this->media_url;
 	}
