@@ -89,7 +89,7 @@ class Template{
 	final public function media_url(){
 		if(func_num_args() > 0){
 			$this->media_url = str_replace("\\",'/',(string)func_get_arg(0));
-			if(substr($this->media_url,-1) !== '/') $this->media_url = $this->media_url.'/';
+			if(!empty($this->media_url) && substr($this->media_url,-1) !== '/') $this->media_url = $this->media_url.'/';
 		}
 		return $this;
 	}
@@ -254,7 +254,7 @@ class Template{
 		return $src;
 	}
 	private function parse_url($src,$media){
-		if(substr($media,-1) !== '/') $media = $media.'/';
+		if(!empty($media) && substr($media,-1) !== '/') $media = $media.'/';
 		$secure_base = ($this->secure) ? str_replace('http://','https://',$media) : null;
 		if(preg_match_all("/<([^<\n]+?[\s])(src|href|background)[\s]*=[\s]*([\"\'])([^\\3\n]+?)\\3[^>]*?>/i",$src,$match)){
 			foreach($match[2] as $k => $p){
