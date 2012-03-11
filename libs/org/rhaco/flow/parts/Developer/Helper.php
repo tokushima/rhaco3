@@ -148,4 +148,10 @@ class Helper{
 	public function htmlspecialchars($src){
 		return htmlspecialchars($src);
 	}
+	public function method_html_filename($package,$method){
+		return $package.'__'.$method.'.html';
+	}
+	public function class_html_filename($package){
+		return $package.'.html';
+	}
 }

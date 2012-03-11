@@ -161,7 +161,6 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function class_src($class){
-		$info = \org\rhaco\Man::class_info($class);
 		foreach(\org\rhaco\Man::class_info($class) as $k => $v){
 			$this->vars($k,$v);
 		}
