@@ -31,7 +31,7 @@ foreach(\org\rhaco\Flow::get_maps($path) as $k => $m){
 }
 
 $template = template($template_index,array('app_name'=>$entry,'maps'=>$maps));
-file_put_contents($out_dir.'index.html',$template->read($template_dir.'index.html'));
+file_put_contents($out_dir.'index.html',$template->read($template_index));
 		
 
 // class list 
