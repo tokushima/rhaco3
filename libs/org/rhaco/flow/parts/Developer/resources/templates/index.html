@@ -1,109 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>{$app_name} - {$t.html($app_summary)}</title>
+<rt:extends href="base.html" />
 
-	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-	<!--[if lt IE 9]>
-	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
 
-	<!-- Le styles -->
-	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-	<link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
-	<link href="google-code-prettify/prettify.css" rel="stylesheet">
-
-	<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
-	<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
-</head>
-
-<body>
-	<div class="navbar">
-		<div class="navbar-inner">
-			<div class="container" style="width: auto;">
-				<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</a>
-				<a class="brand" href="{$t.package_method_url('index')}">{$app_name}</a>
-				<div class="nav-collapse">
-				
-					<rt:block name="search_form">
-						<form class="navbar-search pull-left" rt:ref="true">
-							<input type="text" class="search-query span2" placeholder="Search" name="q">
-						</form>
-					</rt:block>
-
-					<ul class="nav">
-						<li class="{$t.endswith_pattern_switch('entry_list','active','inactive')}"><a href="{$t.package_method_url('entry_list')}">Entry</a></li>
-						<li class="{$t.endswith_pattern_switch('index','active','inactive')}"><a href="{$t.package_method_url('index')}">Map</a></li>
-						<li class="{$t.endswith_pattern_switch('classes','active','inactive')}"><a href="{$t.package_method_url('classes')}">Classes</a></li>
-						<li class="{$t.endswith_pattern_switch('module_list','active','inactive')}"><a href="{$t.package_method_url('module_list')}">Module</a></li>
-						<li class="{$t.endswith_pattern_switch('conf_list','active','inactive')}"><a href="{$t.package_method_url('conf_list')}">Conf</a></li>
-						<rt:if param="{$has_dao}">
-							<li class="{$t.endswith_pattern_switch('model_list','active','inactive')}"><a href="{$t.package_method_url('model_list')}">Models</a></li>
-						</rt:if>
-						<rt:if param="{$has_smtp_blackhole_dao}">
-							<li class="{$t.endswith_pattern_switch('mail_list','active','inactive')}"><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
-						</rt:if>
-						
-						<rt:if param="{$t.is_login()}">
-							<li class="{$t.endswith_pattern_switch('do_logout','active','inactive')}"><a href="{$t.package_method_url('do_logout')}">Logout</a></li>
-						</rt:if>
-					</ul>
-				</div>
-			</div>
+<rt:block name="content">
+	<rt:if param="{$app_description}">
+		<div class="alert alert-block alert-info">
+			{$t.html($app_description)}
 		</div>
-	</div>
+	</rt:if>
 
-	<div class="container">
-		<div class="row">
-			<rt:block name="content">
-				<rt:if param="{$app_description}">
-					<div class="alert alert-block alert-info">
-						{$t.html($app_description)}
-					</div>
+	<table rt:param="{$maps}" rt:var="map" rt:key="url">
+	<thead>
+		<tr>
+			<th style="width:200px;">name</th>
+			<th style="width:200px;">url</th>
+			<th>template</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td nowrap>						
+				<rt:if param="{$map['class']}">
+					<a href="{$t.package_method_url('method_info',$map['class'],$map['method'])}">{$map['name']}</a>
+				<rt:else />
+					{$map['name']}
 				</rt:if>
-
-				<table rt:param="{$maps}" rt:var="map" rt:key="url">
-				<thead>
-					<tr>
-						<th style="width:200px;">name</th>
-						<th style="width:200px;">url</th>
-						<th>template</th>
-						<th>summary</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr class="even">
-						<td nowrap>						
-							<rt:if param="{$map['class']}">
-								<a href="{$t.package_method_url('method_info',$map['class'],$map['method'])}">{$map['name']}</a>
-							<rt:else />
-								{$map['name']}
-							</rt:if>
-						</td>
-						<td>{$map['url']}</td>
-						<td>
-							<rt:if param="{$map['template']}">{$map['template']}</rt:if>
-						</td>
-						<td>
-							<span>{$map['summary']}</span>
-							<span style="color:#ff0000; font-weight: bold;">{$map['error']}</span>
-						</td>
-					</tr>
-				</tbody>
-				</table>
-			</rt:block>
-		</div>
-		<footer>
-		</footer>
-	</div>
-
-
-	<script type="text/javascript" src="google-code-prettify/prettify.js"></script>
-	<script type="text/javascript">prettyPrint();</script>
-</body>
-</html>
+			</td>
+			<td>{$map['url']}</td>
+			<td>
+				<rt:if param="{$map['template']}">{$map['template']}</rt:if>
+			</td>
+			<td>
+				<span>{$map['summary']}</span>
+				<span style="color:#ff0000; font-weight: bold;">{$map['error']}</span>
+			</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:block>

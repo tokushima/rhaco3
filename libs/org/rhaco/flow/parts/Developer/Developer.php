@@ -161,7 +161,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function class_src($class){
-		foreach(\org\rhaco\Man::class_info($class) as $k => $v){
+		$info = \org\rhaco\Man::class_info($class);
+		foreach($info as $k => $v){
 			$this->vars($k,$v);
 		}
 		$this->vars('class_src',file_get_contents($info['filename']));
@@ -172,7 +173,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function class_info($class){
-		foreach(\org\rhaco\Man::class_info($class) as $k => $v){
+		$info = \org\rhaco\Man::class_info($class);
+		foreach($info as $k => $v){
 			$this->vars($k,$v);
 		}
 		$is_dao = false;

@@ -1,12 +1,15 @@
 <?php
 $entry = isset($_ENV['params']['entry']) ? $_ENV['params']['entry'] : null;
+$mode = isset($_ENV['params']['mode']) ? $_ENV['params']['mode'] : null;
+$base = isset($_ENV['params']['template']) ? $_ENV['params']['template'] : null;
+
 $zip_dir = str_replace("\\",'/',isset($_ENV['params']['o']) ? $_ENV['params']['o'] : \org\rhaco\io\File::work_path());
 $zip_dir = (substr($zip_dir,-1) == '/') ? $zip_dir : $zip_dir.'/';
 $path = getcwd().'/'.$entry.'.php';
-if(!is_file($path)) throw new \RuntimeException($entry.' not found');
+if(!is_file($path)) throw new \RuntimeException('Entry `'.$entry.'` not found');
 
 $out_dir = \org\rhaco\io\File::work_path('export_'.time().'/');
-$template_index = dirname(__DIR__).'/resources/export_templates/index.html';
+$template_base = (empty($base)) ? dirname(__DIR__).'/resources/export_templates/base.html' : $base;
 $template_dir = dirname(__DIR__).'/resources/templates/';
 
 \org\rhaco\io\File::mkdir($out_dir);
@@ -16,23 +19,35 @@ $self_name = 'org.rhaco.flow.parts.Developer';
 $maps = array();
 foreach(\org\rhaco\Flow::get_maps($path) as $k => $m){
 	if(!isset($m['class']) || $m['class'] != $self_name){
-		$m['summary'] = $m['error'] = '';
-		if(isset($m['class']) && isset($m['method'])){
-			try{
-				$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
-				$mr = $cr->getMethod($m['method']);
-				list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment())))));
-			}catch(\ReflectionException $e){
-				$m['error'] = $e->getMessage();
+		$bool = false;
+		if(isset($m['mode']) && isset($mode) && !empty($mode)){		
+			foreach(explode(',',$m['mode']) as $expmode){
+				if($mode == trim($expmode)){
+					$bool = true;
+					break;
+				}
 			}
+		}else{
+			$bool = true;
 		}
-		$maps[$k] = $m;
+		if($bool){
+			$m['summary'] = $m['error'] = '';
+			if(isset($m['class']) && isset($m['method'])){
+				try{
+					$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
+					$mr = $cr->getMethod($m['method']);
+					list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment())))));
+				}catch(\ReflectionException $e){
+					$m['error'] = $e->getMessage();
+				}
+			}
+			$maps[$k] = $m;
+		}
 	}
 }
+$template = template($template_base,array('app_name'=>$entry,'maps'=>$maps));
+file_put_contents($out_dir.'index.html',$template->read($template_dir.'index.html'));
 
-$template = template($template_index,array('app_name'=>$entry,'maps'=>$maps));
-file_put_contents($out_dir.'index.html',$template->read($template_index));
-		
 
 // class list 
 $class_list = array();
@@ -50,7 +65,7 @@ foreach(\org\rhaco\Man::libs() as $package => $info){
 }
 ksort($class_list);
 
-$template = template($template_index,array('app_name'=>$entry,'class_list'=>$class_list));
+$template = template($template_base,array('app_name'=>$entry,'class_list'=>$class_list));
 file_put_contents($out_dir.'classes.html',$template->read($template_dir.'classes.html'));
 
 //class info
@@ -60,17 +75,17 @@ foreach($class_list as $package => $c){
 	foreach(array('static_methods','methods') as $k){
 		foreach($class_info[$k] as $method => $doc){
 			$method_info = \org\rhaco\Man::method_info($package,$method);
-			$template = template($template_index,array_merge($method_info,array('app_name'=>$entry)));
+			$template = template($template_base,array_merge($method_info,array('app_name'=>$entry)));
 			file_put_contents($out_dir.$package.'__'.$method.'.html',$template->read($template_dir.'method_info.html'));
 		}
 	}
-	$template = template($template_index,array_merge($class_info,array('app_name'=>$entry)));
+	$template = template($template_base,array_merge($class_info,array('app_name'=>$entry)));
 	file_put_contents($out_dir.$package.'.html',$template->read($template_dir.'class_info.html'));
 }
 
 $arc = new \org\rhaco\io\Archive();
 $arc->add($out_dir,$out_dir);
-$arc->zipwrite($zip_dir.'entry_export_'.date('YmdHis').'.zip');
+$arc->zipwrite($zip_dir.'entry_export_'.date('YmdHis').(empty($mode) ? '' : '_'.$mode).'.zip');
 
 \org\rhaco\io\File::rm($out_dir);
 
