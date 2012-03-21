@@ -12,6 +12,7 @@ $flow->output(array(''
 ,'patterns'=>array(
 	''=>array('template'=>'hoge.html')
 	,'model'=>array('action'=>'test.flow.Model')
+	,'board'=>array('action'=>'org.rhaco.flow.parts.Board')
 	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer','mode'=>'local,dev')
 	,'dev/do_find/(.+)/xml'=>array('action'=>'org.rhaco.flow.parts.Developer::do_find')
 	,'dev/do_detail/(.+)/xml'=>array('action'=>'org.rhaco.flow.parts.Developer::do_detail')

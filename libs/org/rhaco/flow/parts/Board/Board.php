@@ -7,6 +7,9 @@ namespace org\rhaco\flow\parts;
  *
  */
 class Board extends \org\rhaco\flow\parts\RequestFlow{
+	/**
+	 * @automap
+	 */
 	public function index(){
 		if($this->is_post()){
 			$obj = new Board\Model();
@@ -23,6 +26,12 @@ class Board extends \org\rhaco\flow\parts\RequestFlow{
 					,\org\rhaco\store\db\Q::order('-id')
 		));
 		$this->vars("paginator",$paginator);
+	}
+	public function get_template_modules(){
+		return array(
+					new \org\rhaco\flow\module\TwitterBootstrapPagination()
+					,new \org\rhaco\flow\module\Exceptions()
+				);
 	}
 }
 
