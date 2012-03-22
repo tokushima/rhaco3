@@ -179,7 +179,7 @@ class Man{
 	static public function libs(){
 		$result = array();
 		if(is_dir(\Rhaco3::lib_dir())){
-			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::lib_dir(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
+			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::lib_dir(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 				if(strpos($e->getPathname(),'/.') === false){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'
 						&& (strpos($e->getPathname(),'/_') === false || strpos($e->getPathname(),'/_vendors') !== false)
