@@ -4,7 +4,6 @@ use \org\rhaco\store\db\Q;
 /**
  * Blog
  * @author tokushima
- * @class @['maps'=>['index','detail','tag','atom']]
  */
 class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	protected function __init__(){
@@ -12,6 +11,8 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 		sort($names);
 		$this->vars('tag_name_list',$names);
 		$this->vars('query',$this->in_vars('query'));
+		$this->vars('title',\org\rhaco\Conf::get('title','Blog'));
+		$this->vars('summary',\org\rhaco\Conf::get('summary',''));
 	}
 	/**
 	 * 記事一覧
@@ -20,6 +21,7 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	 * @rewuest string $query
 	 * @context BlogEntry[] $object_list
 	 * @context Paginator $paginator
+	 * @automap
 	 */
 	public function index(){
 		$paginator = new \org\rhaco\Paginator($this->map_arg('paginate_by',1),$this->in_vars('page',1));
@@ -39,6 +41,7 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	 * @rewuest string $query
 	 * @context Entry[] $object_list
 	 * @context Paginator $paginator
+	 * @automap
 	 */
 	public function tag($tag=null){
 		$paginator = new \org\rhaco\Paginator($this->map_arg('paginate_by',1),$this->in_vars('page',1));
@@ -58,6 +61,7 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * Atom1.0での出力
 	 * @conf string[] $atom string title,string base url
+	 * @automap
 	 */
 	public function atom(){
 		$object_list = array();
@@ -75,6 +79,7 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	 * 指定の記事
 	 * @param string $name
 	 * @context BlogEntry $object
+	 * @automap
 	 */
 	public function detail($name){
 		$this->vars('object_list',array(Blog\model\Entry::find_get(Q::eq('name',$name))->set_object_module($this)));
@@ -83,6 +88,7 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	 * 整形された $srcを返す
 	 * @param string $src
 	 * @return string
+	 * @automap
 	 */
 	public function format($src){
 		if($this->has_object_module('format')) return $this->object_module('format',$src);
