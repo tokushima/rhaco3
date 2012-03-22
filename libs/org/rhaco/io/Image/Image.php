@@ -56,7 +56,7 @@ class Image extends \org\rhaco\Object{
 	 * @return self
 	 */
 	static public function load($filename){
-		if(!is_file($filename)) throw new Image\ImageException('file not found');
+		if(!is_file($filename)) throw new Image\ImageException('`'.$filename.'` file not found.');
 		$size = getimagesize($filename);
 		if($size === false) throw new Image\ImageException("invalid file");
 		$self = new self(null,null);

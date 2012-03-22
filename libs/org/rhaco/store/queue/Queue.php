@@ -38,9 +38,9 @@ class Queue extends \org\rhaco\Object{
 		$result = array();
 		while(true){
 			try{
+				if($limit <= 0) break;
 				$result[] = self::get($type,$priority);
 				$limit--;
-				if($limit == 0) break;
 			}catch(\org\rhaco\store\queue\exception\NotfoundException $e){
 				break;
 			}
