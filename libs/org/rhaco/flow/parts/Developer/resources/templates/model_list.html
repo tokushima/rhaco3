@@ -101,6 +101,21 @@
 			{$summary}
 			<rt:if param="{$dao_model_errors[$package]}">
 				<rt:if param="{$summary}"><br /></rt:if>
+				
+				<rt:if param="{$dao_model_error_query[$package]}">
+					<div id="modal_error_query_{$count}" class="modal hide fade" style="display: none;">
+						<form>
+						<div class="modal-header">
+							<h3>Error Query</h3>
+						</div>
+						<div class="modal-body">
+							<textarea style="width:98%; height: 400px;" name="sample" onclick="this.select()">{$dao_model_error_query[$package]}</textarea>
+						</div>
+						</form>
+		          	</div>
+					<a class="icon-question-sign" data-toggle="modal" href="#modal_error_query_{$count}"></a>
+				</rt:if>
+
 				<span style="color:#ff0000; font-weight: bold;">{$dao_model_errors[$package]}</span>
 			</rt:if>
 		</td>

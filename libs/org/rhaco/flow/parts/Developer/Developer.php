@@ -51,7 +51,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function model_list(){
-		$list = $errors = $model_list = $con = array();
+		$list = $errors = $error_query = $model_list = $con = array();
 		foreach(\org\rhaco\Man::libs() as $package => $info){
 			if($info['dir']){
 				foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($info['filename']),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
@@ -83,13 +83,14 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 					$con[$package] = false;
 				}catch(\Exception $e){
 					$errors[$package] = $e->getMessage();
-					\org\rhaco\Log::error($dao::recorded_query());
+					$error_query[$package] = print_r($dao::recorded_query(),true);
 				}
 				if($this->search_str($package,$summary)) $model_list[$package] = $summary;				
 			}
 		}
 		$this->vars('dao_models',$model_list);
 		$this->vars('dao_model_errors',$errors);
+		$this->vars('dao_model_error_query',$error_query);
 		$this->vars('dao_model_con',$con);
 	}
 	/**

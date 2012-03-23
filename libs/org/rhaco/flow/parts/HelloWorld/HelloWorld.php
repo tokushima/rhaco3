@@ -5,8 +5,8 @@ namespace org\rhaco\flow\parts;
  * @author tokushima
  *
  */
-class HelloWorld extends \org\rhaco\flow\parts\RequestFlow{
+class HelloWorld{
 	public function sample(){
-		$this->vars('message','hello world');
+		return array('message'=>'hello world');
 	}	
 }
