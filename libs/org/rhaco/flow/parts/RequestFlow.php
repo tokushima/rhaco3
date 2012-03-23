@@ -403,13 +403,14 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	/**
 	 * 自身のメソッドにマッピングされたURLへリダイレクトする(パッケージのみ)
 	 * @param string $method
-	 * @param string $name
 	 */
-	protected function redirect_by_method($method,$name){
+	protected function redirect_by_method($method){
+		$args = func_get_args();
+		array_shift($args);
 		foreach($this->package_maps as $u => $m){
-			if($m['method'] == $method) return \org\rhaco\net\http\Header::redirect(vsprintf($m['format'],$name));
+			if($m['method'] == $method) return \org\rhaco\net\http\Header::redirect(vsprintf($m['format'],$args));
 		}
-	}		
+	}
 	/**
 	 * mapで定義されたarg値
 	 * @param string $name
