@@ -82,4 +82,12 @@ class Session{
 	static public function __shutdown__(){
 		if('' != session_id()) session_write_close();
 	}
+	/**
+	 * セッションモジュール名を取得
+	 * @return string
+	 */
+	static public function get_module_name(){
+		$module = \org\rhaco\Conf::get('module');
+		return (empty($module)) ? ini_get('session.save_handler') : $module;
+	}
 }

@@ -474,6 +474,8 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		ksort($list);
 		$this->vars('object_list',$list);
+		$this->vars('session_module_name',\org\rhaco\net\Session::get_module_name());
+		$this->vars('umask',sprintf('%04o',umask()));
 	}
 	/**
 	 * エントリ一覧
