@@ -48,7 +48,7 @@ class Pear{
 			$download_path = $download_base.str_replace(array('.','-'),'_',$domain).'_'.$target_package.'_'.strtr($target_version,'.','_');
 			$download_url = 'http://'.$domain.'/get/'.$target_package.'-'.$target_version.'.tgz';
 			if(!is_dir($download_path)){
-				mkdir($download_path,0777,true);
+				\org\rhaco\io\File::mkdir($download_path,0777);
 				$fp = gzopen($download_url,'rb');
 				$buf = null;
 				while(!gzeof($fp)) $buf .= gzread($fp,4096);
@@ -101,7 +101,7 @@ class Pear{
 
 		if($role == 'php'){
 			$dest = $baseinstalldir.'/'.$name;
-			if(!is_dir(dirname($dest))) mkdir(dirname($dest),0777,true);
+			if(!is_dir(dirname($dest))) \org\rhaco\io\File::mkdir(dirname($dest),0777);
 			copy($src,$dest);
 
 			$det_src = file_get_contents($dest);
@@ -113,7 +113,7 @@ class Pear{
 			}
 		}else if($role == 'data'){
 			$dest = $data.'/'.$target_package.'/'.$name;
-			if(!is_dir(dirname($dest))) mkdir(dirname($dest),0777,true);
+			if(!is_dir(dirname($dest))) \org\rhaco\io\File::mkdir(dirname($dest),0777,true);
 			copy($src,$dest);
 		}
 	}

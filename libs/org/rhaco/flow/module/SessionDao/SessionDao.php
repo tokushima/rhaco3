@@ -6,7 +6,7 @@ use \org\rhaco\store\db\Q;
  * @author tokushima
  * @var string $id @['primary'=>true]
  * @var text $data
- * @var timestamp $expires
+ * @var number $expires
  */
 class SessionDao extends \org\rhaco\store\db\Dao{
 	protected $id;
@@ -57,6 +57,7 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 			$obj = new self();
 			$obj->id($id);
 			$obj->data($sess_data);
+
 			try{
 				$obj->save();
 			}catch(\org\rhaco\store\db\exception\DaoBadMethodCallException $r){}

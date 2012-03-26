@@ -98,6 +98,7 @@ class Archive{
 			fclose($fr);
 		gzclose($fp);
 		unlink($filename.'.tar');
+		chmod($filename,0777);
 		return $this;
 	}
 	/**
@@ -121,6 +122,7 @@ class Archive{
 				}
 			}
 			$zip->close();
+			chmod($filename,0777);
 		}
 		return $this;
 	}
@@ -158,7 +160,7 @@ class Archive{
 	 */
 	static public function untar($inpath,$outpath){
 		if(substr($outpath,-1) != '/') $outpath = $outpath.'/';
-		if(!is_dir($outpath)) mkdir($outpath,0777,true);
+		if(!is_dir($outpath)) \org\rhaco\io\File::mkdir($outpath,0777);
 		$fr = fopen($inpath,'rb');
 
 		while(!feof($fr)){
@@ -175,7 +177,7 @@ class Archive{
 					case 0:	
 						$size = base_convert($data['size'],8,10);
 						$cur = ftell($fr);
-						if(!is_dir(dirname($f))) mkdir(dirname($f),0777,true);
+						if(!is_dir(dirname($f))) \org\rhaco\io\File::mkdir(dirname($f),0777);
 						$fw = fopen($f,'wb');
 							for($i=0;$i<=$size;$i+=512){
 								fwrite($fw,fread($fr,512));
@@ -185,7 +187,7 @@ class Archive{
 						fseek($fr,$skip,SEEK_SET);
 						break;
 					case 5:
-						if(!is_dir($f)) mkdir($f,0777,true);
+						if(!is_dir($f)) \org\rhaco\io\File::mkdir($f,0777);
 						break;
 				}
 			}
@@ -209,7 +211,7 @@ class Archive{
 	}
 	static public function unzip($inpath,$outpath){
 		if(substr($outpath,-1) != '/') $outpath = $outpath.'/';
-		if(!is_dir($outpath)) mkdir($outpath,0777,true);
+		if(!is_dir($outpath)) \org\rhaco\io\File::mkdir($outpath,0777);
 		$zip = new \ZipArchive();
 		if($zip->open($inpath) !== true) throw new \ErrorException('failed to open stream');
 		$zip->extractTo($outpath);

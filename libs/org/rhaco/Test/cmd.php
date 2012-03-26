@@ -81,7 +81,7 @@ if(isset($value)){
 	}
 	if(empty($exceptions)){
 		if(is_dir($entry_path)){
-			foreach(new \RecursiveDirectoryIterator($entry_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS) as $e){
+			foreach(new \RecursiveDirectoryIterator($entry_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
 				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
 					$src = file_get_contents($e->getFilename());
 					if((strpos($src,"\\org\\rhaco\\Flow") !== false && strpos($src,'->output(') !== false)){
@@ -95,7 +95,7 @@ if(isset($value)){
 			}
 		}
 		if(is_dir($tests_path)){
-			foreach(new \RecursiveDirectoryIterator($tests_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS) as $e){
+			foreach(new \RecursiveDirectoryIterator($tests_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS) as $e){
 				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
 					try{
 						$verify_format($e->getPathname());
@@ -112,7 +112,7 @@ if(isset($value)){
 }
 if(isset($params['xml'])){
 	if(!empty($params['xml'])){
-		if(!is_dir(dirname($params['xml']))) mkdir(dirname($params['xml']),0777,true);
+		if(!is_dir(dirname($params['xml']))) \org\rhaco\io\File::mkdir(dirname($params['xml']),0777);
 		file_put_contents($params['xml'],\org\rhaco\Test::xml($value)->get('UTF-8'));
 	}else{
 		print(\org\rhaco\Test::xml($value)->get('UTF-8'));

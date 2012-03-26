@@ -11,7 +11,7 @@ class OneFile{
 	public function __construct($path=null){
 		$this->path = (empty($path)) ? \org\rhaco\Conf::get('path',\org\rhaco\io\File::work_path('output.log')) : $path;
 		$dir = dirname($this->path);
-		if(!is_dir($dir)) mkdir($dir,0777,true);
+		\org\rhaco\io\File::mkdir($dir,0777);
 	}
 	public function debug(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);

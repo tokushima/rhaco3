@@ -254,7 +254,7 @@ class Request implements \IteratorAggregate{
 	 */
 	public function move_file($file_info,$newname){
 		if(!$this->has_file($file_info)) throw new \LogicException('file not found ');
-		if(!is_dir(dirname($newname))) mkdir(dirname($newname),0775,true);
+		if(!is_dir(dirname($newname))) \org\rhaco\io\File::mkdir(dirname($newname));
 		copy($file_info['tmp_name'],$newname);
 		chmod($newname,0777);
 		unlink($file_info['tmp_name']);

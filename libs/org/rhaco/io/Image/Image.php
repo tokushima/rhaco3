@@ -230,7 +230,7 @@ class Image extends \org\rhaco\Object{
 	 * @return string
 	 */
 	public function write($filename,$type=null){
-		if(!is_dir(dirname($filename))) mkdir(dirname($filename),0777,true);
+		if(!is_dir(dirname($filename))) \org\rhaco\io\File::mkdir(dirname($filename));
 		if($type !== null) $this->type($type);
 		$bool = false;
 		$ext = image_type_to_extension($this->type_no(),true);

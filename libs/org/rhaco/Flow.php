@@ -242,7 +242,6 @@ class Flow{
 						foreach($modules as $m) $this->set_object_module($m);
 						if(isset($apps[$k]['class'])){
 							if(!class_exists(str_replace('.',"\\",$apps[$k]['class']))) throw new \InvalidArgumentException($apps[$k]['class'].' not found');
-							if(isset($map['session'])) \org\rhaco\Conf::set('module',$map['session']);
 							$r = $this->str_reflection($apps[$k]['class']);
 							$obj = $r->newInstance();
 							$func_exception = null;

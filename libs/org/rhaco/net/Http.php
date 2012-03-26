@@ -560,7 +560,7 @@ class Http{
 					}
 				}
 		}
-		$download_handle = ($download_path !== null && (is_dir(dirname($download_path)) || mkdir(dirname($download_path),0777,true))) ? fopen($download_path,'wb') : null;
+		$download_handle = ($download_path !== null && (is_dir(dirname($download_path)) || \org\rhaco\io\File::mkdir(dirname($download_path),0777))) ? fopen($download_path,'wb') : null;
 		if(preg_match("/^Content\-Length:[\s]+([0-9]+)\r\n/i",$result->head,$m)){
 			if(0 < ($length = $m[1])){
 				$rest = $length % 4096;

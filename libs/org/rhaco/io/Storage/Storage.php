@@ -18,7 +18,7 @@ class Storage{
 		if(empty($nodes)) throw new \org\rhaco\io\Storage\StorageException('ノードが設定されていません');
 		$service = \org\rhaco\Conf::get('service_name','new_service');
 		$dir = \org\rhaco\net\Path::slash($nodes[rand(1,sizeof($nodes))-1],false,true).$service.'/'.$type.'/'.date('Y/md/H');
-		\org\rhaco\io\File::mkdir(self::get_path($dir));
+		\org\rhaco\io\File::mkdir(self::get_path($dir),0777);
 		return $dir;
 	}
 	/**

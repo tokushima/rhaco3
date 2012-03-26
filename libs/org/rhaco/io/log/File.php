@@ -15,7 +15,7 @@ class File{
 	static private function path($dir=null){
 		if($dir===null) $dir = \org\rhaco\Conf::get('path',\org\rhaco\io\File::work_path('logs'));
 		if(substr(str_replace("\\",'/',$dir),-1) == '/') $dir = subustr($dir,0,-1);
-		if(!is_dir($dir)) mkdir($dir,0777,true);
+		\org\rhaco\io\File::mkdir($dir,0777);
 		return $dir.'/'.date('Ymd').'.log';
 	}
 	public function __construct($dir=null){

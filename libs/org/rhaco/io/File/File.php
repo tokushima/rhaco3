@@ -121,15 +121,19 @@ class File extends \org\rhaco\Object{
 	/**
 	 * フォルダを作成する
 	 * @param string $source 作成するフォルダパス
+	 * @param oct $permission
 	 */
-	static public function mkdir($source){
+	static public function mkdir($source,$permission=0775){
+		$bool = true;
 		if(!is_dir($source)){
 			try{
-				mkdir($source,0775,true);
+				$bool = mkdir($source,$permission,true);
+				chmod($source,$permission);
 			}catch(\ErrorException $e){
 				throw new \InvalidArgumentException(sprintf('permission denied `%s`',$source));
 			}
 		}
+		return $bool;
 	}
 	/**
 	 * 移動
