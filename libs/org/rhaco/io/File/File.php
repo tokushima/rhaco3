@@ -127,8 +127,16 @@ class File extends \org\rhaco\Object{
 		$bool = true;
 		if(!is_dir($source)){
 			try{
-				$bool = mkdir($source,$permission,true);
-				chmod($source,$permission);
+				$list = explode('/',str_replace('\\','/',$source));
+				$dir = '';
+				foreach($list as $d){
+					$dir = $dir.$d.'/';
+					if(!is_dir($dir)){
+						$bool = mkdir($dir);
+						if(!$bool) return $bool;
+						chmod($dir,$permission);
+					}
+				}
 			}catch(\ErrorException $e){
 				throw new \InvalidArgumentException(sprintf('permission denied `%s`',$source));
 			}
