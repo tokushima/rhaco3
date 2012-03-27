@@ -4,8 +4,8 @@ namespace org\rhaco\store\queue\module\Dao;
  * キュー用のDBモデル
  * @var serial $id
  * @var number $lock
- * @var string $type
- * @var string $data
+ * @var string $type @['max'=>32]
+ * @var string $data @['max'=>255]
  * @var timestamp $fin
  * @var integer $priority
  * @var timestamp $create_date @['auto_now_add'=>true]

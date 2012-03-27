@@ -44,12 +44,13 @@
 	</form>
 </div>
 <a class="icon-search" data-toggle="modal" href="#filter"></a>
+( Total: {$paginator.total()} )
 
 <table rt:param="object_list" rt:var="obj">
 <thead>
 	<tr>
 		<th></th>
-		<rt:loop param="{$f.props($model,3)}" var="name">
+		<rt:loop param="{$f.props($model,4)}" var="name">
 			<th><a href="?{$paginator.query_order($name)}">{$t.trim_width($t.text($name),50,'..')}</a></th>
 		</rt:loop>
 	</tr>
@@ -62,7 +63,7 @@
 				<input type="submit" value="delete" class="btn" style="margin:0; padding-top: 0; padding-bottom: 0; " />
 			</form>
 		</td>
-		<rt:loop param="{$f.props($model,3)}" var="name">
+		<rt:loop param="{$f.props($model,4)}" var="name">
 			<td>
 				<rt:if param="{$f.is_primary($obj,$name)}">
 					<a href="{$t.package_method_url('do_update',$package)}?{$f.primary_query($obj)}">{$t.trim_width($t.text($f.acr($obj,$name)),50,'..')}</a>

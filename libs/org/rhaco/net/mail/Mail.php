@@ -285,8 +285,10 @@ class Mail extends \org\rhaco\Object{
 		}else{
 			if(!$this->is_to()) throw new \RuntimeException('undefine to');
 			if(!$this->is_from()) throw new \RuntimeException('undefine from');
-			$header = trim(preg_replace("/".$this->eol."Subject: .+".$this->eol."/","\n",$this->header()));
-			mail(null,$this->subject(),$this->body(),$header,'-f'.$this->from());
+			$header = $this->header();
+			$header = preg_replace("/".$this->eol."Subject: .+".$this->eol."/","\n",$header);
+			$header = preg_replace("/".$this->eol."To: .+".$this->eol."/","\n",$header);
+			mail($this->implode_address($this->to),$this->subject(),$this->body(),trim($header),'-f'.$this->from());
 		}
 	}
 	/**

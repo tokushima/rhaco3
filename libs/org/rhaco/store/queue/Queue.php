@@ -70,7 +70,7 @@ class Queue extends \org\rhaco\Object{
 	 * @return org.rhaco.store.queue.Model[]
 	 */	
 	static public function reset($type,$sec=86400){
-		return static::module('reset',$type,microtime(true) - ($sec * 100.0000));
+		return static::module('reset',$type,microtime(true) - (float)$sec);
 	}
 	/**
 	 * 一覧を取得する
