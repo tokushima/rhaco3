@@ -459,8 +459,15 @@ if(isset($_SERVER['argv'][1])){
 								require_once($f);
 							}else if(is_dir($f)){
 								if(is_file($cmdf=$f.'/'.$value.'.php')){
-									if(is_file($f.'/__setup__.php')) require_once($f.'/__setup__.php');
-									require($cmdf);
+									if(is_file($f.'/__setup__.php')) require($f.'/__setup__.php');
+									try{
+										require($cmdf);
+									}catch(\Exception $exception){
+										$_ENV['exception'] = $exception;
+										if(is_file($f.'/__exception__.php')) require($f.'/__exception__.php');
+									}
+									if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
+									if(isset($_ENV['exception'])) throw $_ENV['exception'];
 								}else{
 									$println('Commands: ');
 									foreach(new \DirectoryIterator($f) as $f){
