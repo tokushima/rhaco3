@@ -96,7 +96,6 @@ class Q extends \org\rhaco\Object{
 				}else if($arg instanceof \org\rhaco\Paginator){
 					$this->paginator = $arg;
 				}else{
-\org\rhaco\Log::warn($arg);
 					throw new \BadMethodCallException("`".(string)$arg."` not supported");
 				}
 			}
