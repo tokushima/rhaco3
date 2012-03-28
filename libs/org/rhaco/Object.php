@@ -418,6 +418,36 @@ class Object{
 				fail();
 			}
 			try{
+				$obj->kk("aaa.bbb.ccc@example.com");
+				success();
+			}catch(Exception $e){
+				fail();
+			}
+			try{
+				$obj->kk("aaa.bbb.ccc@example.aa.bb.com");
+				success();
+			}catch(Exception $e){
+				fail();
+			}
+			try{
+				$obj->kk("aaa..bbb.ccc@example.com");
+				fail();
+			}catch(Exception $e){
+				success();
+			}
+			try{
+				$obj->kk("aaa.bbb.ccc.@example.com");
+				fail();
+			}catch(Exception $e){
+				success();
+			}
+			try{
+				$obj->kk("aaa.bbb.ccc@example.c");
+				fail();
+			}catch(Exception $e){
+				success();
+			}
+			try{
 				$obj->kk("123@example.com");
 				success();
 			}catch(Exception $e){
