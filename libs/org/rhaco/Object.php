@@ -538,7 +538,9 @@ class Object{
 				success();
 			}
 			eq(false,$obj->is_oo());
-			$obj->oo(123);			
+			$obj->oo(0);
+			eq(true,$obj->is_oo());			
+			$obj->oo(123);
 			eq(123,$obj->oo());
 			$obj->oo("456");
 			eq(456,$obj->oo());
