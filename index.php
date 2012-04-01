@@ -10,7 +10,7 @@ $flow = new \org\rhaco\Flow();
 $flow->output(array(''
 ,'nomatch_redirect'=>'/'
 ,'patterns'=>array(
-	''=>array('template'=>'hoge.html')
+	''=>array('name'=>'index','template'=>'hoge.html')
 	,'model'=>array('action'=>'test.flow.Model')
 	,'board'=>array('action'=>'org.rhaco.flow.parts.Board')
 	,'blog'=>array('action'=>'org.rhaco.flow.parts.Blog')
