@@ -10,8 +10,6 @@ class Dao{
 	 * @param \Exception $exception
 	 */
 	public function flow_handle_exception(\Exception $exception){
-		foreach(\org\rhaco\store\db\Dao::connections() as $con){
-			$con->rollback();
-		}
+		\org\rhaco\store\db\Dao::rollback_all();
 	}
 }

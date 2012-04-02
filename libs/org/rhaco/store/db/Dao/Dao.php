@@ -46,6 +46,12 @@ abstract class Dao extends \org\rhaco\Object{
 	final static private function connection($class){
 		return self::$_connections_[self::$_co_anon_[$class][0]];
 	}
+	/**
+	 * すべての接続でロールバックする
+	 */
+	final static public function rollback_all(){
+		foreach(self::connections() as $con) $con->rollback();
+	}
 	final static private function get_con($database,$class){
 		$def = Conf::get('connection');
 		if(!isset(self::$_connections_[$database])){
