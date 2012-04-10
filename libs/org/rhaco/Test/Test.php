@@ -198,7 +198,7 @@ class Test{
 	 * テスト結果をXMLで取得する
 	 * @return org.rhaco.Xml
 	 */
-	static public function xml($name=null){
+	static public function xml($name=null,$system_err=null){
 		$xml = new \org\rhaco\Xml('testsuite');
 		if(!empty($name)) $xml->attr('name',$name);
 		
@@ -254,7 +254,7 @@ class Test{
 		$xml->attr('skipped',$none);
 		$xml->attr('time',round((microtime(true) - (float)\org\rhaco\Test::start_time()),4));
 		$xml->add(new \org\rhaco\Xml('system-out'));
-		$xml->add(new \org\rhaco\Xml('system-err'));
+		$xml->add(new \org\rhaco\Xml('system-err',$system_err));
 		return $xml;
 	}
 	public function __toString(){
