@@ -855,6 +855,14 @@ abstract class Dao extends \org\rhaco\Object{
 		}
 		throw new NotfoundDaoException('Synchronization failed');
 	}
+	protected function set_prop($name,$type,$value){
+		try{
+			return parent::set_prop($name,$type,$value);
+		}catch(\InvalidArgumentException $e){
+			$this->dao_exception()->add($e,$name);
+		}
+		$this->dao_exception()->throw_over();
+	}
 	/**
 	 * 配列からプロパティに値をセットする
 	 * @param mixed{} $arg

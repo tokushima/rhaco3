@@ -3,7 +3,7 @@ namespace test\model;
 /**
  * @var serial $id
  * @var number $number
- * @bar integer $integer
+ * @var integer $integer
  * @var string $string
  * @var text $text
  * @var timestamp $timestamp

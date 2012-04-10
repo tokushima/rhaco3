@@ -28,7 +28,7 @@ $verify_format = function($class_name,$m=null,$b=null){
 };
 
 $ini_error_log = ini_get('error_log');
-$ini_error_log_start_size = (empty($ini_error_log)) ? 0 : filesize($ini_error_log);
+$ini_error_log_start_size = (empty($ini_error_log) || !is_file($ini_error_log)) ? 0 : filesize($ini_error_log);
 \org\rhaco\Test::start_time();
 if(isset($params['mem']) && $params['mem'] != '') ini_set('memory_limit',$params['mem']);
 if(isset($value)){
@@ -113,7 +113,7 @@ if(isset($value)){
 		foreach($exceptions as $k => $e) $error_print($k.': '.$e);
 	}
 }
-$ini_error_log_end_size = (empty($ini_error_log)) ? 0 : filesize($ini_error_log);
+$ini_error_log_end_size = (empty($ini_error_log) || !is_file($ini_error_log)) ? 0 : filesize($ini_error_log);
 $error_msg = ($ini_error_log_end_size != $ini_error_log_start_size) ? file_get_contents($ini_error_log,false,null,$ini_error_log_start_size) : null;
 if(isset($params['xml'])){
 	if(!empty($params['xml'])){

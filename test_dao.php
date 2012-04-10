@@ -13,6 +13,14 @@ $flow->output(array(''
 	,'get'=>array('name'=>'get','action'=>'test.flow.Model::get')
 )));
 /***
+	# error
+	$b = b();
+	$b->vars('integer','123F');
+	$b->do_post(test_map_url('insert'));
+	eq(200,$b->status());
+	eq('<error><message group="integer" type="InvalidArgumentException">integer must be an integer</message></error>',$b->body());
+ */
+/***
  * $b = b();
  * $b->do_post(test_map_url('insert'));
  * $b->do_post(test_map_url('get'));
