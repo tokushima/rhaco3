@@ -1,4 +1,9 @@
 <?php
+/**
+ * 開発ツール
+ */
+
+
 function template($super_html,$vars=array()){
 	$template = new \org\rhaco\Template();
 	$template->template_super($super_html);

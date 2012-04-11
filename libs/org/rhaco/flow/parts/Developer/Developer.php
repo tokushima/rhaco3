@@ -124,19 +124,6 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		$this->vars('maps',$maps);
 	}
-	/**
-	 * @automap
-	 */
-	public function explorer(){
-		$self_name = str_replace("\\",'.',__CLASS__);
-		$map_names = array();
-		foreach($this->maps() as $k => $m){
-			if(!isset($m['class']) || $m['class'] != $self_name){
-				$map_names[$m['name']] = $m['name'];
-			}
-		}
-		$this->vars('map_names',$map_names);
-	}
 	private function search_str(){
 		$query = str_replace('　',' ',trim($this->in_vars('q')));
 		if(!empty($query)){

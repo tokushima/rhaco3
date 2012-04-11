@@ -1,5 +1,8 @@
 <?php
-$entry = isset($_ENV['params']['entry']) ? $_ENV['params']['entry'] : null;
+/**
+ * エントリ一覧を出力する
+ */
+$entry = isset($_ENV['params']['entry']) ? $_ENV['params']['entry'] : 'index';
 $mode = isset($_ENV['params']['mode']) ? $_ENV['params']['mode'] : null;
 $base = isset($_ENV['params']['template']) ? $_ENV['params']['template'] : null;
 
@@ -85,8 +88,8 @@ foreach($class_list as $package => $c){
 
 $arc = new \org\rhaco\io\Archive();
 $arc->add($out_dir,$out_dir);
-$arc->zipwrite($zip_dir.'entry_export_'.date('YmdHis').(empty($mode) ? '' : '_'.$mode).'.zip');
+$arc->zipwrite($zipfile=($zip_dir.'entry_export_'.$entry.'_'.date('YmdHis').(empty($mode) ? '' : '_'.$mode).'.zip'));
 
 \org\rhaco\io\File::rm($out_dir);
 
-
+\org\rhaco\lang\AnsiEsc::println('Output: '.$zipfile,true);

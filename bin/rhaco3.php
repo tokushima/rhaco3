@@ -458,27 +458,41 @@ if(isset($_SERVER['argv'][1])){
 							if(is_file($f)){
 								require_once($f);
 							}else if(is_dir($f)){
-								if(is_file($cmdf=$f.'/'.$value.'.php')){
-									if(is_file($f.'/__setup__.php')) require($f.'/__setup__.php');
-									try{
+								try{
+									if(is_file($cmdf=$f.'/'.$value.'.php')){
+										if(is_file($f.'/__setup__.php')) require($f.'/__setup__.php');
 										require($cmdf);
-									}catch(\Exception $exception){
-										$_ENV['exception'] = $exception;
-										if(is_file($f.'/__exception__.php')) require($f.'/__exception__.php');
-									}
-									if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
-									if(isset($_ENV['exception'])) throw $_ENV['exception'];
-								}else{
-									$println('Commands: ');
-									foreach(new \DirectoryIterator($f) as $f){
-										if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
-											$println(substr($f->getFileName(),0,-4),true,2);
-											if(preg_match('/\/\*\*(.+?)\*\//ms',file_get_contents($f->getPathname()),$m)){
-												$println(trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1]))),null,4);
+										if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
+									}else{
+										if(is_file($sf=$f.'/__setup__.php')){
+											if(preg_match('/\/\*\*(.+?)\*\//ms',file_get_contents($sf),$m)){
+												$println(trim(preg_replace('/@.+/','',preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1])))),null,0);
+												$println(str_repeat('-',50));
+											}
+											require($sf);
+										}
+										if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
+										$list = array();
+										$len = 8;
+										foreach(new \DirectoryIterator($f) as $f){
+											if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
+												$package = substr($f->getFileName(),0,-4);
+												$list[$package] = null;
+												if($len < strlen($package)) $len = strlen($package);
+												if(preg_match('/\/\*\*(.+?)\*\//ms',file_get_contents($f->getPathname()),$m)){
+													list($summary) = explode("\n",trim(preg_replace('/@.+/','',preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1])))));
+													$list[$package] = $summary;
+												}
 											}
 										}
+										print(PHP_EOL.'Commands ('.substr($cmd,1).'): '.PHP_EOL);
+										foreach($list as $p => $s) print('  '.str_pad($p,$len).' : '.$s.PHP_EOL);
 									}
+								}catch(\Exception $exception){
+									$_ENV['exception'] = $exception;
+									if(is_file($f.'/__exception__.php')) require($f.'/__exception__.php');
 								}
+								if(isset($_ENV['exception'])) throw $_ENV['exception'];
 							}
 						}
 					}else{
@@ -507,7 +521,7 @@ if(is_dir(Rhaco3::lib_dir())){
 			if($len < strlen($package)) $len = strlen($package);
 			$doc = is_file($dir.'/cmd.php') ? file_get_contents($dir.'/cmd.php') : (is_file($dir.'/cmd/__setup__.php') ? file_get_contents($dir.'/cmd/__setup__.php') : null);
 			list($summary) = (preg_match('/\/\*\*.+?\*\//s',$doc,$m)) ? explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0])))) : '';
-			$list[$package] = (empty($summary) && is_dir($dir.'/cmd')) ? 'There are multiple commands' : $summary;
+			$list[$package] = $summary;
 		}
 	}
 }
