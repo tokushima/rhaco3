@@ -13,6 +13,8 @@ class Helper{
 				case "{}":
 				case "[]": $class = substr($class,0,-2);
 			}
+			$class = str_replace('\\','.',$class);
+			if(substr($class,0,1) == '.') $class = substr($class,1);
 			return $class;
 		}
 		return null;

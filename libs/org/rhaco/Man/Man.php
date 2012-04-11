@@ -165,10 +165,14 @@ class Man{
 				}
 			}
 		}
+		$throws = array();
+		if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$document,$match)){
+			foreach($match[1] as $k => $n) $throws[$n] = trim($match[2][$k]);
+		}
 		$description = trim(preg_replace('/@.+/','',$document));
 		return array(
 				'package'=>$class,'method_name'=>$method,'params'=>$params,'request'=>$request,'context'=>$context
-				,'args'=>$args,'return'=>$return,'description'=>$description
+				,'args'=>$args,'return'=>$return,'description'=>$description,'throws'=>$throws
 				,'is_post'=>(strpos($src,'$this->is_post()') !== false)
 				);
 	}

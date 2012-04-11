@@ -78,8 +78,9 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 指定の記事
 	 * @param string $name
-	 * @context BlogEntry $object
+	 * @context org.rhaco.flow.parts.Blog.model.Entry[] $object_list 指定の記事１件
 	 * @automap
+	 * @throws \org\rhaco\store\db\exception\NotfoundDaoException 指定の記事がない
 	 */
 	public function detail($name){
 		$this->vars('object_list',array(Blog\model\Entry::find_get(Q::eq('name',$name))->set_object_module($this)));
