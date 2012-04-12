@@ -166,8 +166,11 @@ class Man{
 			}
 		}
 		$throws = array();
+		if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\(([\"\'])(.+)\\2/",$src,$match)){
+			foreach($match[1] as $k => $n) $throws[md5($n.$match[3][$k])] = array($n,trim($match[3][$k]));
+		}
 		if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$document,$match)){
-			foreach($match[1] as $k => $n) $throws[$n] = trim($match[2][$k]);
+			foreach($match[1] as $k => $n) $throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
 		}
 		$description = trim(preg_replace('/@.+/','',$document));
 		return array(
