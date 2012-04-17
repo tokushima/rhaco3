@@ -4,7 +4,7 @@ namespace org\rhaco\store\db\exception;
  * Daoの例外
  * @author tokushima
  */
-class DaoException extends \Exception{
+class DaoException extends \org\rhaco\Exception{
 	private $e = array();
 
 	/**
@@ -15,6 +15,7 @@ class DaoException extends \Exception{
 	public function add(\Exception $exception,$group=null){
 		if(empty($group)) $group = 'exceptions';
 		$this->e[$group][] = $exception;
+		return $this;
 	}
 	/**
 	 * 例外があればthrowする

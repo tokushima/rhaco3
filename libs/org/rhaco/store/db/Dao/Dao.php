@@ -613,7 +613,9 @@ abstract class Dao extends \org\rhaco\Object{
 		$query->add(new Paginator(1,1));
 		if(!empty($args)) call_user_func_array(array($query,'add'),$args);
 		foreach(self::get_statement_iterator($dao,$query) as $d) return $d;
-		throw new NotfoundDaoException(basename(str_replace("\\",'/',get_class($dao))).' not found');
+		// TODO
+		$class_name = str_replace("\\",'.',get_class($dao));
+		throw new NotfoundDaoException(basename(str_replace('.','/',$class_name)).' not found',$class_name);
 	}
 	/**
 	 * サブクエリを取得する
@@ -853,7 +855,8 @@ abstract class Dao extends \org\rhaco\Object{
 			}
 			return $this;
 		}
-		throw new NotfoundDaoException('Synchronization failed');
+		$class_name = str_replace("\\",'.',get_class($this));
+		throw new NotfoundDaoException(basename(str_replace('.','/',$class_name)).' synchronization failed',$class_name);
 	}
 	protected function set_prop($name,$type,$value){
 		try{

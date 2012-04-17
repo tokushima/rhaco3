@@ -8,9 +8,9 @@ namespace org\rhaco;
  * @var string $file
  * @var text $message
  */
-class Exceptions extends \Exception{
+class Exceptions extends \org\rhaco\Exception{
 	static private $self;
-	protected $message = 'exceptions';
+	protected $message = 'multiple exceptions';
 	private $messages = array();
 
 	/**
@@ -25,7 +25,7 @@ class Exceptions extends \Exception{
 				foreach($es as $e) self::$self->messages[$key][] = $e;
 			}
 		}else{
-			if(empty($group)) $group = 'exceptions';
+			if(empty($group)) $group = ($exception instanceof \org\rhaco\Exception) ? $exception->getGroup() : 'exceptions';
 			self::$self->messages[$group][] = $exception;
 		}
 	}
