@@ -80,7 +80,21 @@ class Flow{
 	 * @param array $map
 	 */
 	public function output($p0=null,$p1=null,$p2=null,$p3=null,$p4=null,$p5=null,$p6=null,$p7=null,$p8=null,$p9=null){
-		$pathinfo = preg_replace("/(.*?)\?.*/","\\1",(isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null));			
+		$pathinfo = preg_replace("/(.*?)\?.*/","\\1",(isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null));
+		/**
+		 * ハンドリングマップ配列を取得する
+		 * @param mixed $p0
+		 * @param mixed $p1
+		 * @param mixed $p2
+		 * @param mixed $p3
+		 * @param mixed $p4
+		 * @param mixed $p5
+		 * @param mixed $p6
+		 * @param mixed $p7
+		 * @param mixed $p8
+		 * @param mixed $p9
+		 * @return array
+		 */
 		$map = ($this->has_object_module('flow_map_loader')) ? $this->object_module('flow_map_loader',$p0,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9) : $p0;
 		$apps = $urls = array();
 		$idx = 0;

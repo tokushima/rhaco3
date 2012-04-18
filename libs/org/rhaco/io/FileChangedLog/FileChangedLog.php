@@ -60,6 +60,11 @@ class FileChangedLog extends \org\rhaco\Object{
 	}
 	private function msg($info,$pre_size,$text){
 		$text = (string)(isset($text) ? $text : 'UPDATE '.($info[2]-$pre_size)).' byte';
+		/**
+		 * infoログの場合の処理
+		 * @param org.rhaco.Log $log
+		 * @param string $id
+		 */
 		self::module('info',new \org\rhaco\Log('info',$text,$info[0],0,$info[1]),$this->path);
 		print(date('Y/m/d H:i:s',$info[1]).' '.$info[0].'('.$text.')'.PHP_EOL);
 	}

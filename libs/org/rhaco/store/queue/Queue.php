@@ -16,6 +16,10 @@ class Queue extends \org\rhaco\Object{
 		$obj->type($type);
 		$obj->data($data);
 		$obj->priority($priority);
+		/**
+		 * キューの挿入
+		 * @param \org\rhaco\store\queue\Model $obj
+		 */
 		static::module('insert',$obj);
 	}
 	/**
@@ -24,6 +28,11 @@ class Queue extends \org\rhaco\Object{
 	 * @param integer $priority
 	 */
 	static public function get($type,$priority=1){
+		/**
+		 * キューの取得
+		 * @param string $type キューの種類
+		 * @param integer $priority 優先度
+		 */
 		$obj = static::module('get',$type,$priority);
 		if(!($obj instanceof \org\rhaco\store\queue\Model)) throw new \org\rhaco\store\queue\exception\IllegalDataTypeException('must be an of '.get_class($obj));
 		return $obj;
@@ -53,6 +62,10 @@ class Queue extends \org\rhaco\Object{
 	 */	
 	static public function delete($key){
 		if($key instanceof Model) $key = $key->id();
+		/**
+		 * キューを削除
+		 * @param \org\rhaco\store\queue\Model $key
+		 */
 		static::module('delete',$key);
 	}
 	/**
@@ -61,16 +74,26 @@ class Queue extends \org\rhaco\Object{
 	 */	
 	static public function finish($key){
 		if($key instanceof Model) $key = $key->id();
+		/**
+		 * キューを終了にする
+		 * @param \org\rhaco\store\queue\Model $key
+		 */
 		static::module('finish',$key);
 	}
 	/**
 	 * 終了していないものをリセットする
-	 * @param string $type
+	 * @param string $type キューの種類
 	 * @param integer $sec
 	 * @return org.rhaco.store.queue.Model[]
 	 */	
 	static public function reset($type,$sec=86400){
-		return static::module('reset',$type,microtime(true) - (float)$sec);
+		$time = microtime(true) - (float)$sec;
+		/**
+		 * 終了していないキューをリセットする
+		 * @param string $type キューの種類
+		 * @param integer $time この時間以降のものを対象とする
+		 */
+		return static::module('reset',$type,$time);
 	}
 	/**
 	 * 一覧を取得する
@@ -87,6 +110,12 @@ class Queue extends \org\rhaco\Object{
 		$sorter = \org\rhaco\lang\Sorter::order($order,$pre_order);
 		$list = array();
 		if(static::has_module('view')){
+			/**
+			 * キューの一覧
+			 * @param string $type キューの種類
+			 * @param \org\rhaco\Paginator $paginator
+			 * @param string $sorter 順序のキー
+			 */
 			$list = static::module('view',$type,$paginator,$sorter);
 		}
 		$paginator->cp(array('type'=>$type,'order'=>$sorter));
@@ -94,10 +123,15 @@ class Queue extends \org\rhaco\Object{
 	}
 	/**
 	 * 終了したものを削除する
-	 * @param string $type
-	 * @param timestamp $fin
+	 * @param string $type キューの種類
+	 * @param timestamp $fin 終了時間の秒
 	 */
 	static public function clean($type,$fin=null){
+		/**
+		 * 終了したものを削除する
+		 * @param string  $type キューの種類
+		 * @param integer $fin この時間未満のものを対象とする
+		 */
 		static::module('clean',$type,$fin);
 	}
 }

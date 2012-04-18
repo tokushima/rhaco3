@@ -53,10 +53,10 @@ class Man{
 			foreach($match[1] as $t) $tasks[] = trim($t);
 		}
 		$modules = array();
-		if(preg_match_all("/->object_module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
+		if(preg_match_all("/->object_module\(([\"\'])(.+?)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
 			foreach($match[2] as $k => $v) self::get_desc($modules,$match,$k,$v[0],$src,$class);
 		}
-		if(preg_match_all("/::module\(([\"\'])(.+)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
+		if(preg_match_all("/::module\(([\"\'])(.+?)\\1/",$src,$match,PREG_OFFSET_CAPTURE)){
 			foreach($match[2] as $k => $v) self::get_desc($modules,$match,$k,$v[0],$src,$class);
 		}		
 		$properties = array();
