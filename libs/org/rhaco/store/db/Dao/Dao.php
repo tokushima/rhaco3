@@ -4,13 +4,13 @@ use \org\rhaco\Conf;
 use \org\rhaco\Paginator;
 use \org\rhaco\store\db\Q;
 use \org\rhaco\store\db\exception\DaoException;
-use \org\rhaco\store\db\exception\DaoExceptions;
 use \org\rhaco\store\db\exception\LengthDaoException;
 use \org\rhaco\store\db\exception\NotfoundDaoException;
 use \org\rhaco\store\db\exception\RequiredDaoException;
 use \org\rhaco\store\db\exception\UniqueDaoException;
 use \org\rhaco\store\db\exception\DaoBadMethodCallException;
 use \org\rhaco\store\db\exception\DaoConnectionException;
+use \org\rhaco\store\db\exception\InvalidArgumentException;
 /**
  * O/R Mapper
  * @author tokushima
@@ -23,15 +23,10 @@ abstract class Dao extends \org\rhaco\Object{
 	private $_has_hierarchy_ = 1;	
 	private $_class_id_;
 	private $_hierarchy_;
-	private $_dao_exception_;
 
 	static private $_co_anon_ = array();
 	static private $_connections_ = array();
 
-	private function dao_exception(){
-		if(empty($this->_dao_exception_)) $this->_dao_exception_ = new DaoException();
-		return $this->_dao_exception_;
-	}
 	/**
 	 * コネクション一覧
 	 * @return org.rhaco.store.db.Dbc[]
@@ -396,19 +391,22 @@ abstract class Dao extends \org\rhaco\Object{
 			$q->add(Q::eq($column->name(),$value));
 			$primary = true;
 		}
-		if($primary && static::find_count($q) > 0) $this->dao_exception()->add(new UniqueDaoException('primary unique'));
+		if($primary && static::find_count($q) > 0){
+			throw new UniqueDaoException('duplicate entry',$this);
+		}
 	}
 	/**
 	 * 値の妥当性チェックを行う
 	 */
 	final public function validate(){
+		$err = array();
 		foreach($this->self_columns() as $name => $column){
 			$value = $this->{$name}();
 			$label = $this->prop_anon($name,'label',$name);
 			$e_require = false;
 
 			if($this->prop_anon($name,'require') === true && ($value === '' || $value === null)){
-				$this->dao_exception()->add(new RequiredDaoException($label.' required'),$name);
+				$err[] = new RequiredDaoException($label.' required',$name);
 				$e_require = true;
 			}
 			$unique_together = $this->prop_anon($name,'unique_together');
@@ -424,7 +422,7 @@ abstract class Dao extends \org\rhaco\Object{
 				foreach($this->primary_columns() as $column){
 					if(null !== ($pv = $this->{$column->name()})) $q[] = Q::neq($column->name(),$this->{$column->name()});
 				}
-				if(0 < call_user_func_array(array(get_class($this),'find_count'),$q)) $this->dao_exception()->add(new UniqueDaoException($label.' unique'),$name);
+				if(0 < call_user_func_array(array(get_class($this),'find_count'),$q)) $err[] = new UniqueDaoException($label.' unique',$name);
 			}
 			$master = $this->prop_anon($name,'master');
 			if(!empty($master)){
@@ -433,28 +431,35 @@ abstract class Dao extends \org\rhaco\Object{
 				$r = new \ReflectionClass($master);
 				$mo = $r->newInstanceArgs();
 				$primarys = $mo->primary_columns();
-				if(empty($primarys) || 0 === $master::find_count(Q::eq(key($primarys),$this->{$name}))) $this->dao_exception()->add(new NotfoundDaoException($label.' master not found'),$name);
+				if(empty($primarys) || 0 === $master::find_count(Q::eq(key($primarys),$this->{$name}))) $err[] = new NotfoundDaoException($label.' master not found',$name);
 			}
 			if(!$e_require && $value !== null){
 				switch($this->prop_anon($name,'type')){
 					case 'number':
 					case 'integer':
-						if($this->prop_anon($name,'min') !== null && (float)$this->prop_anon($name,'min') > $value) $this->dao_exception()->add(new LengthDaoException($label.' less than minimum'),$name);
-						if($this->prop_anon($name,'max') !== null && (float)$this->prop_anon($name,'max') < $value) $this->dao_exception()->add(new LengthDaoException($label.' exceeds maximum'),$name);
+						if($this->prop_anon($name,'min') !== null && (float)$this->prop_anon($name,'min') > $value) $err[] = new LengthDaoException($label.' less than minimum',$name);
+						if($this->prop_anon($name,'max') !== null && (float)$this->prop_anon($name,'max') < $value) $err[] = new LengthDaoException($label.' exceeds maximum',$name);
 						break;
 					case 'text':
 					case 'string':
 					case 'alnum':
-						if($this->prop_anon($name,'min') !== null && (int)$this->prop_anon($name,'min') > mb_strlen($value)) $this->dao_exception()->add(new LengthDaoException($label.' less than minimum'),$name);
-						if($this->prop_anon($name,'max') !== null && (int)$this->prop_anon($name,'max') < mb_strlen($value)) $this->dao_exception()->add(new LengthDaoException($label.(' exceeds maximum')),$name);
+						if($this->prop_anon($name,'min') !== null && (int)$this->prop_anon($name,'min') > mb_strlen($value)) $err[] = new LengthDaoException($label.' less than minimum',$name);
+						if($this->prop_anon($name,'max') !== null && (int)$this->prop_anon($name,'max') < mb_strlen($value)) $err[] = new LengthDaoException($label.' exceeds maximum',$name);
 						break;
 				}
 			}
 			if($this->{'verify_'.$column->name()}() === false){
-				$this->dao_exception()->add(new DaoException($this->prop_anon($column->name(),'label').' verify fail'),$column->name());
+				$err[] = new DaoException($this->prop_anon($column->name(),'label').' verify fail',$column->name());
 			}
 		}
-		$this->dao_exception()->throw_over();
+		if(!empty($err)){
+			$msg = count($err).' exceptions: ';
+			foreach($err as $e){
+				$msg .= PHP_EOL.' '.$e->getMessage();
+				\org\rhaco\Exceptions::add($e);
+			}
+			throw new \org\rhaco\store\db\exception\DaoExceptions($msg);
+		}
 	}
 	final private function which_aggregator($exe,array $args,$is_list=false){
 		$target_name = $gorup_name = array();
@@ -613,9 +618,7 @@ abstract class Dao extends \org\rhaco\Object{
 		$query->add(new Paginator(1,1));
 		if(!empty($args)) call_user_func_array(array($query,'add'),$args);
 		foreach(self::get_statement_iterator($dao,$query) as $d) return $d;
-		// TODO
-		$class_name = str_replace("\\",'.',get_class($dao));
-		throw new NotfoundDaoException(basename(str_replace('.','/',$class_name)).' not found',$class_name);
+		throw new NotfoundDaoException('{S} not found',$dao);
 	}
 	/**
 	 * サブクエリを取得する
@@ -855,16 +858,14 @@ abstract class Dao extends \org\rhaco\Object{
 			}
 			return $this;
 		}
-		$class_name = str_replace("\\",'.',get_class($this));
-		throw new NotfoundDaoException(basename(str_replace('.','/',$class_name)).' synchronization failed',$class_name);
+		throw new NotfoundDaoException('{S} synchronization failed',$this);
 	}
 	protected function set_prop($name,$type,$value){
 		try{
 			return parent::set_prop($name,$type,$value);
 		}catch(\InvalidArgumentException $e){
-			$this->dao_exception()->add($e,$name);
+			throw new InvalidArgumentException($e->getMessage(),$name);
 		}
-		$this->dao_exception()->throw_over();
 	}
 	/**
 	 * 配列からプロパティに値をセットする
@@ -874,16 +875,20 @@ abstract class Dao extends \org\rhaco\Object{
 	public function set_props($arg){
 		if(isset($arg) && (is_array($arg) || (is_object($arg) && ($arg instanceof \Traversable)))){
 			$vars = get_object_vars($this);
+			$err = array();
 			foreach($arg as $name => $value){
 				if($name[0] != '_' && array_key_exists($name,$vars)){
 					try{
 						$this->{$name}($value);
 					}catch(\Exception $e){
-						$this->dao_exception()->add($e,$name);
+						$err[] = array($r,$name);
 					}
 				}
 			}
-			$this->dao_exception()->throw_over();
+			if(!empty($err)){
+				foreach($err as $e) \org\rhaco\Exceptions::add($e[0],$e[1]);
+				\org\rhaco\Exceptions::throw_over();
+			}
 		}
 		return $this;
 	}

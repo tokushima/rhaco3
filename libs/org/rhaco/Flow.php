@@ -394,9 +394,11 @@ class Flow{
 		$xml = new \org\rhaco\Xml('error');
 			foreach(\org\rhaco\Exceptions::groups() as $g){
 				foreach(\org\rhaco\Exceptions::gets($g) as $e){
+					$class_name = get_class($e);
 					$message = new \org\rhaco\Xml('message',$e->getMessage());
 					$message->add('group',$g);
-					$message->add('type',basename(str_replace("\\",'/',get_class($e))));
+					$message->add('class',str_replace("\\",'.',$class_name));
+					$message->add('type',basename(str_replace("\\",'/',$class_name)));
 					$xml->add($message);
 				}
 			}

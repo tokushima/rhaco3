@@ -35,7 +35,7 @@ eq('<result />',$b->body());
 $b = b();
 $b->do_post(test_map_url('login'));
 eq(401,$b->status());
-eq('<error><message group="do_login" type="LogicException">Unauthorized</message></error>',$b->body());
+eq('<error><message group="do_login" class="LogicException" type="LogicException">Unauthorized</message></error>',$b->body());
 */
 /***
 $b = b();
@@ -51,7 +51,7 @@ $b->vars('user_name','aaaa');
 $b->vars('password','bbbb');
 $b->do_post(test_map_url('login'));
 eq(401,$b->status());
-eq('<error><message group="do_login" type="LogicException">Unauthorized</message></error>',$b->body());
+eq('<error><message group="do_login" class="LogicException" type="LogicException">Unauthorized</message></error>',$b->body());
 */
 /***
 $b = b();

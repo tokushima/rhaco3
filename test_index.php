@@ -376,14 +376,14 @@ eq('<result><init_var>INIT</init_var></result>',$b->body());
 $b = b();
 $b->do_get(test_map_url('module_throw_exception'));
 eq(403,$b->status());
-eq('<error><message group="exceptions" type="LogicException">flow handle begin exception</message></error>',$b->body());
+eq('<error><message group="exceptions" class="LogicException" type="LogicException">flow handle begin exception</message></error>',$b->body());
 */
 /***
 #method_not_allowed
 $b = b();
 $b->do_get(test_map_url('method_not_allowed'));
 eq(405,$b->status());
-eq('<error><message group="exceptions" type="LogicException">Method Not Allowed</message></error>',$b->body());
+eq('<error><message group="exceptions" class="LogicException" type="LogicException">Method Not Allowed</message></error>',$b->body());
 */
 /***
 # module_map
@@ -487,13 +487,14 @@ eq('<result><abc>ABC</abc><newtag><hoge>HOGE</hoge></newtag></result>',$b->body(
 $b = b();
 $b->do_get(test_map_url('sample_flow_exception_throw_xml'));
 eq(403,$b->status());
-eq('<error><message group="exceptions" type="LogicException">error</message></error>',$b->body());
+eq('<error><message group="exceptions" class="LogicException" type="LogicException">error</message></error>',$b->body());
 */
+
 /***
 # sample_flow_exception_package_throw_xml
 $b = b();
 $b->do_get(test_map_url('sample_flow_exception_package_throw_xml'));
 eq(403,$b->status());
-eq('<error><message group="exceptions" type="SampleException">sample error</message></error>',$b->body());
+eq('<error><message group="exceptions" class="test.exception.SampleException" type="SampleException">sample error</message></error>',$b->body());
 */
 

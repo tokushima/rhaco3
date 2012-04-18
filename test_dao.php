@@ -18,7 +18,7 @@ $flow->output(array(''
 	$b->vars('integer','123F');
 	$b->do_post(test_map_url('insert'));
 	eq(200,$b->status());
-	eq('<error><message group="integer" type="InvalidArgumentException">integer must be an integer</message></error>',$b->body());
+	eq('<error><message group="integer" class="org.rhaco.store.db.exception.InvalidArgumentException" type="InvalidArgumentException">integer must be an integer</message></error>',$b->body());
  */
 /***
  * $b = b();
