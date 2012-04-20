@@ -636,6 +636,7 @@ abstract class Dao extends \org\rhaco\Object{
 		if(!$query->is_order_by()) $query->order($name);
 		$paginator = $query->paginator();
 		if($paginator instanceof Paginator){
+			if($query->is_order_by()) $paginator->order($query->in_order_by(0)->ar_arg1(),$query->in_order_by(0)->type() == Q::ORDER_ASC);
 			$paginator->total(call_user_func_array(array(get_called_class(),'find_count'),$args));
 			if($paginator->total() == 0) return array();
 		}
@@ -666,6 +667,7 @@ abstract class Dao extends \org\rhaco\Object{
 		
 		$paginator = $query->paginator();
 		if($paginator instanceof Paginator){
+			if($query->is_order_by()) $paginator->order($query->in_order_by(0)->ar_arg1(),$query->in_order_by(0)->type() == Q::ORDER_ASC);
 			$paginator->total(call_user_func_array(array(get_called_class(),'find_count'),$args));
 			if($paginator->total() == 0) return array();
 		}
@@ -802,7 +804,6 @@ abstract class Dao extends \org\rhaco\Object{
 			$this->__create_verify__();
 			$this->__save_verify__();
 			$this->validate();
-
 			/**
 			 * createを実行するSQL文の生成
 			 * @param self $this

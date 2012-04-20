@@ -86,10 +86,11 @@ class Paginator implements \IteratorAggregate{
 	/**
 	 * 最後のソートキー
 	 * @param string $value
+	 * @param boolean $asc
 	 * return string
 	 */
-	public function order($value=null){
-		if(isset($value)) $this->order = $value;
+	public function order($value=null,$asc=true){
+		if(isset($value)) $this->order = ($asc ? '' :'-').(string)(is_array($value) ? array_shift($value) : $value);
 		return $this->order;
 	}
 	/**
@@ -358,10 +359,9 @@ class Paginator implements \IteratorAggregate{
 	 */
 	public function query_prev(){
 		$prev = $this->prev();
-		return Query::get(array_merge(
-							$this->vars
-							,array($this->query_name()=>($this->dynamic && isset($this->tmp[3]) ? (isset($prev[$this->tmp[3]]) ? $prev[$this->tmp[3]] : null) : $prev))
-						));
+		$vars = array_merge($this->vars,array($this->query_name()=>($this->dynamic && isset($this->tmp[3]) ? (isset($prev[$this->tmp[3]]) ? $prev[$this->tmp[3]] : null) : $prev)));
+		if(isset($this->order)) $vars['order'] = $this->order;
+		return Query::get($vars);
 		/***
 			$p = new self(10,3,100);
 			$p->query_name("page");
@@ -374,10 +374,9 @@ class Paginator implements \IteratorAggregate{
 	 * @return string
 	 */
 	public function query_next(){
-		return Query::get(array_merge(
-							$this->vars
-							,array($this->query_name()=>(($this->dynamic) ? $this->tmp[0] : $this->next()))
-						));
+		$vars = array_merge($this->vars,array($this->query_name()=>(($this->dynamic) ? $this->tmp[0] : $this->next())));
+		if(isset($this->order)) $vars['order'] = $this->order;
+		return Query::get($vars);
 		/***
 			$p = new self(10,3,100);
 			$p->query_name("page");
@@ -420,12 +419,15 @@ class Paginator implements \IteratorAggregate{
 	 * @return string
 	 */
 	public function query($current){
-		return Query::get(array_merge($this->vars,array($this->query_name()=>$current)));
+		$vars = array_merge($this->vars,array($this->query_name()=>$current));
+		if(isset($this->order)) $vars['order'] = $this->order;
+		return Query::get($vars);
 		/***
 			$p = new self(10,1,100);
 			eq("page=3",$p->query(3));
 		 */
 	}
+	
 	/**
 	 * コンテンツを追加する
 	 * @param mixed $mixed
