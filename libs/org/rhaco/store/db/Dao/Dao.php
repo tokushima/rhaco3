@@ -881,7 +881,7 @@ abstract class Dao extends \org\rhaco\Object{
 					try{
 						$this->{$name}($value);
 					}catch(\Exception $e){
-						$err[] = array($r,$name);
+						$err[] = array($e,$name);
 					}
 				}
 			}
