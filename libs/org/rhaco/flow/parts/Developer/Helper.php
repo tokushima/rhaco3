@@ -2,6 +2,13 @@
 namespace org\rhaco\flow\parts\Developer;
 
 class Helper{
+	private $html_replace_prefix;
+	private $html_replace_map_url;
+	
+	public function set_html_replace_var($map_url,$prefix=null){
+		$this->html_replace_map_url = $map_url;
+		$this->html_replace_prefix = $prefix;
+	}
 	public function package_name($p){
 		$p = str_replace(array('/','\\'),array('.','.'),$p);
 		if(substr($p,0,1) == '.') $p = substr($p,1);
@@ -151,9 +158,11 @@ class Helper{
 		return htmlspecialchars($src);
 	}
 	public function method_html_filename($package,$method){
-		return $package.'__'.$method.'.html';
+		$html = $package.'__'.$method.'.html';
+		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
 	}
 	public function class_html_filename($package){
-		return $package.'.html';
+		$html = $package.'.html';
+		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
 	}
 }

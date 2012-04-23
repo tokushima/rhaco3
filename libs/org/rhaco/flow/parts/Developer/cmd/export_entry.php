@@ -2,14 +2,19 @@
 /**
  * エントリ一覧を出力する
  */
-function output($output_file,$template_file,$vars,$template_base,$extends,$block){
+function output($output_file,$template_file,$vars,$option){
+	list($template_base,$extends,$block,$map_url,$prefix) = $option;
+	$helper = new \org\rhaco\flow\parts\Developer\Helper();
+	$helper->set_html_replace_var($map_url,$prefix);
+	
 	$template = new \org\rhaco\Template();
 	$template->template_super($template_base);
+	
 	$template->set_object_module(new \org\rhaco\flow\parts\Developer\Replace());
 	$template->set_object_module(new \org\rhaco\flow\parts\Developer\Formatter());
 	foreach($vars as $k => $v) $template->vars($k,$v);
 	$template->vars('t',new \org\rhaco\flow\module\Helper());
-	$template->vars('f',new \org\rhaco\flow\parts\Developer\Helper());
+	$template->vars('f',$helper);
 
 	$src = $template->read($template_file);
 	if(!empty($extends) || !empty($block)){
@@ -26,21 +31,25 @@ $entry = isset($_ENV['params']['entry']) ? $_ENV['params']['entry'] : 'index';
 $mode = isset($_ENV['params']['mode']) ? $_ENV['params']['mode'] : null;
 $extends = isset($_ENV['params']['extends']) ? $_ENV['params']['extends'] : null;
 $block = isset($_ENV['params']['block']) ? $_ENV['params']['block'] : null;
+$prefix = isset($_ENV['params']['prefix']) ? $_ENV['params']['prefix'] : null;
+$map_url = isset($_ENV['params']['map_url']) ? $_ENV['params']['map_url'] : null;
 $base = isset($_ENV['params']['template']) ? $_ENV['params']['template'] : null;
 $zip = isset($_ENV['params']['zip']) ? $_ENV['params']['zip'] : null;
+$out_dir = isset($_ENV['params']['out']) ? $_ENV['params']['out'] : \org\rhaco\io\File::work_path('export_entry/');
 
-$zip_dir = str_replace("\\",'/',isset($_ENV['params']['o']) ? $_ENV['params']['o'] : \org\rhaco\io\File::work_path());
-$zip_dir = (substr($zip_dir,-1) == '/') ? $zip_dir : $zip_dir.'/';
+if(substr($out_dir,-1) != '/') $out_dir = $out_dir.'/';
+$zip_dir = \org\rhaco\io\File::work_path();
 $path = getcwd().'/'.$entry.'.php';
 if(!is_file($path)) throw new \RuntimeException('Entry `'.$entry.'` not found');
 
-$out_dir = \org\rhaco\io\File::work_path('export_entry/');
+
 $template_base = (empty($base)) ? dirname(__DIR__).'/resources/export_templates/'.((!empty($extends) || !empty($block)) ? 'block.html' : 'base.html') : $base;
 $template_dir = dirname(__DIR__).'/resources/templates/';
 
 \org\rhaco\io\File::mkdir($out_dir);
 \org\rhaco\io\File::copy(dirname(__DIR__).'/resources/media/bootstrap/css/bootstrap.min.css',$out_dir);
 
+$option = array($template_base,$extends,$block,$map_url,$prefix);
 $self_name = 'org.rhaco.flow.parts.Developer';
 $maps = array();
 foreach(\org\rhaco\Flow::get_maps($path) as $k => $m){
@@ -71,15 +80,14 @@ foreach(\org\rhaco\Flow::get_maps($path) as $k => $m){
 		}
 	}
 }
-// TODO
 $output_file = $out_dir.'index.html';
 $template_file = $template_dir.'index.html';
 $vars = array('app_name'=>$entry,'maps'=>$maps);
-output($output_file,$template_file,$vars,$template_base,$extends,$block);
+output($output_file,$template_file,$vars,$option);
 
 
 // class list 
-$class_list = array();
+$class_list = $classes = array();
 foreach(\org\rhaco\Man::libs() as $package => $info){
 	$r = new \ReflectionClass($info['class']);
 	$class_doc = $r->getDocComment();
@@ -91,14 +99,14 @@ foreach(\org\rhaco\Man::libs() as $package => $info){
 	$c->summary = $summary;
 	$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
 	$class_list[$package] = $c;
+	if(strpos($package,'test.') !== 0) $classes[$package] = $c;
 }
 ksort($class_list);
 
-// TODO
 $output_file = $out_dir.'classes.html';
 $template_file = $template_dir.'classes.html';
-$vars = array('app_name'=>$entry,'class_list'=>$class_list);
-output($output_file,$template_file,$vars,$template_base,$extends,$block);
+$vars = array('app_name'=>$entry,'class_list'=>$classes);
+output($output_file,$template_file,$vars,$option);
 
 //class info
 foreach($class_list as $package => $c){
@@ -107,19 +115,16 @@ foreach($class_list as $package => $c){
 	foreach(array('static_methods','methods') as $k){
 		foreach($class_info[$k] as $method => $doc){
 			$method_info = \org\rhaco\Man::method_info($package,$method);
-			
-			// TODO
 			$output_file = $out_dir.$package.'__'.$method.'.html';
 			$template_file = $template_dir.'method_info.html';
 			$vars = array_merge($method_info,array('app_name'=>$entry));
-			output($output_file,$template_file,$vars,$template_base,$extends,$block);
+			output($output_file,$template_file,$vars,$option);
 		}
 	}
-	// TODO
 	$output_file = $out_dir.$package.'.html';
 	$template_file = $template_dir.'class_info.html';
 	$vars = array_merge($class_info,array('app_name'=>$entry));
-	output($output_file,$template_file,$vars,$template_base,$extends,$block);
+	output($output_file,$template_file,$vars,$option);
 }
 
 if(isset($zip)){
