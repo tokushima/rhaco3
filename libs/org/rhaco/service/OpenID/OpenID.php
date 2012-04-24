@@ -4,6 +4,8 @@ namespace org\rhaco\service;
  * OpenID
  * @incomplete
  * @author tokushima
+ * @see http://janrain.com/openid-enabled/
+ * @see https://github.com/openid/php-openid
  */
 class OpenID extends \org\rhaco\flow\parts\RequestFlow{
 	private $store_path;
@@ -45,6 +47,7 @@ class OpenID extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function begin(){
+		$error_message = '';
 		$store = new \Auth_OpenID_FileStore($this->store_path);
 		$consumer = new \Auth_OpenID_Consumer($store);
 		
@@ -55,8 +58,6 @@ class OpenID extends \org\rhaco\flow\parts\RequestFlow{
 		
 		if($this->is_vars('id')){
 			$openid = $this->in_vars('id');
-		
-			$error_message = "";
 			$auth_request = $consumer->begin($openid);
 			if(!$auth_request) $error_message = "OpenID が正しくありません";
 		
@@ -98,6 +99,7 @@ class OpenID extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function return_to(){
+		$error_message = '';
 		$store = new \Auth_OpenID_FileStore($this->store_path);  
 		$consumer = new \Auth_OpenID_Consumer($store);
 
@@ -121,5 +123,6 @@ class OpenID extends \org\rhaco\flow\parts\RequestFlow{
 			$this->vars('id',$id);
 			$this->sessions('id',$id);
 		}
+		$this->vars('error_message',$error_message);
 	}
 }
