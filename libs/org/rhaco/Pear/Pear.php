@@ -132,4 +132,17 @@ class Pear{
 			rmdir($dir);
 		}
 	}
+	/**
+	 * include
+	 */
+	static public function load(){
+		$args = func_get_args();
+		foreach($args as $arg){
+			$arg = str_replace('_','/',trim($arg));
+			if(!empty($arg)){
+				if(substr($arg,-4) !== '.php') $arg = $arg.'.php';
+				include_once($arg);
+			}
+		}
+	}
 }

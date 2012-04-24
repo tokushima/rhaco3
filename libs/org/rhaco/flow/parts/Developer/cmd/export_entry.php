@@ -99,7 +99,7 @@ foreach(\org\rhaco\Man::libs() as $package => $info){
 	$c->summary = $summary;
 	$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
 	$class_list[$package] = $c;
-	if(strpos($package,'test.') !== 0) $classes[$package] = $c;
+	if(strpos($package,'test.') !== 0 && strpos($class_doc,'@incomplete') === false) $classes[$package] = $c;
 }
 ksort($class_list);
 
