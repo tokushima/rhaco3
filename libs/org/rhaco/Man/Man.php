@@ -85,6 +85,7 @@ class Man{
 				'filename'=>$r->getFileName(),'extends'=>$extends,'static_methods'=>$static_methods,'methods'=>$methods
 				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>$description
 				,'modules'=>$modules
+				,'abstract'=>$r->isAbstract()
 				);
 	}
 	/**
@@ -208,7 +209,7 @@ class Man{
 			}
 			foreach(get_declared_classes() as $class){
 				$r = new \ReflectionClass($class);
-				if((!$r->isInterface() && !$r->isAbstract()) && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
+				if(!$r->isInterface() && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
 					$f = null;
 					$d = false;
 					$n = str_replace('\\','/',$r->getName());
