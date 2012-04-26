@@ -92,6 +92,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('dao_model_errors',$errors);
 		$this->vars('dao_model_error_query',$error_query);
 		$this->vars('dao_model_con',$con);
+		$this->vars('getcwd',getcwd());
 	}
 	/**
 	 * アプリケーションのマップ一覧

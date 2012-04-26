@@ -3,9 +3,19 @@
 <rt:block name="content">
 <script type="text/javascript">
 	function conf_sample(frm,pkg){
+		type = frm.type.options[frm.type.selectedIndex].value;
+		frm.type_other.style.display = (frm.type.selectedIndex == 0) ? 'block' : 'none';
+		
+		if(type == 'org.rhaco.store.db.module.Sqlite'){
+			if(frm.host.value == 'localhost') frm.host.value = '{$getcwd}';
+			if(frm.dbname.value == '{$app_dirname}') frm.dbname.value = '{$app_dirname}.db';
+		}else{
+			if(frm.host.value == '{$getcwd}') frm.host.value = 'localhost';
+			if(frm.dbname.value == '{$app_dirname}.db') frm.dbname.value = '{$app_dirname}';			
+		}
 		frm.sample.value = "\\org\\rhaco\\Conf::set('org.rhaco.store.db.Dao','connection',array(\n"
 							+ "'" + pkg + "'=>array(\n"
-							+ "'type'=>'" + frm.type.value + "',"
+							+ "'type'=>'" + ((type == '') ? frm.type_other.value : type) + "',"
 							+ "'host'=>'" + frm.host.value + "',"
 							+ "'dbname'=>'" + frm.dbname.value + "',"
 							+ "'user'=>'" + frm.user.value + "',"
@@ -38,7 +48,7 @@
 		<td>
 			<rt:if param="{$dao_model_con[$package]}">
 				<rt:if param="{$dao_model_errors[$package]}">
-					<a class="icon-pencil" href="{$t.package_method_url('do_sql',$package)}?create_sql"></a>
+					<a class="icon-asterisk" href="{$t.package_method_url('do_sql',$package)}?create_sql"></a>
 				<rt:else />
 					<a class="icon-list" href="{$t.package_method_url('do_find',$package)}"></a>
 				</rt:if>
@@ -56,7 +66,14 @@
 						<table>
 						<tr>
 							<td>type</td>
-							<td><input type="text" name="type"  value="org.rhaco.store.db.module.Mysql"　onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')"/></td>
+							<td>
+								<select name="type" onChange="conf_sample(this.form,'{$package}')">
+									<option value="" ></option>
+									<option value="org.rhaco.store.db.module.Mysql"selected="selected">org.rhaco.store.db.module.Mysql </option>
+									<option value="org.rhaco.store.db.module.Sqlite">org.rhaco.store.db.module.Sqlite</option>
+								</select>
+								<input type="text" name="type_other" value=""  onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" />
+							</td>
 						</tr>
 						<tr>
 							<td>host</td>
