@@ -22,7 +22,7 @@ class Exceptions{
 					$varnm = 'rtinvalid_varnm'.uniqid('');
 					$value = sprintf("<rt:loop param=\"%s\" var=\"%s\">\n"
 										."%s{\$%s}%s"
-									."</rt:loop>\n",$messages,$varnm,sprintf($stag,'exception'),$varnm,$etag);
+									."</rt:loop>\n",$messages,$varnm,sprintf($stag,$tag->in_attr('class','exception')),$varnm,$etag);
 				}
 				$src = str_replace(
 							$tag->plain(),

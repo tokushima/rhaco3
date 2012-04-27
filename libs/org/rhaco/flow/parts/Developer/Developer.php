@@ -398,32 +398,38 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function do_sql($package){
-		$con = self::get_dao_connection($package);
 		$result_list = $keys = array();
 		$sql = $this->in_vars('sql');
 		$count = 0;
 		
-		if($this->is_vars('create_sql')){
-			$r = new \ReflectionClass('\\'.str_replace('.','\\',$package));
-			$dao = $r->newInstance();
-			$sql = $con->connection_module()->create_table_sql($dao);
-			$this->rm_vars('create_sql');
-			$this->vars('sql',$sql);
-		}		
-		if($this->is_post() && !empty($sql)){
-			foreach(explode(';',$sql) as $q){
-				$q = trim($q);
-				if(!empty($q)) $con->query($q);
+		try{
+			$con = self::get_dao_connection($package);
+			
+			if($this->is_vars('create_sql')){
+				$r = new \ReflectionClass('\\'.str_replace('.','\\',$package));
+				$dao = $r->newInstance();
+				$sql = $con->connection_module()->create_table_sql($dao);
+				$this->rm_vars('create_sql');
+				$this->vars('sql',$sql);
+			}		
+			if($this->is_post() && !empty($sql)){
+				$sql = str_replace(array('\\r\\n','\\r','\\n'),array("\n","\n","\n"),$sql);
+				foreach(explode(';',$sql) as $q){
+					$q = trim($q);
+					if(!empty($q)) $con->query($q);
+				}
+				foreach($con as $k => $v){
+					if(empty($keys)) $keys = array_keys($v);
+					$result_list[] = $v;
+					$count++;
+					
+					if($count >= 100) break;
+				}
+				$this->rm_vars('sql');
+				$this->vars('excute_sql',$sql);
 			}
-			foreach($con as $k => $v){
-				if(empty($keys)) $keys = array_keys($v);
-				$result_list[] = $v;
-				$count++;
-				
-				if($count >= 100) break;
-			}
-			$this->rm_vars('sql');
-			$this->vars('excute_sql',$sql);
+		}catch(\Exception $e){
+			\org\rhaco\Exceptions::add($e);
 		}
 		$this->vars('result_keys',$keys);
 		$this->vars('result_list',$result_list);
