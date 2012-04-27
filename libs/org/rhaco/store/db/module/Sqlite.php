@@ -42,7 +42,7 @@ class Sqlite extends Base{
 					return $quote($name).' TEXT';
 				case 'number':
 					return $quote($name).' REAL';
-				case 'serial': return $quote($name).' INTEGER PRIMARY KEY';
+				case 'serial': return $quote($name).' INTEGER PRIMARY KEY AUTOINCREMENT';
 				case 'boolean':
 				case 'timestamp':
 				case 'date':

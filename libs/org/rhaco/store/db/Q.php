@@ -45,7 +45,7 @@ class Q extends \org\rhaco\Object{
 		if($type === self::AND_BLOCK){
 			$this->and_block = $arg1;
 		}else if($type === self::OR_BLOCK){
-			if(!is_array($arg1) || sizeof($arg1) < 2) throw new \InvalidArgumentException("require multiple blocks");
+			if(!is_array($arg1) || sizeof($arg1) < 2) throw new \InvalidArgumentException('require multiple blocks');
 			foreach($arg1 as $a){
 				if(!$a->is_block()) throw new \InvalidArgumentException('require multiple blocks');
 			}
@@ -56,7 +56,7 @@ class Q extends \org\rhaco\Object{
 		$this->arg2 = $arg2;
 		$this->type = $type;
 		if($param !== null){
-			if(!ctype_digit((string)$param)) throw new \InvalidArgumentException("`".(string)$param."` invalid param type");
+			if(!ctype_digit((string)$param)) throw new \InvalidArgumentException('`'.(string)$param.'` invalid param type');
 			$this->param = decbin($param);
 		}
 	}
@@ -87,7 +87,7 @@ class Q extends \org\rhaco\Object{
 							}
 						}
 					}else if($arg->type() == self::AND_BLOCK){
-						if(!$arg->none()) call_user_func_array(array($this,"add"),$arg->and_block());
+						if(!$arg->none()) call_user_func_array(array($this,'add'),$arg->and_block());
 					}else if($arg->type() == self::OR_BLOCK){
 						if(!$arg->none()) $this->or_block = array_merge($this->or_block,$arg->or_block());
 					}else{
@@ -96,7 +96,7 @@ class Q extends \org\rhaco\Object{
 				}else if($arg instanceof \org\rhaco\Paginator){
 					$this->paginator = $arg;
 				}else{
-					throw new \BadMethodCallException("`".(string)$arg."` not supported");
+					throw new \BadMethodCallException('`'.(string)$arg.'` not supported');
 				}
 			}
 		}
@@ -106,14 +106,14 @@ class Q extends \org\rhaco\Object{
 		if(empty($this->arg1)) return array();
 		if(is_string($this->arg1)){
 			$result = array();
-			foreach(explode(",",$this->arg1()) as $arg){
+			foreach(explode(',',$this->arg1()) as $arg){
 				if(!empty($arg)) $result[] = $arg;
 			}
 			return $result;
 		}else if($this->arg1 instanceof Column){
 			return array($this->arg1);
 		}
-		throw new \InvalidArgumentException("invalid arg1");
+		throw new \InvalidArgumentException('invalid arg1');
 	}
 	/**
 	 * 条件が存在しない
@@ -204,7 +204,11 @@ class Q extends \org\rhaco\Object{
 	 * @param integer $param
 	 */
 	static public function startswith($column_str,$words,$param=null){
-		return new self(self::START_WITH,$column_str,self::words_array($words),$param);
+		try{
+			return new self(self::START_WITH,$column_str,self::words_array($words),$param);
+		}catch(\InvalidArgumentException $e){
+			return new self();
+		}
 	}
 	/**
 	 * 後方一致
@@ -213,7 +217,11 @@ class Q extends \org\rhaco\Object{
 	 * @param integer $param
 	 */
 	static public function endswith($column_str,$words,$param=null){
-		return new self(self::END_WITH,$column_str,self::words_array($words),$param);
+		try{
+			return new self(self::END_WITH,$column_str,self::words_array($words),$param);
+		}catch(\InvalidArgumentException $e){
+			return new self();
+		}
 	}
 	/**
 	 * 部分一致
@@ -222,7 +230,11 @@ class Q extends \org\rhaco\Object{
 	 * @param integer $param
 	 */
 	static public function contains($column_str,$words,$param=null){
-		return new self(self::CONTAINS,$column_str,self::words_array($words),$param);
+		try{
+			return new self(self::CONTAINS,$column_str,self::words_array($words),$param);
+		}catch(\InvalidArgumentException $e){
+			return new self();
+		}
 	}
 	/**
 	 * in
@@ -231,16 +243,21 @@ class Q extends \org\rhaco\Object{
 	 * @param integer $param 
 	 */
 	static public function in($column_str,$words,$param=null){
-		return new self(self::IN,$column_str,($words instanceof Daq) ? $words : array(self::words_array($words)),$param);
+		try{
+			return new self(self::IN,$column_str,($words instanceof Daq) ? $words : array(self::words_array($words)),$param);
+		}catch(\InvalidArgumentException $e){
+			return new self();
+		}
 	}
 	static private function words_array($words){
-		if($words === "" || $words === null) throw new \InvalidArgumentException("invalid character");
+		if($words === '' || $words === null) throw new \InvalidArgumentException();
 		if(is_array($words)){
 			$result = array();
 			foreach($words as $w){
 				$w = (string)$w;
-				if($w !== "") $result[] = $w;
+				if($w !== '') $result[] = $w;
 			}
+			if(empty($result)) throw new \InvalidArgumentException();
 			return $result;
 		}
 		return array($words);
@@ -265,7 +282,7 @@ class Q extends \org\rhaco\Object{
 	 */
 	static public function select_order(&$column_str,$pre_column_str){
 		if($column_str == $pre_column_str){
-			$column_str = (substr($column_str,0,1) == "-") ? substr($column_str,1) : "-".$column_str;
+			$column_str = (substr($column_str,0,1) == '-') ? substr($column_str,1) : '-'.$column_str;
 		}
 		return new self(self::ORDER,$column_str);
 	}
@@ -275,8 +292,8 @@ class Q extends \org\rhaco\Object{
 	 * @param integer $param
 	 */
 	static public function match($dict,$param=null){
-		if(!($param === null || $param === self::IGNORE)) throw new \InvalidArgumentException("invalid param");
-		return new self(self::MATCH,str_replace(" ",",",trim($dict)),null,$param);
+		if(!($param === null || $param === self::IGNORE)) throw new \InvalidArgumentException('invalid param');
+		return new self(self::MATCH,str_replace(' ',',',trim($dict)),null,$param);
 	}
 	/**
 	 * OR条件ブロック
