@@ -203,6 +203,19 @@ class Helper{
 		 */
 	}
 	/**
+	 * 現在の日付を返す
+	 * @param string $format
+	 * @return string
+	 */
+	public function now($format="Y/m/d H:i:s"){
+		return date($format,time());
+		/***
+			$t = new self();
+			$time = time();
+			eq(date("YmdHis",$time),$t->now("YmdHis"));
+		 */
+	}
+	/**
 	 * 改行を削除(置換)する
 	 *
 	 * @param string $value 対象の文字列
