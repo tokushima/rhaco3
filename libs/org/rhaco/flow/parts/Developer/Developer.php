@@ -413,9 +413,11 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 				$this->vars('sql',$sql);
 			}		
 			if($this->is_post() && !empty($sql)){
-				$sql = str_replace(array('\\r\\n','\\r','\\n'),array("\n","\n","\n"),$sql);
+				$excute_sql = array();
+				$sql = str_replace(array('\\r\\n','\\r','\\n','\;'),array("\n","\n","\n",'{SEMICOLON}'),$sql);
 				foreach(explode(';',$sql) as $q){
-					$q = trim($q);
+					$q = trim(str_replace('{SEMICOLON}',';',$q));
+					$excute_sql[] = $q;
 					if(!empty($q)) $con->query($q);
 				}
 				foreach($con as $k => $v){
@@ -426,7 +428,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 					if($count >= 100) break;
 				}
 				$this->rm_vars('sql');
-				$this->vars('excute_sql',$sql);
+				$this->vars('excute_sql',implode(';'.PHP_EOL,$excute_sql));
 			}
 		}catch(\Exception $e){
 			\org\rhaco\Exceptions::add($e);
