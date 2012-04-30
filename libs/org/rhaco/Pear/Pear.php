@@ -141,7 +141,12 @@ class Pear{
 			$arg = str_replace('_','/',trim($arg));
 			if(!empty($arg)){
 				if(substr($arg,-4) !== '.php') $arg = $arg.'.php';
-				include_once($arg);
+				try{
+					include_once($arg);
+				}catch(\Exception $e){					
+					\org\rhaco\Log::warn($e);
+					break;
+				}
 			}
 		}
 	}
