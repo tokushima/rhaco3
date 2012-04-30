@@ -116,7 +116,7 @@ class Template{
 		 * キャッシュのチェック
 		 * @param string $cname キャッシュ名
 		 */
-		if(!$this->has_object_module('has_template_cahce') || $this->object_module('has_template_cahce',$cname) !== true){
+		if(!$this->has_object_module('has_template_cache') || $this->object_module('has_template_cache',$cname) !== true){
 			if(!empty($this->put_block)){
 				$src = $this->read_src($this->put_block);
 				if(strpos($src,'rt:extends') !== false){
@@ -134,14 +134,14 @@ class Template{
 			 * @param string $cname キャッシュ名
 			 * @param string $src 作成されたテンプレート
 			 */
-			$this->object_module('set_template_cahce',$cname,$src);
+			$this->object_module('set_template_cache',$cname,$src);
 		}else{
 			/**
 			 * キャッシュから取得する
 			 * @param string $cname キャッシュ名
 			 * @return string
 			 */
-			$src = $this->object_module('get_template_cahce',$cname);
+			$src = $this->object_module('get_template_cache',$cname);
 		}
 		return $this->execute($src);
 		/***
