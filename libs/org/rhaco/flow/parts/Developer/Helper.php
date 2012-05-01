@@ -84,13 +84,19 @@ class Helper{
 			if(!empty($master)){
 				$master = str_replace('.',"\\",$master);
 				if($master[0] !== "\\") $master = "\\".$master;
-				$r = new \ReflectionClass($master);
+
+				try{
+					$r = new \ReflectionClass($master);
+				}catch(\ReflectionException $e){
+					$self = new \ReflectionClass(get_class($obj));
+					$r = new \ReflectionClass("\\".$self->getNamespaceName().$master);
+				}
 				$mo = $r->newInstanceArgs();
 				$primarys = $mo->primary_columns();
 				if(sizeof($primarys) != 1) return sprintf('<input name="%s" type="text" />',$name);
 				foreach($primarys as $primary) break;
 				$pri = $primary->name();
-				foreach($master::find() as $dao){
+				foreach(call_user_func_array(array($mo,'find'),array()) as $dao){
 					$options[] = sprintf('<option value="%s">%s</option>',$dao->{$pri}(),(string)$dao);
 				}
 			}			

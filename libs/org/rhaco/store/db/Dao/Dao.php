@@ -427,11 +427,16 @@ abstract class Dao extends \org\rhaco\Object{
 			$master = $this->prop_anon($name,'master');
 			if(!empty($master)){
 				$master = str_replace('.',"\\",$master);
-				if($master[0] !== "\\") $master = "\\".$master;				
-				$r = new \ReflectionClass($master);
+				if($master[0] !== "\\") $master = "\\".$master;
+				try{
+					$r = new \ReflectionClass($master);
+				}catch(\ReflectionException $e){
+					$self = new \ReflectionClass(get_class($this));
+					$r = new \ReflectionClass("\\".$self->getNamespaceName().$master);
+				}
 				$mo = $r->newInstanceArgs();
 				$primarys = $mo->primary_columns();
-				if(empty($primarys) || 0 === $master::find_count(Q::eq(key($primarys),$this->{$name}))) $err[] = new NotfoundDaoException($label.' master not found',$name);
+				if(empty($primarys) || 0 === call_user_func_array(array($mo,'find_count'),array(Q::eq(key($primarys),$this->{$name})))) $err[] = new NotfoundDaoException($label.' master not found',$name);
 			}
 			if(!$e_require && $value !== null){
 				switch($this->prop_anon($name,'type')){
