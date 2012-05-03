@@ -14,7 +14,7 @@ $flow->output(array(''
 	,'model'=>array('action'=>'test.flow.Model')
 	,'board'=>array('action'=>'org.rhaco.flow.parts.Board')
 	,'blog'=>array('action'=>'org.rhaco.flow.parts.Blog')
-	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer','mode'=>'local,dev')
+	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer','mode'=>'local,dev','modules'=>'org.rhaco.flow.module.SimpleAuth')
 	,'dev/do_find/(.+)/xml'=>array('action'=>'org.rhaco.flow.parts.Developer::do_find')
 	,'dev/do_detail/(.+)/xml'=>array('action'=>'org.rhaco.flow.parts.Developer::do_detail')
 )));

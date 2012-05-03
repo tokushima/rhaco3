@@ -247,17 +247,16 @@ class Flow{
 						exit;
 					}
 					if(isset($map['modules'])){
-						foreach((is_array($map['modules']) ? $map['modules'] : array($map['modules'])) as $m) $modules[] = $this->str_reflection($m)->newInstance();
+						foreach((is_array($map['modules']) ? $map['modules'] : array($map['modules'])) as $m) $modules[] = $this->str_reflection($m);
 					}
 					if(isset($apps[$k]['modules'])){
-						foreach((is_array($apps[$k]['modules']) ? $apps[$k]['modules'] : array($apps[$k]['modules'])) as $m) $modules[] = $this->str_reflection($m)->newInstance();
+						foreach((is_array($apps[$k]['modules']) ? $apps[$k]['modules'] : array($apps[$k]['modules'])) as $m) $modules[] = $this->str_reflection($m);
 					}
 					try{
 						foreach($modules as $m) $this->set_object_module($m);
 						if(isset($apps[$k]['class'])){
 							if(!class_exists(str_replace('.',"\\",$apps[$k]['class']))) throw new \InvalidArgumentException($apps[$k]['class'].' not found');
-							$r = $this->str_reflection($apps[$k]['class']);
-							$obj = $r->newInstance();
+							$obj = $this->str_reflection($apps[$k]['class']);
 							$func_exception = null;
 							
 							if($obj instanceof \org\rhaco\Object){
@@ -419,13 +418,16 @@ class Flow{
 		$xml->output();
 	}
 	private function str_reflection($package){
+		if(is_object($package)) return $package;
 		$class_name = substr($package,strrpos($package,'.')+1);
 		try{
-			return new \ReflectionClass("\\".str_replace('.',"\\",$package));
+			$r = new \ReflectionClass("\\".str_replace('.',"\\",$package));
+			return $r->newInstance();
 		}catch(\ReflectionException $e){
 			if(!empty($class_name)){
 				try{
-					return new \ReflectionClass($class_name);
+					$r = new \ReflectionClass($class_name);
+					return $r->newInstance();
 				}catch(\ReflectionException $f){}
 			}
 			throw $e;
@@ -461,7 +463,7 @@ class Flow{
 	static public function loader($loader_module){
 		list($d) = debug_backtrace(false);
 		$self = new self(dirname($d['file']));
-		if(!is_object($loader_module)) $loader_module = $self->str_reflection($loader_module)->newInstance();
+		if(!is_object($loader_module)) $loader_module = $self->str_reflection($loader_module);
 		$self->set_object_module($loader_module);
 		return $self;
 	}

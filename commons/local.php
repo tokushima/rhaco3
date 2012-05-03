@@ -13,7 +13,6 @@ Conf::set('org.rhaco.Template','display_exception',true);
 Conf::set('org.rhaco.Log','level','error');
 Conf::set('org.rhaco.flow.module.SimpleAuth','auth',array('user_name'=>md5(sha1('password'))));
 
-
 \org\rhaco\Log::set_module(new \org\rhaco\io\log\Growl());
 \org\rhaco\Log::set_module(new \org\rhaco\io\log\File());
 
