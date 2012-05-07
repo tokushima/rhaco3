@@ -9,9 +9,15 @@
 		if(type == 'org.rhaco.store.db.module.Sqlite'){
 			if(frm.host.value == 'localhost') frm.host.value = '{$getcwd}';
 			if(frm.dbname.value == '{$app_dirname}') frm.dbname.value = '{$app_dirname}.db';
+			frm.user.value = '';
+			frm.password.value = '';
+			frm.port_sock_value.value = '';
 		}else{
 			if(frm.host.value == '{$getcwd}') frm.host.value = 'localhost';
-			if(frm.dbname.value == '{$app_dirname}.db') frm.dbname.value = '{$app_dirname}';			
+			if(frm.dbname.value == '{$app_dirname}.db') frm.dbname.value = '{$app_dirname}';
+			frm.user.value = 'root';
+			frm.password.value = 'root';
+			frm.port_sock_value.value = '3306';
 		}
 		frm.sample.value = "\\org\\rhaco\\Conf::set('org.rhaco.store.db.Dao','connection',array(\n"
 							+ "'" + pkg + "'=>array(\n"
@@ -25,8 +31,11 @@
 							+ "\n)));";
 	}
 	function port_sock_default(frm,pkg){
-		frm.port_sock_value.value = (frm.port_sock.options[frm.port_sock.selectedIndex].value == 'port') ? '3306' : '/tmp/mysql.sock';
-		conf_sample(frm,pkg);
+		type = frm.type.options[frm.type.selectedIndex].value;
+		if(type != 'org.rhaco.store.db.module.Sqlite'){
+			frm.port_sock_value.value = (frm.port_sock.options[frm.port_sock.selectedIndex].value == 'port') ? '3306' : '/tmp/mysql.sock';
+			conf_sample(frm,pkg);
+		}
 	}
 </script>
 <style type="text/css">

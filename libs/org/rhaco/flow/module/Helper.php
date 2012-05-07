@@ -328,6 +328,14 @@ class Helper{
 		return self::html(preg_replace("/<.+?>/","",$value),$length,$lines,$postfix);
 	}
 	/**
+	 * Json文字列にして返す
+	 * @param mixed $value
+	 * @return string
+	 */
+	public function json($value){
+		return \org\rhaco\lang\Json::encode($value);
+	}
+	/**
 	 * aがbより小さい
 	 * @param integer $a
 	 * @param integer $b
