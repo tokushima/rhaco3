@@ -105,7 +105,7 @@ $dup = array();
 $list = dirs($input_path,$input_path);
 $docs = null;
 foreach($list[0] as $p){
-	if(substr($p,-4) == '.php'){
+	if(substr($p,-4) == '.php' && strpos($p,'/_') === false){
 		$r = str_replace("\\",'/',$p);
 		$n = substr(basename($r),0,-4);
 		$b = true;

@@ -131,7 +131,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 */
 			$this->object_module('before_flow_handle',$this);
 		}
-		if(!$this->is_login() && isset($this->anon_login['require']) && $this->anon_login['require'] === true) $this->login_required();
+		if(!$this->is_login() && ((isset($this->anon_login['require']) && $this->anon_login['require'] === true) || $this->has_object_module('login_condition'))) $this->login_required();
 	}
 	/**
 	 * (non-PHPdoc)
