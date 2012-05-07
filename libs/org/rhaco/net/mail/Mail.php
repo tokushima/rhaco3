@@ -116,6 +116,21 @@ class Mail extends \org\rhaco\Object{
 		$this->html = $this->encode($message);
 		if($this->message === null) $this->message(strip_tags($message));
 	}
+	protected function __fm_to__(){
+		return implode("\n",array_keys($this->to()));
+	}
+	protected function __fm_cc__(){
+		return implode("\n",array_keys($this->cc()));
+	}
+	protected function __fm_bcc__(){
+		return implode("\n",array_keys($this->bcc()));
+	}
+	protected function __fm_subject__(){
+		return mb_convert_encoding(base64_decode(preg_replace('/^=\?ISO-2022-JP\?B\?(.+)\?=$/','\\1',$this->subject())),'UTF-8','JIS');
+	}
+	protected function __fm_message__(){
+		return mb_convert_encoding($this->message(),'UTF-8','JIS');
+	}
 	public function header(){
 		$send = '';
 		$send .= $this->line("MIME-Version: 1.0");
