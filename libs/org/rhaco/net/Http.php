@@ -260,6 +260,16 @@ class Http{
 		return $this->browse($this->build_url($url),'GET',false)->body();
 	}
 	/**
+	 * リダイレクトする
+	 * @param string $url アクセスするURL
+	 */
+	public function do_redirect($url=null){
+		$url = $this->build_url($url);
+		$url = (strpos($url,'?') === false) ? $url.'?' : $url.'&';
+		header('Location: '.$url.Query::get($this->vars,null,true));
+		exit;
+	}
+	/**
 	 * Basic認証
 	 * @param string $user ユーザ名
 	 * @param string $password パスワード

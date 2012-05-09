@@ -350,7 +350,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param string $key
 	 * @param mixed $val
 	 */
-	protected function sessions($key,$val){
+	public function sessions($key,$val){
 		$this->sess->vars($key,$val);
 	}
 	/**
@@ -359,14 +359,14 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param mixed $d セッションが存在しない場合の代理値
 	 * @return mixed
 	 */
-	protected function in_sessions($n,$d=null){
+	public function in_sessions($n,$d=null){
 		return $this->sess->in_vars($n,$d);
 	}
 	/**
 	 * セッションから削除する
 	 * @param string $n 削除する定義名
 	 */
-	protected function rm_sessions($n){
+	public function rm_sessions($n){
 		call_user_func_array(array($this->sess,'rm_vars'),func_get_args());
 	}
 	/**
@@ -374,7 +374,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param string $n
 	 * @return boolean
 	 */
-	protected function is_sessions($n){
+	public function is_sessions($n){
 		return $this->sess->is_vars($n);
 	}
 	/**
