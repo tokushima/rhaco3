@@ -97,6 +97,7 @@ class Man{
 		$ref = new \ReflectionMethod('\\'.str_replace(array('.','/'),array('\\','\\'),$class),$method);
 		$src = implode(array_slice(file($ref->getDeclaringClass()->getFileName()),$ref->getStartLine(),($ref->getEndLine()-$ref->getStartLine()-1)));
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$ref->getDocComment())));
+		$deprecated = (strpos($ref->getDocComment(),'@deprecated') !== false);
 		$params = array();
 		$return = array();
 		
@@ -178,6 +179,7 @@ class Man{
 				'package'=>$class,'method_name'=>$method,'params'=>$params,'request'=>$request,'context'=>$context
 				,'args'=>$args,'return'=>$return,'description'=>$description,'throws'=>$throws
 				,'is_post'=>(strpos($src,'$this->is_post()') !== false)
+				,'deprecated'=>$deprecated
 				);
 	}
 	/**

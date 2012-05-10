@@ -109,6 +109,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 						$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
 						$mr = $cr->getMethod($m['method']);
 						list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment())))));
+						if(!isset($m['deprecated'])) $m['deprecated'] = (strpos($mr->getDocComment(),'@deprecated') !== false);
 					}catch(\ReflectionException $e){
 						$m['error'] = $e->getMessage();
 					}
@@ -118,6 +119,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 					,(isset($m['class'])?$m['class']:'')
 					,(isset($m['method'])?$m['method']:'')
 					,(isset($m['template'])?$m['template']:'')
+					,(isset($m['deprecated'])?$m['deprecated']:false)
 					,$m['url']
 					,$m['summary']
 				)) $maps[$k] = $m;

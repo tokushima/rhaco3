@@ -3,7 +3,7 @@
 <rt:block name="search_form" />
 
 <rt:block name="content">
-<h2 class="title">
+<h2 class="title"  style="{$t.cond_switch($deprecated,'text-decoration: line-through;','')}">
 	<a href="{$t.package_method_url('class_info',$package)}">{$f.package_name($package)}</a>
 	::
 	{$method_name}
