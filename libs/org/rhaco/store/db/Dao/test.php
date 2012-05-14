@@ -884,22 +884,34 @@ try{
 	success();
 }
 UpdateModel::find_delete();
-$s1 = r(new UpdateModel())->value("abc")->save();
-$s2 = UpdateModel::find_get(Q::eq('id',$s1->id()));
+
+/**
+ * @var serial $id
+ * @var string $value
+ * @class @['stale'=>false]
+ */
+class UpdateModelStale extends UpdateModel{
+	protected $id;
+	protected $value;
+}
+
+$s1 = r(new UpdateModelStale())->value("abc")->save();
+$s2 = UpdateModelStale::find_get(Q::eq('id',$s1->id()));
 $s2->value('def');
 $s2->save();
 try{
 	$s1->value('ghi');
 	$s1->save(Q::eq('value','abc'));
+	// TODO
 	fail();
-}catch(\BadMethodCallException $e){
+}catch(\org\rhaco\store\db\exception\StaleObjectException $e){
 	success();
 	try{
 		$s1->value('ghi');
 		$s1->save(Q::eq('value','def'));
 		success();
 		eq('ghi',UpdateModel::find_get(Q::eq('id',$s1->id()))->value());
-	}catch(\BadMethodCallException $e){
+	}catch(\org\rhaco\store\db\exception\StaleObjectException $e){
 		fail();
 	}
 }

@@ -11,6 +11,7 @@ use \org\rhaco\store\db\exception\UniqueDaoException;
 use \org\rhaco\store\db\exception\DaoBadMethodCallException;
 use \org\rhaco\store\db\exception\DaoConnectionException;
 use \org\rhaco\store\db\exception\InvalidArgumentException;
+use \org\rhaco\store\db\exception\StaleObjectException;
 /**
  * O/R Mapper
  * @author tokushima
@@ -730,7 +731,8 @@ abstract class Dao extends \org\rhaco\Object{
 		 * @param self $this
 		 */
 		$daq = static::module('delete_sql',$this);
-		if($this->update_query($daq) == 0) throw new DaoBadMethodCallException('delete failed');
+		// TODO
+		if($this->update_query($daq) == 0 && static::anon('stale') === false) throw new StaleObjectException('delete failed');
 		$this->__after_delete__();
 	}
 	/**
@@ -844,7 +846,8 @@ abstract class Dao extends \org\rhaco\Object{
 			 * @return Daq
 			 */
 			$daq = $self::module('update_sql',$this,$query);
-			if($this->update_query($daq) == 0) throw new DaoBadMethodCallException('update failed');
+			// TODO
+			if($this->update_query($daq) == 0 && static::anon('stale') === false) throw new StaleObjectException('update failed');
 			$this->__after_update__();
 			$this->__after_save__();
 		}
