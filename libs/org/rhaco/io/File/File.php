@@ -254,9 +254,10 @@ class File extends \org\rhaco\Object{
 	 */
 	static public function write($filename,$src=null,$lock=true){
 		if(empty($filename)) throw new \InvalidArgumentException(sprintf('permission denied `%s`',$filename));
+		$b = is_file($filename);
 		self::mkdir(dirname($filename));
 		if(false === file_put_contents($filename,(string)$src,($lock ? LOCK_EX : 0))) throw new \InvalidArgumentException(sprintf('permission denied `%s`',$filename));
-		chmod($filename,0777);
+		if(!$b) chmod($filename,0777);
 	}
 	/**
 	 * ファイルに追記する
