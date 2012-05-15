@@ -888,37 +888,6 @@ UpdateModel::find_delete();
 /**
  * @var serial $id
  * @var string $value
- * @class @['stale'=>false]
- */
-class UpdateModelStale extends UpdateModel{
-	protected $id;
-	protected $value;
-}
-
-$s1 = r(new UpdateModelStale())->value("abc")->save();
-$s2 = UpdateModelStale::find_get(Q::eq('id',$s1->id()));
-$s2->value('def');
-$s2->save();
-try{
-	$s1->value('ghi');
-	$s1->save(Q::eq('value','abc'));
-	// TODO
-	fail();
-}catch(\org\rhaco\store\db\exception\StaleObjectException $e){
-	success();
-	try{
-		$s1->value('ghi');
-		$s1->save(Q::eq('value','def'));
-		success();
-		eq('ghi',UpdateModel::find_get(Q::eq('id',$s1->id()))->value());
-	}catch(\org\rhaco\store\db\exception\StaleObjectException $e){
-		fail();
-	}
-}
-
-/**
- * @var serial $id
- * @var string $value
  */
 class CrossParent extends Dao{
 	protected $id;

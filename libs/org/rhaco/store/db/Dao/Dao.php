@@ -11,7 +11,6 @@ use \org\rhaco\store\db\exception\UniqueDaoException;
 use \org\rhaco\store\db\exception\DaoBadMethodCallException;
 use \org\rhaco\store\db\exception\DaoConnectionException;
 use \org\rhaco\store\db\exception\InvalidArgumentException;
-use \org\rhaco\store\db\exception\StaleObjectException;
 /**
  * O/R Mapper
  * @author tokushima
@@ -731,8 +730,7 @@ abstract class Dao extends \org\rhaco\Object{
 		 * @param self $this
 		 */
 		$daq = static::module('delete_sql',$this);
-		// TODO
-		if($this->update_query($daq) == 0 && static::anon('stale') === false) throw new StaleObjectException('delete failed');
+		if($this->update_query($daq) == 0) throw new NotfoundDaoException('delete failed');
 		$this->__after_delete__();
 	}
 	/**
@@ -817,7 +815,7 @@ abstract class Dao extends \org\rhaco\Object{
 			 * @return org.rhaco.store.db.Daq
 			 */
 			$daq = $self::module('create_sql',$this);
-			if($this->update_query($daq) == 0) throw new DaoBadMethodCallException('failed to create');
+			if($this->update_query($daq) == 0) throw new DaoException('create failed');
 			if($daq->is_id()){
 				/**
 				 * AUTOINCREMENTの値を取得するSQL文の生成
@@ -825,7 +823,7 @@ abstract class Dao extends \org\rhaco\Object{
 				 * @return integer
 				 */
 				$result = $this->func_query(static::module('last_insert_id_sql',$this));
-				if(empty($result)) throw new DaoBadMethodCallException('create failed');
+				if(empty($result)) throw new DaoException('create failed');
 				$this->{$daq->id()}($result[0]);
 			}
 			$this->__after_create__();
@@ -846,8 +844,7 @@ abstract class Dao extends \org\rhaco\Object{
 			 * @return Daq
 			 */
 			$daq = $self::module('update_sql',$this,$query);
-			// TODO
-			if($this->update_query($daq) == 0 && static::anon('stale') === false) throw new StaleObjectException('update failed');
+			$this->update_query($daq);
 			$this->__after_update__();
 			$this->__after_save__();
 		}
