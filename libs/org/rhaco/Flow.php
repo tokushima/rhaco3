@@ -97,7 +97,7 @@ class Flow{
 		 */
 		$map = ($this->has_object_module('flow_map_loader')) ? $this->object_module('flow_map_loader',$p0,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9) : $p0;
 		$apps = $urls = array();
-		$idx = 0;
+		$idx = $pkg_id =0;
 		$theme = $put_block = null;
 
 		if(isset($map['patterns']) && is_array($map['patterns'])){
@@ -151,6 +151,7 @@ class Flow{
 				}
 				if(isset($v['class']) && !isset($v['method'])){
 					try{
+						$pkg_id++;
 						$n = isset($v['name']) ? $v['name'] : $v['class'];
 						$r = new \ReflectionClass(str_replace('.',"\\",$v['class']));
 						$suffix = isset($v['suffix']) ? $v['suffix'] : '';
@@ -161,7 +162,7 @@ class Flow{
 								if(empty($automaps) || $automap){
 									$url = $k.(($m->getName() == 'index') ? '' : (($k == '') ? '' : '/').$m->getName()).str_repeat('/(.+)',$m->getNumberOfRequiredParameters());
 									for($i=0;$i<=$m->getNumberOfParameters()-$m->getNumberOfRequiredParameters();$i++){
-										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename())));
+										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename()),'pkg_id'=>$pkg_id));
 										if($automap){
 											$automaps[$url.$suffix] = $mapvar;
 										}else{

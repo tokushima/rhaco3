@@ -72,9 +72,9 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 				break;
 			}
 		}
-		foreach($maps as $u => $m){
-			if(isset($this->select_map['=']) && isset($m['=']) && $m['class'] == $this->select_map['class']){
-				$this->package_maps[$u] = $maps[$u];
+		if(isset($this->select_map['='])){
+			foreach($maps as $u => $m){
+				if(isset($m['=']) && $m['pkg_id'] == $this->select_map['pkg_id']) $this->package_maps[$u] = $maps[$u];
 			}
 		}
 	}
@@ -181,10 +181,13 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 							if(isset($m['format']) && $current == $m['format']) $current = null;
 						}
 					}
-					if($current != null) $this->sessions('logined_redirect_to',$current);
+					if($current !== null) $this->sessions('logined_redirect_to',$current);
 				}
 				$this->save_current_vars();
-				foreach($this->maps as $k => $m){			
+				foreach($this->package_maps as $k => $m){
+					if($m['method'] == 'do_login' && isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
+				}
+				foreach($this->maps as $k => $m){
 					if(((isset($m['name']) && $m['name'] == 'login')) || (isset($m['method']) && $this->select_map['class'] == $m['class'] && $m['method'] == 'do_login') 
 						&& isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
 				}
@@ -434,7 +437,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @automap
 	 */
 	public function do_login(){
-		if($this->is_login() || $this->silent() || ($this->is_post() && $this->login())){
+		if($this->is_login() || $this->silent() || $this->login()){
 			$redirect_to = $this->in_sessions('logined_redirect_to');
 			$this->rm_sessions('logined_redirect_to');
 			/**
@@ -445,7 +448,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
 			if($this->map_arg('login_redirect') !== null) $this->redirect_by_map('login_redirect');
 		}
-		if(!$this->is_login() && $this->is_post()){
+		if(!$this->is_login()){
 			\org\rhaco\net\http\Header::send_status(401);
 			if(!\org\rhaco\Exceptions::has()) \org\rhaco\Exceptions::add(new \LogicException('Unauthorized'),'do_login');
 		}
@@ -477,7 +480,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		 * @param self $this
 		 * @return boolean
 		 */
-		if(!$this->is_post() || !$this->has_object_module('login_condition') || $this->object_module('login_condition',$this) === false){
+		if(!$this->has_object_module('login_condition') || $this->object_module('login_condition',$this) === false){
 			/**
 			 * ログイン失敗
 			 * @param self $this

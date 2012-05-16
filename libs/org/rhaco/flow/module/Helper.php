@@ -72,7 +72,7 @@ class Helper{
 			$n = sizeof($args);
 			
 			foreach($this->url_pattern as $m){
-				if(isset($m['=']) && $m['class'] == $p['class'] && $m['method'] == $name && $m['num'] == $n){
+				if(isset($m['=']) && $m['pkg_id'] == $p['pkg_id'] && $m['method'] == $name && $m['num'] == $n){
 					return call_user_func_array(array($this,'map_url'),array_merge(array($m['name']),$args));
 				}
 			}

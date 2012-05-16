@@ -18,17 +18,17 @@ $flow->output(array(''
 #login
 $b = b();
 $b->do_get(test_map_url('login'));
-eq(200,$b->status());
+eq(401,$b->status());
 eq(test_map_url('login'),$b->url());
-eq('<result />',$b->body());
+eq('<error><message group="do_login" class="LogicException" type="LogicException">Unauthorized</message></error>',$b->body());
 */
 /***
 #aaa_to_login
 $b = b();
 $b->do_get(test_map_url('aaa'));
-eq(200,$b->status());
+eq(401,$b->status());
 eq(test_map_url('login'),$b->url());
-eq('<result />',$b->body());
+eq('<error><message group="do_login" class="LogicException" type="LogicException">Unauthorized</message></error>',$b->body());
 */
 /***
 #unauthorized
@@ -42,8 +42,8 @@ $b = b();
 $b->vars('user_name','aaaa');
 $b->vars('password','bbbb');
 $b->do_get(test_map_url('login'));
-eq(200,$b->status());
-eq('<result><user_name>aaaa</user_name><password>bbbb</password></result>',$b->body());
+eq(401,$b->status());
+eq('<error><message group="do_login" class="LogicException" type="LogicException">Unauthorized</message></error>',$b->body());
 */
 /***
 $b = b();
@@ -77,9 +77,9 @@ eq('<result><user><nickname>hogeuser</nickname><code>1234</code></user></result>
 $b = b();
 
 $b->do_post(test_map_url('logout'));
-eq(200,$b->status());
+eq(401,$b->status());
 eq(test_map_url('login'),$b->url());
-eq('<result />',$b->body());
+eq('<error><message group="do_login" class="LogicException" type="LogicException">Unauthorized</message></error>',$b->body());
 
 $b->vars('user_name','hogeuser');
 $b->vars('password','hogehoge');
