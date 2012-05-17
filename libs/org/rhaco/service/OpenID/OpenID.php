@@ -2,7 +2,6 @@
 namespace org\rhaco\service;
 /**
  * OpenID
- * @incomplete
  * @author tokushima
  * 
  * @see http://gitorious.org/lightopenid/lightopenid/trees/master
