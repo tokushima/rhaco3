@@ -447,6 +447,9 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			$this->object_module('after_do_login',$this);
 			if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
 			if($this->map_arg('login_redirect') !== null) $this->redirect_by_map('login_redirect');
+			foreach($this->package_maps as $k => $m){
+				if($m['method'] == 'index' && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
+			}
 		}
 		if(!$this->is_login()){
 			\org\rhaco\net\http\Header::send_status(401);
@@ -466,6 +469,9 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$this->object_module('before_do_logout',$this);
 		$this->logout();
 		if($this->map_arg('logout_redirect') !== null) $this->redirect_by_map('logout_redirect');
+		foreach($this->package_maps as $k => $m){
+			if($m['method'] == 'index' && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
+		}
 		$this->vars('login',$this->is_login());
 	}
 	/**
