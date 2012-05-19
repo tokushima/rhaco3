@@ -8,7 +8,7 @@ include_once('rhaco3.php');
  */
 $flow = new \org\rhaco\Flow();
 $flow->output(array(''
-,'nomatch_redirect'=>'/'
+,'nomatch_redirect'=>'index'
 ,'patterns'=>array(
 	''=>array('name'=>'index','template'=>'hoge.html')
 	,'model'=>array('action'=>'test.flow.Model')

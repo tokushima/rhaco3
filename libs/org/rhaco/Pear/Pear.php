@@ -47,6 +47,7 @@ class Pear{
 			$download_base = $output_path.'_download/';
 			$download_path = $download_base.str_replace(array('.','-'),'_',$domain).'_'.$target_package.'_'.strtr($target_version,'.','_');
 			$download_url = 'http://'.$domain.'/get/'.$target_package.'-'.$target_version.'.tgz';
+
 			if(!is_dir($download_path)){
 				\org\rhaco\io\File::mkdir($download_path,0777);
 				$fp = gzopen($download_url,'rb');

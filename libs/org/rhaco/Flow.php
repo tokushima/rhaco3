@@ -327,12 +327,11 @@ class Flow{
 							$this->object_module('flow_exception_output',$obj,$e);
 							exit;
 						}else if(isset($map['error_redirect'])){
-							if(strpos($map['error_redirect'],'://') === false){
-								$map['error_redirect'] = $this->app_url.$map['error_redirect'];
+							if(strpos($map['error_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($map['error_redirect']);
+							foreach($apps as $m){
+								if(isset($m['name']) && $m['name'] == $map['error_redirect'] && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
 							}
-							\org\rhaco\net\http\Header::send_status(302);
-							header('Location: '.$map['error_redirect']);
-							exit;
+							\org\rhaco\net\http\Header::redirect($this->app_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
 						}else{
 							if(isset($apps[$k]['error_template'])){
 								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
@@ -361,13 +360,11 @@ class Flow{
 			}
 		}
 		if(isset($map['nomatch_redirect'])){
-			if(strpos($map['nomatch_redirect'],'://') === false){
-				if(substr($map['nomatch_redirect'],0,1) == '/') $map['nomatch_redirect'] = substr($map['nomatch_redirect'],1);
-				$map['nomatch_redirect'] = $this->app_url.$map['nomatch_redirect'];
+			if(strpos($map['nomatch_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($map['nomatch_redirect']);
+			foreach($apps as $m){
+				if(isset($m['name']) && $m['name'] == $map['nomatch_redirect'] && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
 			}
-			\org\rhaco\net\http\Header::send_status(302);
-			header('Location: '.$map['nomatch_redirect']);
-			exit;
+			\org\rhaco\net\http\Header::redirect($this->app_url.((substr($map['nomatch_redirect'],0,1) == '/') ? substr($map['nomatch_redirect'],1) : $map['nomatch_redirect']));
 		}
 		if(($level = \org\rhaco\Conf::get('notfound_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
 			\org\rhaco\Log::$level(\org\rhaco\Request::current_url().' (`'.$pathinfo.'`) bad request');
