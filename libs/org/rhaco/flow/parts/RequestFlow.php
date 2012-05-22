@@ -3,7 +3,7 @@ namespace org\rhaco\flow\parts;
 /**
  * Requestを含むFlowインタフェース
  * @author tokushima
- * 
+ * @conf string{} $session_group セッションの範囲名, エントリ名=>セッショングループ名('*' or '\w+')
  */
 class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\rhaco\flow\FlowInterface{
 	private $put_block;
@@ -16,19 +16,22 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 
 	private $sess;
 	private $req;
-	private $code;
 	private $login_id;
 	private $anon_login;
 	
 	protected function __new__(){
 		$d = debug_backtrace(false);
-		$d = array_pop($d);		
-		$this->code = md5($d['file']);
+		$d = array_pop($d);
+		$dir = dirname($d['file']);
+		$entry = substr(basename($d['file']),0,-4);
+		$session_group = \org\rhaco\Conf::get('session_group');
+		$group = (isset($session_group[$entry])) ? $session_group[$entry] : '';
+		$sess_name = ($group == '*') ? $dir : ($group == '' ? ($dir.'/'.$entry) : (($group[0] == '@') ? $group : $dir.'#'.$group));
 		$this->req = new \org\rhaco\Request();
-		$this->sess = new \org\rhaco\net\Session($this->code);
+		$this->sess = new \org\rhaco\net\Session(md5($sess_name));
 		foreach($this->sess->in_vars('_saved_vars_',array()) as $k => $v) $this->req->vars($k,$v);
 		$this->sess->rm_vars('_saved_vars_');
-		$this->login_id = $this->code.'_LOGIN_';
+		$this->login_id = $sess_name.'_LOGIN_';
 	}
 	protected function __anon__($d){
 		$this->anon_login = self::anon_decode($d,'login');
@@ -46,9 +49,9 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 				if($class[0] != "\\") $class= "\\".$class;
 				if(!($user instanceof $class)) throw new \LogicException('user must be an of '.$this->anon_login['type']);
 			}
-			$this->sess->vars($this->login_id.'USER',$user);
+			$this->sessions($this->login_id.'USER',$user);
 		}
-		return $this->sess->in_vars($this->login_id.'USER');
+		return $this->in_sessions($this->login_id.'USER');
 	}
 	protected function theme($theme){
 		$this->theme = $theme;
@@ -301,13 +304,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$vars = array();
 		foreach($this->req as $k => $v) $vars[$k] = $v;
 		$this->sessions('_saved_vars_',$vars);
-	}
-	/**
-	 * コードを取得
-	 * @return string
-	 */
-	protected function code(){
-		return $this->code;
 	}
 	/**
 	 * 値をセットする

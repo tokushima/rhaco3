@@ -257,6 +257,7 @@ class Flow{
 						foreach($modules as $m) $this->set_object_module($m);
 						if(isset($apps[$k]['class'])){
 							if(!class_exists(str_replace('.',"\\",$apps[$k]['class']))) throw new \InvalidArgumentException($apps[$k]['class'].' not found');
+							// TODO
 							$obj = $this->str_reflection($apps[$k]['class']);
 							$func_exception = null;
 							
@@ -267,6 +268,7 @@ class Flow{
 								$obj->set_select_map_name($apps[$k]['name']);
 								$obj->set_maps($apps);
 								$obj->set_args((isset($apps[$k]['args']) && is_array($apps[$k]['args'])) ? $apps[$k]['args'] : array());
+								// TODO
 								$obj->before();
 								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
