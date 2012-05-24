@@ -303,6 +303,14 @@ class Helper{
 		return nl2br(str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value));
 	}
 	/**
+	 * 改行文字の前に HTML の改行タグを挿入する
+	 * @param string $value
+	 * @return string
+	 */
+	public function nl2br($value){
+		return nl2br($value);
+	}
+	/**
 	 * CDATA形式から値を取り出す
 	 * @param string $value 対象の文字列
 	 * @return string
