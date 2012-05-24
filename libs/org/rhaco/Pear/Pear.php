@@ -67,7 +67,7 @@ class Pear{
 						foreach($dir->children() as $file) self::copy($file,$target_package,$target_version,$download_path,$output_path);
 					}
 					foreach($package->dependencies->required->children() as $dep){
-						if($dep->getName() == 'package') self::install(((string)$dep->channel).'/'.((string)$dep->name),$target_state);
+						if($dep->getName() == 'package') self::install(((string)$dep->channel).'/'.((string)$dep->name),$target_state,$output_path);
 					}
 					break;
 				case '1.0':
