@@ -3,9 +3,7 @@
 
 <rt:block name="content">
 	<rt:if param="{$app_description}">
-		<div class="alert alert-block alert-info">
-			{$t.html($app_description)}
-		</div>
+		<pre class="alert alert-block alert-info">{$app_description}</pre>
 	</rt:if>
 
 	<table rt:param="{$maps}" rt:var="map" rt:key="url">
