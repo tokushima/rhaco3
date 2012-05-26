@@ -149,11 +149,13 @@ class Growl{
 		if($priority < 0) $flag |= 8;
 		if($sticky) $flag |= 1;
 
-		$data = pack('c2n5',self::PROTOCOL_VERSION,self::TYPE_NOTIFICATION,$flag
-					,strlen($this->notification),strlen($title),strlen($description),strlen($this->app_name))
-					.$this->notification.$title.$description.$this->app_name;
-		$data .= pack('H32',md5(isset($this->password) ? $data.$this->password : $data));
-		$this->con->send($data);
+		try{
+			$data = pack('c2n5',self::PROTOCOL_VERSION,self::TYPE_NOTIFICATION,$flag
+						,strlen($this->notification),strlen($title),strlen($description),strlen($this->app_name))
+						.$this->notification.$title.$description.$this->app_name;
+			$data .= pack('H32',md5(isset($this->password) ? $data.$this->password : $data));
+			$this->con->send($data);
+		}catch(\ErrorException $e){}
 		return $this;
 	}
 	private function tcp_notification($name){		
