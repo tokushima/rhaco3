@@ -1,9 +1,12 @@
 <?php
 /**
  * Daemon tool
- * @param string $s pid file
- * /var/run/****.pid
+ * @param string $d pid file path
  */
-$pid_file = isset($params['s']) ? $params['s'] : null;
-\org\rhaco\Daemon::stop($pid_file);
+$php = isset($params['php']) ? $params['php'] : null;
+$pid = isset($params['d']) ? $params['d'] : '';
+$opt = array(
+			'name'=>(isset($params['name']) ? $params['name'] : null),
+		);
+\org\rhaco\Daemon::stop($php,$pid,$opt);
 
