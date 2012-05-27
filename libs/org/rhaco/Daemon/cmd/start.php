@@ -3,9 +3,9 @@
  * Daemon tool
  * @param string $php execute php file
  */
-$php = isset($params['php']) ? $params['php'] : null;
-$pid = isset($params['d']) ? $params['d'] : '';
+$pid = isset($params['d']) ? $params['d'] : null;
 $opt = array(
+			'exec_php'=>(isset($params['exec']) ? $params['exec'] : null),
 			'name'=>(isset($params['name']) ? $params['name'] : null),
 			'clients'=>(isset($params['clients']) ? $params['clients'] : 1),
 			'sleep'=>(isset($params['sleep']) ? $params['sleep'] : null),
@@ -15,5 +15,5 @@ $opt = array(
 			'gid'=>(isset($params['gid']) ? $params['gid'] : null),
 			'egid'=>(isset($params['egid']) ? $params['egid'] : null),
 		);
-\org\rhaco\Daemon::start($php,$pid,$opt);
+\org\rhaco\Daemon::start($pid,$opt);
 
