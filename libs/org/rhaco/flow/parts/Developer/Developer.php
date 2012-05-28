@@ -542,4 +542,11 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		$this->vars('object_list',$list);
 	}
+	/**
+	 * @automap
+	 */
+	public function explorer(){
+		// TODO つくりたい
+		// https://developers.facebook.com/tools/explorer
+	}
 }
