@@ -36,10 +36,8 @@ class Daemon{
 	}
 	/**
 	 * 実装
-	 * @param integer $parent_id
-	 * @param integer $id
 	 */
-	static public function main($parent_id,$id){
+	static public function main(){
 		$i = rand(1,10);
 		sleep($i);
 	}
@@ -69,12 +67,12 @@ class Daemon{
 		if((php_sapi_name() !== 'cli')) return;
 		$name = isset($opt['name']) ? $opt['name'] : null;
 		$exec_php = isset($opt['exec_php']) ? $opt['exec_php'] : null;
+		$ref = new \ReflectionClass(new static);
 		
 		if(isset($pid_file)){
 			if(empty($pid_file) && !empty($name)) $pid_file = sprintf('/var/run/%s.pid',$name);
 			if(empty($pid_file) && !empty($exec_php)) $pid_file = sprintf('/var/run/%s.pid',basename($exec_php,'.php'));
 			if(empty($pid_file)){
-				$ref = new \ReflectionClass(new static);
 				$class = str_replace('\\','_',$ref->getName());
 				$pid_file = sprintf('/var/run/%s.pid',(substr($class,0,1) == '_') ? substr($class,1) : $class);
 			}
@@ -98,7 +96,8 @@ class Daemon{
 		$sleep = isset($opt['sleep']) ? $opt['sleep'] : 0;
 		$exec_php = isset($opt['exec_php']) ? $opt['exec_php'] : null;
 		$phpcmd = isset($_ENV['_']) ? $_ENV['_'] : (isset($_SERVER['_']) ? $_SERVER['_'] : (isset($cmd['phpcmd']) ? $cmd['phpcmd'] : '/usr/bin/php'));
-
+		$ref = new \ReflectionClass(new static);
+		
 		$name = isset($opt['name']) ? $opt['name'] : null;
 		if(isset($opt['dir'])) chdir($opt['dir']);
 		if(!empty($exec_php) && !is_file($exec_php)) throw new \Exception($exec_php.' not found');
@@ -108,7 +107,6 @@ class Daemon{
 			if(empty($pid_file) && !empty($name)) $pid_file = sprintf('/var/run/%s.pid',$name);
 			if(empty($pid_file) && !empty($exec_php)) $pid_file = sprintf('/var/run/%s.pid',basename($exec_php,'.php'));
 			if(empty($pid_file)){
-				$ref = new \ReflectionClass(new static);
 				$class = str_replace('\\','_',$ref->getName());
 				$pid_file = sprintf('/var/run/%s.pid',(substr($class,0,1) == '_') ? substr($class,1) : $class);
 			}
@@ -140,7 +138,7 @@ class Daemon{
 				if(pcntl_fork() !== 0) return;
 				posix_setsid();
 			}
-			foreach(self::$signal_list as $sig => $dec) pcntl_signal($sig,array(__CLASS__,'signal_func'));
+			foreach(self::$signal_list as $sig => $dec) pcntl_signal($sig,array($ref->getName(),'signal_func'));
 			
 			// pid
 			self::$pid = posix_getpid();
@@ -157,10 +155,10 @@ class Daemon{
 					// execute
 					$pid = posix_getpid();
 					if(empty($exec_php)){
-						static::main(self::$pid,$pid);
+						static::main();
 						exit;
 					}else{
-						pcntl_exec($phpcmd,array($exec_php,self::$pid,$pid));
+						pcntl_exec($phpcmd,array($exec_php));
 					}
 				}
 				if(sizeof(self::$child) >= $clients){
