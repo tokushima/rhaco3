@@ -3,13 +3,12 @@ namespace org\rhaco;
 /**
  * デーモン
  * @author tokushima
- * @incomplete
  */
 class Daemon{
-	static protected $state = true;
-	static protected $pid;
-	static protected $pid_file;
-	static protected $child = array();
+	static private $state = true;
+	static private $pid;
+	static private $pid_file;
+	static private $child = array();
 	static protected $signal_list = array(
 					SIGHUP=>array('SIGHUP','terminal line hangup'),
 					SIGINT=>array('SIGINT','interrupt program'),
@@ -32,12 +31,16 @@ class Daemon{
 					SIGUSR1=>array('SIGUSR1','User defined signal 1'),
 					SIGUSR2=>array('SIGUSR2','User defined signal 2'),
 				);
-	
+
 	final public function __construct(){
 	}
+	/**
+	 * 実装
+	 * @param integer $parent_id
+	 * @param integer $id
+	 */
 	static public function main($parent_id,$id){
 		$i = rand(1,10);
-		\org\rhaco\Log::info('Main: '.$id.'/'.$parent_id.' '.date('H:i:s').'  sleep:'.$i);
 		sleep($i);
 	}
 	static protected function signal_func($signal){
@@ -72,7 +75,8 @@ class Daemon{
 			if(empty($pid_file) && !empty($exec_php)) $pid_file = sprintf('/var/run/%s.pid',basename($exec_php,'.php'));
 			if(empty($pid_file)){
 				$ref = new \ReflectionClass(new static);
-				$pid_file = sprintf('/var/run/%s.pid',$ref->getShortName());
+				$class = str_replace('\\','_',$ref->getName());
+				$pid_file = sprintf('/var/run/%s.pid',(substr($class,0,1) == '_') ? substr($class,1) : $class);
 			}
 		}
 		if(!is_file($pid_file)) throw new \Exception($pid_file.' not found');
@@ -105,7 +109,8 @@ class Daemon{
 			if(empty($pid_file) && !empty($exec_php)) $pid_file = sprintf('/var/run/%s.pid',basename($exec_php,'.php'));
 			if(empty($pid_file)){
 				$ref = new \ReflectionClass(new static);
-				$pid_file = sprintf('/var/run/%s.pid',$ref->getShortName());
+				$class = str_replace('\\','_',$ref->getName());
+				$pid_file = sprintf('/var/run/%s.pid',(substr($class,0,1) == '_') ? substr($class,1) : $class);
 			}
 			self::$pid_file = $pid_file;
 			if(is_file($pid_file)){
@@ -152,7 +157,7 @@ class Daemon{
 					// execute
 					$pid = posix_getpid();
 					if(empty($exec_php)){
-						self::main(self::$pid,$pid);
+						static::main(self::$pid,$pid);
 						exit;
 					}else{
 						pcntl_exec($phpcmd,array($exec_php,self::$pid,$pid));
