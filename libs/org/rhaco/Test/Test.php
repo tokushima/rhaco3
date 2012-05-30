@@ -13,7 +13,7 @@ class Test{
 	static private $current_file;
 	static private $start_time;
 	static private $flow_output_maps;
-	
+
 	/**
 	 * 結果を取得する
 	 * @return string{}
@@ -87,8 +87,9 @@ class Test{
 	 * @param string $class_name クラス名
 	 * @param string $method メソッド名
 	 * @param string $block_name ブロック名
+	 * @param boolean $print_progress 実行中のブロック名を出力するか
 	 */
-	static final public function run($class_name,$method_name=null,$block_name=null){
+	static final public function run($class_name,$method_name=null,$block_name=null,$print_progress=false){
 		list($entry_path,$tests_path) = self::search_path();
 		if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true) || interface_exists($f)){
 			$doctest = ((strpos($f,"\\") !== false || ctype_upper(substr($class_name,0,1))) ? self::get_doctest($f) : self::get_func_doctest($f));
@@ -121,17 +122,19 @@ class Test{
 		self::$current_class = ($doctest['type'] == 1) ? $doctest['name'] : null;
 		self::$current_entry = ($doctest['type'] == 2 || $doctest['type'] == 3) ? $doctest['name'] : null;
 		self::$current_method = null;
-
+		
 		foreach($doctest['tests'] as $test_method_name => $tests){
 			if($method_name === null || $method_name === $test_method_name){
 				self::$current_method = $test_method_name;
-
+				
 				if(empty($tests['blocks'])){
 					self::$result[self::$current_file][self::$current_class][self::$current_method][$tests['line']][] = array('none');
 				}else{
 					foreach($tests['blocks'] as $test_block){
 						list($name,$block) = $test_block;
+
 						if($block_name === null || $block_name === $name){
+							if($print_progress && substr(PHP_OS,0,3) != 'WIN') print('@'.basename($name));
 							try{
 								ob_start();
 								if($doctest['type'] == 3){
@@ -173,6 +176,7 @@ class Test{
 								self::$result[self::$current_file][self::$current_class][self::$current_method][$line][] = array('exception',$message,$file,$line);
 								\org\rhaco\Log::error($e);
 							}
+							if($print_progress && substr(PHP_OS,0,3) != 'WIN') print("\033[".strlen('@'.basename($name)).'D'."\033[0K");
 							\org\rhaco\Exceptions::clear();
 						}
 					}
@@ -184,9 +188,9 @@ class Test{
 			if(!empty($test_name) && is_dir($d=($tests_path.str_replace(array('.'),'/',$test_name)))){
 				foreach(new \RecursiveDirectoryIterator($d,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS) as $e){
 					if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false
-						&& ($block_name === null || $block_name === substr($e->getFilename(),0,-4))
+						&& ($block_name === null || $block_name === substr($e->getFilename(),0,-4) || $block_name === $e->getFilename())
 					){
-						self::run($e->getPathname());
+						self::run($e->getPathname(),null,null,$print_progress);
 					}
 				}
 			}

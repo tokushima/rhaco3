@@ -16,14 +16,14 @@ $verify_format = function($class_name,$m=null,$b=null){
 		print("\033[".$l.'D'."\033[0K");
 		print($f);
 		try{
-			\org\rhaco\Test::run($class_name,$m,$b);
+			\org\rhaco\Test::run($class_name,$m,$b,true);
 		}catch(\Exception $e){
 			$throw = $e;
 		}
 		print("\033[".$l.'D'."\033[0K");
 		if(isset($throw)) throw $throw;
 	}else{
-		\org\rhaco\Test::run($class_name,$m,$b);
+		\org\rhaco\Test::run($class_name,$m,$b,true);
 	}
 };
 
