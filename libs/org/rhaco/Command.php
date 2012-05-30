@@ -138,20 +138,34 @@ class Command{
 	 * @param string $default 入力が空だった場合のデフォルト値
 	 * @param string[] $choice 入力を選択式で求める
 	 * @param boolean $multiline 複数行の入力をまつ、終了は行頭.(ドット)
+	 * @param boolean $invisible 入力を非表示にする(Windowsでは非表示になりません)
 	 * @return string
 	 */
-	static public function stdin($msg,$default=null,$choice=array(),$multiline=false){
+	static public function stdin($msg,$default=null,$choice=array(),$multiline=false,$invisible=false){
 		$result = null;
 		print($msg.(empty($choice) ? '' : ' ('.implode(' / ',$choice).')').(empty($default) ? '' : ' ['.$default.']').': ');
-
+		if($invisible && substr(PHP_OS,0,3) != 'WIN') print("\033[8m");
 		while(true){
 			fscanf(STDIN,'%s',$b);
 			if($multiline && $b == '.') break;
 			$result .= $b."\n";
 			if(!$multiline) break;
 		}
+		if($invisible && substr(PHP_OS,0,3) != 'WIN') print("\033[0m");
 		$result = substr(str_replace(array("\r\n","\r","\n"),"\n",$result),0,-1);
 		if(empty($result)) $result = $default;
 		if(empty($choice) || in_array($result,$choice)) return $result;
+	}
+	/**
+	 * stdinのエイリアス、入力を非表示にする
+	 * Windowsでは非表示になりません
+	 * @param string $msg 入力待ちのメッセージ
+	 * @param string $default 入力が空だった場合のデフォルト値
+	 * @param string[] $choice 入力を選択式で求める
+	 * @param boolean $multiline 複数行の入力をまつ、終了は行頭.(ドット)
+	 * @return string
+	 */
+	static public function stdin_invisible($msg,$default=null,$choice=array(),$multiline=false){
+		return self::stdin($msg,$default,$choice,$multiline,true);
 	}
 }
