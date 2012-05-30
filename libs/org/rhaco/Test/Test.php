@@ -132,9 +132,10 @@ class Test{
 				}else{
 					foreach($tests['blocks'] as $test_block){
 						list($name,$block) = $test_block;
+						$exec_block_name = ' ::'.basename($name);
 
 						if($block_name === null || $block_name === $name){
-							if($print_progress && substr(PHP_OS,0,3) != 'WIN') print('@'.basename($name));
+							if($print_progress && substr(PHP_OS,0,3) != 'WIN') print($exec_block_name);
 							try{
 								ob_start();
 								if($doctest['type'] == 3){
@@ -176,7 +177,7 @@ class Test{
 								self::$result[self::$current_file][self::$current_class][self::$current_method][$line][] = array('exception',$message,$file,$line);
 								\org\rhaco\Log::error($e);
 							}
-							if($print_progress && substr(PHP_OS,0,3) != 'WIN') print("\033[".strlen('@'.basename($name)).'D'."\033[0K");
+							if($print_progress && substr(PHP_OS,0,3) != 'WIN') print("\033[".strlen($exec_block_name).'D'."\033[0K");
 							\org\rhaco\Exceptions::clear();
 						}
 					}
@@ -419,7 +420,7 @@ class Test{
 			}
 		}
 		self::merge_setup_teardown($result);
-		return array('filename'=>$filename,'type'=>1,'name'=>$class_name,'tests'=>$result);
+		return array('filename'=>$filename,'type'=>1,'name'=>$rc->getName(),'tests'=>$result);
 	}
 	final static private function merge_setup_teardown(&$result){
 		if(isset($result['@']['blocks'])){
