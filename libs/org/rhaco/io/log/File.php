@@ -8,10 +8,6 @@ namespace org\rhaco\io\log;
 class File{
 	private $path;
 
-	static public function __import__(){
-		ini_set('log_errors','On');
-		ini_set('error_log',self::path());
-	}
 	static private function path($dir=null){
 		if($dir===null) $dir = \org\rhaco\Conf::get('path',\org\rhaco\io\File::work_path('logs'));
 		if(substr(str_replace("\\",'/',$dir),-1) == '/') $dir = subustr($dir,0,-1);
