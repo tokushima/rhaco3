@@ -41,8 +41,10 @@ class FacebookSimpleAuth{
 			
 			$http->vars('access_token',$access_token);
 			$http->do_get('https://graph.facebook.com/me');
-			$user = json_decode($http->body());
-			$req->user($user);
+			$ret = json_decode($http->body(),true);
+			if(isset($ret['error']) && $ret['error']['type'] == 'OAuthException') return false;
+			$ret['access_token'] = $access_token;
+			$req->user((object)$ret);
 			return true;
 		}
 		return false;
