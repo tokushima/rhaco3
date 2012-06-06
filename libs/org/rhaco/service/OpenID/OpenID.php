@@ -3,7 +3,7 @@ namespace org\rhaco\service;
 /**
  * OpenID
  * @author tokushima
- * 
+ * @incomplete
  * @see http://gitorious.org/lightopenid/lightopenid/trees/master
  * openid.php -> _extlibs/LightOpenID.php
  */

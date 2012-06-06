@@ -3,6 +3,7 @@ namespace org\rhaco\service\flow\module;
 /**
  * Openid認証
  * @author tokushima
+ * @incomplete
  * openid_identifier http://mixi.jp
  * openid_identifier https://www.google.com/accounts/o8/id
  */
