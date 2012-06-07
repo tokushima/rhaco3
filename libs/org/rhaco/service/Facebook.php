@@ -4,7 +4,7 @@ namespace org\rhaco\service;
  * 
  * @incomplete
  * @author tokushima
- *
+ * @see https://developers.facebook.com/docs/reference/api/photo/
  */
 class Facebook{
 	private $client_id;
@@ -59,6 +59,17 @@ class Facebook{
 		$http = new \org\rhaco\net\Http();
 		$http->vars('access_token',$this->access_token);
 		$http->do_get('https://graph.facebook.com/me/albums');
-		return json_decode($http->body(),true);
+		$data = json_decode($http->body(),true);
+		// TODO paginatorどうしよ
+		return $data['data'];
+	}
+	public function photos($album_id){
+		if(empty($this->access_token)) $this->get_access_token();
+		$http = new \org\rhaco\net\Http();
+		$http->vars('access_token',$this->access_token);
+		$http->do_get('https://graph.facebook.com/'.$album_id.'/photos');
+		$data = json_decode($http->body(),true);
+		// TODO paginatorどうしよ
+		return $data['data'];
 	}
 }
