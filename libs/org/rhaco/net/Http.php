@@ -39,6 +39,14 @@ class Http{
 		return $this->body;
 	}
 	/**
+	 * 自動でリダイレクトするか
+	 * @param boolean $bool
+	 */
+	public function status_redirect($bool){
+		$this->status_redirect = (boolean)$bool;
+		return $this;
+	}
+	/**
 	 * APIのベースURLを設定する
 	 * @param string $url
 	 * @return $this
@@ -535,7 +543,7 @@ class Http{
 		if(!isset($header['User-Agent'])) $header['User-Agent'] = empty($this->agent) ? (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null) : $this->agent;
 		if(!isset($header['Accept'])) $header['Accept'] = isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : null;
 		if(!isset($header['Accept-Language'])) $header['Accept-Language'] = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : null;
-		if(!isset($header['Accept-Charset'])) $header['Accept-Charset'] = isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : null;
+		if(!isset($header['Accept-Charset'])) $header['Accept-Charset'] = isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : (isset($header['Accept-Language']) ? 'UTF-8' : null);
 		$header['Connection'] = 'Close';
 
 		foreach($header as $k => $v){
