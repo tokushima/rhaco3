@@ -48,14 +48,14 @@ class Facebook{
 		throw new \RuntimeException('');
 	}
 	public function me(){
-		if(empty($this->access_token)) $this->get_access_token();
+		if(empty($this->access_token)) $this->get_access_token('user_photos');
 		$http = new \org\rhaco\net\Http();
 		$http->vars('access_token',$this->access_token);
 		$http->do_get('https://graph.facebook.com/me');
 		return json_decode($http->body(),true);
 	}
 	public function albums(){
-		if(empty($this->access_token)) $this->get_access_token();
+		if(empty($this->access_token)) $this->get_access_token('user_photos');
 		$http = new \org\rhaco\net\Http();
 		$http->vars('access_token',$this->access_token);
 		$http->do_get('https://graph.facebook.com/me/albums');
@@ -64,7 +64,7 @@ class Facebook{
 		return $data['data'];
 	}
 	public function photos($album_id){
-		if(empty($this->access_token)) $this->get_access_token();
+		if(empty($this->access_token)) $this->get_access_token('user_photos');
 		$http = new \org\rhaco\net\Http();
 		$http->vars('access_token',$this->access_token);
 		$http->do_get('https://graph.facebook.com/'.$album_id.'/photos');
