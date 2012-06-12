@@ -546,7 +546,6 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function explorer(){
-		// TODO つくりたい
-		// https://developers.facebook.com/tools/explorer
+		$this->vars('maps',$this->maps());
 	}
 }

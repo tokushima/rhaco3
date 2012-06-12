@@ -20,5 +20,8 @@ $flow->output(array(''
 	
 	,'fb'=>array('action'=>'org.rhaco.flow.parts.Sample','modules'=>'org.rhaco.service.flow.module.FacebookSimpleAuth')
 	,'openid'=>array('action'=>'org.rhaco.flow.parts.Sample','modules'=>'org.rhaco.service.flow.module.OpenidSimpleAuth')	
+	
+	,'post'=>array('action'=>'org.rhaco.flow.parts.Sample::post')
+	,'get'=>array('action'=>'org.rhaco.flow.parts.Sample::get')
 )));
 
