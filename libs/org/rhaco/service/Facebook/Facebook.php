@@ -1,10 +1,12 @@
 <?php
 namespace org\rhaco\service;
 /**
- * 
- * @incomplete
  * @author tokushima
  * @see https://developers.facebook.com/docs/reference/api/photo/
+ * @see https://developers.facebook.com/docs/authentication/server-side/
+ * @see https://developers.facebook.com/docs/authentication/permissions/
+ * 
+ * @see https://www.facebook.com/settings?tab=applications
  */
 class Facebook{
 	private $client_id;
@@ -18,14 +20,25 @@ class Facebook{
 		$this->client_id = $client_id;
 		$this->client_secret = $client_secret;
 	}
+	public function access_token(){
+		if(empty($this->access_token)) $this->get_access_token();
+		return $this->access_token;
+	}
 	public function set_access_token($access_token){
 		$this->access_token = $access_token;
 		return $this;
 	}
-	public function me_id($me_id){
+	public function me_id(){
+		if(empty($this->me_id)) $this->me();
+		return $this->me_id;
+	}
+	public function set_me_id($me_id){
 		$this->me_id = $me_id;
 		return $this;
 	}
+	
+	
+	
 	public function require_permissions($perm){
 		if(!$this->has_permissions($perm)) $this->get_access_token($perm,null,true);
 		return $this;
