@@ -1,10 +1,9 @@
 <rt:extends href="base.html" />
 
-<rt:block name="search_form" />
 
 <rt:block name="content">
 
-<h2>APIエクスプローラ</h2>
+<h2>Explorer</h2>
 
 
 <script type="text/javascript">
@@ -18,7 +17,7 @@ var json_obj;
 				dataType: 'text',
 				data: json_obj,
 				success: function(data,status,header){
-					$("#result_status").html(header.status);
+					$("#result_status").html('(HTTP status ' + header.status + ')');
 					$("#result_header").html(header.getAllResponseHeaders());
 					$("#result_body").html($('<div>').text(data).html());
 				}
@@ -30,26 +29,29 @@ var json_obj;
 </script>
 
 <form>
-<select name="url_list" onchange="this.form.url.value=this.options[this.selectedIndex].value" style="width:600px;">
+
+<select name="url_list" onchange="this.form.url.value=this.options[this.selectedIndex].value">
 	<rt:loop param="maps" var="map">
 		<option value="{$map['pattern']}">{$map['name']}</option>
 	</rt:loop>
 </select>
-<br />
-
-<select name="method_type" style="width:70px;" >
-	<option value="post">post</option>
-	<option value="get">get</option>
+<hr />
+<select name="method_type" style="width:70px;">
+	<option value="post">POST</option>
+	<option value="get">GET</option>
 </select>
 <input type="text" name="url" style="width:400px;" />
-<input type="button" value="send" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,this.form.data_json.value)" /><br />
-query:<textarea name="data_json" style="width:500px;">{}</textarea>
+<input class="button" type="button" value="send" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,this.form.data_json.value)" /><br />
+<textarea name="data_json" style="width:700px; height:50px;">{}</textarea>
 </form>
 
-<h3>status:</h3>
-<pre id="result_status"></pre>
-<h3>header:</h3>
-<pre id="result_header"></pre>
-<h3>body:</h3>
-<pre id="result_body"></pre>
+<div style="width:100%;">
+	<div style="height:100%;">
+		<h3>body <span id="result_status" style="font-weight: bold;"></span>:</h3>
+		<pre id="result_body"></pre>
+		
+		<h3>header:</h3>
+		<pre id="result_header"></pre>
+	</div>
+</div>
 </rt:block>
