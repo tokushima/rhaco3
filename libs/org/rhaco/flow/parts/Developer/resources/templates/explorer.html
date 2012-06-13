@@ -32,7 +32,7 @@ var json_obj;
 <form>
 <select name="url_list" onchange="this.form.url.value=this.options[this.selectedIndex].value" style="width:600px;">
 	<rt:loop param="maps" var="map">
-		<option value="{$map['pattern']}">{$map['pattern']}</option>
+		<option value="{$map['pattern']}">{$map['name']}</option>
 	</rt:loop>
 </select>
 <br />
