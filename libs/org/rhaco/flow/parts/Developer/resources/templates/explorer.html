@@ -56,7 +56,7 @@ var hoge;
 				dataType: 'text',
 				data: json_obj,
 				success: function(data,status,header){
-					$("#result_status").html('(HTTP status ' + header.status + ')');
+					$("#result_status").html('(status ' + header.status + ')');
 					$("#result_header").html(header.getAllResponseHeaders());
 					$("#result_body").html($('<div>').text(data).html());
 					$("#result_body").addClass('prettyprint');
@@ -105,7 +105,8 @@ var hoge;
 			
 			<hr />
 			<div style="margin-top: 20px;">
-				<select id="map_name_list" onchange="select_map()" style="width:250px;">
+				<select id="map_name_list" onchange="select_map()" onclick="select_map()" style="width:250px;">
+					<option value=""></option>
 					<rt:loop param="maps" var="map">
 						<option value="{$map['name']}">{$map['name']}</option>
 					</rt:loop>

@@ -546,9 +546,22 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function explorer(){
-		$maps = $this->maps();
-		foreach($maps as $k => $map){
+		$maps = array();
+		$self_name = str_replace("\\",'.',__CLASS__);
+		foreach($this->maps() as $k => $m){
+			if(!isset($m['class']) || $m['class'] != $self_name){
+				$m['summary'] = $m['error'] = '';
 
+				if($this->search_str(
+					$m['name']
+					,(isset($m['class'])?$m['class']:'')
+					,(isset($m['method'])?$m['method']:'')
+					,(isset($m['template'])?$m['template']:'')
+					,(isset($m['deprecated'])?$m['deprecated']:false)
+					,$m['url']
+					,$m['summary']
+				)) $maps[$k] = $m;
+			}
 		}
 		$this->vars('maps',$maps);
 	}
