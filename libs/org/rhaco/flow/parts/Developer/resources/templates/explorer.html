@@ -22,6 +22,7 @@ var hoge;
 					dataType: 'json',
 					data: {"class":maps[map_name].class,"method":maps[map_name].method},
 					success: function(data,status,header){
+						hoge = data;
 						param_str = '';
 						for(var param in data.params){
 							type = data.params[param][0];
@@ -36,6 +37,7 @@ var hoge;
 							
 							request_str = request_str + req + "(" + type + "): " + doc + "\n";
 						}
+						$("#method_description").html($('<div>').text(data.description).html());
 						$("#request_param").html($('<div>').text(param_str).html());
 						$("#request_request").html($('<div>').text(request_str).html());
 					}
@@ -76,15 +78,6 @@ var hoge;
 
 <form>
 <div style="margin-top: 20px;">
-	<div class="control-group error">
-		<span class="help-inline" style="font-weight: bold;">Maps:</span>
-		<select id="map_name_list" onchange="select_map()" class="span3">
-			<rt:loop param="maps" var="map">
-				<option value="{$map['name']}">{$map['name']}</option>
-			</rt:loop>
-		</select>
-	</div>
-	
 	<div class="control-group success">
 		<select name="method_type" style="width:6em;">
 			<option value="get">GET</option>
@@ -110,7 +103,15 @@ var hoge;
 			<textarea name="data_json" style="width:250px; height:100px;">{}</textarea><br />
 			<input type="checkbox" id="display_header" /> <span style="font-weight: bold;">view headers</span>
 			
+			<hr />
 			<div style="margin-top: 20px;">
+				<select id="map_name_list" onchange="select_map()" style="width:250px;">
+					<rt:loop param="maps" var="map">
+						<option value="{$map['name']}">{$map['name']}</option>
+					</rt:loop>
+				</select>
+			
+				<pre id="method_description"></pre>			
 				<h3>param (%s):</h3>
 				<pre id="request_param"></pre>
 				<h3>request (query):</h3>
