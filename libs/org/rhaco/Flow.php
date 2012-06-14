@@ -11,6 +11,7 @@ use \org\rhaco\Conf;
  */
 class Flow{
 	private $module = array();
+	private $branch_url;
 	private $app_url;
 	private $media_url;
 	private $template_path;
@@ -23,13 +24,14 @@ class Flow{
 		list($d) = debug_backtrace(false);
 		$f = str_replace("\\",'/',$d['file']);
 		$this->app_url = Conf::get('app_url',$app_url);
+
 		if(empty($this->app_url)) $this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
 		if(substr($this->app_url,-1) != '/') $this->app_url .= '/';
 		$this->template_path = str_replace("\\",'/',Conf::get('template_path',\org\rhaco\io\File::resource_path('templates')));
 		if(substr($this->template_path,-1) != '/') $this->template_path .= '/';
 		$this->media_url = str_replace("\\",'/',Conf::get('media_url',$this->app_url.'resources/media/'));
-		if(substr($this->media_url,-1) != '/') $this->media_url .= '/';
-		if(($branch = substr(basename($f),0,-4)) !== 'index') $this->app_url = $this->app_url.$branch.'/';
+		if(substr($this->media_url,-1) != '/') $this->media_url .= '/';		
+		$this->branch_url = $this->app_url.((($branch = substr(basename($f),0,-4)) !== 'index') ? $branch.'/' : '');
 		$this->template = new Template();
 	}
 	public function package_media_url($path){
@@ -182,7 +184,7 @@ class Flow{
 					$apps[(string)$k] = $v;
 				}
 			}
-			list($url,$surl) = array($this->app_url,str_replace('http://','https://',$this->app_url));
+			list($url,$surl) = array($this->branch_url,str_replace('http://','https://',$this->branch_url));
 			$map_secure = (isset($map['secure']) && $map['secure'] === true);
 			$conf_secure = (\org\rhaco\Conf::get('secure',true) === true);
 			foreach($apps as $u => $m){
@@ -244,7 +246,7 @@ class Flow{
 						}
 					}
 					if(isset($apps[$k]['redirect'])){
-						header('Location: '.\org\rhaco\net\Path::absolute($this->app_url,$apps[$k]['redirect']));
+						header('Location: '.\org\rhaco\net\Path::absolute($this->branch_url,$apps[$k]['redirect']));
 						exit;
 					}
 					if(isset($map['modules'])){
@@ -293,7 +295,7 @@ class Flow{
 						if(isset($apps[$k]['template'])){
 							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 						}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html')){
-							$this->print_template(dirname($t).'/',basename($t),$this->app_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
+							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 						}else if($this->has_object_module('flow_output')){
 							/**
 							 * 結果出力
@@ -331,7 +333,7 @@ class Flow{
 							foreach($apps as $m){
 								if(isset($m['name']) && $m['name'] == $map['error_redirect'] && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
 							}
-							\org\rhaco\net\http\Header::redirect($this->app_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
+							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
 						}else{
 							if(isset($apps[$k]['error_template'])){
 								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
@@ -343,7 +345,7 @@ class Flow{
 								exit;
 							}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html')){
 								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
-								$this->print_template(dirname($t).'/',basename($t),$this->app_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
+								$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 								exit;
 							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
 								if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
@@ -364,7 +366,7 @@ class Flow{
 			foreach($apps as $m){
 				if(isset($m['name']) && $m['name'] == $map['nomatch_redirect'] && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
 			}
-			\org\rhaco\net\http\Header::redirect($this->app_url.((substr($map['nomatch_redirect'],0,1) == '/') ? substr($map['nomatch_redirect'],1) : $map['nomatch_redirect']));
+			\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['nomatch_redirect'],0,1) == '/') ? substr($map['nomatch_redirect'],1) : $map['nomatch_redirect']));
 		}
 		if(($level = \org\rhaco\Conf::get('notfound_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
 			\org\rhaco\Log::$level(\org\rhaco\Request::current_url().' (`'.$pathinfo.'`) bad request');
@@ -392,7 +394,7 @@ class Flow{
 		$this->template->media_url($media_url);
 		$this->template->cp($obj);
 		if(isset($apps[$index]['vars'])) $this->template->cp($apps[$index]['vars']);
-		$this->template->vars('t',new \org\rhaco\flow\module\Helper($media_url,$apps[$index]['name'],$apps[$index]['num'],$apps,$obj));
+		$this->template->vars('t',new \org\rhaco\flow\module\Helper($this->app_url,$media_url,$apps[$index]['name'],$apps[$index]['num'],$apps,$obj));
 		$src = $this->template->read($template);
 		/**
 		 * テンプレートの出力

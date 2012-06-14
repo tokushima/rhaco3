@@ -5,21 +5,27 @@ namespace org\rhaco\flow\module;
  * @author tokushima
  */
 class Helper{
+	private $app_url;
 	private $media_url;
 	private $name;
 	private $map_name;
 	private $url_pattern = array();
+	
 	private $is_login = false;
 	private $user;
 
-	public function __construct($media_url=null,$name=null,$num=0,$map=array(),$obj=null){
+	public function __construct($app_url=null,$media_url=null,$name=null,$num=0,$map=array(),$obj=null){
+		$this->app_url = $app_url;
 		$this->media_url = $media_url;
 		$this->name = $name;
 		$this->map_name = $name.'#'.$num;
+		$secure = false;
 
 		foreach($map as $p => $m){
-			if(isset($m['name'])) $this->url_pattern[$m['name'].'#'.$m['num']] = $m;
+			$this->url_pattern[$m['name'].'#'.$m['num']] = $m;
+			if($m['name'] === $this->name) $secure = $m['secure'];
 		}
+		if($secure) $this->app_url = str_replace('http://','https://',$this->app_url);
 		if($obj instanceof \org\rhaco\flow\parts\RequestFlow){
 			$this->is_login = $obj->is_login();
 			$this->user = $obj->user();
@@ -158,6 +164,14 @@ class Helper{
 	 */
 	public function media($url=null){
 		return \org\rhaco\net\Path::absolute($this->media_url,$url);
+	}
+	/**
+	 * アプリケーションのURLを返す
+	 * @param string $url ベースのURLに続く相対パス
+	 * @retunr string
+	 */
+	public function app_url($url=null){
+		return \org\rhaco\net\Path::absolute($this->app_url,$url);
 	}
 	/**
 	 * ゼロを桁数分前に埋める
