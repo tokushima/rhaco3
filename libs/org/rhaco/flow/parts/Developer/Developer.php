@@ -546,6 +546,20 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function explorer(){
-		$this->vars('maps',$this->maps());
+		$maps = $this->maps();
+		foreach($maps as $k => $map){
+
+		}
+		$this->vars('maps',$maps);
+	}
+	/**
+	 * @automap
+	 */
+	public function method_info_json(){
+		$result = array();
+		try{
+			$result = \org\rhaco\Man::method_info($this->in_vars('class'),$this->in_vars('method'));
+		}catch(\Exception $e){}
+		\org\rhaco\lang\Json::output($result);
 	}
 }

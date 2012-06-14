@@ -3,11 +3,48 @@
 
 <rt:block name="content">
 
-<h2>Explorer</h2>
+<h2>API Explorer</h2>
 
 
 <script type="text/javascript">
-var json_obj;
+	var maps = {$t.json($maps)};
+var hoge;
+	function select_map(){
+		name = $("#map_name_list").children(':selected').val();
+
+		for(var map_name in maps){
+			if(map_name == name){
+				$("#url").val(maps[map_name].pattern);			
+
+				$.ajax({
+					type: 'GET',
+					url: "{$t.package_method_url('method_info_json')}",
+					dataType: 'json',
+					data: {"class":maps[map_name].class,"method":maps[map_name].method},
+					success: function(data,status,header){
+						param_str = '';
+						for(var param in data.params){
+							type = data.params[param][0];
+							doc = data.params[param][1];
+							
+							param_str = param_str + param + "(" + type + "): " + doc + "\n";
+						}
+						request_str ='';
+						for(var req in data.request){
+							type = data.request[req][0];
+							doc = data.request[req][1];
+							
+							request_str = request_str + req + "(" + type + "): " + doc + "\n";
+						}
+						$("#request_param").html($('<div>').text(param_str).html());
+						$("#request_request").html($('<div>').text(request_str).html());
+					}
+				});
+
+				break;
+			}
+		}
+	}
 	function send(url,method_type,json_str){
 		try{
 			json_obj = eval('(' + json_str + ')');
@@ -20,6 +57,15 @@ var json_obj;
 					$("#result_status").html('(HTTP status ' + header.status + ')');
 					$("#result_header").html(header.getAllResponseHeaders());
 					$("#result_body").html($('<div>').text(data).html());
+					$("#result_body").addClass('prettyprint');
+				    prettyPrint();
+				    
+				    if($("#display_header").attr('checked')){
+				    	alert('S');
+						$("#header_field").show();
+					}else{
+						$("#header_field").hide();
+					}
 				}
 			});
 		}catch(e){
@@ -29,29 +75,50 @@ var json_obj;
 </script>
 
 <form>
-
-<select name="url_list" onchange="this.form.url.value=this.options[this.selectedIndex].value">
-	<rt:loop param="maps" var="map">
-		<option value="{$map['pattern']}">{$map['name']}</option>
-	</rt:loop>
-</select>
-<hr />
-<select name="method_type" style="width:70px;">
-	<option value="post">POST</option>
-	<option value="get">GET</option>
-</select>
-<input type="text" name="url" style="width:400px;" />
-<input class="button" type="button" value="send" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,this.form.data_json.value)" /><br />
-<textarea name="data_json" style="width:700px; height:50px;">{}</textarea>
-</form>
-
-<div style="width:100%;">
-	<div style="height:100%;">
-		<h3>body <span id="result_status" style="font-weight: bold;"></span>:</h3>
-		<pre id="result_body"></pre>
-		
-		<h3>header:</h3>
-		<pre id="result_header"></pre>
+<div style="margin-top: 20px;">
+	<div class="control-group error">
+		<span class="help-inline" style="font-weight: bold;">Maps:</span>
+		<select id="map_name_list" onchange="select_map()" class="span3">
+			<rt:loop param="maps" var="map">
+				<option value="{$map['name']}">{$map['name']}</option>
+			</rt:loop>
+		</select>
+	</div>
+	
+	<div class="control-group success">
+		<select name="method_type" style="width:6em;">
+			<option value="get">GET</option>
+			<option value="post">POST</option>
+		</select>
+		<input type="text" id="url" style="width: 80%;" />
+		<input class="button" type="button" value="Send" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,this.form.data_json.value)" />
 	</div>
 </div>
+<div class="container-fluid" style="margin-top: 20px;">
+	<div class="row-fluid">
+		<div class="span8">
+			<h3>response <span id="result_status" style="font-weight: bold;"></span>:</h3>
+			<pre id="result_body" class="prettyprint"></pre>
+			
+			<div id="header_field" style="display: none;">
+				<h3>headers</h3>
+				<pre id="result_header"></pre>
+			</div>
+	    </div>
+		<div class="span4">
+			 <h3>query (json)</h3>
+			<textarea name="data_json" style="width:250px; height:100px;">{}</textarea><br />
+			<input type="checkbox" id="display_header" /> <span style="font-weight: bold;">view headers</span>
+			
+			<div style="margin-top: 20px;">
+				<h3>param (%s):</h3>
+				<pre id="request_param"></pre>
+				<h3>request (query):</h3>
+				<pre id="request_request"></pre>
+			</div>
+		</div>
+	</div>
+</div>
+
+</form>
 </rt:block>
