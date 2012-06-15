@@ -45,6 +45,7 @@ var hoge;
 							request_str = request_str + req + " (" + type + "): " + doc + "\n";
 						}
 						$("#send_method").html($("<div>").text("[ " + (data.is_post ? "POST" : "GET") + " ]").html());
+						$("#method_type").val((data.is_post ? "post" : "get"));
 						$("#method_description").html($("<div>").text(data.description).html());
 						$("#request_param").html($("<div>").text(param_str).html());
 						$("#request_request").html($("<div>").text(request_str).html());
@@ -93,7 +94,7 @@ var hoge;
 <form>
 <div style="margin-top: 20px;">
 	<div class="control-group success">
-		<select name="method_type" style="width:6em;">
+		<select name="method_type" id="method_type" style="width:6em;">
 			<option value="get">GET</option>
 			<option value="post">POST</option>
 		</select>
@@ -104,16 +105,16 @@ var hoge;
 <div class="container-fluid" style="margin-top: 20px;">
 	<div class="row-fluid">
 		<div class="span8">
-			<h3>response <span id="result_status" style="font-weight: bold;"></span>:</h3>
+			<h4>response <span id="result_status" style="font-weight: bold;"></span>:</h4>
 			<pre id="result_body" class="prettyprint"></pre>
 			
 			<div id="header_field" style="display: none;">
-				<h3>headers</h3>
+				<h4>headers</h4>
 				<pre id="result_header"></pre>
 			</div>
 	    </div>
 		<div class="span4">
-			 <h3>query (json)</h3>
+			 <h4>request query (json)</h4>
 			<textarea name="data_json" style="width:250px; height:100px;">{}</textarea><br />
 			<input type="checkbox" id="display_header" /> <span style="font-weight: bold;">view headers</span>
 			
@@ -129,9 +130,9 @@ var hoge;
 			
 				<div id="send_method"></div>
 				<pre id="method_description"></pre>
-				<h3>parameter:</h3>
+				<h4>parameter:</h4>
 				<pre id="request_param"></pre>
-				<h3>request:</h3>
+				<h4>request:</h4>
 				<pre id="request_request"></pre>
 			</div>
 		</div>

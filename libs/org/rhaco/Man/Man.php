@@ -178,7 +178,7 @@ class Man{
 		return array(
 				'package'=>$class,'method_name'=>$method,'params'=>$params,'request'=>$request,'context'=>$context
 				,'args'=>$args,'return'=>$return,'description'=>$description,'throws'=>$throws
-				,'is_post'=>(strpos($src,'$this->is_post()') !== false)
+				,'is_post'=>((strpos($src,'$this->is_post()') !== false) && (strpos($src,'!$this->is_post()') === false))
 				,'deprecated'=>$deprecated
 				);
 	}
