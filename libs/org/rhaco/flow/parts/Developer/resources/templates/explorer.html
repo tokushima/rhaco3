@@ -1,14 +1,23 @@
 <rt:extends href="base.html" />
 
 
+<rt:block name="search_form">
+	<form class="navbar-search pull-left" rt:ref="true">
+		<input type="text" class="search-query span2" placeholder="Search" name="q">
+	</form>
+</rt:block>
+
 <rt:block name="content">
-
-<h2>API Explorer</h2>
-
 
 <script type="text/javascript">
 	var maps = {$t.json($maps)};
 	
+	$(function(){
+		$("#map_name_list").append($("<option>").html("").val(""));
+		for(var i in maps){
+			$("#map_name_list").append($("<option>").html(maps[i].name).val(maps[i].name + "|" + maps[i].num));
+		}
+	});
 	function select_map(){
 		$("#method_description").html("");
 		$("#request_param").html("");
@@ -50,10 +59,10 @@
 						}
 						$("#send_method").html($("<div>").text("[ " + (data.is_post ? "POST" : "GET") + " ]").html());
 						$("#method_type").val((data.is_post ? "post" : "get"));
-						$("#method_description").html($("<div>").text(data.description).html());
 						$("#request_param").html($("<div>").text(param_str).html());
 						$("#request_request").html($("<div>").text(request_str).html());
-						$("#data_json").val("{\n" + request_query_str + "\n}")
+						$("#data_json").val("{\n" + request_query_str + "\n}");
+						if(data.description) $("#method_description").html($("<div>").text(data.description).html());
 					},
 					error: function(data){
 					}
@@ -72,20 +81,20 @@
 				json_str = "{}";
 				$("#data_json").val(json_str);
 			}
-			json_obj = eval('(' + json_str + ')');
+			json_obj = eval("(" + json_str + ")");
 			$.ajax({
 				type: method_type,
 				url: url,
 				dataType: 'text',
 				data: json_obj,
 				success: function(data,status,header){
-					$("#result_status").html('(status ' + header.status + ')');
+					$("#result_status").html("(status " + header.status + ")");
 					$("#result_header").html(header.getAllResponseHeaders());
-					$("#result_body").html($('<div>').text(data).html());
-					$("#result_body").addClass('prettyprint');
+					$("#result_body").html($("<div>").text(data).html());
+					$("#result_body").addClass("prettyprint");
 				    prettyPrint();
 				    
-				    if($("#display_header").attr('checked')){
+				    if($("#display_header").attr("checked")){
 						$("#header_field").show();
 					}else{
 						$("#header_field").hide();
@@ -101,22 +110,25 @@
 	}
 </script>
 
+
+<h2>Explorer</h2>
+
 <form>
-<div style="margin-top: 20px;">
+<div>
 	<div class="control-group success">
-		<select name="method_type" id="method_type" style="width:6em;">
+		<select name="method_type" id="method_type" style="width:5em;">
 			<option value="get">GET</option>
 			<option value="post">POST</option>
 		</select>
-		<input type="text" id="url" style="width: 80%;" />
-		<input class="button" type="button" value="Send" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,this.form.data_json.value)" />
+		<input type="text" id="url" style="width: 70%;" />
+		<input class="button" type="button" value="Send" style="width:100px;" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,this.form.data_json.value)" />
 	</div>
 </div>
 <div class="container-fluid" style="margin-top: 20px;">
 	<div class="row-fluid">
 		<div class="span8">
 			<h4>response <span id="result_status" style="font-weight: bold;"></span>:</h4>
-			<pre id="result_body" class="prettyprint"></pre>
+			<pre id="result_body" class="prettyprint" style="padding: 5px;"></pre>
 			
 			<div id="header_field" style="display: none;">
 				<h4>headers</h4>
@@ -131,12 +143,7 @@
 			<hr />
 			<div style="margin-top: 20px;">
 				<select id="map_name_list" onchange="select_map()" style="width:250px;">
-					<option value=""></option>
-					<rt:loop param="maps" var="map" key="key">
-						<option value="{$map['name']}|{$map['num']}">{$map['name']}</option>
-					</rt:loop>
 				</select>
-			
 			
 				<div id="send_method"></div>
 				<pre id="method_description"></pre>
