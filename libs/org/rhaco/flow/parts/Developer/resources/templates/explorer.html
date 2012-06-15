@@ -57,12 +57,11 @@
 							request_str = request_str + req + " (" + type + "): " + doc + "\n";
 							request_query_str = request_query_str + req + ":" + "null,\n";
 						}
-						$("#send_method").html($("<div>").text("[ " + (data.is_post ? "POST" : "GET") + " ]").html());
 						$("#method_type").val((data.is_post ? "post" : "get"));
 						$("#request_param").html($("<div>").text(param_str).html());
 						$("#request_request").html($("<div>").text(request_str).html());
 						$("#data_json").val("{\n" + request_query_str + "\n}");
-						if(data.description) $("#method_description").html($("<div>").text(data.description).html());
+						$("#method_description").html($("<div>").text(("[ " + (data.is_post ? "POST" : "GET") + " ]\n") + ((data.description) ? data.description : "")).html());
 					},
 					error: function(data){
 					}
@@ -136,20 +135,21 @@
 			</div>
 	    </div>
 		<div class="span4">
-			 <h4>request query (json)</h4>
+			 <h5>request query</h5>
 			<textarea name="data_json" id="data_json" style="width:250px; height:100px;">{}</textarea><br />
 			<input type="checkbox" id="display_header" /> <span style="font-weight: bold;">view headers</span>
 			
 			<hr />
 			<div style="margin-top: 20px;">
-				<select id="map_name_list" onchange="select_map()" style="width:250px;">
-				</select>
+				<h3>Maps</h3>
 			
-				<div id="send_method"></div>
+				<select id="map_name_list" onchange="select_map()" style="width:290px;">
+				</select>
+				
 				<pre id="method_description"></pre>
-				<h4>parameter:</h4>
+				<h5>parameter</h5>
 				<pre id="request_param"></pre>
-				<h4>request:</h4>
+				<h5>request</h5>
 				<pre id="request_request"></pre>
 			</div>
 		</div>
