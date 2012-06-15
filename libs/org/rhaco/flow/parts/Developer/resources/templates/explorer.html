@@ -8,7 +8,6 @@
 
 <script type="text/javascript">
 	var maps = {$t.json($maps)};
-var hoge;
 	
 	function select_map(){
 		$("#method_description").html("");
@@ -61,6 +60,10 @@ var hoge;
 			$("#result_header").html("");
 			$("#result_body").html("");
 			
+			if(json_str.replace(/(^\s+)|(\s+$)/g,"") == ""){
+				json_str = "{}";
+				$("#data_json").val(json_str);
+			}
 			json_obj = eval('(' + json_str + ')');
 			$.ajax({
 				type: method_type,
@@ -75,7 +78,6 @@ var hoge;
 				    prettyPrint();
 				    
 				    if($("#display_header").attr('checked')){
-				    	alert('S');
 						$("#header_field").show();
 					}else{
 						$("#header_field").hide();
@@ -115,7 +117,7 @@ var hoge;
 	    </div>
 		<div class="span4">
 			 <h4>request query (json)</h4>
-			<textarea name="data_json" style="width:250px; height:100px;">{}</textarea><br />
+			<textarea name="data_json" id="data_json" style="width:250px; height:100px;">{}</textarea><br />
 			<input type="checkbox" id="display_header" /> <span style="font-weight: bold;">view headers</span>
 			
 			<hr />
