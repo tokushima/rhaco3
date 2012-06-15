@@ -1,6 +1,7 @@
 v<?php
 /**
  * エントリファイルを書き出す
+ * @param string $name エントリ名
  */
 $name = isset($params['name']) ? $params['name'] : 'index';
 $path = getcwd().'/'.$name.'.php';
