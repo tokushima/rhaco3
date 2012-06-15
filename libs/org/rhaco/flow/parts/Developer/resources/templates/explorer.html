@@ -46,7 +46,7 @@
 							doc = data.request[req][1];
 							
 							request_str = request_str + req + " (" + type + "): " + doc + "\n";
-							request_query_str = request_query_str + req + ":" + "\"\",\n";
+							request_query_str = request_query_str + req + ":" + "null,\n";
 						}
 						$("#send_method").html($("<div>").text("[ " + (data.is_post ? "POST" : "GET") + " ]").html());
 						$("#method_type").val((data.is_post ? "post" : "get"));
