@@ -24,9 +24,11 @@
 				$.ajax({
 					type: 'GET',
 					url: "{$t.package_method_url('method_info_json')}",
-					dataType: 'json',
+					dataType: 'text',
 					data: {"class":maps[map_name].class,"method":maps[map_name].method},
 					success: function(data,status,header){
+						data = eval('(' + data + ')');
+						
 						param_str = '';
 						for(var param in data.params){
 							type = data.params[param][0];
@@ -36,18 +38,24 @@
 							param_str = param_str + uc + " (" + type + "): " + doc + "\n";
 							$("#url").val($("#url").val().replace(/%[sdw]/,uc));
 						}
-						request_str ='';
+						request_str = "";
+						request_query_str = "";
+						
 						for(var req in data.request){
 							type = data.request[req][0];
 							doc = data.request[req][1];
 							
 							request_str = request_str + req + " (" + type + "): " + doc + "\n";
+							request_query_str = request_query_str + req + ":" + "\"\",\n";
 						}
 						$("#send_method").html($("<div>").text("[ " + (data.is_post ? "POST" : "GET") + " ]").html());
 						$("#method_type").val((data.is_post ? "post" : "get"));
 						$("#method_description").html($("<div>").text(data.description).html());
 						$("#request_param").html($("<div>").text(param_str).html());
 						$("#request_request").html($("<div>").text(request_str).html());
+						$("#data_json").val("{\n" + request_query_str + "\n}")
+					},
+					error: function(data){
 					}
 				});
 				break;
