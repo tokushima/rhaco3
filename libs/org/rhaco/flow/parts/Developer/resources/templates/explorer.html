@@ -10,7 +10,7 @@
 <rt:block name="content">
 
 <script type="text/javascript">
-	var maps = {$t.json($maps)};
+	var maps = {$t.noop($t.json($maps))};
 	
 	$(function(){
 		$("#map_name_list").append($("<option>").html("").val(""));
