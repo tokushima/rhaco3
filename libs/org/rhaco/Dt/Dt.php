@@ -1,13 +1,12 @@
 <?php
-namespace org\rhaco\flow\parts;
+namespace org\rhaco;
 use \org\rhaco\Exceptions;
 use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
- * @deprecated => org.rhaco.Dt
  * @author tokushima
  */
-class Developer extends \org\rhaco\flow\parts\RequestFlow{
+class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	private $smtp_blackhole_dao;
 	private $dao;
 
@@ -35,7 +34,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('app_description',$description);
 		$this->vars('app_dirname',basename(dirname($d['file'])));
 		$this->vars('app_mode',\Rhaco3::mode());
-		$this->vars('f',new Developer\Helper());
+		$this->vars('f',new Dt\Helper());
 		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
 		$this->vars('has_dao',class_exists($this->dao));
 	}
@@ -43,7 +42,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 		return array(
 					new \org\rhaco\flow\module\TwitterBootstrapPagination()
 					,new \org\rhaco\flow\module\Exceptions()
-					,new Developer\Formatter()
+					,new Dt\Formatter()
 					,new \org\rhaco\flow\module\Dao()
 				);
 	}
@@ -505,7 +504,7 @@ class Developer extends \org\rhaco\flow\parts\RequestFlow{
 					$dev_index = null;
 					foreach($maps as $m){
 						if(isset($m['class']) && isset($m['method']) 
-							&& $m['class'] == 'org.rhaco.flow.parts.Developer' && $m['method'] == 'index'
+							&& $m['class'] == 'org.rhaco.Dt' && $m['method'] == 'index'
 						){
 							$dev_index = $m['format'];
 							break;

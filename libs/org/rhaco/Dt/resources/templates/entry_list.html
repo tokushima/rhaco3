@@ -1,0 +1,30 @@
+<rt:extends href="base.html" />
+
+<rt:block name="content">
+<h2>Entry</h2>
+
+<table rt:param="object_list" rt:var="obj">
+<thead>
+<tr>
+	<th>entry</th>
+	<th>name</th>
+	<th>summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+	<td>
+		<rt:if param='{$obj.url()}'>
+			<a href="{$obj.url()}">{$obj.entry()}</a>
+		<rt:else />
+			{$obj.entry()}
+		</rt:if>
+
+	</td>
+	<td>{$obj.name()}</td>
+	<td>{$obj.summary()}</td>
+</tr>
+</tbody>
+</table>
+
+</rt:block>

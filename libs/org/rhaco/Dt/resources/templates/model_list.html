@@ -1,0 +1,152 @@
+<rt:extends href="base.html" />
+
+<rt:block name="content">
+<script type="text/javascript">
+	function conf_sample(frm,pkg){
+		type = frm.type.options[frm.type.selectedIndex].value;
+		frm.type_other.style.display = (frm.type.selectedIndex == 0) ? 'block' : 'none';
+		
+		if(type == 'org.rhaco.store.db.module.Sqlite'){
+			if(frm.host.value == 'localhost') frm.host.value = '{$getcwd}';
+			if(frm.dbname.value == '{$app_dirname}') frm.dbname.value = '{$app_dirname}.db';
+			frm.user.value = '';
+			frm.password.value = '';
+			frm.port_sock_value.value = '';
+		}else{
+			if(frm.host.value == '{$getcwd}') frm.host.value = 'localhost';
+			if(frm.dbname.value == '{$app_dirname}.db') frm.dbname.value = '{$app_dirname}';
+			frm.user.value = 'root';
+			frm.password.value = 'root';
+			frm.port_sock_value.value = '3306';
+		}
+		frm.sample.value = "\\org\\rhaco\\Conf::set('org.rhaco.store.db.Dao','connection',array(\n"
+							+ "'" + pkg + "'=>array(\n"
+							+ "'type'=>'" + ((type == '') ? frm.type_other.value : type) + "',"
+							+ "'host'=>'" + frm.host.value + "',"
+							+ "'dbname'=>'" + frm.dbname.value + "',"
+							+ "'user'=>'" + frm.user.value + "',"
+							+ "'password'=>'" + frm.password.value + "',"
+							+ "'" + ((frm.port_sock.value == "port") ? "port" : "sock") + "'=>'" + frm.port_sock_value.value + "',"
+							+ "'encode'=>'" + frm.encode.value + "'"
+							+ "\n)));";
+	}
+	function port_sock_default(frm,pkg){
+		type = frm.type.options[frm.type.selectedIndex].value;
+		if(type != 'org.rhaco.store.db.module.Sqlite'){
+			frm.port_sock_value.value = (frm.port_sock.options[frm.port_sock.selectedIndex].value == 'port') ? '3306' : '/tmp/mysql.sock';
+			conf_sample(frm,pkg);
+		}
+	}
+</script>
+<style type="text/css">
+ .connection_setting input{ margin: 0; width: 90%; }
+</style>
+
+<h2 class="title">Models</h2>
+
+<table rt:param="{$dao_models}" rt:key="package" rt:var="summary" rt:counter="count">
+<thead>
+	<tr>
+		<th>&nbsp;</th>
+		<th>package</th>
+		<th>summary</th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+		<td>
+			<rt:if param="{$dao_model_con[$package]}">
+				<rt:if param="{$dao_model_errors[$package]}">
+					<a class="icon-asterisk" href="{$t.package_method_url('do_sql',$package)}?create_sql"></a>
+				<rt:else />
+					<a class="icon-list" href="{$t.package_method_url('do_find',$package)}"></a>
+				</rt:if>
+			<rt:else>
+				<div id="modal_{$count}" class="modal hide fade" style="display: none;">
+					<form class="connection_setting" id="modal_{$count}_form">
+					<div class="modal-header">
+						<h3>Connection settings</h3>
+					</div>
+					<div class="modal-body">
+						<textarea style="width:98%; height: 80px;" name="sample" onclick="this.select()">
+						</textarea>
+						<p style="color:#c3325f; margin-left:10px;">copy to __settings__.php or commons/{$app_mode}.php</p>
+						
+						<table>
+						<tr>
+							<td>type</td>
+							<td>
+								<select name="type" onChange="conf_sample(this.form,'{$package}')">
+									<option value="" ></option>
+									<option value="org.rhaco.store.db.module.Mysql"selected="selected">org.rhaco.store.db.module.Mysql </option>
+									<option value="org.rhaco.store.db.module.Sqlite">org.rhaco.store.db.module.Sqlite</option>
+								</select>
+								<input type="text" name="type_other" value=""  onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" />
+							</td>
+						</tr>
+						<tr>
+							<td>host</td>
+							<td><input type="text" name="host"  value="localhost" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>dbname</td>
+							<td><input type="text" name="dbname" value="{$app_dirname}" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>user</td>
+							<td><input type="text" name="user" value="root" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>password</td>
+							<td><input type="text" name="password" value="root"  onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>port/sock</td>
+							<td>
+								<select name="port_sock" onChange="port_sock_default(this.form,'{$package}')" style="width: 70px;">
+									<option value="port">port</option>
+									<option value="sock">sock</option>
+								</select>
+								<input type="text" name="port_sock_value" value="3306" style="width: 70%;" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						<tr>
+							<td>encode</td>
+							<td><input type="text" name="encode" value="utf8" onChange="conf_sample(this.form,'{$package}')" onKeyup="conf_sample(this.form,'{$package}')" onMouseup="conf_sample(this.form,'{$package}')" /></td>
+						</tr>
+						</table>
+					</div>
+					</form>
+	          	</div>
+				<a class="icon-warning-sign" data-toggle="modal" href="#modal_{$count}" onClick="conf_sample(modal_{$count}_form,'{$package}')"></a>
+			</rt:if>
+		</td>
+		<td>
+			<a href="{$t.package_method_url('class_info',$package)}">{$f.package_name($package)}</a>
+		</td>
+		<td style="width:90%;">
+			{$summary}
+			<rt:if param="{$dao_model_errors[$package]}">
+				<rt:if param="{$summary}"><br /></rt:if>
+				
+				<rt:if param="{$dao_model_error_query[$package]}">
+					<div id="modal_error_query_{$count}" class="modal hide fade" style="display: none;">
+						<form>
+						<div class="modal-header">
+							<h3>Error Query</h3>
+						</div>
+						<div class="modal-body">
+							<textarea style="width:98%; height: 400px;" name="sample" onclick="this.select()">{$dao_model_error_query[$package]}</textarea>
+						</div>
+						</form>
+		          	</div>
+					<a class="icon-question-sign" data-toggle="modal" href="#modal_error_query_{$count}"></a>
+				</rt:if>
+
+				<span style="color:#ff0000; font-weight: bold;">{$dao_model_errors[$package]}</span>
+			</rt:if>
+		</td>
+	</tr>
+</tbody>
+</table>
+</rt:block>
+

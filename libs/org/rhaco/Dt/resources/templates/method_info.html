@@ -1,0 +1,165 @@
+<rt:extends href="base.html" />
+
+<rt:block name="search_form" />
+
+<rt:block name="content">
+<h2 class="title"  style="{$t.cond_switch($deprecated,'text-decoration: line-through;','')}">
+	<a href="{$t.package_method_url('class_info',$package)}">{$f.package_name($package)}</a>
+	::
+	{$method_name}
+
+
+	<rt:if param="{$is_post}">
+		<span class="label important">POST</span>
+	</rt:if>
+</h2>
+
+<div class="alert alert-info">
+	{$t.html($description)}
+</div>
+
+<rt:if param="{$params}">
+	<h3>Params</h3>		
+	<table rt:param="{$params}" rt:var="param" rt:key="param_name">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th style="width:100px">type</th>
+			<th style="width:100px">default</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td>
+				<rt:if param="{$param[1]}">&</rt:if>
+				{$param_name}
+			</td>
+			<td>
+				<rt:if param="{$f.type($param[0])}">
+					<a href="{$t.package_method_url('class_info',$f.type($param[0]))}">{$param[0]}</a>
+				<rt:else />
+					{$param[0]}
+				</rt:if>
+			</td>
+			<td>{$param[3]}</td>
+			<td>{$t.html($param[4])}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
+<rt:if param="{$request}">
+	<h3>Request</h3>		
+	<table rt:param="{$request}" rt:var="arg" rt:key="name">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th style="width:100px">type</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td>{$name}</td>
+			<td>
+				<rt:if param="{$f.type($arg[0])}">
+					<a href="{$t.package_method_url('class_info',$f.type($arg[0]))}">{$arg[0]}</a>
+				<rt:else />
+					{$arg[0]}
+				</rt:if>
+			</td>
+			<td>{$t.html($arg[1])}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
+<rt:if param="{$context}">
+	<h3>Context</h3>		
+	<table rt:param="{$context}" rt:var="arg" rt:key="name">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th style="width:100px">type</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td>{$name}</td>
+			<td>
+				<rt:if param="{$f.type($arg[0])}">
+					<a href="{$t.package_method_url('class_info',$f.type($arg[0]))}">{$arg[0]}</a>
+				<rt:else />
+					{$arg[0]}
+				</rt:if>
+			</td>
+			<td>{$t.html($arg[1])}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
+<rt:if param="{$args}">
+	<h3>Arg</h3>		
+	<table rt:param="{$args}" rt:var="summary" rt:key="name">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td>{$name}</td>
+			<td>{$t.html($summary)}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
+<rt:if param="{$return}">
+	<h3>Return</h3>		
+	<table>
+	<thead>
+		<tr>
+			<th style="width:200px">type</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td>
+				<rt:if param="{$f.type($return[0])}">
+					<a href="{$t.package_method_url('class_info',$f.type($return[0]))}">{$return[0]}</a>
+				<rt:else />
+					{$return[0]}
+				</rt:if>
+			</td>
+			<td>{$t.html($return[1])}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
+<rt:if param="{$throws}">
+	<h3>Throws</h3>		
+	<table rt:param="{$throws}" rt:var="e">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td><a href="{$t.package_method_url('class_info',$f.type($e[0]))}">{$f.type($e[0])}</a></td>
+			<td>{$t.html($e[1])}</td>
+		</tr>
+	</tbody>
+	</table>	
+</rt:if>
+
+</rt:block>
+
