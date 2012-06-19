@@ -8,6 +8,7 @@ use \org\rhaco\Conf;
  * @conf string $media_url メディアファイルのベースURL
  * @conf boolean $secure patternsでsecure指定された場合にhttpsとするか
  * @conf string $exception_log_level Exceptionが発生した際にLogに出力するログレベル (error,warn,info,debug)
+ * @conf string $notfound_log_level 対象のmapが見つからなかった際にLogに出力するログレベル (error,warn,info,debug)
  */
 class Flow{
 	private $module = array();
