@@ -50,7 +50,7 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 				$this->user('root');
 				$this->password('root');
 			}
-			if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('could not find module `'.$this->type.'`');
+			if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('could not find module `'.((substr($s=str_replace("\\",'.',$this->type),0,1) == '.') ? substr($s,1) : $s).'`');
 			$r = new \ReflectionClass($this->type);
 			$this->connection_module = $r->newInstanceArgs(array($this->encode));
 			$this->set_object_module($this->connection_module);

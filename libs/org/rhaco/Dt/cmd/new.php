@@ -25,7 +25,7 @@ if(isset($htaccess)){
 			.'RewriteBase '.$htaccess.PHP_EOL
 			.PHP_EOL
 			.'RewriteCond %{REQUEST_FILENAME} !-f'.PHP_EOL
-			.'RewriteRule ^(.*)$ index.php/$1?%{QUERY_STRING} [L]'.PHP_EOL
+			.'RewriteRule ^(.*)$ '.$name.'.php/$1?%{QUERY_STRING} [L]'.PHP_EOL
 			;
 	$write_file(getcwd().'/.htaccess',$str);
 }
