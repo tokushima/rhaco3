@@ -15,6 +15,7 @@ use \org\rhaco\store\db\exception\InvalidArgumentException;
  * O/R Mapper
  * @author tokushima
  * @conf string $future_date auto_future_addで定義される日付、未定義の場合は`2038/01/01 00:00:00`
+ * @conf mixed{} $connection 接続設定
  */
 abstract class Dao extends \org\rhaco\Object{
 	static private $_dao_ = array();
