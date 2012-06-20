@@ -1,25 +1,17 @@
 <?php
 include_once('rhaco3.php');
-
-foreach(array(
-		'name','mode','template','modules','vars','args','action','redirect'
-		,'template_super','template_path','media_path','theme_path'
-		,'patterns','nomatch_redirect','error_redirect','error_status','error_template','session','secure') as $d){
-	if(!defined($d)) define($d,$d);
-}
-
 /**
  * @name rhaco.org
  * @summary site
  */
-$flow = new \org\rhaco\Flow();
-$flow->output(array(''
-,error_status=>403
-,patterns=>array(''
+\org\rhaco\Flow::out(
+array(''
+,'error_status'=>403
+,'patterns'=>array(''
 	,''=>array(
-		name=>'index'
-		,template=>'index.html'
-		,vars=>array(
+		'name'=>'index'
+		,'template'=>'index.html'
+		,'vars'=>array(
 			'xml_var'=>'hogehoge_xml_var'
 			,'xml_var_value'=>'hogehoge_xml_var_value'
 			,'xml_var_array'=>array('A1','A2','A3')
@@ -28,79 +20,79 @@ $flow->output(array(''
 		)
 	)
 	,'sample_flow_theme_media'=>array(
-		theme_path=>'theme_path'
-		,action=>'test.SampleMediaFlow'
-		,patterns=>array(
-			''=>array(name=>'sample_flow_theme_media_index',action=>'index',template=>'sample_media.html')
-			,'hoge'=>array(name=>'sample_flow_theme_media_hoge',action=>'hoge',template=>'sample_media.html')
+		'theme_path'=>'theme_path'
+		,'action'=>'test.SampleMediaFlow'
+		,'patterns'=>array(
+			''=>array('name'=>'sample_flow_theme_media_index','action'=>'index','template'=>'sample_media.html')
+			,'hoge'=>array('name'=>'sample_flow_theme_media_hoge','action'=>'hoge','template'=>'sample_media.html')
 		)
 	)
 	,'sample_flow_theme_media_plain'=>array(
-		media_path=>'media_path'
-		,action=>'test.SampleMediaFlow'
-		,patterns=>array(
-			''=>array(name=>'sample_flow_theme_media_plain_index',action=>'index',template=>'sample_media.html')
-			,'hoge'=>array(name=>'sample_flow_theme_media_plain_hoge',action=>'hoge',template=>'sample_media.html')
+		'media_path'=>'media_path'
+		,'action'=>'test.SampleMediaFlow'
+		,'patterns'=>array(
+			''=>array('name'=>'sample_flow_theme_media_plain_index','action'=>'index','template'=>'sample_media.html')
+			,'hoge'=>array('name'=>'sample_flow_theme_media_plain_hoge','action'=>'hoge','template'=>'sample_media.html')
 		)
 	)
-	,'plain_theme/template_path_theme_html'=>array(name=>'template_path_theme_html',template_path=>'template_path',theme_path=>'theme_path',template=>'index.html')
-	,'plain_theme/template_path_html'=>array(name=>'template_path_html',template=>'index.html',template_path=>'template_path')
-	,'module'=>array(name=>'module',template=>'module_index.html',action=>'org.rhaco.flow.parts.RequestFlow::noop',modules=>'test.flow.module.CoreTestModule')
-	,'module_request_flow'=>array(name=>'module_request_flow',template=>'module_index.html',modules=>'test.flow.module.CoreTestModule',action=>'org.rhaco.flow.parts.RequestFlow::noop')
-	,'sample_flow_html'=>array(name=>'sample_flow_html',template=>'sample.html')
-	,'sample_media_flow'=>array(name=>'sample_media_flow',action=>'test.SampleMediaFlow',media_path=>'media_path')
-	,'sample_flow_exception/throw'=>array(name=>'sample_flow_exception_throw',action=>'test.SampleExceptionFlow::throw_method',error_template=>'exception_flow/error.html')
-	,'sample_flow_exception/throw/xml'=>array(name=>'sample_flow_exception_throw_xml',action=>'test.SampleExceptionFlow::throw_method')
-	,'sample_flow_exception/throw/xml/package'=>array(name=>'sample_flow_exception_package_throw_xml',action=>'test.SampleExceptionFlow::throw_method_package')	
-	,'extends_block_template/extendsA'=>array(name=>'template_super_a',template=>'template_super.html')
-	,'extends_block_template/extendsB'=>array(name=>'template_super_b',template=>'template_super.html',template_super=>'template_super_x.html')
+	,'plain_theme/template_path_theme_html'=>array('name'=>'template_path_theme_html','template_path'=>'template_path','theme_path'=>'theme_path','template'=>'index.html')
+	,'plain_theme/template_path_html'=>array('name'=>'template_path_html','template'=>'index.html','template_path'=>'template_path')
+	,'module'=>array('name'=>'module','template'=>'module_index.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','modules'=>'test.flow.module.CoreTestModule')
+	,'module_request_flow'=>array('name'=>'module_request_flow','template'=>'module_index.html','modules'=>'test.flow.module.CoreTestModule','action'=>'org.rhaco.flow.parts.RequestFlow::noop')
+	,'sample_flow_html'=>array('name'=>'sample_flow_html','template'=>'sample.html')
+	,'sample_media_flow'=>array('name'=>'sample_media_flow','action'=>'test.SampleMediaFlow','media_path'=>'media_path')
+	,'sample_flow_exception/throw'=>array('name'=>'sample_flow_exception_throw','action'=>'test.SampleExceptionFlow::throw_method','error_template'=>'exception_flow/error.html')
+	,'sample_flow_exception/throw/xml'=>array('name'=>'sample_flow_exception_throw_xml','action'=>'test.SampleExceptionFlow::throw_method')
+	,'sample_flow_exception/throw/xml/package'=>array('name'=>'sample_flow_exception_package_throw_xml','action'=>'test.SampleExceptionFlow::throw_method_package')	
+	,'extends_block_template/extendsA'=>array('name'=>'template_super_a','template'=>'template_super.html')
+	,'extends_block_template/extendsB'=>array('name'=>'template_super_b','template'=>'template_super.html','template_super'=>'template_super_x.html')
 	
-	,'under_var'=>array(name=>'under_var',action=>'test.CoreApp::under_var',template=>'under_var.html')
-	,'module_throw_exception'=>array(name=>'module_throw_exception',action=>'test.CoreApp::noop',modules=>'test.flow.module.CoreTestExceptionModule')
-	,'noop'=>array(name=>'noop',action=>'test.CoreApp::noop')
-	,'method_not_allowed'=>array(name=>'method_not_allowed',action=>'test.CoreApp::method_not_allowed')
-	,'module_map'=>array(name=>'module_map',template=>'module_index.html',action=>'org.rhaco.flow.parts.RequestFlow::noop',modules=>'test.flow.module.CoreTestModule')
-	,'module_maps'=>array(name=>'module_maps',template=>'module_index.html',action=>'org.rhaco.flow.parts.RequestFlow::noop',modules=>'test.flow.module.CoreTestModule')
-	,'module_raise'=>array(name=>'module_raise',action=>'test.CoreApp::raise',template=>'module_index.html',modules=>'test.flow.module.CoreTestModule',error_template=>'module_exception.html')
-	,'module_add_exceptions'=>array(name=>'module_add_exceptions',action=>'test.CoreApp::add_exceptions',template=>'module_index.html',modules=>'test.flow.module.CoreTestModule',error_template=>'module_exception.html')
-	,'raise'=>array(name=>'raise',action=>'test.CoreApp::raise')
-	,'module_order'=>array(name=>'module_order',template=>'module_order.html',action=>'org.rhaco.flow.parts.RequestFlow::noop',modules=>'test.flow.module.CoreTestModuleOrder')
+	,'under_var'=>array('name'=>'under_var','action'=>'test.CoreApp::under_var','template'=>'under_var.html')
+	,'module_throw_exception'=>array('name'=>'module_throw_exception','action'=>'test.CoreApp::noop','modules'=>'test.flow.module.CoreTestExceptionModule')
+	,'noop'=>array('name'=>'noop','action'=>'test.CoreApp::noop')
+	,'method_not_allowed'=>array('name'=>'method_not_allowed','action'=>'test.CoreApp::method_not_allowed')
+	,'module_map'=>array('name'=>'module_map','template'=>'module_index.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','modules'=>'test.flow.module.CoreTestModule')
+	,'module_maps'=>array('name'=>'module_maps','template'=>'module_index.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','modules'=>'test.flow.module.CoreTestModule')
+	,'module_raise'=>array('name'=>'module_raise','action'=>'test.CoreApp::raise','template'=>'module_index.html','modules'=>'test.flow.module.CoreTestModule','error_template'=>'module_exception.html')
+	,'module_add_exceptions'=>array('name'=>'module_add_exceptions','action'=>'test.CoreApp::add_exceptions','template'=>'module_index.html','modules'=>'test.flow.module.CoreTestModule','error_template'=>'module_exception.html')
+	,'raise'=>array('name'=>'raise','action'=>'test.CoreApp::raise')
+	,'module_order'=>array('name'=>'module_order','template'=>'module_order.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','modules'=>'test.flow.module.CoreTestModuleOrder')
 	
-	,'redirect_test_a'=>array(name=>'redirect_by_map_method_a',action=>'test.CoreTestRedirectMapA::redirect_by_map_method_a')
-	,'redirect_test_call_a'=>array(name=>'redirect_by_map_method_call_a',template=>'redirect_test_call_a.html')
-	,'redirect_test_b'=>array(name=>'redirect_by_map_method_b',action=>'test.CoreTestRedirectMapA::redirect_by_map_method_b',args=>array('redirect_by_map_method_call_b'=>'redirect_by_map_method_call_alias_b'))
-	,'redirect_test_call_b'=>array(name=>'redirect_by_map_method_call_alias_b',template=>'redirect_test_call_b.html')
-	,'redirect_test_c'=>array(name=>'redirect_by_map_method_c',action=>'test.CoreTestRedirectMapA::redirect_by_map_method_c',args=>array('redirect_by_map_method_call_c'=>'redirect_by_map_method_call_alias_c'))
-	,'redirect_test_call_c'=>array(name=>'redirect_by_map_method_call_alias_c',template=>'redirect_test_call_c.html')
-	,'redirect_test_call_c_e'=>array(name=>'redirect_by_map_method_call_c',template=>'redirect_test_call_c_e.html')
+	,'redirect_test_a'=>array('name'=>'redirect_by_map_method_a','action'=>'test.CoreTestRedirectMapA::redirect_by_map_method_a')
+	,'redirect_test_call_a'=>array('name'=>'redirect_by_map_method_call_a','template'=>'redirect_test_call_a.html')
+	,'redirect_test_b'=>array('name'=>'redirect_by_map_method_b','action'=>'test.CoreTestRedirectMapA::redirect_by_map_method_b','args'=>array('redirect_by_map_method_call_b'=>'redirect_by_map_method_call_alias_b'))
+	,'redirect_test_call_b'=>array('name'=>'redirect_by_map_method_call_alias_b','template'=>'redirect_test_call_b.html')
+	,'redirect_test_c'=>array('name'=>'redirect_by_map_method_c','action'=>'test.CoreTestRedirectMapA::redirect_by_map_method_c','args'=>array('redirect_by_map_method_call_c'=>'redirect_by_map_method_call_alias_c'))
+	,'redirect_test_call_c'=>array('name'=>'redirect_by_map_method_call_alias_c','template'=>'redirect_test_call_c.html')
+	,'redirect_test_call_c_e'=>array('name'=>'redirect_by_map_method_call_c','template'=>'redirect_test_call_c_e.html')
 
-	,'notemplate'=>array(name=>'notemplate',action=>'test.CoreTestNotTemplate::aaa')
+	,'notemplate'=>array('name'=>'notemplate','action'=>'test.CoreTestNotTemplate::aaa')
 	
-	,'put_block'=>array(name=>'put_block',action=>'test.CoreTestPutBlock::index',template=>'put_block.html')
-	,'theme'=>array(name=>'theme',action=>'test.CoreTestTheme::index',template=>'abc.html',theme_path=>'custom_theme')
-	,'theme_maps'=>array(name=>'theme_maps',action=>'test.CoreTestTheme::index',template=>'abc.html',theme_path=>'custom_theme',theme_path=>'custom_theme')
+	,'put_block'=>array('name'=>'put_block','action'=>'test.CoreTestPutBlock::index','template'=>'put_block.html')
+	,'theme'=>array('name'=>'theme','action'=>'test.CoreTestTheme::index','template'=>'abc.html','theme_path'=>'custom_theme')
+	,'theme_maps'=>array('name'=>'theme_maps','action'=>'test.CoreTestTheme::index','template'=>'abc.html','theme_path'=>'custom_theme','theme_path'=>'custom_theme')
 
-	,'theme_none'=>array(name=>'theme_none',action=>'test.CoreTestTheme::index',template=>'abc.html')
-	,'sample_flow'=>array(name=>'sample_flow',action=>'test.SampleFlow')
+	,'theme_none'=>array('name'=>'theme_none','action'=>'test.CoreTestTheme::index','template'=>'abc.html')
+	,'sample_flow'=>array('name'=>'sample_flow','action'=>'test.SampleFlow')
 	
 	,'sample_flow_theme'=>array(
-		theme_path=>'theme_path'
-		,patterns=>array(
-			''=>array(name=>'sample_flow_theme_index',action=>'test.SampleFlow::index',template=>'sample.html')
-			,'hoge'=>array(name=>'sample_flow_theme_hoge',action=>'test.SampleFlow::hoge',template=>'sample.html')
+		'theme_path'=>'theme_path'
+		,'patterns'=>array(
+			''=>array('name'=>'sample_flow_theme_index','action'=>'test.SampleFlow::index','template'=>'sample.html')
+			,'hoge'=>array('name'=>'sample_flow_theme_hoge','action'=>'test.SampleFlow::hoge','template'=>'sample.html')
 		)
 	)
 	,'sample_flow_theme_not_path'=>array(
-		patterns=>array(
-			''=>array(name=>'sample_flow_theme_not_index',action=>'test.SampleFlow::index',template=>'sample.html')
-			,'hoge'=>array(name=>'sample_flow_theme_not_hoge',action=>'test.SampleFlow::hoge',template=>'sample.html')
+		'patterns'=>array(
+			''=>array('name'=>'sample_flow_theme_not_index','action'=>'test.SampleFlow::index','template'=>'sample.html')
+			,'hoge'=>array('name'=>'sample_flow_theme_not_hoge','action'=>'test.SampleFlow::hoge','template'=>'sample.html')
 		)
 	)
-	,'upload_multi'=>array(name=>'upload_multi',action=>'test.SampleFlow::upload_multi')
-	,'upload_value'=>array(name=>'upload_value',action=>'test.SampleFlow::upload_value')
-	,'upload_file'=>array(name=>'upload_file',action=>'test.SampleFlow::upload_file')
+	,'upload_multi'=>array('name'=>'upload_multi','action'=>'test.SampleFlow::upload_multi')
+	,'upload_value'=>array('name'=>'upload_value','action'=>'test.SampleFlow::upload_value')
+	,'upload_file'=>array('name'=>'upload_file','action'=>'test.SampleFlow::upload_file')
 	
-	,'dev'=>array(action=>'org.rhaco.flow.parts.Developer',mode=>'local')
+	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer','mode'=>'local')
 )));
 
 

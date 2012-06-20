@@ -21,9 +21,14 @@ class Flow{
 	static private $get_maps = false;
 	static private $output_maps = array();
 	
+	static private function entry_file(){
+		foreach(debug_backtrace(false) as $d){
+			if($d['file'] !== __FILE__) return $d['file'];
+		}
+		new \RuntimeException('no entry file');
+	}
 	public function __construct($app_url=null){
-		list($d) = debug_backtrace(false);
-		$f = str_replace("\\",'/',$d['file']);
+		$f = str_replace("\\",'/',self::entry_file());
 		$this->app_url = Conf::get('app_url',$app_url);
 
 		if(empty($this->app_url)) $this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
@@ -67,7 +72,6 @@ class Flow{
 		if(!isset(self::$output_maps[$key])){
 			self::$get_maps = true;
 			self::$output_maps[$key] = array();
-			
 			try{
 				ob_start();
 					include_once($file);
@@ -82,7 +86,7 @@ class Flow{
 	 * 出力する
 	 * @param array $map
 	 */
-	public function output($p0=null,$p1=null,$p2=null,$p3=null,$p4=null,$p5=null,$p6=null,$p7=null,$p8=null,$p9=null){
+	public function output($p0=null,$p1=null,$p2=null,$p3=null,$p4=null){
 		$pathinfo = preg_replace("/(.*?)\?.*/","\\1",(isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null));
 		/**
 		 * ハンドリングマップ配列を取得する
@@ -91,14 +95,9 @@ class Flow{
 		 * @param mixed $p2
 		 * @param mixed $p3
 		 * @param mixed $p4
-		 * @param mixed $p5
-		 * @param mixed $p6
-		 * @param mixed $p7
-		 * @param mixed $p8
-		 * @param mixed $p9
 		 * @return array
 		 */
-		$map = ($this->has_object_module('flow_map_loader')) ? $this->object_module('flow_map_loader',$p0,$p1,$p2,$p3,$p4,$p5,$p6,$p7,$p8,$p9) : $p0;
+		$map = ($this->has_object_module('flow_map_loader')) ? $this->object_module('flow_map_loader',$p0,$p1,$p2,$p3,$p4) : $p0;
 		$apps = $urls = array();
 		$idx = $pkg_id =0;
 		$theme = $put_block = null;
@@ -206,8 +205,7 @@ class Flow{
 								));
 			}
 			if(self::$get_maps){
-				list($d) = debug_backtrace(false);
-				self::$output_maps[basename($d['file'])] = $apps;
+				self::$output_maps[basename(self::entry_file())] = $apps;
 				self::$get_maps = false;
 				return;
 			}
@@ -462,10 +460,17 @@ class Flow{
 	 * @return $this
 	 */
 	static public function loader($loader_module){
-		list($d) = debug_backtrace(false);
-		$self = new self(dirname($d['file']));
+		$self = new self(dirname(self::entry_file()));
 		if(!is_object($loader_module)) $loader_module = $self->str_reflection($loader_module);
 		$self->set_object_module($loader_module);
 		return $self;
+	}
+	/**
+	 * 出力する
+	 * @param array $maps
+	 */
+	static public function out($maps){
+		$self = new self();
+		$self->output($maps);
 	}
 }

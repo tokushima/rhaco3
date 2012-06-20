@@ -5,8 +5,7 @@ include_once('rhaco3.php');
  * @name rhaco.org
  * @summary site
  */
-$flow = new \org\rhaco\Flow();
-$flow->output(array(''
+\org\rhaco\Flow::out(array(''
 ,'modules'=>'test.flow.module.CoreTestLogin'
 ,'patterns'=>array(
 	'login_url'=>array('name'=>'login','action'=>'test.CoreTestLoginFlow::do_login')

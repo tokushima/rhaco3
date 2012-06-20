@@ -4,11 +4,12 @@ include_once('rhaco3.php');
  * @name 
  * @summary 
  */
-$flow = new \org\rhaco\Flow();
-$flow->output(array(''
-,'nomatch_redirect'=>'index'
+\org\rhaco\Flow::out(
+array(
+'nomatch_redirect'=>'index'
 ,'patterns'=>array(
 	''=>array('name'=>'index','template'=>'index.html')
 	,'dt'=>array('name'=>'dt','action'=>'org.rhaco.Dt','mode'=>'local')
-)));
+))
+);
 

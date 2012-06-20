@@ -109,7 +109,7 @@ class Test{
 			foreach(new \RecursiveDirectoryIterator($entry_path,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS) as $e){
 				if(substr($e->getFilename(),-4) == '.php' && strpos($e->getPathname(),'/.') === false && strpos($e->getPathname(),'/_') === false){
 					$src = file_get_contents($e->getFilename());
-					if((strpos($src,"\\org\\rhaco\\Flow") !== false && strpos($src,'->output(') !== false)){
+					if((strpos($src,"\\org\\rhaco\\Flow") !== false && (strpos($src,'->output(') !== false || strpos($src,'::out(') !== false))){
 						$entry_name = substr($e->getFilename(),0,-4);
 						foreach(\org\rhaco\Flow::get_maps($e->getPathname()) as $p => $m){
 							if(isset($m['name'])) self::$flow_output_maps[$entry_name][$m['name']] = $m;

@@ -6,8 +6,7 @@ include_once('rhaco3.php');
  * ああああああああああ
  * いいいいいいいいいい
  */
-$flow = new \org\rhaco\Flow();
-$flow->output(array(''
+\org\rhaco\Flow::out(array(''
 ,'nomatch_redirect'=>'index'
 ,'patterns'=>array(
 	''=>array('name'=>'index','template'=>'hoge.html')

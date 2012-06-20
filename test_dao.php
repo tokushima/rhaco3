@@ -1,8 +1,7 @@
 <?php
 include_once('rhaco3.php');
 
-$flow = new \org\rhaco\Flow();
-$flow->output(array(''
+\org\rhaco\Flow::out(array(''
 ,'modules'=>array(
 	'org.rhaco.flow.module.Dao'
 )
