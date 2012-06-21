@@ -155,7 +155,8 @@ class MediaInfo extends \org\rhaco\Object{
 		}
 		if(!empty($create_date)){
 			if(preg_match('/(\d{4}[^\d]\d{2}[^\d]\d{2} \d{2}[^\d]\d{2}[^\d]\d{2})/',$create_date,$m)) $create_date = $m[1];
-			$self->create_date($create_date);
+			$create_time = strtotime($create_date);
+			if($create_time !== false) $self->create_date($create_time);
 		}
 		if(isset($exif['Make'])){
 			$self->make($exif['Make']);
