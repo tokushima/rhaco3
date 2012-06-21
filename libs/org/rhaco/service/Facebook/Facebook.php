@@ -1,6 +1,7 @@
 <?php
 namespace org\rhaco\service;
 /**
+ * Facebookを操作する
  * @author tokushima
  * @see https://developers.facebook.com/docs/reference/api/photo/
  * @see https://developers.facebook.com/docs/authentication/server-side/
@@ -20,29 +21,54 @@ class Facebook{
 		$this->client_id = $client_id;
 		$this->client_secret = $client_secret;
 	}
+	/**
+	 * アクセストークンを取得する
+	 * @return string
+	 */
 	public function access_token(){
 		if(empty($this->access_token)) $this->get_access_token();
 		return $this->access_token;
 	}
+	/**
+	 * アクセストークンをセットする
+	 * @param string $access_token
+	 * @return $this
+	 */
 	public function set_access_token($access_token){
 		$this->access_token = $access_token;
 		return $this;
 	}
+	/**
+	 * facebook idを取得する
+	 * @return integer
+	 */
 	public function me_id(){
 		if(empty($this->me_id)) $this->me();
 		return $this->me_id;
 	}
+	/**
+	 * facebook idを設定する
+	 * @param integer $me_id
+	 * @return $this
+	 */
 	public function set_me_id($me_id){
 		$this->me_id = $me_id;
 		return $this;
 	}
-	
-	
-	
+	/**
+	 * パーミッションを要求する
+	 * @param stirng $perm
+	 * @return $this
+	 */
 	public function require_permissions($perm){
 		if(!$this->has_permissions($perm)) $this->get_access_token($perm,null,true);
 		return $this;
 	}
+	/**
+	 * パーミッションを取得しているか
+	 * @param string $perm
+	 * preturn boolean
+	 */
 	public function has_permissions($perm){
 		if(empty($this->me_id)){
 			if(empty($this->access_token)) $this->get_access_token($perm);			
@@ -61,6 +87,13 @@ class Facebook{
 		}
 		return true;
 	}
+	/**
+	 * アクセストークンを取得する
+	 * @param string  $scope 
+	 * @param string $redirect_url
+	 * @param boolean $reset
+	 * @return $this
+	 */
 	public function get_access_token($scope=null,$redirect_url=null,$reset=false){
 		if(empty($redirect_url)) $redirect_url = \org\rhaco\Request::current_url();
 		$sess = new \org\rhaco\net\Session();
@@ -100,6 +133,11 @@ class Facebook{
 		$this->me_id = $data['id'];
 		return $data;
 	}
+	/**
+	 * アルバム一覧を取得する
+	 * @param string $next_url
+	 * @return array
+	 */
 	public function albums(&$next_url=null){
 		if(empty($this->access_token)) $this->get_access_token();
 		$http = new \org\rhaco\net\Http();
@@ -111,6 +149,12 @@ class Facebook{
 		
 		return $data['data'];
 	}
+	/**
+	 * アルバムの写真一覧を取得する
+	 * @param integer $album_id
+	 * @param string $next_url
+	 * @return array
+	 */
 	public function photos($album_id,$next_url=null){
 		if(empty($this->access_token)) $this->get_access_token();
 		$http = new \org\rhaco\net\Http();
