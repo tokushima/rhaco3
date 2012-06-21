@@ -1,6 +1,6 @@
 <?php
 /**
- * Daemon tool
+ * stop daemon
  * @param string $d pid file path
  */
 $pid = isset($params['d']) ? $params['d'] : '';

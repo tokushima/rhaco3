@@ -1,0 +1,4 @@
+<?php
+/**
+ * Daemon tool
+ */

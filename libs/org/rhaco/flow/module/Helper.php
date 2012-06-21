@@ -138,6 +138,7 @@ class Helper{
 		*/
 	}
 	/**
+	 * $condが空じゃなければ$true,空なら$falseを返す
 	 * @param mixed $cond 空または0またはfalseの場合に偽
 	 * @param string $true 真の場合に返す文字列
 	 * @param string $false 偽の場合に返す文字列

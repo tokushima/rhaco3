@@ -1,6 +1,6 @@
 <?php
 /**
- * Daemon tool
+ * start daemon
  * @param string $php execute php file
  */
 $pid = isset($params['d']) ? $params['d'] : null;
