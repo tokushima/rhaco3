@@ -2,7 +2,6 @@
 namespace org\rhaco\service\flow\module;
 /**
  * Facebook認証
- * @incomplete
  * @author tokushima
  * @see https://developers.facebook.com/docs/authentication/server-side/
  * @see https://developers.facebook.com/docs/authentication/permissions/

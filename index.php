@@ -17,7 +17,8 @@ include_once('rhaco3.php');
 	,'dev/do_find/(.+)/xml'=>array('action'=>'org.rhaco.Dt::do_find')
 	,'dev/do_detail/(.+)/xml'=>array('action'=>'org.rhaco.Dt::do_detail')
 	
-	,'fb'=>array('action'=>'org.rhaco.flow.parts.Sample','modules'=>'org.rhaco.service.flow.module.FacebookSimpleAuth')
+	,'facebook'=>array('action'=>'org.rhaco.flow.parts.Sample','modules'=>'org.rhaco.service.flow.module.FacebookSimpleAuth')
+	,'twitter'=>array('action'=>'org.rhaco.flow.parts.Sample','modules'=>'org.rhaco.service.flow.module.TwitterSimpleAuth')	
 	,'openid'=>array('action'=>'org.rhaco.flow.parts.Sample','modules'=>'org.rhaco.service.flow.module.OpenidSimpleAuth')	
 	
 	,'post'=>array('action'=>'org.rhaco.flow.parts.Sample::post')

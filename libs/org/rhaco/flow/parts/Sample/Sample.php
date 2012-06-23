@@ -8,6 +8,12 @@ class Sample extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * @automap
 	 */
+	public function index(){
+		
+	}
+	/**
+	 * @automap
+	 */
 	public function auth(){
 		$this->vars('user',var_dump($this->user(),true));
 	}
