@@ -5,8 +5,18 @@
 <title>auth</title>
 </head>
 <body>
-<pre>
-{$user}
-</pre>
+<p>
+	<rt:if param="{$t.is_login()}">
+		<a href="{$t.package_method_url('do_logout')}">logout</a>
+	</rt:if>
+</p>
+
+
+<table rt:param="{$user}" rt:var="v" rt:key="k">
+<tr>
+	<th>{$k}</th>
+	<td>{$v}</td>
+</tr>
+</table>
 </body>
 </html>

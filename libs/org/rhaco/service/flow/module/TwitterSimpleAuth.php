@@ -10,7 +10,8 @@ class TwitterSimpleAuth{
 		
 		try{
 			$twitter->auth();
-			$req->user($twitter->verify_credentials());
+			$user = $twitter->verify_credentials();
+			$req->user(array('id'=>$user['id'],'name'=>$user['name']));
 			return true;
 		}catch(\Exception $e){
 			

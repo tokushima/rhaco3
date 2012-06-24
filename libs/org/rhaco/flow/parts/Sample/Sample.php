@@ -14,8 +14,8 @@ class Sample extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * @automap
 	 */
-	public function auth(){
-		$this->vars('user',var_dump($this->user(),true));
+	public function user_info(){
+		$this->vars('user',$this->user());
 	}
 	public function post(){
 		if($this->is_post()){
