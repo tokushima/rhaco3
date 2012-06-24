@@ -18,7 +18,11 @@ class OpenidSimpleAuth{
 			$openid->optional = array('namePerson','namePerson/friendly');
 			\org\rhaco\net\http\Header::redirect($openid->authUrl());
 		}else if($openid->mode == 'id_res'){
-			$req->user($openid->getAttributes());
+			$user = $openid->getAttributes();
+			$req->user(array(
+				'id'=>(isset($openid->data['openid_claimed_id']) ? $openid->data['openid_claimed_id'] : null),
+				'name'=>(isset($user['namePerson/friendly']) ? $user['namePerson/friendly'] : null)
+			));
 			return true;
 		}
 		return false;

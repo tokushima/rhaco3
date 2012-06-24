@@ -16,10 +16,9 @@ class GoogleOpenidSimpleAuth{
 		}else if($openid->mode == 'id_res'){
 			$user = $openid->getAttributes();
 			$req->user(array(
-					'id'=>$openid->data['openid_claimed_id'],
-					'email'=>$user['contact/email'],
-					'name'=>($user['namePerson/first'].' '.$user['namePerson/last']))
-			);
+				'id'=>$openid->data['openid_claimed_id'],
+				'name'=>($user['namePerson/first'].' '.$user['namePerson/last'])
+			));
 			return true;
 		}
 		return false;

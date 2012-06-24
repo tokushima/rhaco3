@@ -16,10 +16,9 @@ class MixiOpenidSimpleAuth{
 		}else if($openid->mode == 'id_res'){
 			$user = $openid->getAttributes();
 			$req->user(array(
-					'id'=>$openid->data['openid_claimed_id'],
-					'email'=>(isset($user['contact/email']) ? $user['contact/email'] : null),
-					'name'=>($user['namePerson/friendly']))
-					);
+				'id'=>$openid->data['openid_claimed_id'],
+				'name'=>($user['namePerson/friendly'])
+			));
 			return true;
 		}
 		return false;

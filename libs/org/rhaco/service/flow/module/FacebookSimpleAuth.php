@@ -15,7 +15,10 @@ class FacebookSimpleAuth{
 		try{
 			$fb->get_access_token(\org\rhaco\Conf::get('scope'));
 			$user = $fb->me();
-			$req->user(array('id'=>$user['id'],'name'=>$user['name']));
+			$req->user(array(
+				'id'=>$user['id'],
+				'name'=>$user['name']
+			));
 			return true;
 		}catch(\Exception $e){
 			
