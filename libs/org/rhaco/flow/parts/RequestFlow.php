@@ -294,7 +294,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		return $this->req->args();
 	}
 	/**
-	 * Exceptionを保存する
+	 * Exceptionを保存し、次回リクエスト時に展開する(org.rhaco.Exceptionsに格納される)
 	 * @param Exception $exception
 	 * @param string $name
 	 */
