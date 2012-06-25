@@ -337,7 +337,7 @@ class Helper{
 		$lines = array();
 		$stag = '<'.$tag.(empty($class) ? '' : ' class="'.$class.'"').(empty($style) ? '' : ' style="'.$style.'"').'>';
 		$etag = '</'.$tag.'>';
-		foreach(explode(PHP_EOL,str_replace(array('\r\n','\r','\n'),PHP_EOL,$value)) as $line){
+		foreach(explode(PHP_EOL,str_replace(array("\r\n","\r","\n"),PHP_EOL,$value)) as $line){
 			$lines[] = $stag.$line.$etag;
 		}
 		return implode(PHP_EOL,$lines);
