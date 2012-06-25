@@ -55,6 +55,10 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		}
 		return $this->in_sessions($this->login_id.'USER');
 	}
+	/**
+	 * テーマをセットする
+	 * @param string $theme
+	 */
 	protected function theme($theme){
 		$this->theme = $theme;
 	}
@@ -90,9 +94,17 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	public function set_select_map_name($name){
 		$this->select_map_name = $name;
 	}
+	/**
+	 * mapを返す
+	 * @return array
+	 */
 	protected function maps(){
 		return $this->maps;
 	}
+	/**
+	 * blockを上書きする
+	 * @param sting $path
+	 */
 	protected function set_block($path){
 		$this->put_block = $path;
 	}

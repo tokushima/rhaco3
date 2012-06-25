@@ -16,10 +16,10 @@ class Man{
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$r->getDocComment())));
 		$extends = ($r->getParentClass() === false) ? null : $r->getParentClass()->getName();
 
-		$methods = $static_methods = array();
+		$methods = $static_methods = $protected_methods = $protected_static_methods = array();
 		foreach($r->getMethods() as $method){
 			if($method->getDeclaringClass()->getFileName() == $r->getFileName()){
-				if(substr($method->getName(),0,1) != '_' && $method->isPublic()){
+				if(substr($method->getName(),0,1) != '_' && ($method->isPublic() || $method->isProtected())){
 					$method_document = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$method->getDocComment()));
 					list($method_description) = explode("\n",trim(preg_replace('/@.+/','',$method_document)));
 					if(strpos($method_description,'non-PHPdoc') !== false){
@@ -40,10 +40,18 @@ class Man{
 					}
 					if($method->isStatic()){
 						if($method->getDeclaringClass()->getName() == $r->getName()){
-							$static_methods[$method->getName()] = $method_description;
+							if($method->isPublic()){
+								$static_methods[$method->getName()] = $method_description;
+							}else{
+								$protected_static_methods[$method->getName()] = $method_description;								
+							}
 						}
 					}else{
-						$methods[$method->getName()] = $method_description;
+						if($method->isPublic()){
+							$methods[$method->getName()] = $method_description;
+						}else{
+							$protected_methods[$method->getName()] = $method_description;
+						}
 					}
 				}
 			}
@@ -81,8 +89,15 @@ class Man{
 			}
 		}
 		$description = trim(preg_replace('/@.+/','',$document));
+		ksort($static_methods);
+		ksort($methods);
+		ksort($protected_methods);
+		ksort($protected_static_methods);
+		ksort($properties);
+		ksort($modules);
 		return array(
-				'filename'=>$r->getFileName(),'extends'=>$extends,'static_methods'=>$static_methods,'methods'=>$methods
+				'filename'=>$r->getFileName(),'extends'=>$extends
+				,'static_methods'=>$static_methods,'methods'=>$methods,'protected_static_methods'=>$protected_static_methods,'protected_methods'=>$protected_methods
 				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>$description
 				,'modules'=>$modules
 				,'abstract'=>$r->isAbstract()

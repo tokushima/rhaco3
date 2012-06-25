@@ -106,4 +106,41 @@
 	</table>
 </rt:if>
 
+
+<rt:if param="{$protected_static_methods}">
+	<h3>Protected static methods</h3>		
+	<table rt:param="{$protected_static_methods}" rt:var="summary" rt:key="method_name">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td>{$t.html($summary)}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
+<rt:if param="{$protected_methods}">
+	<h3>Protected methods</h3>
+	<table rt:param="{$protected_methods}" rt:var="summary" rt:key="method_name">
+	<thead>
+		<tr>
+			<th style="width:200px">name</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td style="width:200px"><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td>{$t.html($summary)}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
 </rt:block>

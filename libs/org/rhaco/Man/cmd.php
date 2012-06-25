@@ -49,7 +49,7 @@ if(isset($params['m'])){
 	print(' Description:');
 	print('   '.str_replace("\n","\n   ",$rtn['description']));
 	
-	list($static_methods,$methods,$properties,$modules) = array($rtn['static_methods'],$rtn['methods'],$rtn['properties'],$rtn['modules']);
+	list($static_methods,$methods,$protected_static_methods,$protected_methods,$properties,$modules) = array($rtn['static_methods'],$rtn['methods'],$rtn['protected_static_methods'],$rtn['protected_methods'],$rtn['properties'],$rtn['modules']);
 	$len = \org\rhaco\lang\Text::length(array_merge(array_keys($static_methods),array_keys($methods),array_keys($properties),array_keys($modules)));
 
 	if(!empty($static_methods)){
@@ -70,6 +70,15 @@ if(isset($params['m'])){
 			list($summary) = explode(PHP_EOL,$v[0]);
 			print('    '.str_pad($k,$len).' : '.$summary.PHP_EOL);
 		}
-	}	
+	}
+	
+	if(!empty($protected_static_methods)){
+		print("\n".'  Protected static methods defined here:'.PHP_EOL);
+		foreach($protected_static_methods as $k => $v) print('    '.str_pad($k,$len).' : '.$v.PHP_EOL);
+	}
+	if(!empty($protected_methods)){
+		print("\n".'  Protected Methods defined here:'.PHP_EOL);
+		foreach($protected_methods as $k => $v) print('    '.str_pad($k,$len).' : '.$v.PHP_EOL);
+	}
 }
 print(PHP_EOL);
