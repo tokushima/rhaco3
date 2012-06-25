@@ -30,7 +30,9 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$this->req = new \org\rhaco\Request();
 		$this->sess = new \org\rhaco\net\Session(md5($sess_name));
 		foreach($this->sess->in_vars('_saved_vars_',array()) as $k => $v) $this->req->vars($k,$v);
+		foreach($this->sess->in_vars('_saved_exceptions_',array()) as $e) \org\rhaco\Exceptions::add($e[0],$e[1]);
 		$this->sess->rm_vars('_saved_vars_');
+		$this->sess->rm_vars('_saved_exceptions_');
 		$this->login_id = $sess_name.'_LOGIN_';
 	}
 	protected function __anon__($d){
