@@ -112,7 +112,7 @@ class Facebook{
 				$http->do_redirect('https://graph.facebook.com/oauth/authorize');
 			}
 		}
-		if($req->in_vars('state') == $sess->in_vars('state')){
+		if($req->is_vars('state') && $req->in_vars('state') == $sess->in_vars('state')){
 			$http->vars('client_id',$this->client_id);
 			$http->vars('client_secret',$this->client_secret);
 			$http->vars('redirect_uri',$redirect_url);
@@ -120,9 +120,14 @@ class Facebook{
 			$http->do_get('https://graph.facebook.com/oauth/access_token');
 			parse_str($http->body(),$params);
 			$this->access_token = $params['access_token'];
+			$sess->rm_vars('state');
 		}
 		return $this;
 	}
+	/**
+	 * ユーザ情報を取得する
+	 * @return array
+	 */
 	public function me(){
 		if(empty($this->access_token)) $this->get_access_token();
 		$http = new \org\rhaco\net\Http();
