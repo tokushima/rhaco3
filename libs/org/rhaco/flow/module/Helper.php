@@ -326,23 +326,6 @@ class Helper{
 		return nl2br($value,true);
 	}
 	/**
-	 * １行毎にタグでかこむ
-	 * @param string $value
-	 * @param string $tag
-	 * @param string $style
-	 * @param string $class
-	 * @return string
-	 */
-	public function nl2tag($value,$tag,$style='',$class=''){
-		$lines = array();
-		$stag = '<'.$tag.(empty($class) ? '' : ' class="'.$class.'"').(empty($style) ? '' : ' style="'.$style.'"').'>';
-		$etag = '</'.$tag.'>';
-		foreach(explode(PHP_EOL,str_replace(array("\r\n","\r","\n"),PHP_EOL,$value)) as $line){
-			$lines[] = $stag.$line.$etag;
-		}
-		return implode(PHP_EOL,$lines);
-	}
-	/**
 	 * CDATA形式から値を取り出す
 	 * @param string $value 対象の文字列
 	 * @return string
