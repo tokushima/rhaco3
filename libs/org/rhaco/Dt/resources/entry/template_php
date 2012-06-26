@@ -7,6 +7,8 @@ include_once('rhaco3.php');
 \org\rhaco\Flow::out(
 array(
 'nomatch_redirect'=>'index'
+,'error_template'=>'error.html'
+,'modules'=>array('org.rhaco.flow.module.Exceptions')
 ,'patterns'=>array(
 	''=>array('name'=>'index','template'=>'index.html')
 	,'dt'=>array('name'=>'dt','action'=>'org.rhaco.Dt','mode'=>'local')

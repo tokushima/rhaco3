@@ -15,6 +15,7 @@ $write_file = function($f,$value){
 };
 $write_file(getcwd().'/'.$name.'.php',file_get_contents(dirname(__DIR__).'/resources/entry/template_php'));
 $write_file(getcwd().'/resources/templates/index.html',file_get_contents(dirname(__DIR__).'/resources/entry/index_html'));
+$write_file(getcwd().'/resources/templates/error.html',file_get_contents(dirname(__DIR__).'/resources/entry/error_html'));
 $write_file(getcwd().'/resources/media/style.css',file_get_contents(dirname(__DIR__).'/resources/entry/style_css'));
 $write_file(getcwd().'/__settings__.php',file_get_contents(dirname(__DIR__).'/resources/entry/__settings___php'));
 
