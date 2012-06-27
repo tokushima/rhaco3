@@ -204,7 +204,19 @@ class Object{
 				eq(null,$hoge->eee());
 			}catch(\InvalidArgumentException $e){
 				fail();
-			}			
+			}
+			try{
+				$hoge->eee("1969:12:31 17:59:59");
+				eq('-54001',$hoge->eee());
+			}catch(\InvalidArgumentException $e){
+				fail();
+			}
+			try{
+				$hoge->eee("-54001");
+				eq('-54001',$hoge->eee());
+			}catch(\InvalidArgumentException $e){
+				fail();
+			}
 			try{
 				$hoge->eee(null);
 				eq(true,true);
@@ -864,7 +876,7 @@ class Object{
 						return (boolean)$v;
 					case 'timestamp':
 					case 'date':
-						if(ctype_digit((string)$v)) return (int)$v;
+						if(ctype_digit((string)$v) || (substr($v,0,1) == '-' && ctype_digit(substr($v,1)))) return (int)$v;
 						if(preg_match('/^0+$/',preg_replace('/[^\d]/','',$v))) return null;
 						$time = strtotime($v);
 						if($time === false) throw new \InvalidArgumentException();

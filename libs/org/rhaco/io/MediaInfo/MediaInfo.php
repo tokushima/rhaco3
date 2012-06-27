@@ -9,6 +9,7 @@ namespace org\rhaco\io;
  * @var string $filename
  * @var integer $width
  * @var integer $height
+ * @var string $create_date_value
  * @var timestamp $create_date
  * @var integer $size
  * @var string $make
@@ -26,6 +27,7 @@ class MediaInfo extends \org\rhaco\Object{
 	protected $filename;
 	protected $width;
 	protected $height;
+	protected $create_date_value;	
 	protected $create_date;
 	protected $size;
 	protected $make;
@@ -37,9 +39,6 @@ class MediaInfo extends \org\rhaco\Object{
 
 	protected $raw;
 
-	protected function __init__(){
-		$this->create_date = time();
-	}
 	/**
 	 * 動画か
 	 * @return boolean
@@ -73,7 +72,11 @@ class MediaInfo extends \org\rhaco\Object{
 							$self->filename(isset($exif['FileName']) ? $exif['FileName'] : basename($filename));
 							$self->width(isset($exif['ExifImageWidth']) ? $exif['ExifImageWidth'] : (isset($info[0]) ? $info[0] : null));
 							$self->height(isset($exif['ExifImageLength']) ? $exif['ExifImageLength'] : (isset($info[1]) ? $info[1] : null));
-							if(isset($exif['DateTimeOriginal'])) $self->create_date($exif['DateTimeOriginal']);
+							if(isset($exif['DateTimeOriginal']) && !empty($exif['DateTimeOriginal'])){
+								$self->create_date_value($exif['DateTimeOriginal']);
+								$timestamp = (ctype_digit((string)$self->create_date_value())) ? (int)$self->create_date_value() : strtotime($self->create_date_value());
+								if($timestamp !== false) $self->create_date($timestamp);
+							}
 							if(isset($exif['Make'])) $self->make($exif['Make']);
 							if(isset($exif['Model'])){
 								$self->model($exif['Model']);
@@ -145,18 +148,16 @@ class MediaInfo extends \org\rhaco\Object{
 		$self->width(isset($exif['Image Width ']) ? $exif['Image Width '] : (isset($info[0]) ? $info[0] : null));
 		$self->height(isset($exif['Image Height']) ? $exif['Image Height'] : (isset($info[1]) ? $info[1] : null));
 		
-		$create_date = null;
 		if(isset($exif['Create Date'])){
-			$create_date = $exif['Create Date'];
+			$self->create_date_value($exif['Create Date']);
 		}else if(isset($exif['Date/Time Original'])){
-			$create_date = $exif['Date/Time Original'];
+			$self->create_date_value($exif['Date/Time Original']);
 		}else if(isset($exif['Modify Date  Date'])){
-			$create_date = $exif['Modify Date'];
+			$self->create_date_value($exif['Modify Date']);
 		}
-		if(!empty($create_date)){
-			if(preg_match('/(\d{4}[^\d]\d{2}[^\d]\d{2} \d{2}[^\d]\d{2}[^\d]\d{2})/',$create_date,$m)) $create_date = $m[1];
-			$create_time = strtotime($create_date);
-			if($create_time !== false) $self->create_date($create_time);
+		if($self->is_create_date_value()){
+			$timestamp = (ctype_digit((string)$self->create_date_value())) ? (int)$self->create_date_value() : strtotime($self->create_date_value());
+			if($timestamp !== false) $self->create_date($timestamp);
 		}
 		if(isset($exif['Make'])){
 			$self->make($exif['Make']);
@@ -166,7 +167,7 @@ class MediaInfo extends \org\rhaco\Object{
 		if(isset($exif['Model'])){
 			$self->model($exif['Model']);
 		}else if(isset($exif['Camera Model Name'])){
-			$self->model($exif['Camera Model Name']);								
+			$self->model($exif['Camera Model Name']);
 		}else if(isset($exif['User Data mod'])){
 			$self->model($exif['User Data mod']);
 		}
