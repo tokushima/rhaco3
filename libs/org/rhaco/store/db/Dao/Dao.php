@@ -751,8 +751,10 @@ abstract class Dao extends \org\rhaco\Object{
 		 	if($this->prop_anon($prop_name,'lower',true) === true) $char .= 'abcdefghijklmnopqrstuvwxyz';
 		}
 		$charl = strlen($char) - 1;
+		$ignore = $this->prop_anon($prop_name,'ignore_auto_code');
 		while($code == '' || static::find_count(Q::eq($prop_name,$code)) > 0){
 			for($code='',$i=0;$i<$max;$i++) $code .= $char[mt_rand(0,$charl)];
+			if(!empty($ignore) && preg_match('/^'.$ignore.'$/',$code)) $code = '';
 		}
 		$this->{$prop_name}($code);
 		return $code;

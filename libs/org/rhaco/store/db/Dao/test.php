@@ -137,7 +137,7 @@ foreach(UniqueCode::find() as $o){
 /**
  * @var serial $id
  * @var string $code1 @['auto_code_add'=>true,'ctype'=>'digit']
- * @var string $code2 @['auto_code_add'=>true,'max'=>10,'ctype'=>'digit']
+ * @var string $code2 @['auto_code_add'=>true,'max'=>10,'ctype'=>'digit','ignore_auto_code'=>'000.+000']
  * @var string $code3 @['auto_code_add'=>true,'max'=>40,'ctype'=>'digit']
  */
 class UniqueCodeDigit extends UniqueCode{
@@ -163,7 +163,11 @@ foreach(UniqueCodeDigit::find() as $o){
 	eq(true,ctype_digit($o->code1()));
 	eq(true,ctype_digit($o->code2()));
 	eq(true,ctype_digit($o->code3()));
+	
+	neq('000',substr($o->code2(),0,3));
+	neq('000',substr($o->code2(),-3));
 }
+
 
 /**
  * @var serial $id
@@ -194,6 +198,26 @@ foreach(UniqueCodeAlpha::find() as $o){
 	eq(true,ctype_alpha($o->code1()));
 	eq(true,ctype_alpha($o->code2()));
 	eq(true,ctype_alpha($o->code3()));
+}
+
+/**
+ * @var serial $id
+ * @var string $code1 @['auto_code_add'=>true,'ctype'=>'digit','max'=>1,'ignore_auto_code'=>'[0-8]']
+ */
+class UniqueCodeIgnore extends UniqueCode{
+	protected $id;
+	protected $code1;
+}
+UniqueCodeIgnore::find_delete();
+$obj = new UniqueCodeIgnore();
+eq(null,$obj->code1());
+$obj->save();
+
+foreach(UniqueCodeIgnore::find() as $o){
+	neq(null,$o->code1());
+	eq(1,strlen($o->code1()));
+	eq(true,ctype_digit($o->code1()));
+	eq('9',$o->code1());
 }
 
 

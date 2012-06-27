@@ -40,14 +40,17 @@ class Object{
 		$result = array();
 		$decode_func = function($s){
 			if(empty($s)) return array();
-			$d = @eval('return '.str_replace(array('[',']'),array('array(',')'),$s).';');
+			if(preg_match_all('/([\"\']).+?\\1/',$s,$m)){
+				foreach($m[0] as $v) $s = str_replace($v,str_replace(array('[',']'),array('#{#','#}#'),$v),$s);
+			}
+			$d = @eval('return '.str_replace(array('[',']','#{#','#}#'),array('array(',')','[',']'),$s).';');
 			if(!is_array($d)) throw new \InvalidArgumentException('annotation error : `'.$s.'`');
 			return $d;
+			
 		};
 		if($ns_name !== null && preg_match_all("/@".$name."\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
 			foreach($m[2] as $k => $n){
 				$as = (false !== ($s=strpos($m[3][$k],'@['))) ? substr($m[3][$k],$s+1,strrpos($m[3][$k],']')-$s) : null;
-				
 				$decode = $decode_func($as);
 				$result[$n] = (isset($result[$n])) ? array_merge($result[$n],$decode) : $decode;
 
@@ -724,7 +727,10 @@ class Object{
 	 */
 	final public function prop_anon($p,$n,$d=null,$f=false){
 		if($f) $this->_im[0][$p][$n] = $d;
-		return isset($this->_im[0][$p][$n]) ? $this->_im[0][$p][$n] : ((isset(self::$_m[0][get_class($this)][$p][$n])) ? self::$_m[0][get_class($this)][$p][$n] : $d);
+		// TODO
+		$v = isset($this->_im[0][$p][$n]) ? $this->_im[0][$p][$n] : ((isset(self::$_m[0][get_class($this)][$p][$n])) ? self::$_m[0][get_class($this)][$p][$n] : $d);
+		if(is_string($v) && $d !== $v) $v = preg_replace('/array\((.+?)\)/','[\\1]',$v);
+		return $v;
 	}
 	/**
 	 * アクセス可能なプロパティを取得する
