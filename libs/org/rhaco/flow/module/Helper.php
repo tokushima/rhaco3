@@ -170,8 +170,8 @@ class Helper{
 		/***
 			\org\rhaco\Exceptions::add(new \LogicException(),'abc');
 			$t = new self();
-			eq('on',$t->has_exceptions('abc','on','off'));
-			eq('off',$t->has_exceptions('def','on','off'));
+			eq('on',$t->has_exceptions_switch('abc','on','off'));
+			eq('off',$t->has_exceptions_switch('def','on','off'));
 			\org\rhaco\Exceptions::clear();
 		*/
 	}
