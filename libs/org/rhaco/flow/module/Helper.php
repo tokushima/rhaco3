@@ -159,6 +159,23 @@ class Helper{
 		*/
 	}
 	/**
+	 * 指定のgroupのExceptionsがあれば$true,空なら$falseを返す
+	 * @param string $group Exceptionsグループ名
+	 * @param string $true 真の場合に返す文字列
+	 * @param string $false 偽の場合に返す文字列
+	 * @return string
+	 */
+	public function has_exceptions_switch($group=null,$true='error',$false=''){
+		return (\org\rhaco\Exceptions::has($group)) ? $true : $false;
+		/***
+			\org\rhaco\Exceptions::add(new \LogicException(),'abc');
+			$t = new self();
+			eq('on',$t->has_exceptions('abc','on','off'));
+			eq('off',$t->has_exceptions('def','on','off'));
+			\org\rhaco\Exceptions::clear();
+		*/
+	}
+	/**
 	 * アプリケーションのメディアのURLを返す
 	 * @param string $url ベースのURLに続く相対パス
 	 * @return string
@@ -301,9 +318,10 @@ class Helper{
 	 * @param integer $length 取得する文字列の最大長
 	 * @param integer $lines 取得する文字列の最大行数
 	 * @param string $postfix 文字列が最大長または最大行数を超えた場合に末尾に接続される文字列
+	 * @param boolean $nl2br 改行コードを<br />にするか
 	 * @return string
 	 */
-	public function html($value,$length=0,$lines=0,$postfix=null){
+	public function html($value,$length=0,$lines=0,$postfix=null,$nl2br=true){
 		$value = self::cdata(str_replace(array("\r\n","\r"),"\n",$value));
 		if($length > 0){
 			$det = mb_detect_encoding($value);
@@ -315,7 +333,8 @@ class Helper{
 			for($i=0;$i<$lines;$i++) $ln[] = $l[$i];
 			$value = implode("\n",$ln).((sizeof($l) > $lines) ? $postfix : null);
 		}
-		return nl2br(str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value),true);
+		$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);
+		return ($nl2br) ? nl2br($value,true) : $value;
 	}
 	/**
 	 * 改行文字の前に HTML の改行タグを挿入する
