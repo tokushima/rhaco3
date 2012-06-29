@@ -69,7 +69,7 @@ class Log extends \org\rhaco\Object{
 		$this->class = $class;
 		$this->value = (is_object($value)) ? 
 							(($value instanceof \Exception) ? 
-								array_merge(array($value->getMessage()),array($value->getTraceAsString()))
+								array(get_class($value),(string)$value,$value->getTraceAsString())
 								: clone($value)
 							)
 							: $value;
