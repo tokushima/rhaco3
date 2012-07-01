@@ -46,7 +46,7 @@
 <a class="icon-search" data-toggle="modal" href="#filter"></a>
 ( Total: {$paginator.total()} )
 
-<table rt:param="object_list" rt:var="obj">
+<table rt:param="object_list" rt:var="obj" rt:counter="counter">
 <thead>
 	<tr>
 		<th></th>
@@ -57,11 +57,12 @@
 </thead>
 <tbody>
 	<tr>
-		<td style="width: 60px;">
-			<form method="post" action="{$t.package_method_url('do_drop',$package)}" style="margin:0;">
+		<td class="span1">
+			<form method="post" action="{$t.package_method_url('do_drop',$package)}" style="margin:0;" id="delete_form_{$counter}">
 				{$t.noop($f.primary_hidden($obj))}
-				<input type="submit" value="delete" class="btn" style="margin:0; padding-top: 0; padding-bottom: 0; " />
+				 <a href="#" class="btn btn-small btn-danger" onclick="delete_form_{$counter}.submit()"><i class="icon-trash icon-white"></i></a>
 			</form>
+			
 		</td>
 		<rt:loop param="{$f.props($model,4)}" var="name">
 			<td>

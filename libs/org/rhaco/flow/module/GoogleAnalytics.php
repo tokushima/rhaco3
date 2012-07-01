@@ -6,6 +6,10 @@ namespace org\rhaco\flow\module;
  *
  */
 class GoogleAnalytics{
+	/**
+	 * @module org.rhaco.Template
+	 * @param string $src
+	 */
 	public function before_template(&$src){
 		if(strpos($src,'rt:ga') !== false){
 			$base_account = \org\rhaco\Conf::get('account');

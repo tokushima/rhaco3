@@ -40,6 +40,10 @@ class Exceptions{
 			}
 		}
 	}
+	/**
+	 * @module org.rhaco.Template
+	 * @param string $src
+	 */
 	public function before_template(&$src){
 		$this->replace('rt:exceptions',$src);
 		$this->replace('rt:invalid',$src);

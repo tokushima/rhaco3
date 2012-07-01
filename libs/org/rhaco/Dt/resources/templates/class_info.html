@@ -23,7 +23,7 @@
 	<table rt:param="{$static_methods}" rt:var="summary" rt:key="method_name">
 	<thead>
 		<tr>
-			<th style="width:200px">name</th>
+			<th class="span3">name</th>
 			<th>summary</th>
 		</tr>
 	</thead>
@@ -41,13 +41,13 @@
 	<table rt:param="{$methods}" rt:var="summary" rt:key="method_name">
 	<thead>
 		<tr>
-			<th style="width:200px">name</th>
+			<th class="span3">name</th>
 			<th>summary</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr class="even">
-			<td style="width:200px"><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td class="span3"><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -59,10 +59,10 @@
 	<table rt:param="{$properties}" rt:var="prop" rt:key="prop_name">
 	<thead>
 		<tr>
-			<th style="width:200px">name</th>
-			<th style="width:100px">type</th>
+			<th class="span3">name</th>
+			<th class="span2">type</th>
 			<th>summary</th>
-			<th style="width:50px;">xml</th>
+			<th class="span1">xml</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -93,13 +93,13 @@
 	<table rt:param="{$modules}" rt:var="v" rt:key="module_name">
 	<thead>
 		<tr>
-			<th style="width:200px">name</th>
+			<th class="span3">name</th>
 			<th>summary</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
-			<td style="width:200px"><a href="{$t.package_method_url('class_module_info',$package,$module_name)}">{$module_name}</a></td>
+			<td class="span3"><a href="{$t.package_method_url('class_module_info',$package,$module_name)}">{$module_name}</a></td>
 			<td>{$t.html($v[0],0,1)}</td>
 		</tr>
 	</tbody>
@@ -112,7 +112,7 @@
 	<table rt:param="{$protected_static_methods}" rt:var="summary" rt:key="method_name">
 	<thead>
 		<tr>
-			<th style="width:200px">name</th>
+			<th class="span3">name</th>
 			<th>summary</th>
 		</tr>
 	</thead>
@@ -130,14 +130,39 @@
 	<table rt:param="{$protected_methods}" rt:var="summary" rt:key="method_name">
 	<thead>
 		<tr>
-			<th style="width:200px">name</th>
+			<th class="span3">name</th>
 			<th>summary</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr class="even">
-			<td style="width:200px"><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td class="span3"><a name="{$method_name}" href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
+
+<rt:if param="{$module_method}">
+	<h3>Module method</h3>
+	<table rt:param="{$module_method}" rt:var="method_name_list" rt:key="class_name">
+	<thead>
+		<tr>
+			<th class="span3">class</th>
+			<th>method</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td class="span3">
+				<a href="{$t.package_method_url('class_info',$f.package_name($class_name))}">{$f.package_name($class_name)}</a>
+			</td>
+			<td>
+				<rt:loop param="method_name_list" var="method_name">
+					<div><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></div>
+				</rt:loop>
+			</td>
 		</tr>
 	</tbody>
 	</table>

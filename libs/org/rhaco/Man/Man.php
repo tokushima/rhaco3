@@ -16,7 +16,7 @@ class Man{
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$r->getDocComment())));
 		$extends = ($r->getParentClass() === false) ? null : $r->getParentClass()->getName();
 
-		$methods = $static_methods = $protected_methods = $protected_static_methods = array();
+		$methods = $static_methods = $protected_methods = $protected_static_methods = $module_method = array();
 		foreach($r->getMethods() as $method){
 			if($method->getDeclaringClass()->getFileName() == $r->getFileName()){
 				if(substr($method->getName(),0,1) != '_' && ($method->isPublic() || $method->isProtected())){
@@ -38,6 +38,9 @@ class Man{
 							}
 						}
 					}
+					if(preg_match_all("/@module\s+([\w\.]+)/",$method_document,$match)){
+						foreach($match[1] as $v) $module_method[trim($v)][] = $method->getName();
+					}					
 					if($method->isStatic()){
 						if($method->getDeclaringClass()->getName() == $r->getName()){
 							if($method->isPublic()){
@@ -96,11 +99,11 @@ class Man{
 		ksort($properties);
 		ksort($modules);
 		return array(
-				'filename'=>$r->getFileName(),'extends'=>$extends
+				'filename'=>$r->getFileName(),'extends'=>$extends,'abstract'=>$r->isAbstract()
 				,'static_methods'=>$static_methods,'methods'=>$methods,'protected_static_methods'=>$protected_static_methods,'protected_methods'=>$protected_methods
+				,'module_method'=>$module_method
 				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>$description
 				,'modules'=>$modules
-				,'abstract'=>$r->isAbstract()
 				);
 	}
 	/**
@@ -113,8 +116,7 @@ class Man{
 		$src = implode(array_slice(file($ref->getDeclaringClass()->getFileName()),$ref->getStartLine(),($ref->getEndLine()-$ref->getStartLine()-1)));
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$ref->getDocComment())));
 		$deprecated = (strpos($ref->getDocComment(),'@deprecated') !== false);
-		$params = array();
-		$return = array();
+		$params = $return = $modules = $see = array();
 		
 		if(preg_match("/@return\s+([^\s]+)(.*)/",$document,$match)){
 			// type, summary
@@ -189,12 +191,32 @@ class Man{
 		if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$document,$match)){
 			foreach($match[1] as $k => $n) $throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
 		}
+		ksort($throws);
+
+		if(preg_match_all("/@module\s+([\w\.]+)/",$document,$match)){
+			foreach($match[1] as $v) $modules[trim($v)] = true;
+		}
+		$modules = array_keys($modules);
+		sort($modules);
+		
+		if(preg_match_all("/@see\s+([\w\.\:\\\\]+)/",$document,$match)){
+			foreach($match[1] as $v){
+				$class = $v = trim($v);
+				$method = null;
+				if(strpos($v,'::') !== false){
+					list($class,$method) = explode('::',$v,2);
+				}
+				$see[$v] = array($class,$method);
+			}
+		}
+		ksort($see);
+
 		$description = trim(preg_replace('/@.+/','',$document));
 		return array(
 				'package'=>$class,'method_name'=>$method,'params'=>$params,'request'=>$request,'context'=>$context
 				,'args'=>$args,'return'=>$return,'description'=>$description,'throws'=>$throws
 				,'is_post'=>((strpos($src,'$this->is_post()') !== false) && (strpos($src,'!$this->is_post()') === false))
-				,'deprecated'=>$deprecated
+				,'deprecated'=>$deprecated,'modules'=>$modules,'see'=>$see
 				);
 	}
 	/**

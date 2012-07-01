@@ -5,6 +5,13 @@ namespace org\rhaco\io\log;
  * @author tokushima
  */
 class Firebug{
+	/**
+	 * 
+	 * @module org.rhaco.Log
+	 * @param org.rhaco.Log[] $logs
+	 * @param string $id
+	 * @param boolean $stdout
+	 */
 	public function flush($logs,$id,$stdout){
 		if(php_sapi_name() != 'cli' && $stdout){
 			print('<script>');

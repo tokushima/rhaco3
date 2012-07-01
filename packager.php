@@ -76,11 +76,18 @@ function tar($base,$input,$output){
 	fwrite($fp,pack('a1024',null));
 	fclose($fp);
 }
-function get_summary($path){
-	if(is_file($path) && preg_match('/\/\*\*[^\*](.+?)\*\//ms',file_get_contents($path),$m)){
-		list($summary) = explode("\n",trim(preg_replace('/@.+/','',preg_replace('/^[\s]*\*[\s]{0,1}/m','',str_replace(array('/'.'**','*'.'/'),'',$m[0])))));
-		return trim($summary);
+function get_desc($path){
+	$summary = $modules = array();
+	$src = file_get_contents($path);
+	if(is_file($path) && preg_match('/\/\*\*[^\*](.+?)\*\//ms',$src,$m)){
+		list($summary) = explode("\n",trim(preg_replace('/@.+/','',preg_replace('/^[\s]*\*[\s]{0,1}/m','',str_replace(array('/'.'**','*'.'/'),'',$m[0])))));	
 	}
+	if(preg_match_all("/@module\s+(.*)/",$src,$m)){
+		$module = array();
+		foreach($m[1] as $v) $module[trim($v)] = true;
+		$modules = implode(':',array_keys($module));
+	}	
+	return array(trim($summary),trim($modules));
 }
 function last_update($filename){
 	if(is_dir($filename)){
@@ -131,7 +138,8 @@ foreach($list[0] as $p){
 							touch($tn,$time);
 							touch($output_path.$package.'.tgz',$time);
 						}
-						$docs = $docs.$package.','.get_summary($dir.'/'.basename($dir).'.php')."\n";
+						list($summary,$modules) = get_desc($dir.'/'.basename($dir).'.php');
+						$docs = $docs.$package.','.$summary.','.$modules."\n";
 					}
 				}else if(!preg_match('/[A-Z]/',str_replace($input_path,'',dirname($r)))){
 					$package = str_replace(array($input_path,'/'),array('','.'),substr($r,0,-4));
@@ -145,7 +153,8 @@ foreach($list[0] as $p){
 							touch($tn,$time);
 							touch($output_path.$package.'.tgz',$time);
 						}
-						$docs = $docs.$package.','.get_summary($r)."\n";
+						list($summary,$modules) = get_desc($r);
+						$docs = $docs.$package.','.$summary.','.$modules."\n";
 					}
 				}
 			}

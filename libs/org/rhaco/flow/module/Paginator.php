@@ -7,6 +7,10 @@ use \org\rhaco\Xml;
  *
  */
 class Paginator{
+	/**
+	 * @module org.rhaco.Template
+	 * @param string $src
+	 */
 	public function before_template(&$src){
 		if(strpos($src,'rt:paginator') !== false){
 			while(Xml::set($tag,$src,'rt:paginator')){

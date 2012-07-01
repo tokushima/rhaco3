@@ -145,11 +145,22 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$libs = array();
 		foreach(\org\rhaco\Man::libs() as $package => $info){
 			$r = new \ReflectionClass($info['class']);
+			$src = file_get_contents($r->getFileName());
 			$class_doc = $r->getDocComment();
 			$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
-			list($summary) = explode("\n",$document);
-			if($this->search_str($info['class'],$document)){
-				$src = file_get_contents($r->getFileName());
+			list($summary) = explode("\n",$document);			
+			
+			$bool = true;
+			if($this->in_vars('q') != ''){
+				$modules = null;
+				if(preg_match_all("/@module\s+(.*)/",$src,$m)){
+					$module = array();
+					foreach($m[1] as $v) $module[trim($v)] = true;
+					$modules = implode(':',array_keys($module));
+				}
+				$bool = $this->search_str($info['class'],$document,$modules);
+			}
+			if($bool){
 				$c = new \org\rhaco\Object();
 				$c->summary = $summary;
 				$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
@@ -445,7 +456,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function mail_list(){
-		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
+		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page',1));
 		$order = $this->in_vars('order','-id');
 		$list = array();
 		try{

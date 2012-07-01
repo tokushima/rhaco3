@@ -14,24 +14,44 @@ class Post{
 		$this->url = $url;
 		$this->var_name = $var_name;
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function debug(\org\rhaco\Log $log,$id){
 		if($this->url !== null){
 			$this->http->vars($this->var_name,(string)$log);
 			$this->http->do_post($this->url);
 		}
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function info(\org\rhaco\Log $log,$id){
 		if($this->url !== null){
 			$this->http->vars($this->var_name,(string)$log);
 			$this->http->do_post($this->url);
 		}
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function warn(\org\rhaco\Log $log,$id){
 		if($this->url !== null){
 			$this->http->vars($this->var_name,(string)$log);
 			$this->http->do_post($this->url);
 		}
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function error(\org\rhaco\Log $log,$id){
 		if($this->url !== null){
 			$this->http->vars($this->var_name,(string)$log);

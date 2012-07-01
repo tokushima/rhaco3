@@ -11,7 +11,7 @@ class SimpleAuth{
 		$this->users = func_get_args();
 	}
 	/**
-	 * 
+	 * @module org.rhaco.flow.parts.RequestFlow
 	 * @conf string{} $auth ユーザ:md5(sha1(パスワード))
 	 * @param \org\rhaco\flow\parts\RequestFlow $request
 	 * @return boolean

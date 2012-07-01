@@ -41,6 +41,10 @@ class SendGmail extends \org\rhaco\Object{
 		}
 		return true;
 	}	
+	/**
+	 * @module org.rhaco.net.mail.Mail
+	 * @param org.rhaco.net.mail.Mail $mail
+	 */
 	public function send_mail(\org\rhaco\net\mail\Mail $mail){
 		if('' == fgets($this->resource,4096)) throw new \org\rhaco\net\mail\module\SendGmail\Exception('not connection');
 		$this->talk('HELO '.(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'localhost'));

@@ -9,6 +9,10 @@ namespace org\rhaco\service\flow\module;
  * @see https://www.facebook.com/settings?tab=applications
  */
 class FacebookSimpleAuth{
+	/**
+	 * @module org.rhaco.flow.parts.RequestFlow
+	 * @param org.rhaco.flow.parts.RequestFlow $req
+	 */
 	public function login_condition(\org\rhaco\flow\parts\RequestFlow $req){
 		$fb = new \org\rhaco\service\Facebook(\org\rhaco\Conf::get('client_id'), \org\rhaco\Conf::get('client_secret'));
 		

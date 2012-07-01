@@ -4,7 +4,17 @@ namespace org\rhaco\store\db\module;
  * Mysqlモジュール
  * @author tokushima
  */
-class Mysql extends Base{
+class Mysql extends Base{	
+	/**
+	 * @module org.rhaco.store.db.Dbc
+	 * @param string $name
+	 * @param string $host
+	 * @param number $port
+	 * @param string $user
+	 * @param string $password
+	 * @param string $sock
+	 * @see org\rhaco\store\db\module.Base::connect()
+	 */
 	public function connect($name,$host,$port,$user,$password,$sock){
 		if(!extension_loaded('pdo_mysql')) throw new \RuntimeException('pdo_mysql not supported');
 		$con = null;
@@ -29,11 +39,17 @@ class Mysql extends Base{
 		$error = $st->errorInfo();
 		if((int)$error[0] !== 0) throw new \InvalidArgumentException($error[2]);
 	}
+	/**
+	 * @module org.rhaco.store.db.Dbc
+	 * (non-PHPdoc)
+	 * @see org\rhaco\store\db\module.Base::last_insert_id_sql()
+	 */
 	public function last_insert_id_sql(){
 		return \org\rhaco\store\db\Daq::get('select last_insert_id() as last_insert_id;');
 	}
 	/**
 	 * create table
+	 * @module org.rhaco.store.db.Dbc
 	 * @param org.rhaco.store.db.Dao $dao
 	 */
 	public function create_table_sql(\org\rhaco\store\db\Dao $dao){

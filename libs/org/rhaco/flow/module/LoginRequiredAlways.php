@@ -6,6 +6,10 @@ namespace org\rhaco\flow\module;
  *
  */
 class LoginRequiredAlways{
+	/**
+	 * @module org.rhaco.flow.parts.RequestFlow
+	 * @param org.rhaco.flow.parts.RequestFlow $flow
+	 */	
 	public function before_login_required(\org\rhaco\flow\parts\RequestFlow $flow){
 		if(!$flow->is_login()){
 			\org\rhaco\net\http\Header::send_status(401);

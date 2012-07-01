@@ -17,15 +17,35 @@ class File{
 	public function __construct($dir=null){
 		$this->path = self::path($dir);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function debug(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function info(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function warn(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function error(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);
 	}

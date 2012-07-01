@@ -23,6 +23,11 @@ class SmtpBlackholeDao extends \org\rhaco\store\db\Dao{
 	protected $manuscript;
 	protected $create_date;
 	
+	/**
+	 * メールの内容をDBに保存する
+	 * @module org.rhaco.net.mail.Mail
+	 * @param org.rhaco.net.mail.Mail $mail
+	 */
 	public function send_mail(\org\rhaco\net\mail\Mail $mail){
 		$self = new self();		
 		$self->from($mail->from());

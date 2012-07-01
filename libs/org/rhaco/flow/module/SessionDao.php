@@ -23,6 +23,7 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		$this->data = ($value === null) ? '' : $value;
 	}
 	/**
+	 * @module org.rhaco.net.Session
 	 * @param string $session_name
 	 * @param string $id
 	 * @param string $save_path
@@ -35,6 +36,7 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return false;
 	}
 	/**
+	 * @module org.rhaco.net.Session
 	 * @param string $id
 	 * @return string
 	 */
@@ -48,6 +50,7 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return '';
 	}
 	/**
+	 * @module org.rhaco.net.Session
 	 * @param string $id
 	 * @param string $sess_data
 	 * @return boolean
@@ -67,6 +70,7 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return false;
 	}
 	/**
+	 * @module org.rhaco.net.Session
 	 * @param string $id
 	 * @return boolean
 	 */
@@ -83,6 +87,7 @@ class SessionDao extends \org\rhaco\store\db\Dao{
 		return false;
 	}
 	/**
+	 * @module org.rhaco.net.Session
 	 * @param int $maxlifetime
 	 * @return boolean
 	 */

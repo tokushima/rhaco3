@@ -5,6 +5,10 @@ namespace org\rhaco\service\flow\module;
  * @author tokushima
  */
 class InstagramSimpleAuth{
+	/**
+	 * @module org.rhaco.flow.parts.RequestFlow
+	 * @param org.rhaco.flow.parts.RequestFlow $req
+	 */
 	public function login_condition(\org\rhaco\flow\parts\RequestFlow $req){
 		$gram = new \org\rhaco\service\Instagram(\org\rhaco\Conf::get('client_id'), \org\rhaco\Conf::get('client_secret'));
 		

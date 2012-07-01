@@ -5,6 +5,10 @@ namespace org\rhaco\flow\module;
  * @author tokushima
  */
 class OutputXml{
+	/**
+	 * @module org.rhaco.Flow
+	 * @param mixed $obj
+	 */
 	public function flow_output($obj){
 		if(\org\rhaco\Exceptions::has()){
 			$this->flow_exception_output($obj,new \org\rhaco\Exceptions());
@@ -14,6 +18,10 @@ class OutputXml{
 			$xml->output();
 		}
 	}
+	/**
+	 * @module org.rhaco.Flow
+	 * @param mixed $obj
+	 */
 	public function flow_exception_output($obj,\Exception $exception){
 		\org\rhaco\Log::disable_display();
 		$xml = new \org\rhaco\Xml('error');

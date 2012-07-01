@@ -12,6 +12,10 @@ class OutputJson{
 		$this->mode = strtolower($mode);
 		$this->varname = $varname;
 	}
+	/**
+	 * @module org.rhaco.Flow
+	 * @param mixed $obj
+	 */
 	public function flow_output($obj){
 		if(\org\rhaco\Exceptions::has()){
 			$this->flow_exception_output($obj,new \org\rhaco\Exceptions());
@@ -22,6 +26,10 @@ class OutputJson{
 			print(($this->mode == 'jsonp') ? $this->varname.'('.$json.')' : $json);
 		}
 	}
+	/**
+	 * @module org.rhaco.Flow
+	 * @param mixed $obj
+	 */
 	public function flow_exception_output($obj,\Exception $exception){
 		\org\rhaco\Log::disable_display();
 		\org\rhaco\net\http\Header::send('Content-Type',(($this->mode == 'jsonp') ? 'text/javascript' : 'application/json'));

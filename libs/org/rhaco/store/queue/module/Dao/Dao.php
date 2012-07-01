@@ -9,6 +9,7 @@ use \org\rhaco\store\db\Q;
 class Dao{
 	/**
 	 * 挿入
+	 * @module org.rhaco.store.queue.Queue
 	 * @param \org\rhaco\store\queue\Model $obj
 	 */
 	public function insert(\org\rhaco\store\queue\Model $obj){
@@ -19,6 +20,7 @@ class Dao{
 	}
 	/**
 	 * 削除
+	 * @module org.rhaco.store.queue.Queue
 	 * @param string $id
 	 */
 	public function delete($id){
@@ -33,6 +35,7 @@ class Dao{
 	}
 	/**
 	 * 終了
+	 * @module org.rhaco.store.queue.Queue
 	 * @param string $id
 	 */
 	public function finish($id){
@@ -48,6 +51,7 @@ class Dao{
 	}
 	/**
 	 * 取得
+	 * @module org.rhaco.store.queue.Queue
 	 * @param string $type
 	 * @param integer $priority
 	 * @throws \org\rhaco\store\db\exception\DaoException
@@ -76,6 +80,7 @@ class Dao{
 	
 	/**
 	 * リセット
+	 * @module org.rhaco.store.queue.Queue
 	 * @param string $type
 	 * @param integer $priority
 	 * @throws \org\rhaco\store\db\exception\DaoException
@@ -101,6 +106,7 @@ class Dao{
 	}
 	/**
 	 * 一覧
+	 * @module org.rhaco.store.queue.Queue
 	 * @param string $type
 	 * @param \org\rhaco\Paginator $paginator
 	 * @param string $sorter
@@ -117,6 +123,7 @@ class Dao{
 		return $result;
 	}
 	/**
+	 * @module org.rhaco.store.queue.Queue
 	 * 終了したものを削除する
 	 * @param string $type
 	 * @param timestamp $fin

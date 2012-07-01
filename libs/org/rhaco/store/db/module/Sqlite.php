@@ -7,6 +7,16 @@ namespace org\rhaco\store\db\module;
 class Sqlite extends Base{
 	protected $order_random_str = 'random()';
 
+	/**
+	 * @module org.rhaco.store.db.Dbc
+	 * @param string $name
+	 * @param string $host
+	 * @param number $port
+	 * @param string $user
+	 * @param string $password
+	 * @param string $sock
+	 * @see org\rhaco\store\db\module.Base::connect()
+	 */
 	public function connect($name,$host,$port,$user,$password,$sock){
 		if(!extension_loaded('pdo_sqlite')) throw new \RuntimeException('pdo_sqlite not supported');
 		if(empty($host) && empty($name)) throw new \InvalidArgumentException('undef connection name');
@@ -21,11 +31,17 @@ class Sqlite extends Base{
 		}
 		return $con;
 	}
+	/**
+	 * @module org.rhaco.store.db.Dbc
+	 * (non-PHPdoc)
+	 * @see org\rhaco\store\db\module.Base::last_insert_id_sql()
+	 */
 	public function last_insert_id_sql(){
 		return \org\rhaco\store\db\Daq::get('select last_insert_rowid() as last_insert_id;');
 	}
 	/**
 	 * create table
+	 * @module org.rhaco.store.db.Dbc
 	 * @param org.rhaco.store.db.Dao $dao
 	 */
 	public function create_table_sql(\org\rhaco\store\db\Dao $dao){

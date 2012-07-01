@@ -18,6 +18,25 @@
 	{$t.html($description)}
 </div>
 
+<rt:if param="{$see}">
+	<h3>See</h3>
+	<table rt:param="{$see}" rt:var="class_method">
+	<thead>
+		<tr>
+			<th>class</th>
+			<th>method</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td><a href="{$t.package_method_url('class_info',$f.type($class_method[0]))}">{$f.type($class_method[0])}</a></td>
+			<td><a href="{$t.package_method_url('method_info',$class_method[0],$class_method[1])}">{$class_method[1]}</a></td>
+		</tr>
+	</tbody>
+	</table>	
+</rt:if>
+
+
 <rt:if param="{$params}">
 	<h3>Params</h3>		
 	<table rt:param="{$params}" rt:var="param" rt:key="param_name">
@@ -156,6 +175,22 @@
 		<tr class="even">
 			<td><a href="{$t.package_method_url('class_info',$f.type($e[0]))}">{$f.type($e[0])}</a></td>
 			<td>{$t.html($e[1])}</td>
+		</tr>
+	</tbody>
+	</table>	
+</rt:if>
+
+<rt:if param="{$modules}">
+	<h3>Modules</h3>
+	<table rt:param="{$modules}" rt:var="pkg">
+	<thead>
+		<tr>
+			<th style="width:200px">package</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td><a href="{$t.package_method_url('class_info',$f.type($pkg))}">{$f.type($pkg)}</a></td>
 		</tr>
 	</tbody>
 	</table>	

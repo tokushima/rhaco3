@@ -16,15 +16,35 @@ namespace org\rhaco\io\log;
 class MailSender{
 	private $template_base;
 
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function debug(\org\rhaco\Log $log){
 		$this->send('debug',$log);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function info(\org\rhaco\Log $log){
 		$this->send('info',$log);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function warn(\org\rhaco\Log $log){
 		$this->send('warn',$log);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
 	public function error(\org\rhaco\Log $log){
 		$this->send('error',$log);
 	}

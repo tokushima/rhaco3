@@ -116,8 +116,8 @@ class Smtp extends \org\rhaco\net\Socket{
 	}
 	
 	/**
-	 * メール送信
-	 * @param Mail $mail
+	 * @module org.rhaco.net.mail.Mail
+	 * @param org.rhaco.net.mail.Mail $mail
 	 */
 	public function send_mail(\org\rhaco\net\mail\Mail $mail){
 		if(!$this->is_connected() && !$this->login()) new \org\rhaco\net\mail\module\Smtp\Exception('not connected');

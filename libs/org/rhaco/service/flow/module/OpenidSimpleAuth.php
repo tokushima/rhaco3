@@ -5,6 +5,10 @@ namespace org\rhaco\service\flow\module;
  * @author tokushima
  */
 class OpenidSimpleAuth{
+	/**
+	 * @module org.rhaco.flow.parts.RequestFlow
+	 * @param org.rhaco.flow.parts.RequestFlow $req
+	 */
 	public function login_condition(\org\rhaco\flow\parts\RequestFlow $req){
 		$openid = new \LightOpenID(\org\rhaco\Request::current_url());
 		if($req->is_vars('return_to')) $openid->returnUrl = $req->in_vars('return_to');
