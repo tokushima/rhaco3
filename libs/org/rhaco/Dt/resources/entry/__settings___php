@@ -4,7 +4,6 @@ Rhaco3::config_path('local');
 
 error_reporting(E_ALL);
 \org\rhaco\Conf::set('org.rhaco.Log','level','warn');
-\org\rhaco\Log::set_module(new \org\rhaco\io\log\Growl());
 \org\rhaco\Log::set_module(new \org\rhaco\io\log\File());
 
 \org\rhaco\Conf::set('org.rhaco.Flow','exception_log_level','error');
