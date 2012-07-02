@@ -16,45 +16,46 @@ class Man{
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$r->getDocComment())));
 		$extends = ($r->getParentClass() === false) ? null : $r->getParentClass()->getName();
 
-		$methods = $static_methods = $protected_methods = $protected_static_methods = $module_method = array();
+		$methods = $static_methods = $protected_methods = $protected_static_methods = array(array(),array());
+		$module_method = array();
 		foreach($r->getMethods() as $method){
-			if($method->getDeclaringClass()->getFileName() == $r->getFileName()){
-				if(substr($method->getName(),0,1) != '_' && ($method->isPublic() || $method->isProtected())){
-					$method_document = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$method->getDocComment()));
-					list($method_description) = explode("\n",trim(preg_replace('/@.+/','',$method_document)));
-					if(strpos($method_description,'non-PHPdoc') !== false){
-						if(preg_match("/@see\s+(.*)/",$method_document,$match)){
-							$method_description = str_replace("\\",'.',trim($match[1]));
-							if(preg_match("/^.+\/([^\/]+)$/",$method_description,$m)) $method_description = trim($m[1]);
-							if(substr($method_description,0,1) == '.') $method_description = substr($method_description,1);
-							if(strpos($method_description,'::') !== false){
-								list($c,$m) = explode('::',str_replace(array('(',')'),'',$method_description));
-								try{
-									$i = self::method_info($c,$m);
-									list($method_description) = explode("\n",$i['description']);
-								}catch(\Exception $e){
-									$method_description = '@see '.$method_description;
-								}
+			if(substr($method->getName(),0,1) != '_' && ($method->isPublic() || $method->isProtected())){
+				$method_document = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$method->getDocComment()));
+				list($method_description) = explode("\n",trim(preg_replace('/@.+/','',$method_document)));
+				if(strpos($method_description,'non-PHPdoc') !== false){
+					if(preg_match("/@see\s+(.*)/",$method_document,$match)){
+						$method_description = str_replace("\\",'.',trim($match[1]));
+						if(preg_match("/^.+\/([^\/]+)$/",$method_description,$m)) $method_description = trim($m[1]);
+						if(substr($method_description,0,1) == '.') $method_description = substr($method_description,1);
+						if(strpos($method_description,'::') !== false){
+							list($c,$m) = explode('::',str_replace(array('(',')'),'',$method_description));
+							try{
+								$i = self::method_info($c,$m);
+								list($method_description) = explode("\n",$i['description']);
+							}catch(\Exception $e){
+								$method_description = '@see '.$method_description;
 							}
 						}
 					}
-					if(preg_match_all("/@module\s+([\w\.]+)/",$method_document,$match)){
-						foreach($match[1] as $v) $module_method[trim($v)][] = $method->getName();
-					}					
-					if($method->isStatic()){
-						if($method->getDeclaringClass()->getName() == $r->getName()){
-							if($method->isPublic()){
-								$static_methods[$method->getName()] = $method_description;
-							}else{
-								$protected_static_methods[$method->getName()] = $method_description;								
-							}
-						}
-					}else{
+				}
+				if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$method_document,$match)){
+					foreach($match[1] as $v) $module_method[trim($v)][] = $method->getName();
+				}
+
+				$dec = ($method->getDeclaringClass()->getFileName() == $r->getFileName()) ? 0 : 1;
+				if($method->isStatic()){
+					if($method->getDeclaringClass()->getName() == $r->getName()){
 						if($method->isPublic()){
-							$methods[$method->getName()] = $method_description;
+							$static_methods[$dec][$method->getName()] = $method_description;
 						}else{
-							$protected_methods[$method->getName()] = $method_description;
+							$protected_static_methods[$dec][$method->getName()] = $method_description;								
 						}
+					}
+				}else{
+					if($method->isPublic()){
+						$methods[$dec][$method->getName()] = $method_description;
+					}else{
+						$protected_methods[$dec][$method->getName()] = $method_description;
 					}
 				}
 			}
@@ -92,15 +93,20 @@ class Man{
 			}
 		}
 		$description = trim(preg_replace('/@.+/','',$document));
-		ksort($static_methods);
-		ksort($methods);
-		ksort($protected_methods);
-		ksort($protected_static_methods);
+		ksort($static_methods[0]);
+		ksort($methods[0]);
+		ksort($protected_methods[0]);
+		ksort($protected_static_methods[0]);
+		ksort($static_methods[1]);
+		ksort($methods[1]);
+		ksort($protected_methods[1]);
+		ksort($protected_static_methods[1]);
 		ksort($properties);
 		ksort($modules);
 		return array(
 				'filename'=>$r->getFileName(),'extends'=>$extends,'abstract'=>$r->isAbstract()
-				,'static_methods'=>$static_methods,'methods'=>$methods,'protected_static_methods'=>$protected_static_methods,'protected_methods'=>$protected_methods
+				,'static_methods'=>$static_methods[0],'methods'=>$methods[0],'protected_static_methods'=>$protected_static_methods[0],'protected_methods'=>$protected_methods[0]
+				,'inherited_static_methods'=>$static_methods[1],'inherited_methods'=>$methods[1],'inherited_protected_static_methods'=>$protected_static_methods[1],'inherited_protected_methods'=>$protected_methods[1]
 				,'module_method'=>$module_method
 				,'properties'=>$properties,'tasks'=>$tasks,'package'=>$class,'description'=>$description
 				,'modules'=>$modules
@@ -193,7 +199,7 @@ class Man{
 		}
 		ksort($throws);
 
-		if(preg_match_all("/@module\s+([\w\.]+)/",$document,$match)){
+		if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$document,$match)){
 			foreach($match[1] as $v) $modules[trim($v)] = true;
 		}
 		$modules = array_keys($modules);

@@ -153,11 +153,17 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			$bool = true;
 			if($this->in_vars('q') != ''){
 				$modules = null;
-				if(preg_match_all("/@module\s+(.*)/",$src,$m)){
-					$module = array();
-					foreach($m[1] as $v) $module[trim($v)] = true;
-					$modules = implode(':',array_keys($module));
+				$module = array();
+				
+				foreach($r->getMethods() as $method){
+					if(substr($method->getName(),0,1) != '_' && ($method->isPublic() || $method->isProtected())){
+						$method_document = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$method->getDocComment()));
+						if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$method_document,$match)){
+							foreach($match[1] as $v) $module[trim($v)] = true;
+						}						
+					}
 				}
+				$modules = implode(':',array_keys($module));
 				$bool = $this->search_str($info['class'],$document,$modules);
 			}
 			if($bool){
