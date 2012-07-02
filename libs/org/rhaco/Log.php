@@ -4,10 +4,11 @@ namespace org\rhaco;
  * ログ処理
  *
  * @author tokushima
- * @var string $level
- * @var timestamp $time
- * @var string $file
- * @var integer $line
+ * @var string $level ログのレベル
+ * @var timestamp $time 発生時間
+ * @var string $file 発生したファイル名
+ * @var integer $line 発生した行
+ * @var mixed $value 内容
  * @conf string $level ログレベル (none,error,warn,info,debug)
  * @conf boolean $disp 標準出力に出すか
  */
@@ -19,11 +20,11 @@ class Log extends \org\rhaco\Object{
 	static private $current_level;
 	static private $disp;
 
-	protected $level; # ログのレベル
-	protected $time; # 発生時間
-	protected $file; # 発生したファイル名
-	protected $line; # 発生した行
-	protected $value; # 内容
+	protected $level;
+	protected $time;
+	protected $file;
+	protected $line;
+	protected $value;
 
 	static public function __import__(){
 		self::$id = uniqid('');
