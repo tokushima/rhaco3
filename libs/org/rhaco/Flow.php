@@ -302,7 +302,6 @@ class Flow{
 							 */
 							$this->object_module('flow_output',$obj);
 						}else{
-							// TODO
 							\org\rhaco\Exceptions::throw_over();
 							$xml = new \org\rhaco\Xml('result',$obj);
 							$xml->output();
@@ -335,9 +334,7 @@ class Flow{
 							}
 							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
 						}else{
-							if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
-							\org\rhaco\Log::warn(new \org\rhaco\Exceptions());
-							
+							if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);							
 							if(isset($apps[$k]['error_template'])){
 								$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
@@ -402,7 +399,6 @@ class Flow{
 		print($src);
 	}
 	private function handle_exception_xml(){
-		// TODO
 		$xml = new \org\rhaco\Xml('error');
 			foreach(\org\rhaco\Exceptions::groups() as $g){
 				foreach(\org\rhaco\Exceptions::gets($g) as $e){
