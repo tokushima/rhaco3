@@ -302,6 +302,7 @@ class Flow{
 							 */
 							$this->object_module('flow_output',$obj);
 						}else{
+							// TODO
 							\org\rhaco\Exceptions::throw_over();
 							$xml = new \org\rhaco\Xml('result',$obj);
 							$xml->output();
@@ -334,25 +335,23 @@ class Flow{
 							}
 							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
 						}else{
+							if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
+							\org\rhaco\Log::warn(new \org\rhaco\Exceptions());
+							
 							if(isset($apps[$k]['error_template'])){
-								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
 							}else if(isset($map['error_template'])){
-								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;
 							}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html')){
-								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 								$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 								exit;
 							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
 								if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
 								exit;
-							}else{
-								if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
-								$this->handle_exception_xml();
 							}
+							$this->handle_exception_xml();
 						}
 						throw $e;
 					}
@@ -403,6 +402,7 @@ class Flow{
 		print($src);
 	}
 	private function handle_exception_xml(){
+		// TODO
 		$xml = new \org\rhaco\Xml('error');
 			foreach(\org\rhaco\Exceptions::groups() as $g){
 				foreach(\org\rhaco\Exceptions::gets($g) as $e){
@@ -414,6 +414,7 @@ class Flow{
 					$xml->add($message);
 				}
 			}
+		$xml->add('id',\org\rhaco\Exceptions::id());
 		$xml->output();
 	}
 	private function str_reflection($package){

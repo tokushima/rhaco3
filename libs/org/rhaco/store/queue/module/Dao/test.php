@@ -3,6 +3,15 @@
 \org\rhaco\store\db\Dao::start_record();
 
 
+while(true){
+	try{
+		$model = \org\rhaco\store\queue\Queue::get('test');
+		\org\rhaco\store\queue\Queue::finish($model);
+	}catch(\Exception $e){
+		break;
+	}
+}
+
 for($i=1;$i<=5;$i++){
 	\org\rhaco\store\queue\Queue::insert('test',$i);
 }

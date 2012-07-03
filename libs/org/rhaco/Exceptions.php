@@ -10,16 +10,42 @@ namespace org\rhaco;
  */
 class Exceptions extends \org\rhaco\Exception{
 	static private $self;
-	protected $message = 'multiple exceptions';
+	static private $prefix;
+	protected $id;
 	private $messages = array();
 
+	/**
+	 * IDの接頭辞を定義する
+	 * @param string $prefix
+	 */
+	static public function set_prefix($prefix){
+		self::$prefix = $prefix;
+	}
+	/**
+	 * ID
+	 * @return string
+	 */
+	static public function id(){
+		return (self::$self !== null) ? self::$self->id : null;
+	}
+	/**
+	 * IDの復元
+	 * @param string $id
+	 */
+	static public function parse_id($id){
+		return sprintf('%04d, %02d: %s',hexdec(substr($id,0,-5)),hexdec(substr($id,-5,1)),substr($id,-4));
+	}
 	/**
 	 * Exceptionを追加する
 	 * @param Exception $exception 例外
 	 * @param string $group グループ名
 	 */
 	static public function add(\Exception $exception,$group=null){
-		if(self::$self === null) self::$self = new self('');
+		if(self::$self === null){			
+			$self = new self('multiple exceptions');
+			$self->id = self::$prefix.strtoupper(dechex(date('md')).dechex(date('g')).dechex(mt_rand(4096,65535)));
+			self::$self = $self;
+		}
 		if($exception instanceof self){
 			foreach($exception->messages as $key => $es){
 				foreach($es as $e) self::$self->messages[$key][] = $e;
@@ -80,10 +106,14 @@ class Exceptions extends \org\rhaco\Exception{
 	static public function throw_over($group=null){
 		if(self::has($group)) throw self::$self;
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see Exception::__toString()
+	 */
 	public function __toString(){
 		if(self::$self === null || empty(self::$self->messages)) return null;
 		$exceptions = self::gets();
-		$result = count($exceptions)." exceptions: ";
+		$result = count($exceptions).' exceptions [#'.self::$self->id.']: ';
 		foreach($exceptions as $e){
 			$result .= "\n ".$e->getMessage();
 		}
