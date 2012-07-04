@@ -18,7 +18,7 @@ class Exceptions extends \org\rhaco\Exception{
 	 * @return string
 	 */
 	static public function id(){
-		return (self::$self !== null) ? self::$self->id : null;
+		return (self::$self !== null) ? self::$self->id : '000000';
 	}
 	/**
 	 * IDの復元

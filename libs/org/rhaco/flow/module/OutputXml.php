@@ -40,6 +40,7 @@ class OutputXml{
 				$message->add('type',basename(str_replace("\\",'/',get_class($exception))));
 				$xml->add($message);
 			}
+		$xml->add('id',\org\rhaco\Exceptions::id());
 		$xml->output();
 	}
 }

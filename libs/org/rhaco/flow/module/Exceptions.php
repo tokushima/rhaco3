@@ -10,6 +10,7 @@ class Exceptions{
 		if(strpos($src,$name) !== false){
 			while(Xml::set($tag,$src,$name)){
 				$param = $tag->in_attr('param');
+				$id = $tag->in_attr('id','rtinvalid_id'.uniqid(''));
 				$var = $tag->in_attr('var','rtinvalid_var'.uniqid(''));
 				$messages = $tag->in_attr('messages','rtinvalid_mes'.uniqid(''));
 				if(!isset($param[0]) || $param[0] !== '$') $param = '"'.$param.'"';
@@ -29,11 +30,13 @@ class Exceptions{
 							sprintf("<?php if(\\org\\rhaco\\Exceptions::has(%s)){ ?>"
 										."<?php \$%s = \\org\\rhaco\\Exceptions::gets(%s); ?>"
 										."<?php \$%s = \\org\\rhaco\\Exceptions::messages(%s); ?>"
+										."<?php \$%s = \\org\\rhaco\\Exceptions::id(); ?>"
 										."%s"
 									."<?php } ?>"
 									,$param
 									,$var,$param
 									,$messages,$param
+									,$id
 									,$value
 							),
 							$src);
