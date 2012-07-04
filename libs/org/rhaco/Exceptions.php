@@ -10,17 +10,9 @@ namespace org\rhaco;
  */
 class Exceptions extends \org\rhaco\Exception{
 	static private $self;
-	static private $prefix;
 	protected $id;
 	private $messages = array();
 
-	/**
-	 * IDの接頭辞を定義する
-	 * @param string $prefix
-	 */
-	static public function set_prefix($prefix){
-		self::$prefix = $prefix;
-	}
 	/**
 	 * ID
 	 * @return string
@@ -33,7 +25,7 @@ class Exceptions extends \org\rhaco\Exception{
 	 * @param string $id
 	 */
 	static public function parse_id($id){
-		return sprintf('%04d, %02d: %s',hexdec(substr($id,0,-5)),hexdec(substr($id,-5,1)),substr($id,-4));
+		return sprintf('%04d, %02d: %s',base_convert(substr($id,0,2),36,10),hexdec(substr($id,2,1)),substr($id,3,3));
 	}
 	/**
 	 * Exceptionを追加する
@@ -41,9 +33,9 @@ class Exceptions extends \org\rhaco\Exception{
 	 * @param string $group グループ名
 	 */
 	static public function add(\Exception $exception,$group=null){
-		if(self::$self === null){			
+		if(self::$self === null){
 			$self = new self('multiple exceptions');
-			$self->id = self::$prefix.strtoupper(dechex(date('md')).dechex(date('g')).dechex(mt_rand(4096,65535)));
+			$self->id = strtoupper(base_convert(date('md'),10,36).base_convert(date('G'),10,36).base_convert(mt_rand(1296,46655),10,36));
 			self::$self = $self;
 		}
 		if($exception instanceof self){
