@@ -7,7 +7,6 @@ namespace org\rhaco;
 class Daemon{
 	static private $state = true;
 	static private $pid;
-	static private $pid_file;
 	static private $child = array();
 	static protected $signal_list = array(
 					SIGHUP=>array('SIGHUP','terminal line hangup'),
@@ -32,32 +31,17 @@ class Daemon{
 					SIGUSR2=>array('SIGUSR2','User defined signal 2'),
 				);
 
-	final public function __construct(){
-	}
-	/**
-	 * 実装
-	 */
-	static public function main(){
-		$i = rand(1,10);
-		sleep($i);
-	}
-	static protected function signal_func($signal){
-		switch($signal){
-			case SIGCHLD:
-				while(pcntl_wait($status,WNOHANG|WUNTRACED) > 0) usleep(1000);
-				break;
-			default:
-				self::$state = false;
+	static private function pid($pid_file,$ref,$name,$exec_php,$action){
+		if(empty($pid_file) && !empty($name)) $pid_file = sprintf('/var/run/%s.pid',$name);
+		if(empty($pid_file) && !empty($exec_php)) $pid_file = sprintf('/var/run/%s.pid',basename($exec_php,'.php'));
+		if(empty($pid_file) && !empty($action)) $pid_file = sprintf('/var/run/%s.pid',md5($action.var_export($args,true)));
+		if(empty($pid_file)){
+			$class = str_replace('\\','_',$ref->getName());
+			$pid_file = sprintf('/var/run/%s.pid',(substr($class,0,1) == '_') ? substr($class,1) : $class);
 		}
-		$signal_name = strtolower(self::$signal_list[$signal][0]);
-		$re = new \ReflectionClass(new static);
-		foreach($re->getMethods(\ReflectionMethod::IS_STATIC) as $m){
-			if($m->getName() == $signal_name){
-				call_user_func(array($re->getName(),$signal_name));
-				break;
-			}
-		}
+		return $pid_file;
 	}
+	
 	/**
 	 * プロセスを停止させる
 	 * @param string $pid_file 
@@ -67,15 +51,12 @@ class Daemon{
 		if((php_sapi_name() !== 'cli')) return;
 		$name = isset($opt['name']) ? $opt['name'] : null;
 		$exec_php = isset($opt['exec_php']) ? $opt['exec_php'] : null;
+		$action = isset($opt['action']) ? $opt['action'] : null;
+		$args = isset($opt['args']) ? $opt['args'] : array();
 		$ref = new \ReflectionClass(new static);
 		
 		if(isset($pid_file)){
-			if(empty($pid_file) && !empty($name)) $pid_file = sprintf('/var/run/%s.pid',$name);
-			if(empty($pid_file) && !empty($exec_php)) $pid_file = sprintf('/var/run/%s.pid',basename($exec_php,'.php'));
-			if(empty($pid_file)){
-				$class = str_replace('\\','_',$ref->getName());
-				$pid_file = sprintf('/var/run/%s.pid',(substr($class,0,1) == '_') ? substr($class,1) : $class);
-			}
+			$pid_file = self::pid($pid_file,$ref,$name,$exec_php,$action);
 		}
 		if(!is_file($pid_file)) throw new \Exception($pid_file.' not found');
 		$pid = (int)file_get_contents($pid_file);
@@ -95,6 +76,8 @@ class Daemon{
 		$clients = isset($opt['clients']) ? $opt['clients'] : 1;
 		$sleep = isset($opt['sleep']) ? $opt['sleep'] : 0;
 		$exec_php = isset($opt['exec_php']) ? $opt['exec_php'] : null;
+		$action = isset($opt['action']) ? $opt['action'] : null;
+		$args = isset($opt['args']) ? $opt['args'] : array();
 		$phpcmd = isset($_ENV['_']) ? $_ENV['_'] : (isset($_SERVER['_']) ? $_SERVER['_'] : (isset($cmd['phpcmd']) ? $cmd['phpcmd'] : '/usr/bin/php'));
 		$ref = new \ReflectionClass(new static);
 		
@@ -104,16 +87,10 @@ class Daemon{
 		
 		// PID file
 		if(isset($pid_file)){
-			if(empty($pid_file) && !empty($name)) $pid_file = sprintf('/var/run/%s.pid',$name);
-			if(empty($pid_file) && !empty($exec_php)) $pid_file = sprintf('/var/run/%s.pid',basename($exec_php,'.php'));
-			if(empty($pid_file)){
-				$class = str_replace('\\','_',$ref->getName());
-				$pid_file = sprintf('/var/run/%s.pid',(substr($class,0,1) == '_') ? substr($class,1) : $class);
-			}
-			self::$pid_file = $pid_file;
+			$pid_file = self::pid($pid_file,$ref,$name,$exec_php,$action);
 			if(is_file($pid_file)){
-				if(posix_kill((int)file_get_contents(self::$pid_file),0)) throw new \Exception('started PID:'.(int)file_get_contents(self::$pid_file));
-				@unlink(self::$pid_file);
+				if(posix_kill((int)file_get_contents($pid_file),0)) throw new \Exception('started PID:'.(int)file_get_contents($pid_file));
+				@unlink($pid_file);
 			}
 			if(!is_dir(dirname($pid_file)) || false === file_put_contents($pid_file,'')) throw new \Exception('permission denied '.$pid_file);
 		}
@@ -134,7 +111,7 @@ class Daemon{
 			}
 
 			// parent
-			if(!empty(self::$pid_file)){
+			if(!empty($pid_file)){
 				if(pcntl_fork() !== 0) return;
 				posix_setsid();
 			}
@@ -142,20 +119,22 @@ class Daemon{
 			
 			// pid
 			self::$pid = posix_getpid();
-			if(!empty(self::$pid_file)) file_put_contents(self::$pid_file,self::$pid);
+			if(!empty($pid_file)) file_put_contents($pid_file,self::$pid);
 			
-			// main loop
 			while(self::$state === true){
-				// child
 				$pid = pcntl_fork();
 				self::$child[$pid] = true;
 				
 				if($pid === -1) throw new \Exception('Unable to fork');
 				if($pid === 0){
-					// execute
 					$pid = posix_getpid();
 					if(empty($exec_php)){
-						static::main();
+						if(empty($action)){
+							static::main();
+						}else{
+							list($class,$method) = explode('::',$action);
+							call_user_func_array(array('\\'.str_replace('.','\\',$class),$method),$args);
+						}
 						exit;
 					}else{
 						pcntl_exec($phpcmd,array($exec_php));
@@ -169,7 +148,36 @@ class Daemon{
 				if($sleep > 0) usleep($sleep * 1000000);
 				clearstatcache();
 			}
-			if(!empty(self::$pid_file) && is_file(self::$pid_file)) @unlink(self::$pid_file);
+			if(!empty($pid_file) && is_file($pid_file)) @unlink($pid_file);
+		}
+	}
+	
+	/**
+	 * Override
+	 */
+	static protected function main(){
+		$i = rand(1,10);
+		sleep($i);
+	}
+	/**
+	 * Override
+	 * @param string $signal
+	 */
+	static protected function signal_func($signal){
+		switch($signal){
+			case SIGCHLD:
+				while(pcntl_wait($status,WNOHANG|WUNTRACED) > 0) usleep(1000);
+				break;
+			default:
+				self::$state = false;
+		}
+		$signal_name = strtolower(self::$signal_list[$signal][0]);
+		$re = new \ReflectionClass(new static);
+		foreach($re->getMethods(\ReflectionMethod::IS_STATIC) as $m){
+			if($m->getName() == $signal_name){
+				call_user_func(array($re->getName(),$signal_name));
+				break;
+			}
 		}
 	}
 }
