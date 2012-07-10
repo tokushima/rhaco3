@@ -11,6 +11,7 @@ use \org\rhaco\store\db\exception\UniqueDaoException;
 use \org\rhaco\store\db\exception\DaoBadMethodCallException;
 use \org\rhaco\store\db\exception\DaoConnectionException;
 use \org\rhaco\store\db\exception\InvalidArgumentException;
+use \org\rhaco\store\db\exception\NoRowsAffectedException;
 /**
  * O/R Mapper
  * @author tokushima
@@ -847,7 +848,8 @@ abstract class Dao extends \org\rhaco\Object{
 			 * @return Daq
 			 */
 			$daq = $self::module('update_sql',$this,$query);
-			$this->update_query($daq);
+			$affected_rows = $this->update_query($daq);
+			if($affected_rows === 0 && !empty($args)) throw new NoRowsAffectedException();
 			$this->__after_update__();
 			$this->__after_save__();
 		}
