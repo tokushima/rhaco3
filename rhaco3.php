@@ -419,11 +419,12 @@ if(isset($_SERVER['argv'][1])){
 					if(is_file($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/cmd.php')) || is_dir($f=(Rhaco3::lib_dir().str_replace('.','/',$package).'/cmd'))
 						|| is_file($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/cmd.php')) || is_dir($f=(Rhaco3::lib_dir().'_vendors/'.str_replace('.','/',$package).'/cmd'))
 					){
-						if($help){
+						$output_help_func = function($package,$f,$value){
 							$help_params = array();
 							$pad = 4;
 							$pvalue = '';
-							$doc = (preg_match('/\/\*\*.+?\*\//s',file_get_contents($f),$m)) ? trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0]))) : '';
+							$src = is_file($f) ? file_get_contents($f) : (is_file($f.'/__setup__.php') ? file_get_contents($f.'/__setup__.php') : null);
+							$doc = (preg_match('/\/\*\*.+?\*\//s',$src,$m)) ? trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0]))) : '';
 							if(preg_match_all('/@.+/',$doc,$as)){
 								foreach($as[0] as $m){
 									if(preg_match("/@(\w+)\s+([^\s]+)\s+\\$(\w+)(.*)/",$m,$p)){
@@ -437,7 +438,7 @@ if(isset($_SERVER['argv'][1])){
 								foreach(array_keys($help_params) as $k){if($pad < strlen($k)){ $pad = strlen($k); }}
 							}
 							print("\nUsage:\n");
-							print("  -".$package." ".$pvalue."\n");
+							print("  -".$package." ".(empty($value) ? ((is_file($f.'/__setup__.php') ? '[(function name)]' : $pvalue)) : $value)."\n");
 							if(!empty($help_params)){
 								print("\n  Options:\n");
 								foreach($help_params as $k => $v){
@@ -447,6 +448,9 @@ if(isset($_SERVER['argv'][1])){
 							$doc = trim(preg_replace('/@.+/','',$doc));
 							print("\n\n  description:\n");
 							print('    '.str_replace("\n","\n    ",$doc)."\n\n");
+						};
+						if($help){
+							$output_help_func($package,$f,null);
 						}else{
 							$_SERVER['argv'] = array_slice($_SERVER['argv'],2);
 							$_ENV['PATH_LIB_DIR'] = Rhaco3::lib_dir();
@@ -460,7 +464,9 @@ if(isset($_SERVER['argv'][1])){
 								$_ENV['return'] = require($f);
 							}else if(is_dir($f)){
 								try{
-									if(is_file($cmdf=$f.'/'.$value.'.php')){
+									if(substr($value,-1) == '?' && is_file($cmdf=$f.'/'.substr($value,0,-1).'.php')){
+										$output_help_func($package,$cmdf,substr($value,0,-1));
+									}else if(is_file($cmdf=$f.'/'.$value.'.php')){
 										if(is_file($f.'/__setup__.php')) require($f.'/__setup__.php');
 										$_ENV['return'] = require($cmdf);
 										if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
@@ -486,7 +492,7 @@ if(isset($_SERVER['argv'][1])){
 												}
 											}
 										}
-										print(PHP_EOL.'Commands ('.substr($cmd,1).'): '.PHP_EOL);
+										print(PHP_EOL.'Functions ('.substr($cmd,1).'): '.PHP_EOL);
 										foreach($list as $p => $s) print('  '.str_pad($p,$len).' : '.$s.PHP_EOL);
 									}
 								}catch(\Exception $exception){
