@@ -452,16 +452,17 @@ if(isset($_SERVER['argv'][1])){
 							$_ENV['PATH_LIB_DIR'] = Rhaco3::lib_dir();
 							$_ENV['PATH_EXTLIB_DIR'] = Rhaco3::lib_dir().'_extlibs';
 							$_ENV['PATH_VENDOR_DIR'] = Rhaco3::lib_dir().'_vendors';
+							$_ENV['return'] = 1;
 							list($_ENV['value'],$_ENV['params']) = array($value,$params);
 							require_once(dirname($f).'/'.basename(dirname($f)).'.php');
 
 							if(is_file($f)){
-								require_once($f);
+								$_ENV['return'] = require($f);
 							}else if(is_dir($f)){
 								try{
 									if(is_file($cmdf=$f.'/'.$value.'.php')){
 										if(is_file($f.'/__setup__.php')) require($f.'/__setup__.php');
-										require($cmdf);
+										$_ENV['return'] = require($cmdf);
 										if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
 									}else{
 										if(is_file($sf=$f.'/__setup__.php')){
@@ -469,7 +470,7 @@ if(isset($_SERVER['argv'][1])){
 												$println(trim(preg_replace('/@.+/','',preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1])))),null,0);
 												$println(str_repeat('-',50));
 											}
-											require($sf);
+											$_ENV['return'] = require($sf);
 										}
 										if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
 										$list = array();
@@ -494,6 +495,7 @@ if(isset($_SERVER['argv'][1])){
 								}
 								if(isset($_ENV['exception'])) throw $_ENV['exception'];
 							}
+							exit((int)$_ENV['return']);
 						}
 					}else{
 						throw new \RuntimeException('Command not found `'.$package.'`');
