@@ -28,25 +28,21 @@ for($i=1;$i<=5;$i++){
 	\org\rhaco\store\queue\Queue::insert('test',$i);
 }
 
-$b = false;
-$i = 1;
+$i = 0;
 foreach(\org\rhaco\store\queue\Queue::gets(5,'test') as $model){
-	$b = true;
+	$i++;	
 	eq($i,$model->data()); // ロックだけする
-	$i++;
 }
-eq(true,$b);
-\org\rhaco\store\queue\Queue::reset('test',0); // リセット
+eq(5,$i);
+\org\rhaco\store\queue\Queue::reset('test',-86400); // 未来を指定してリセット
 
-$b = false;
-$i = 1;
+$i = 0;
 foreach(\org\rhaco\store\queue\Queue::gets(5,'test') as $model){
-	$b = true;
+	$i++;
 	eq($i,$model->data());
 	\org\rhaco\store\queue\Queue::finish($model);
-	$i++;
 }
-eq(true,$b);
+eq(5,$i);
 
 \org\rhaco\store\queue\Queue::clean('test');
 
