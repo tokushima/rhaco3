@@ -266,7 +266,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	public function do_find($package){
 		$name = '\\'.str_replace('.','\\',$package);
 		$order = \org\rhaco\lang\Sorter::order($this->in_vars('order'),$this->in_vars('porder'));
-		$object_list = array();
 		
 		if(empty($order)){
 			$dao = new $name();
@@ -277,36 +276,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 				}
 			}
 		}
-		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page'));
-		$paginator->cp(array('order'=>$order));
-		
-		if($this->is_vars('search_clear')){
-			$object_list = $name::find_all($paginator,Q::select_order($order,$this->in_vars('porder')));
-			$this->rm_vars();
-		}else if($this->is_vars('search')){
-			$q = new \org\rhaco\store\db\Q();
-			foreach($this->ar_vars() as $k => $v){
-				if($v !== '' && strpos($k,'search_') === 0){
-					list(,$type,$key) = explode('_',$k,3);
-					switch($type){
-						case 'timestamp':
-						case 'date':
-							list($fromto,$key) = explode('_',$key);
-							$q->add(($fromto == 'to') ? Q::lte($key,$v) : Q::gte($key,$v));
-							break;
-						default:
-							$q->add(Q::contains($key,$v));
-					}
-					$paginator->vars($k,$v);
-				}
-				$paginator->vars('search',true);
-			}
-			$object_list = $name::find_all($q,$paginator,Q::select_order($order,$this->in_vars('porder')));
-			$this->rm_vars('q');	
-		}else{
-			$object_list = $name::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder')));
-			$paginator->vars('q',$this->in_vars('q'));
-		}
+		list($object_list,$paginator) = $this->filter_find($name, $order);
 		$this->vars('object_list',$object_list);
 		$this->vars('paginator',$paginator);
 		$this->vars('model',new $name());
@@ -462,16 +432,46 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function mail_list(){
-		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page',1));
 		$order = $this->in_vars('order','-id');
-		$list = array();
-		try{
-			$sbd = $this->smtp_blackhole_dao;
-			$list = $sbd::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder')));
-		}catch(\Exception $e){}
-		$this->vars('q',$this->in_vars('q'));
-		$this->vars('object_list',$list);
-		$this->vars('paginator',$paginator->cp(array('q'=>$this->in_vars('q'),'order'=>$order)));
+		$name = $this->smtp_blackhole_dao;
+		list($object_list,$paginator) = $this->filter_find($name,$order);
+		$this->vars('object_list',$object_list);
+		$this->vars('paginator',$paginator);
+		$this->vars('model',new $name());
+	}
+	private function filter_find($class,$order){
+		$object_list = array();
+		$paginator = new \org\rhaco\Paginator(20,$this->in_vars('page',1));
+		$paginator->cp(array('order'=>$order));
+		
+		if($this->is_vars('search_clear')){
+			$object_list = $class::find_all($paginator,Q::select_order($order,$this->in_vars('porder')));
+			$this->rm_vars();
+		}else if($this->is_vars('search')){
+			$q = new \org\rhaco\store\db\Q();
+			foreach($this->ar_vars() as $k => $v){
+				if($v !== '' && strpos($k,'search_') === 0){
+					list(,$type,$key) = explode('_',$k,3);
+					switch($type){
+						case 'timestamp':
+						case 'date':
+							list($fromto,$key) = explode('_',$key);
+							$q->add(($fromto == 'to') ? Q::lte($key,$v) : Q::gte($key,$v));
+							break;
+						default:
+							$q->add(Q::contains($key,$v));
+					}
+					$paginator->vars($k,$v);
+				}
+				$paginator->vars('search',true);
+			}
+			$object_list = $class::find_all($q,$paginator,Q::select_order($order,$this->in_vars('porder')));
+			$this->rm_vars('q');	
+		}else{
+			$object_list = $class::find_all(Q::match($this->in_vars('q')),$paginator,Q::select_order($order,$this->in_vars('porder')));
+			$paginator->vars('q',$this->in_vars('q'));
+		}
+		return array($object_list,$paginator);		
 	}
 	/**
 	 * メールの詳細

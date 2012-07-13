@@ -1,18 +1,30 @@
 <rt:extends href="base.html" />
 
-<rt:block name="righttop">
-<li id="search">
-	<h2><a href="{$t.package_method_url('mail_list')}">Mail</a></h2>
-	<form method="get" action="{$t.package_method_url('mail_list')}" rt:ref="true">
-		<fieldset>
-			<input type="text" id="seach-text" name="query" value="" />
-			<input type="submit" id="search-submit" value="Search" />
-		</fieldset>
-	</form>
-</li>
-</rt:block>
-
 <rt:block name="content">
+
+<div id="filter" class="modal hide fade" style="display: none;">
+	<form method="post" name="search_clear_frm">
+	</form>
+	<form method="post" name="search_frm" rt:aref="true" class="search_form">
+	<input type="hidden" name="search" value="true" rt:ref="false" />
+	<div class="modal-header">
+		<a class="btn" href="#" onClick="document.search_frm.submit()"><i class="icon-search"></i> Search</a>
+		<a class="btn" href="#" onClick="document.search_clear_frm.submit()"><i class="icon-trash"></i> Clear</a>
+	</div>
+	<div class="modal-body">
+		<table>
+			<rt:loop param="{$f.props($model)}" var="name">
+			<tr>
+				<td>{$t.trim_width($name,50,'..')}</td>
+				<td>{$t.noop($f.filter($model,$name))}</td>
+			</tr>
+			</rt:loop>
+		</table>
+	</div>
+	</form>
+</div>
+<a class="icon-search" data-toggle="modal" href="#filter"></a>
+( Total: {$paginator.total()} )
 
 <table rt:param="object_list" rt:var="obj">
 <thead>

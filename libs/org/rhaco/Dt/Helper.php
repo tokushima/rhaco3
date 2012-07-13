@@ -154,7 +154,7 @@ class Helper{
 					return sprintf('<select name="search_%s_%s">%s</select>',$type,$name,implode('',$options));
 				case 'timestamp':
 				case 'date':
-					return sprintf('<input name="search_%s_from_%s" type="text" class="short" />',$type,$name).' : '.sprintf('<input name="search_%s_to_%s" type="text" class="short" />',$type,$name);
+					return sprintf('<input name="search_%s_from_%s" type="text" class="span2" />',$type,$name).' : '.sprintf('<input name="search_%s_to_%s" type="text" class="span2" />',$type,$name);
 				default:
 					return sprintf('<input name="search_%s_%s" type="text"　/>',$type,$name);
 			}
