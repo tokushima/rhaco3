@@ -15,7 +15,12 @@ class Man{
 		$src = implode(array_slice(file($r->getFileName()),$r->getStartLine(),($r->getEndLine()-$r->getStartLine()-1)));
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$r->getDocComment())));
 		$extends = ($r->getParentClass() === false) ? null : $r->getParentClass()->getName();
-
+		$updated = filemtime($r->getFilename());
+		if(substr(basename($r->getFilename()),0,-4) === basename(dirname($r->getFilename()))){
+			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($r->getFilename()),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS)) as $f){
+				if(($u = filemtime($f->getPathname())) > $updated) $updated = $u;
+			}
+		}
 		$methods = $static_methods = $protected_methods = $protected_static_methods = array(array(),array());
 		$module_method = array();
 		foreach($r->getMethods() as $method){
@@ -104,7 +109,7 @@ class Man{
 		ksort($properties);
 		ksort($modules);
 		return array(
-				'filename'=>$r->getFileName(),'extends'=>$extends,'abstract'=>$r->isAbstract()
+				'filename'=>$r->getFileName(),'extends'=>$extends,'abstract'=>$r->isAbstract(),'version'=>date('Ymd',$updated)
 				,'static_methods'=>$static_methods[0],'methods'=>$methods[0],'protected_static_methods'=>$protected_static_methods[0],'protected_methods'=>$protected_methods[0]
 				,'inherited_static_methods'=>$static_methods[1],'inherited_methods'=>$methods[1],'inherited_protected_static_methods'=>$protected_static_methods[1],'inherited_protected_methods'=>$protected_methods[1]
 				,'module_method'=>$module_method

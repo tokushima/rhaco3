@@ -4,13 +4,17 @@
  * @param string $value package path
  * @param string $m method name
  */
-if(empty($value)){
+try{
+	$rtn = \org\rhaco\Man::class_info($value);
+}catch(\Exception $e){
 	$libs = array();
 	$len = 0;
 	foreach(\org\rhaco\Man::libs() as $k => $v){
-		$info = \org\rhaco\Man::class_info($k);
-		list($libs[$k]) = explode("\n",$info['description']);
-		if(strlen($k) > $len) $len = strlen($k);
+		if(empty($value) || strpos(strtolower($k),strtolower($value)) !== false){
+			$info = \org\rhaco\Man::class_info($k);
+			list($libs[$k]) = explode("\n",$info['description']);
+			if(strlen($k) > $len) $len = strlen($k);
+		}
 	}
 	ksort($libs);
 	foreach($libs as $k => $v){
@@ -46,8 +50,9 @@ if(isset($params['m'])){
 }else{
 	$rtn = \org\rhaco\Man::class_info($value);
 	print("\n".'class '.$rtn['package'].':'.PHP_EOL);
-	print(' Description:');
-	print('   '.str_replace("\n","\n   ",$rtn['description']));
+	print('  Version: '.$rtn['version'].PHP_EOL.PHP_EOL);
+	print('  Description:'.PHP_EOL);
+	print('   '.str_replace("\n","\n  ",$rtn['description']).PHP_EOL.PHP_EOL);
 	
 	list($static_methods,$methods,$protected_static_methods,$protected_methods,$properties,$modules) = array($rtn['static_methods'],$rtn['methods'],$rtn['protected_static_methods'],$rtn['protected_methods'],$rtn['properties'],$rtn['modules']);
 	$len = \org\rhaco\lang\Text::length(array_merge(array_keys($static_methods),array_keys($methods),array_keys($properties),array_keys($modules)));
