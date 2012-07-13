@@ -192,7 +192,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			}
 			if(!$this->is_login()){
 				if(!$this->is_sessions('logined_redirect_to')){
-					$current = \org\rhaco\Request::current_url();
+					$current = \org\rhaco\Request::current_url().\org\rhaco\Request::request_string(true);
 					foreach($this->maps as $k => $m){
 						if((isset($m['name']) && $m['name'] == 'logout') || (isset($m['method']) && $m['method'] == 'do_logout')){
 							if(isset($m['format']) && $current == $m['format']) $current = null;
@@ -477,6 +477,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		 * @param self $this
 		 */
 		$this->object_module('before_do_logout',$this);
+		$this->rm_sessions('logined_redirect_to');
 		$this->logout();
 		if($this->map_arg('logout_redirect') !== null) $this->redirect_by_map('logout_redirect');
 		foreach($this->package_maps as $k => $m){

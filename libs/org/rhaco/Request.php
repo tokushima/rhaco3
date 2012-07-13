@@ -105,10 +105,12 @@ class Request implements \IteratorAggregate{
 	}	
 	/**
 	 * 現在のリクエストクエリを返す
+	 * @param boolean $sep 先頭に?をつけるか 
 	 * @return string
 	 */
-	static public function request_string(){
-		return (isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'].'&' : '').file_get_contents('php://input');
+	static public function request_string($sep=false){
+		$query = ((isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'].'&' : '').file_get_contents('php://input');
+		return (($sep && !empty($query)) ? '?' : '').$query;
 	}
 	/**
 	 * POSTされたか
