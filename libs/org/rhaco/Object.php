@@ -727,7 +727,6 @@ class Object{
 	 */
 	final public function prop_anon($p,$n,$d=null,$f=false){
 		if($f) $this->_im[0][$p][$n] = $d;
-		// TODO
 		$v = isset($this->_im[0][$p][$n]) ? $this->_im[0][$p][$n] : ((isset(self::$_m[0][get_class($this)][$p][$n])) ? self::$_m[0][get_class($this)][$p][$n] : $d);
 		if(is_string($v) && $d !== $v) $v = preg_replace('/array\((.+?)\)/','[\\1]',$v);
 		return $v;
