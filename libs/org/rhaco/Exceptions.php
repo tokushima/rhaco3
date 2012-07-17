@@ -105,10 +105,7 @@ class Exceptions extends \org\rhaco\Exception{
 	public function __toString(){
 		if(self::$self === null || empty(self::$self->messages)) return null;
 		$exceptions = self::gets();
-		$result = count($exceptions).' exceptions [#'.self::$self->id.']: ';
-		foreach($exceptions as $e){
-			$result .= "\n ".$e->getMessage();
-		}
-		return $result;
+		return count($exceptions).' exceptions [#'.self::$self->id.']: '
+				.PHP_EOL.implode(PHP_EOL.PHP_EOL,array_map(function($e){ return (string)$e; },$exceptions));
 	}
 }
