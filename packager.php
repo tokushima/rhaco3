@@ -82,12 +82,12 @@ function get_desc($path){
 	if(is_file($path) && preg_match('/\/\*\*[^\*](.+?)\*\//ms',$src,$m)){
 		list($summary) = explode("\n",trim(preg_replace('/@.+/','',preg_replace('/^[\s]*\*[\s]{0,1}/m','',str_replace(array('/'.'**','*'.'/'),'',$m[0])))));	
 	}
-	if(preg_match_all("/@module\s+(.*)/",$src,$m)){
+	if(preg_match_all("/@module\s+(.+)/",$src,$m)){
 		$module = array();
 		foreach($m[1] as $v) $module[trim($v)] = true;
 		$modules = implode(':',array_keys($module));
 	}	
-	return array(trim($summary),trim($modules));
+	return array(trim($summary.' '),trim($modules.' '));
 }
 function last_update($filename){
 	if(is_dir($filename)){
@@ -161,5 +161,5 @@ foreach($list[0] as $p){
 		}
 	}
 }
-file_put_contents($output_path.'packages.csv',trim($docs));
-
+file_put_contents($output_path.'packages.csv',trim($docs.' '));
+print('Written: '.$output_path.'packages.csv'.PHP_EOL);
