@@ -4,6 +4,7 @@ namespace org\rhaco;
  * テンプレートを処理する
  * @author tokushima
  * @conf boolean $display_exception 例外が発生した場合にメッセージを表示するか
+ * @conf string $cache キャッシュモジュールを指定する
  */
 class Template{
 	private $module = array();
@@ -18,6 +19,8 @@ class Template{
 
 	public function __construct($media_url=null){
 		if($media_url !== null) $this->media_url($media_url);
+		$m = \org\rhaco\Conf::get('cache');
+		if(!empty($m)) $this->set_object_module(is_object($m) ? $m : (class_exists($c="\\".str_replace('.',"\\",$m)) ? new $c() : null));
 	}
 	/**
 	 * 配列からテンプレート変数に値をセットする
@@ -115,6 +118,7 @@ class Template{
 		/**
 		 * キャッシュのチェック
 		 * @param string $cname キャッシュ名
+		 * @return boolean
 		 */
 		if(!$this->has_object_module('has_template_cache') || $this->object_module('has_template_cache',$cname) !== true){
 			if(!empty($this->put_block)){
@@ -1719,7 +1723,7 @@ class Template{
 	 * @param object $o
 	 */
 	public function set_object_module($o){
-		$this->module[] = $o;
+		if(is_object($o)) $this->module[] = $o;
 		return $this;
 	}
 	private function has_object_module($n){

@@ -9,6 +9,7 @@ Conf::set('org.rhaco.store.db.Dao','connection',array(
 ));
 
 
+Conf::set('org.rhaco.Template','cache','org.rhaco.store.template.File');
 
 Conf::set('org.rhaco.Template','display_exception',true);
 Conf::set('org.rhaco.flow.module.SimpleAuth','auth',array('user_name'=>md5(sha1('password'))));
