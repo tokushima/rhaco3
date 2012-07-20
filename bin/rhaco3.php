@@ -456,7 +456,7 @@ if(isset($_SERVER['argv'][1])){
 							$_ENV['PATH_LIB_DIR'] = Rhaco3::lib_dir();
 							$_ENV['PATH_EXTLIB_DIR'] = Rhaco3::lib_dir().'_extlibs';
 							$_ENV['PATH_VENDOR_DIR'] = Rhaco3::lib_dir().'_vendors';
-							$_ENV['return'] = 1;
+							$_ENV['return'] = 0;
 							list($_ENV['value'],$_ENV['params']) = array($value,$params);
 							require_once(dirname($f).'/'.basename(dirname($f)).'.php');
 
@@ -476,7 +476,7 @@ if(isset($_SERVER['argv'][1])){
 												$println(trim(preg_replace('/@.+/','',preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[1])))),null,0);
 												$println(str_repeat('-',50));
 											}
-											$_ENV['return'] = require($sf);
+											require($sf);
 										}
 										if(is_file($f.'/__teardown__.php')) require($f.'/__teardown__.php');
 										$list = array();
@@ -501,7 +501,7 @@ if(isset($_SERVER['argv'][1])){
 								}
 								if(isset($_ENV['exception'])) throw $_ENV['exception'];
 							}
-							exit((int)$_ENV['return']);
+							exit(($_ENV['return'] === 1) ? 0 : (int)$_ENV['return']);
 						}
 					}else{
 						throw new \RuntimeException('Command not found `'.$package.'`');
