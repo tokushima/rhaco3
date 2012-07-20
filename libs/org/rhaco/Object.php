@@ -675,6 +675,11 @@ class Object{
 	final static public function set_module($o){
 		self::$_m[2][get_called_class()][] = $o;
 	}
+	/**
+	 * 指定のクラスモジュールを実行する
+	 * @param string $n
+	 * @return mixed
+	 */
 	final static protected function module($n){
 		$r = null;
 		if(isset(self::$_m[2][get_called_class()])){
@@ -688,6 +693,11 @@ class Object{
 		}
 		return $r;
 	}
+	/**
+	 * 指定のクラスモジュールが存在するか
+	 * @param string $n
+	 * @return boolean
+	 */
 	final static protected function has_module($n){
 		foreach((isset(self::$_m[2][get_called_class()]) ? self::$_m[2][get_called_class()] : array()) as $o){
 			if(method_exists($o,$n)) return true;
@@ -697,18 +707,34 @@ class Object{
 	/**
 	 * インスタンスモジュールを追加する
 	 * @param object $o
+	 * @return mixed
 	 */
 	final public function set_object_module($o){
 		$this->_im[1][] = $o;
 		return $this;
 	}
-	final protected function object_module($n,&$p0=null,&$p1=null,&$p2=null,&$p3=null,&$p4=null,&$p5=null,&$p6=null,&$p7=null,&$p8=null,&$p9=null){
+	/**
+	 * 
+	 * 指定のインスタンスモジュールを実行する
+	 * @param string $n
+	 * @return mixed
+	 */
+	final protected function object_module($n){
 		$r = null;
 		foreach($this->_im[1] as $o){
-			if(method_exists($o,$n)) $r = call_user_func_array(array($o,$n),array(&$p0,&$p1,&$p2,&$p3,&$p4,&$p5,&$p6,&$p7,&$p8,&$p9));
+			if(method_exists($o,$n)){
+				$a = func_get_args();
+				array_shift($a);
+				$r = call_user_func_array(array($o,$n),$a);				
+			}
 		}
 		return $r;
 	}
+	/**
+	 * 指定のインスタンスモジュールが存在するか
+	 * @param string $n
+	 * @return boolean
+	 */
 	final protected function has_object_module($n){
 		if(isset($this->_im[1])){
 			foreach($this->_im[1] as $o){
