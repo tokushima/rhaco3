@@ -877,6 +877,10 @@ abstract class Dao extends \org\rhaco\Object{
 		}
 		throw new NotfoundDaoException('{S} synchronization failed',$this);
 	}
+	/**
+	 * (non-PHPdoc)
+	 * @see org\rhaco.Object::set_prop()
+	 */
 	protected function set_prop($name,$type,$value){
 		try{
 			return parent::set_prop($name,$type,$value);
