@@ -40,27 +40,42 @@ class Flow{
 		$this->branch_url = $this->app_url.((($branch = substr(basename($f),0,-4)) !== 'index') ? $branch.'/' : '');
 		$this->template = new Template();
 	}
-	public function package_media_url($path){
-		if(substr($path,0,1) == '/') $path = substr($path,1);
-		if(substr($path,-1) == '/') $path = substr($path,0,-1);
-		$this->package_media_url = $path;
+	/**
+	 * パッケージメディアのURLを設定する
+	 * @param string $path
+	 * @return string
+	 */
+	public function package_media_url($path=null){
+		if(!empty($path)){
+			if(substr($path,0,1) == '/') $path = substr($path,1);
+			if(substr($path,-1) == '/') $path = substr($path,0,-1);
+			$this->package_media_url = $path;
+		}
+		return $this->package_media_url;
 	}
 	/**
 	 * テンプレートのパスを設定する
 	 * @param string $path
+	 * @return string
 	 */
-	public function template_path($path){
-		$this->template_path = str_replace("\\",'/',$path);
-		if(substr($this->template_path,-1) != '/') $this->template_path .= '/';
+	public function template_path($path=null){
+		if(!empty($path)){
+			$this->template_path = str_replace("\\",'/',$path);
+			if(substr($this->template_path,-1) != '/') $this->template_path .= '/';
+		}
+		return $this->template_path;
 	}
 	/**
 	 * メディアのURLを設定する
 	 * @param string $path
+	 * @return string
 	 */
-	public function media_url($path){
-		$this->media_url = $path;
-		if(substr($this->media_url,-1) != '/') $this->media_url .= '/';
-		return $this;
+	public function media_url($path=null){
+		if(!empty($path)){
+			$this->media_url = $path;
+			if(substr($this->media_url,-1) != '/') $this->media_url .= '/';
+		}
+		return $this->media_url;
 	}
 	/**
 	 * outputで定義されたmapsを取得する

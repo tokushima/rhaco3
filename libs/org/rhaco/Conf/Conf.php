@@ -37,10 +37,14 @@ class Conf{
 	 * @param mixed $default
 	 */
 	static public function get($key,$default=null,$return_vars=null){
-		list(,$d) = debug_backtrace(false);
-		$class = str_replace("\\",'.',$d['class']);
-		if($class[0] === '.') $class = substr($class,1);
-		if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
+		if(strpos($key,'@') === false){
+			list(,$d) = debug_backtrace(false);
+			$class = str_replace("\\",'.',$d['class']);
+			if($class[0] === '.') $class = substr($class,1);
+			if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
+		}else{
+			list($class,$key) = explode('@',$key,2);
+		}
 		$result = self::exists($class,$key) ? self::$value[$class][$key] : $default;
 		if(is_array($return_vars)){
 			if(empty($return_vars) && !is_array($result)) return array($result);
