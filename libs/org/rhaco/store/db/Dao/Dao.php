@@ -68,7 +68,7 @@ abstract class Dao extends \org\rhaco\Object{
 					self::$_connections_[$database] = new Dbc($def[$database]);
 				}
 			}catch(\Exception $e){
-				throw $e;
+				throw new DaoException($class.'('.$database.'): '.$e->getMessage());
 			}
 		}
 		return $def[$database];

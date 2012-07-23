@@ -23,6 +23,18 @@ class Conf{
 		if(!isset(self::$value[$class]) || !array_key_exists($key,self::$value[$class])) self::$value[$class][$key] = $value;
 	}
 	/**
+	 * 複数の定義情報をセットする
+	 * @param array $array array(class=>array(key=>value))
+	 */
+	static public function sets(array $array){
+		foreach($array as $class => $values){
+			if(!is_array($values)) throw new \InvalidArgumentException($class.' not array');
+			foreach($values as $key => $value){
+				if(!isset(self::$value[$class]) || !array_key_exists($key,self::$value[$class])) self::$value[$class][$key] = $value;
+			}
+		}
+	}
+	/**
 	 * 定義されているか
 	 * @param string $class
 	 * @param string $key

@@ -8,6 +8,7 @@ $info = array(
 'mode'=>\Rhaco3::mode(),
 'lib'=>\Rhaco3::lib_dir(),
 'commons'=>\Rhaco3::common_dir(),
+'CWD'=>getcwd(),
 'url'=>\org\rhaco\Conf::get('org.rhaco.Flow@app_url'),
 'url secure'=>(\org\rhaco\Conf::get('org.rhaco.Flow@secure') ? 'true' : 'false'),
 'media'=>$flow->media_url(),
