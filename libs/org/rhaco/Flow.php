@@ -283,6 +283,11 @@ class Flow{
 								$obj->set_select_map_name($apps[$k]['name']);
 								$obj->set_maps($apps);
 								$obj->set_args((isset($apps[$k]['args']) && is_array($apps[$k]['args'])) ? $apps[$k]['args'] : array());
+								$ext_modules = $obj->get_template_modules();
+								if(!empty($ext_modules)){
+									if(!is_array($ext_modules)) $ext_modules = array($ext_modules);
+									foreach($ext_modules as $o) $this->template->set_object_module($o);
+								}
 								$obj->before();
 								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
@@ -298,11 +303,6 @@ class Flow{
 								if(\org\rhaco\Exceptions::has()) $obj->exception();
 								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
-								$ext_modules = $obj->get_template_modules();
-								if(!empty($ext_modules)){
-									if(!is_array($ext_modules)) $ext_modules = array($ext_modules);
-									foreach($ext_modules as $o) $this->template->set_object_module($o);
-								}
 							}
 							if($func_exception instanceof \Exception) throw $func_exception;
 						}
@@ -349,7 +349,7 @@ class Flow{
 							}
 							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
 						}else{
-							if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);							
+							if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 							if(isset($apps[$k]['error_template'])){
 								$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;

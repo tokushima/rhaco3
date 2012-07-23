@@ -682,8 +682,9 @@ class Object{
 	 */
 	final static protected function module($n){
 		$r = null;
-		if(isset(self::$_m[2][get_called_class()])){
-			foreach(self::$_m[2][get_called_class()] as $o){
+		if(isset(self::$_m[2][$g=get_called_class()])){
+			foreach(self::$_m[2][$g] as $k => $o){
+				if(!is_object($o) && class_exists(($c='\\'.str_replace('.','\\',$o)))) self::$_m[2][$g][$k] = $o = new $c();
 				if(method_exists($o,$n)){
 					$a = func_get_args();
 					array_shift($a);
@@ -699,7 +700,8 @@ class Object{
 	 * @return boolean
 	 */
 	final static protected function has_module($n){
-		foreach((isset(self::$_m[2][get_called_class()]) ? self::$_m[2][get_called_class()] : array()) as $o){
+		foreach((isset(self::$_m[2][$g=get_called_class()]) ? self::$_m[2][$g] : array()) as $k => $o){
+			if(!is_object($o) && class_exists(($c='\\'.str_replace('.','\\',$o)))) self::$_m[2][$g][$k] = $o = new $c();
 			if(method_exists($o,$n)) return true;
 		}
 		return false;

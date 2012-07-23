@@ -10,6 +10,7 @@ namespace org\rhaco\net;
  * @conf string $module セッションの実装モジュールのパッケージ名
  */
 class Session{
+	static private $module;
 	private $ses_n;
 
 	/**
@@ -26,23 +27,28 @@ class Session{
 			session_cache_expire((int)(\org\rhaco\Conf::get('session_expire',10800)/60));
 			session_name();
 
-			$module = \org\rhaco\Conf::get('module');
-			if(!empty($module)){
-				$r = new \ReflectionClass('\\'.str_replace('.','\\',$module));
-				$o = $r->newInstance();
-				ini_set('session.save_handler','user');
-				$noop_func = create_function('','');
-				$true_func = create_function('','return true;');
-				session_set_save_handler(
-					(method_exists($o,'session_open') ? array($o,'session_open') : $true_func)
-					,(method_exists($o,'session_close') ? array($o,'session_close') : $true_func)
-					,(method_exists($o,'session_read') ? array($o,'session_read') : $noop_func)
-					,(method_exists($o,'session_write') ? array($o,'session_write') : $true_func)
-					,(method_exists($o,'session_destroy') ? array($o,'session_destroy') : $true_func)
-					,(method_exists($o,'session_gc') ? array($o,'session_gc') : $true_func)
-				);
-				if(isset($this->vars[$session_name])){
-					if((method_exists($o,'session_verify') ? array($o,'session_verify') : $noop_func) !== true) session_regenerate_id(true);
+			self::$module = \org\rhaco\Conf::get('module');
+			if(!empty(self::$module)){
+				try{
+					$r = new \ReflectionClass('\\'.str_replace('.','\\',self::$module));
+					$o = $r->newInstance();
+					ini_set('session.save_handler','user');
+					$noop_func = create_function('','');
+					$true_func = create_function('','return true;');
+					session_set_save_handler(
+						(method_exists($o,'session_open') ? array($o,'session_open') : $true_func)
+						,(method_exists($o,'session_close') ? array($o,'session_close') : $true_func)
+						,(method_exists($o,'session_read') ? array($o,'session_read') : $noop_func)
+						,(method_exists($o,'session_write') ? array($o,'session_write') : $true_func)
+						,(method_exists($o,'session_destroy') ? array($o,'session_destroy') : $true_func)
+						,(method_exists($o,'session_gc') ? array($o,'session_gc') : $true_func)
+					);
+					if(isset($this->vars[$session_name])){
+						if((method_exists($o,'session_verify') ? array($o,'session_verify') : $noop_func) !== true) session_regenerate_id(true);
+					}
+				}catch(\Exception $e){
+					self::$module = null;
+					\org\rhaco\Log::error($e);
 				}
 			}
 			session_start();
@@ -87,7 +93,6 @@ class Session{
 	 * @return string
 	 */
 	static public function get_module_name(){
-		$module = \org\rhaco\Conf::get('module');
-		return (empty($module)) ? ini_get('session.save_handler') : $module;
+		return (empty(self::$module)) ? ini_get('session.save_handler') : self::$module;
 	}
 }
