@@ -19,8 +19,7 @@ class Template{
 
 	public function __construct($media_url=null){
 		if($media_url !== null) $this->media_url($media_url);
-		$m = \org\rhaco\Conf::get('cache');
-		if(!empty($m)) $this->set_object_module(is_object($m) ? $m : (class_exists($c="\\".str_replace('.',"\\",$m)) ? new $c() : null));
+		if(\org\rhaco\Conf::has_module()) $this->set_object_module(\org\rhaco\Conf::get_module());
 	}
 	/**
 	 * 配列からテンプレート変数に値をセットする

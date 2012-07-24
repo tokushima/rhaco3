@@ -92,7 +92,7 @@ array(''
 	,'upload_value'=>array('name'=>'upload_value','action'=>'test.SampleFlow::upload_value')
 	,'upload_file'=>array('name'=>'upload_file','action'=>'test.SampleFlow::upload_file')
 	
-	,'dev'=>array('action'=>'org.rhaco.flow.parts.Developer','mode'=>'local')
+	,'dev'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
 )));
 
 

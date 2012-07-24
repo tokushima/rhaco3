@@ -27,11 +27,9 @@ class Session{
 			session_cache_expire((int)(\org\rhaco\Conf::get('session_expire',10800)/60));
 			session_name();
 
-			self::$module = \org\rhaco\Conf::get('module');
-			if(!empty(self::$module)){
+			if(\org\rhaco\Conf::has_module()){
 				try{
-					$r = new \ReflectionClass('\\'.str_replace('.','\\',self::$module));
-					$o = $r->newInstance();
+					$o = \org\rhaco\Conf::get_module();					
 					ini_set('session.save_handler','user');
 					$noop_func = create_function('','');
 					$true_func = create_function('','return true;');
@@ -46,8 +44,8 @@ class Session{
 					if(isset($this->vars[$session_name])){
 						if((method_exists($o,'session_verify') ? array($o,'session_verify') : $noop_func) !== true) session_regenerate_id(true);
 					}
+					self::$module = get_class($o);
 				}catch(\Exception $e){
-					self::$module = null;
 					\org\rhaco\Log::error($e);
 				}
 			}
@@ -93,6 +91,6 @@ class Session{
 	 * @return string
 	 */
 	static public function get_module_name(){
-		return (empty(self::$module)) ? ini_get('session.save_handler') : self::$module;
+		return (empty(self::$module)) ? ini_get('session.save_handler') : str_replace('\\','.',self::$module);
 	}
 }
