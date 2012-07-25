@@ -1,4 +1,7 @@
 <?php
+/**
+ * Packaging
+ */
 if(ini_get('date.timezone') == '') date_default_timezone_set('Asia/Tokyo');
 function dirs($dir,$base){
 	if(substr($dir,-1) == '/') $dir = substr($dir,0,-1);
