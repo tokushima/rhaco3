@@ -3,23 +3,26 @@ namespace org\rhaco;
 /**
  * テンプレートを処理する
  * @author tokushima
+ * @var mixed{} $vars バインドされる変数
+ * @var boolean $secure https://をhttp://に置換するか
+ * @var string $put_block ブロックファイル
+ * @var string $template_super 継承元テンプレート
+ * @var string $media_url メディアファイルへのURLの基点
  * @conf boolean $display_exception 例外が発生した場合にメッセージを表示するか
- * @conf string $cache キャッシュモジュールを指定する
  */
-class Template{
-	private $module = array();
+class Template extends \org\rhaco\Object{
 	private $file;
-	private $media_url;
-	private $put_block;
-	private $template_super;
-	private $secure = false;
 	private $selected_template;
 	private $selected_src;
-	private $vars = array();
+	
+	protected $secure = false;	
+	protected $vars = array();
+	protected $put_block;
+	protected $template_super;
+	protected $media_url;
 
-	public function __construct($media_url=null){
+	protected function __new__($media_url=null){
 		if($media_url !== null) $this->media_url($media_url);
-		if(\org\rhaco\Conf::has_module()) $this->set_object_module(\org\rhaco\Conf::get_module());
 	}
 	/**
 	 * 配列からテンプレート変数に値をセットする
@@ -34,66 +37,13 @@ class Template{
 		return $this;
 	}
 	/**
-	 * テンプレート変数に値をセットする
-	 * @param string $k 変数名
-	 * @param mixed $v 値
-	 * @return $this
-	 */
-	final public function vars($k,$v){
-		$this->vars[$k] = $v;
-		return $this;
-	}
-	/**
-	 * セットしたテンプレート変数を取り除く
-	 * @param string 変数名
-	 * @return $this
-	 */
-	final public function rm_vars(){
-		if(func_num_args() === 0){
-			$this->vars = array();
-		}else{
-			foreach(func_get_args() as $n) unset($this->vars[$n]);
-		}
-		return $this;
-	}
-	/**
-	 * https://をhttp://に置換するか
-	 * @param boolean $bool
-	 * @return $this
-	 */
-	final public function secure($bool){
-		$this->secure = (boolean)$bool;
-		return $this;
-	}
-	/**
-	 * ブロックファイルを指定する
-	 * @param string $file
-	 * @return $this
-	 */
-	final public function put_block($file){
-		$this->put_block = $file;
-		return $this;
-	}
-	/**
-	 * 継承元テンプレートを指定する
-	 * @param string $file
-	 * @return $this
-	 */
-	final public function template_super($file){
-		$this->template_super = $file;
-		return $this;
-	}
-	/**
 	 * メディアファイルへのURLの基点を設定
 	 * @param string $url
 	 * @return $this
 	 */
-	final public function media_url(){
-		if(func_num_args() > 0){
-			$this->media_url = str_replace("\\",'/',(string)func_get_arg(0));
-			if(!empty($this->media_url) && substr($this->media_url,-1) !== '/') $this->media_url = $this->media_url.'/';
-		}
-		return $this;
+	protected function __set_media_url__($url){
+		$this->media_url = str_replace("\\",'/',$url);
+		if(!empty($this->media_url) && substr($this->media_url,-1) !== '/') $this->media_url = $this->media_url.'/';
 	}
 	/**
 	 * 出力する
@@ -119,7 +69,7 @@ class Template{
 		 * @param string $cname キャッシュ名
 		 * @return boolean
 		 */
-		if(!$this->has_object_module('has_template_cache') || $this->object_module('has_template_cache',$cname) !== true){
+		if(!static::has_module('has_template_cache') || static::module('has_template_cache',$cname) !== true){
 			if(!empty($this->put_block)){
 				$src = $this->read_src($this->put_block);
 				if(strpos($src,'rt:extends') !== false){
@@ -137,14 +87,14 @@ class Template{
 			 * @param string $cname キャッシュ名
 			 * @param string $src 作成されたテンプレート
 			 */
-			$this->object_module('set_template_cache',$cname,$src);
+			static::module('set_template_cache',$cname,$src);
 		}else{
 			/**
 			 * キャッシュから取得する
 			 * @param string $cname キャッシュ名
 			 * @return string
 			 */
-			$src = $this->object_module('get_template_cache',$cname);
+			$src = static::module('get_template_cache',$cname);
 		}
 		return $this->execute($src);
 		/***
@@ -189,23 +139,23 @@ class Template{
 		$src = $this->replace_xtag($src);
 		/**
 		 * テンプレート作成の初期化
-		 * @param string $src
+		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('init_template',$src);
-		$src = $this->rtcomment($this->rtblock($this->rttemplate($src),$this->file));
+		$this->object_module('init_template',\org\rhaco\lang\String::ref($obj,$src));
+		$src = $this->rtcomment($this->rtblock($this->rttemplate((string)$obj),$this->file));
 		$this->selected_src = $src;
 		/**
 		 * テンプレート作成の前処理
-		 * @param string $src
+		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('before_template',$src);
-		$src = $this->rtif($this->rtloop($this->rtunit($this->html_form($this->html_list($src)))));
+		$this->object_module('before_template',\org\rhaco\lang\String::ref($obj,$src));
+		$src = $this->rtif($this->rtloop($this->rtunit($this->html_form($this->html_list((string)$src)))));
 		/**
 		 * テンプレート作成の後処理
-		 * @param string $src
+		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('after_template',$src);
-		$src = str_replace('__PHP_ARROW__','->',$src);
+		$this->object_module('after_template',\org\rhaco\lang\String::ref($obj,$src));
+		$src = str_replace('__PHP_ARROW__','->',(string)$src);
 		$src = $this->parse_print_variable($src);
 		$php = array(' ?>','<?php ','->');
 		$str = array('__PHP_TAG_END__','__PHP_TAG_START__','__PHP_ARROW__');
@@ -218,13 +168,13 @@ class Template{
 	private function exec($_src_){
 		/**
 		 * 実行前処理
-		 * @param string $_src_
+		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('before_exec_template',$_src_);
+		$this->object_module('before_exec_template',\org\rhaco\lang\String::ref($obj,$_src_));
 		$this->vars('_t_',new Template\Helper());
 		ob_start();
 			if(is_array($this->vars) && !empty($this->vars)) extract($this->vars);
-			eval('?><?php $_display_exception_='.((\org\rhaco\Conf::get('display_exception') === true) ? 'true' : 'false').'; ?>'.$_src_);
+			eval('?><?php $_display_exception_='.((\org\rhaco\Conf::get('display_exception') === true) ? 'true' : 'false').'; ?>'.((string)$obj));
 		$_eval_src_ = ob_get_clean();
 
 		if(strpos($_eval_src_,'Parse error: ') !== false){
@@ -242,10 +192,10 @@ class Template{
 		$_src_ = $this->selected_src = null;
 		/**
 		 * 実行後処理
-		 * @param string $_eval_src_
+		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('after_exec_template',$_eval_src_);
-		return $_eval_src_;
+		$this->object_module('after_exec_template',\org\rhaco\lang\String::ref($obj,$_eval_src_));
+		return (string)$obj;
 	}
 	private function error_handler($errno,$errstr,$errfile,$errline){
 		throw new \ErrorException($errstr,0,$errno,$errfile,$errline);
@@ -351,9 +301,10 @@ class Template{
 			}
 			/**
 			 * ブロック展開の前処理
-			 * @param string $src
+			 * @param org.rhaco.lang.String $obj
 			 */
-			$this->object_module('before_block_template',$src);
+			$this->object_module('before_block_template',\org\rhaco\lang\String::ref($obj,$src));
+			$src = (string)$obj;
 			if(empty($blocks)){
 				if(Xml::set($bx,'<:>'.$src.'</:>')){
 					foreach($bx->in('rt:block') as $b) $src = str_replace($b->plain(),$b->value(),$src);
@@ -1716,26 +1667,5 @@ class Template{
 		$bool = ($tag->in_attr('rt:ref') === 'true');
 		$tag->rm_attr('rt:ref');
 		return $bool;
-	}
-	/**
-	 * モジュールを追加する
-	 * @param object $o
-	 */
-	public function set_object_module($o){
-		if(is_object($o)) $this->module[] = $o;
-		return $this;
-	}
-	private function has_object_module($n){
-		foreach($this->module as $o){
-			if(method_exists($o,$n)) return true;
-		}
-		return false;
-	}
-	private function object_module($n,&$p0=null,&$p1=null){
-		$r = null;
-		foreach($this->module as $o){
-			if(method_exists($o,$n)) $r = call_user_func_array(array($o,$n),array(&$p0,&$p1));
-		}
-		return $r;
 	}
 }

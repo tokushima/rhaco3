@@ -31,6 +31,10 @@ class File extends RequestFlow{
 	public function attach($path=null){
 		$pattern = $this->map_arg('pattern');
 		if($pattern !== null) $path = vsprintf($pattern,func_get_args());
+		/**
+		 * attachする前に実行する
+		 * @param string $path
+		 */
 		if($this->has_object_module('before_attach')) $this->object_module('before_attach',$path);
 		\org\rhaco\net\http\File::attach(Path::absolute($this->base(),$path));
 	}

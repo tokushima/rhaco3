@@ -3,32 +3,6 @@
 <rt:block name="content">
 <h2 class="title">Conf</h2>
 
-
-<table>
-<tr>
-	<th class="span3">
-		session module
-		<div id="session_module_sample" class="modal hide fade" style="display: none;">
-			<form>
-			<div class="modal-header">
-				<h3>Sample</h3>
-			</div>
-			<div class="modal-body">
-				<textarea style="width:98%; height: 400px;" name="sample" onclick="this.select()">\org\rhaco\Conf::set('org.rhaco.net.Session','module','org.rhaco.flow.module.SessionDao');</textarea>
-			</div>
-			</form>
-         	</div>
-		<a class="icon-question-sign" data-toggle="modal" href="#session_module_sample"></a>
-	</th>
-	<td>{$session_module_name}</td>
-</tr>
-<tr>
-	<th class="span2">umask</th>
-	<td>{$umask}</td>
-</tr>
-</table>
-
-
 <table rt:param="object_list" rt:var="obj">
 <thead>
 <tr>

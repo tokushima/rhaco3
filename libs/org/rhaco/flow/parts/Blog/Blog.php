@@ -92,6 +92,11 @@ class Blog extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function format($src){
+		/**
+		 * 整形する
+		 * @param string $src
+		 * @return string
+		 */
 		if($this->has_object_module('format')) return $this->object_module('format',$src);
 		return $src;
 	}

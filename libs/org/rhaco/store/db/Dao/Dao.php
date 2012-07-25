@@ -1,5 +1,6 @@
 <?php
 namespace org\rhaco\store\db;
+use org\rhaco\store\db\Daq;
 use \org\rhaco\Conf;
 use \org\rhaco\Paginator;
 use \org\rhaco\store\db\Q;
@@ -653,12 +654,28 @@ abstract class Dao extends \org\rhaco\Object{
 			$paginator->total(call_user_func_array(array(get_called_class(),'find_count'),$args));
 			if($paginator->total() == 0) return array();
 		}
+		/**
+		 * SELECT文の生成
+		 * @param self $dao
+		 * @param org.rhaco.store.db.Q $query
+		 * @param org.rhaco.Paginator $paginator
+		 * @param string $name
+		 * @return org.rhaco.store.db.Daq
+		 */
 		return static::module('select_sql',$dao,$query,$paginator,$name);
 	}
 	final static private function get_statement_iterator($dao,$query){
 		if(!$query->is_order_by()){
 			foreach($dao->primary_columns() as $column) $query->order($column->name());
 		}
+		/**
+		 * SELECT文の生成
+		 * @param self $dao
+		 * @param org.rhaco.store.db.Q $query
+		 * @param org.rhaco.Paginator $paginator
+		 * @param string $name
+		 * @return org.rhaco.store.db.Daq
+		 */
 		$daq = static::module('select_sql',$dao,$query,$query->paginator());
 		$statement = $dao->query($daq);
 		$errors = $statement->errorInfo();

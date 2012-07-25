@@ -95,7 +95,6 @@ array(''
 	,'dev'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
 )));
 
-
 /***
 # put_block
 $b = b();
@@ -242,6 +241,7 @@ $b->do_get(test_map_url('sample_flow/hoge'));
 eq('SAMPLE_FLOW_HOGE',$b->body());
 */
 
+
 /***
 # sample_media_flow
 
@@ -278,6 +278,7 @@ $b->do_get(test_map_url('sample_flow_theme_media_plain_hoge'));
 meq('/resources/media/media_path/hoge.jpg',$b->body());
 */
 
+
 /***
 # sample_exception_flow
 
@@ -298,6 +299,7 @@ $b->do_get(test_map_url('template_super_b'));
 eq('xc',$b->body());
 */
 
+
 /***
 # index
 $b = b();
@@ -315,6 +317,7 @@ meq('CCC',$b->body());
 meq('resources/media',$b->body());
 */
 
+
 /***
 # module
 
@@ -331,6 +334,8 @@ meq('BEFORE_EXEC_TEMPLATE',$b->body());
 meq('AFTER_EXEC_TEMPLATE',$b->body());
 meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 */
+
+
 /***
 # module_request_flow
 
@@ -347,6 +352,7 @@ meq('BEFORE_EXEC_TEMPLATE',$b->body());
 meq('AFTER_EXEC_TEMPLATE',$b->body());
 meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 */
+
 /***
 # under_var
 $b = b();
@@ -356,6 +362,7 @@ meq('hogehoge',$b->body());
 meq('ABC',$b->body());
 meq('INIT',$b->body());
 */
+
 /***
 #noop
 $b = b();
@@ -363,6 +370,7 @@ $b->do_get(test_map_url('noop'));
 eq(200,$b->status());
 eq('<result><init_var>INIT</init_var></result>',$b->body());
 */
+
 /***
 #module_throw_exception
 $b = b();
@@ -370,6 +378,8 @@ $b->do_get(test_map_url('module_throw_exception'));
 eq(403,$b->status());
 eq('<error><message group="exceptions" class="LogicException" type="LogicException">flow handle begin exception</message></error>',$b->body());
 */
+
+
 /***
 #method_not_allowed
 $b = b();
@@ -377,6 +387,7 @@ $b->do_get(test_map_url('method_not_allowed'));
 eq(405,$b->status());
 eq('<error><message group="exceptions" class="LogicException" type="LogicException">Method Not Allowed</message></error>',$b->body());
 */
+
 /***
 # module_map
 
@@ -393,6 +404,7 @@ meq('BEFORE_EXEC_TEMPLATE',$b->body());
 meq('AFTER_EXEC_TEMPLATE',$b->body());
 meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 */
+
 /***
 # module_maps
 
@@ -408,6 +420,7 @@ meq('BEFORE_EXEC_TEMPLATE',$b->body());
 meq('AFTER_EXEC_TEMPLATE',$b->body());
 meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 */
+
 /***
 # module_raise
 $b = b();
@@ -424,6 +437,7 @@ meq('AFTER_TEMPLATE',$b->body());
 
 meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 */
+
 /***
 # module_add_exceptions
 $b = b();
@@ -438,12 +452,14 @@ meq('AFTER_TEMPLATE',$b->body());
 meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 meq('EXCEPTION_FLOW_HANDLE',$b->body());
 */
+
 /***
 #raise
 $b = b();
 $b->do_get(test_map_url('raise'));
 eq(403,$b->status());
 */
+
 /***
 # module_order
 $b = b();
@@ -451,6 +467,7 @@ $b->do_get(test_map_url('module_order'));
 eq(200,$b->status());
 eq('345678910',$b->body());
 */
+
 /***
 # redirect_by_map
 $b = b();
@@ -466,12 +483,21 @@ $b->do_get(test_map_url('redirect_by_map_method_c'));
 eq(200,$b->status());
 eq('REDIRECT_C',$b->body());
 */
+
 /***
 #notemplate
 $b = b();
 $b->do_get(test_map_url('notemplate'));
 eq(200,$b->status());
 eq('<result><abc>ABC</abc><newtag><hoge>HOGE</hoge></newtag></result>',$b->body());
+*/
+
+/***
+# sample_flow_exception_package_throw_xml
+$b = b();
+$b->do_get(test_map_url('sample_flow_exception_package_throw_xml'));
+eq(403,$b->status());
+eq('<error><message group="exceptions" class="test.exception.SampleException" type="SampleException">sample error</message></error>',$b->body());
 */
 
 /***
@@ -482,11 +508,4 @@ eq(403,$b->status());
 eq('<error><message group="exceptions" class="LogicException" type="LogicException">error</message></error>',$b->body());
 */
 
-/***
-# sample_flow_exception_package_throw_xml
-$b = b();
-$b->do_get(test_map_url('sample_flow_exception_package_throw_xml'));
-eq(403,$b->status());
-eq('<error><message group="exceptions" class="test.exception.SampleException" type="SampleException">sample error</message></error>',$b->body());
-*/
 

@@ -9,6 +9,11 @@ namespace org\rhaco\net\listener;
 class Runserver{
 	protected $php_cmd;
 
+	/**
+	 * @module org.rhaco.net.listener.SocketListener
+	 * @param string $address
+	 * @param integer $port
+	 */
 	public function listen($address,$port){
 		if(empty($this->php_cmd)) $this->php_cmd = isset($_ENV['_']) ? $_ENV['_'] : 'php';
 		$this->output('checking for php('.$this->php_cmd.') ...');
@@ -19,6 +24,10 @@ class Runserver{
 		$this->output('Development server is running at http://'.$address.':'.$port);
 		$this->output('Quit the server with CONTROL-C.');
 	}
+	/**
+	 * @module org.rhaco.net.listener.SocketListener
+	 * @param org.rhaco.net.listener.Channel $channel
+	 */
 	public function connect($channel){
 		$head = $body = null;
 		$method = $uri = $query = $boundary = null;

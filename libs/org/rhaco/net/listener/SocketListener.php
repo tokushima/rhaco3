@@ -29,6 +29,11 @@ class SocketListener extends \org\rhaco\Object{
 				if(false === socket_listen($this->gsocket,$backlog)){
 					throw new \org\rhaco\net\listener\exception\ConnectException(socket_strerror(socket_last_error()));			
 				}
+				/**
+				 * listen
+				 * @param string $address
+				 * @param integer $port
+				 */
 				$this->object_module('listen',$address,$port);
 				
 				while(true){
@@ -37,7 +42,15 @@ class SocketListener extends \org\rhaco\Object{
 					$channel = new \org\rhaco\net\listener\Channel($this->socket);
 	
 					try{
+						/**
+						 * 接続時の処理
+						 * @param org.rhaco.net.listener.Channel $channel
+						 */
 						$this->object_module('instruction',$channel);
+						/**
+						 * 接続後の処理
+						 * @param org.rhaco.net.listener.Channel $channel
+						 */
 						$this->object_module('connect',$channel);
 						$this->socket_close($this->socket);
 					}catch(\org\rhaco\net\listener\exception\ShutdownException $e){

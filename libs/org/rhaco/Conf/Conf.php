@@ -6,7 +6,6 @@ namespace org\rhaco;
  */
 class Conf{
 	static private $value = array();
-	static private $module = array();
 	/**
 	 * 定義情報をセットする
 	 * @param string $class
@@ -39,7 +38,10 @@ class Conf{
 	 */
 	static public function get($key,$default=null,$return_vars=null){
 		if(strpos($key,'@') === false){
-			 $class = self::class_name();
+			list(,$d) = debug_backtrace(false);
+			$class = str_replace('\\','.',$d['class']);
+			if($class[0] === '.') $class = substr($class,1);
+			if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
 		}else{
 			list($class,$key) = explode('@',$key,2);
 		}
@@ -51,45 +53,6 @@ class Conf{
 			return $result_vars;
 		}
 		return $result;
-	}
-	/**
-	 * モジュールをセットする
-	 * @param string $class
-	 * @param string $package
-	 */
-	static public function set_module($class,$package){
-		$class = str_replace("\\",'.',$class);
-		if($class[0] === '.') $class = substr($class,1);
-		if(!isset(self::$module[$class])) self::$module[$class] = $package;
-	}
-	/**
-	 * モジュールに指定されたオブジェクトを取得する
-	 * @param string $class
-	 * @throws \InvalidArgumentException
-	 * @return object
-	 */
-	static public function get_module($class=null){
-		if(empty($class)) $class = self::class_name();
-		if(!isset(self::$module[$class])) return new stdClass();
-		if(is_object(self::$module[$class])) return self::$module[$class];
-		if(class_exists(($c='\\'.str_replace('.','\\',self::$module[$class])))) return new $c();
-		throw new \InvalidArgumentException(self::$module[$class].' is not an object');
-	}
-	/**
-	 * モジュールが設定されているか
-	 * @param string $class
-	 * @return boolean
-	 */
-	static public function has_module($class=null){
-		if(empty($class)) $class = self::class_name();
-		return isset(self::$module[$class]);
-	}
-	static private function class_name(){
-		list(,,$d) = debug_backtrace(false);
-		$class = str_replace('\\','.',$d['class']);
-		if($class[0] === '.') $class = substr($class,1);
-		if(preg_match('/^(.+?\.[A-Z]\w*)/',$class,$m)) $class = $m[1];
-		return $class;			
 	}
 	/**
 	 * Configの一覧を取得する

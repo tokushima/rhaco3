@@ -7,10 +7,8 @@ namespace org\rhaco\net;
  * @conf string $session_name セッション名
  * @conf string $session_limiter キャッシュリミッタ nocache,private,private_no_expire,public
  * @conf integer $session_expire キャッシュの有効期限(sec)
- * @conf string $module セッションの実装モジュールのパッケージ名
  */
-class Session{
-	static private $module;
+class Session extends \org\rhaco\Object{
 	private $ses_n;
 
 	/**
@@ -18,7 +16,7 @@ class Session{
 	 * @param string $name
 	 * @return $this
 	 */
-	public function __construct($name='sess'){
+	protected function __new__($name='sess'){
 		$this->ses_n = $name;
 		if('' === session_id()){
 			$session_name = \org\rhaco\Conf::get('session_name','SID');
@@ -27,30 +25,75 @@ class Session{
 			session_cache_expire((int)(\org\rhaco\Conf::get('session_expire',10800)/60));
 			session_name();
 
-			if(\org\rhaco\Conf::has_module()){
-				try{
-					$o = \org\rhaco\Conf::get_module();					
-					ini_set('session.save_handler','user');
-					$noop_func = create_function('','');
-					$true_func = create_function('','return true;');
-					session_set_save_handler(
-						(method_exists($o,'session_open') ? array($o,'session_open') : $true_func)
-						,(method_exists($o,'session_close') ? array($o,'session_close') : $true_func)
-						,(method_exists($o,'session_read') ? array($o,'session_read') : $noop_func)
-						,(method_exists($o,'session_write') ? array($o,'session_write') : $true_func)
-						,(method_exists($o,'session_destroy') ? array($o,'session_destroy') : $true_func)
-						,(method_exists($o,'session_gc') ? array($o,'session_gc') : $true_func)
-					);
-					if(isset($this->vars[$session_name])){
-						if((method_exists($o,'session_verify') ? array($o,'session_verify') : $noop_func) !== true) session_regenerate_id(true);
-					}
-					self::$module = get_class($o);
-				}catch(\Exception $e){
-					\org\rhaco\Log::error($e);
-				}
+			if(static::has_module('session_read')){
+				ini_set('session.save_handler','user');
+				$noop_func = create_function('','');
+				$true_func = create_function('','return true;');
+				session_set_save_handler(
+					array($this,'open'),
+					array($this,'close'),
+					array($this,'read'),
+					array($this,'write'),
+					array($this,'destroy'),
+					array($this,'gc')
+				);
+				/**
+				 * セッションの有効性を検証します、falseを返した場合にsession_regenerate_id()が呼ばれます
+				 * @return boolean
+				 */
+				if(isset($this->vars[$session_name]) && (!static::has_module('session_verify') || static::module('session_verify') !== true)) session_regenerate_id(true);
 			}
 			session_start();
 		}
+	}
+	final public function open($path,$name){
+		/**
+		 * セッションを開くときに実行される
+		 * @param string $path
+		 * @param string $name
+		 * @return boolean
+		 */
+		return static::module('session_open',$path,$name);
+	}
+	final public function close(){
+		/**
+		 * writeが実行された後で実行される
+		 * @return boolean
+		 */
+		return static::module('session_close');
+	}
+	final public function read($id){
+		/**
+		 * セッションが開始したとき実行されます
+		 * @param string $id
+		 * @return mixed
+		 */
+		return static::module('session_read',$id);
+	}
+	final public function write($id,$sess_data){
+		/**
+		 * セッションの保存や終了が必要となったときに実行されます
+		 * @param string $id
+		 * @param mixed $sess_data
+		 * @return boolean
+		 */
+		return static::module('session_write',$id,$sess_data);
+	}
+	final public function destroy($id){
+		/**
+		 * セッションを破棄した場合に実行される
+		 * @param string $id
+		 * @return boolean
+		 */
+		return static::module('session_destroy',$id);
+	}
+	final public function gc($maxlifetime){
+		/**
+		 * ガベージコレクタ
+		 * @param integer $maxlifetime
+		 * @return boolean
+		 */
+		return static::module('session_gc',$maxlifetime);
 	}
 	/**
 	 * セッションの設定
@@ -85,12 +128,5 @@ class Session{
 	}
 	static public function __shutdown__(){
 		if('' != session_id()) session_write_close();
-	}
-	/**
-	 * セッションモジュール名を取得
-	 * @return string
-	 */
-	static public function get_module_name(){
-		return (empty(self::$module)) ? ini_get('session.save_handler') : str_replace('\\','.',self::$module);
 	}
 }

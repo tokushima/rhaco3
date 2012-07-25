@@ -298,6 +298,11 @@ class Atom extends \org\rhaco\net\xml\atom\Object{
 	 * return $this
 	 */
 	public function sort(){
+		/**
+		 * ソート
+		 * @param org.rhaco.net.xml.atom.Entry[] $entry
+		 * @return org.rhaco.net.xml.atom.Entry[]
+		 */
 		if($this->has_object_module('sort')) $this->entry = $this->object_module('sort',$this->entry);
 		return $this;
 	}

@@ -8,9 +8,10 @@ namespace org\rhaco\flow\module;
 class GoogleAnalytics{
 	/**
 	 * @module org.rhaco.Template
-	 * @param string $src
+	 * @param org.rhaco.lang.String $obj
 	 */
-	public function before_template(&$src){
+	public function before_template(\org\rhaco\lang\String $obj){
+		$src = $obj->get();
 		if(strpos($src,'rt:ga') !== false){
 			$base_account = \org\rhaco\Conf::get('account');
 			while(\org\rhaco\Xml::set($tag,$src,'rt:ga')){
@@ -37,5 +38,6 @@ _JS_
 				$src = str_replace($tag->plain(),$func,$src);
 			}
 		}
+		$obj->set($src);
 	}	
 }

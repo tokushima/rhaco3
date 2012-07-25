@@ -45,10 +45,12 @@ class Exceptions{
 	}
 	/**
 	 * @module org.rhaco.Template
-	 * @param string $src
+	 * @param org.rhaco.lang.String $obj
 	 */
-	public function before_template(&$src){
+	public function before_template(\org\rhaco\lang\String $obj){
+		$src = $obj->get();
 		$this->replace('rt:exceptions',$src);
 		$this->replace('rt:invalid',$src);
+		$obj->set($src);
 	}
 }

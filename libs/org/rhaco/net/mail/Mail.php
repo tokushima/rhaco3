@@ -286,6 +286,10 @@ class Mail extends \org\rhaco\Object{
 	 */
 	public function send($subject=null,$message=null){
 		if($this->has_object_module('set_mail')){
+			/**
+			 * メールオブジェクトをセットする
+			 * @param self $this
+			 */
 			$this->object_module('set_mail',$this);
 		}else if(static::has_module('set_mail')){
 			$this->object_module('set_mail',$this);
@@ -294,6 +298,10 @@ class Mail extends \org\rhaco\Object{
 		if($message !== null) $this->message($message);
 
 		if($this->has_object_module('send_mail')){
+			/**
+			 * メールオブジェクトを送信する
+			 * @param self $this
+			 */
 			$this->object_module('send_mail',$this);
 		}else if($this->has_module('send_mail')){
 			static::module('send_mail',$this);

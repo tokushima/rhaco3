@@ -13,12 +13,11 @@ use \org\rhaco\Conf;
 \org\rhaco\Conf::set('org.rhaco.flow.module.SimpleAuth','auth',array('user_name'=>md5(sha1('password'))));
 
 
-//\org\rhaco\Conf::set_module('org.rhaco.net.Session','org.rhaco.flow.module.SessionDao');
-//\org\rhaco\Conf::set_module('org.rhaco.Template','org.rhaco.store.template.File');
-
-
+//\org\rhaco\net\Session::set_module('org.rhaco.flow.module.SessionDao');
+//\org\rhaco\Template::set_module('org.rhaco.store.template.File');
 \org\rhaco\Log::set_module('org.rhaco.io.log.Growl');
 \org\rhaco\Log::set_module('org.rhaco.io.log.File');
+
 
 
 

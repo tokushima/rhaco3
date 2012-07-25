@@ -683,13 +683,12 @@ class Object{
 	final static protected function module($n){
 		$r = null;
 		if(isset(self::$_m[2][$g=get_called_class()])){
+			$a = func_get_args();
+			array_shift($a);
+			
 			foreach(self::$_m[2][$g] as $k => $o){
 				if(!is_object($o) && class_exists(($c='\\'.str_replace('.','\\',$o)))) self::$_m[2][$g][$k] = $o = new $c();
-				if(method_exists($o,$n)){
-					$a = func_get_args();
-					array_shift($a);
-					$r = call_user_func_array(array($o,$n),$a);
-				}
+				if(method_exists($o,$n)) $r = call_user_func_array(array($o,$n),$a);
 			}
 		}
 		return $r;
@@ -723,12 +722,10 @@ class Object{
 	 */
 	final protected function object_module($n){
 		$r = null;
+		$a = func_get_args();
+		array_shift($a);
 		foreach($this->_im[1] as $o){
-			if(method_exists($o,$n)){
-				$a = func_get_args();
-				array_shift($a);
-				$r = call_user_func_array(array($o,$n),$a);				
-			}
+			if(method_exists($o,$n)) $r = call_user_func_array(array($o,$n),$a);
 		}
 		return $r;
 	}

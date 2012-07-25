@@ -40,5 +40,30 @@
 	</tbody>
 	</table>
 </rt:if>
+
+<rt:if param="{$return}">
+	<h3>Return</h3>		
+	<table>
+	<thead>
+		<tr>
+			<th style="width:200px">type</th>
+			<th>summary</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td>
+				<rt:if param="{$f.type($return[0])}">
+					<a href="{$t.package_method_url('class_info',$f.type($return[0]))}">{$return[0]}</a>
+				<rt:else />
+					{$return[0]}
+				</rt:if>
+			</td>
+			<td>{$t.html($return[1])}</td>
+		</tr>
+	</tbody>
+	</table>
+</rt:if>
+
 </rt:block>
 

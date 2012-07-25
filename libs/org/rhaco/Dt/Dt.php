@@ -236,6 +236,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('module_name',$module_name);
 		$this->vars('description',$ref['modules'][$module_name][0]);
 		$this->vars('params',$ref['modules'][$module_name][1]);
+		$this->vars('return',$ref['modules'][$module_name][2]);
 	}
 	private function get_model($name,$sync=true){
 		$r = new \ReflectionClass('\\'.str_replace('.','\\',$name));
@@ -502,8 +503,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		ksort($list);
 		$this->vars('object_list',$list);
-		$this->vars('session_module_name',\org\rhaco\net\Session::get_module_name());
-		$this->vars('umask',sprintf('%04o',umask()));
 	}
 	/**
 	 * エントリ一覧

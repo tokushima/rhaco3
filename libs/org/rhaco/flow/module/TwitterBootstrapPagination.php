@@ -10,9 +10,10 @@ use \org\rhaco\Xml;
 class TwitterBootstrapPagination{
 	/**
 	 * @module org.rhaco.Template
-	 * @param string $src
+	 * @param org.rhaco.lang.String $obj
 	 */
-	public function before_template(&$src){
+	public function before_template(\org\rhaco\lang\String $obj){
+		$src = $obj->get();
 		if(strpos($src,'rt:paginator') !== false){
 			while(Xml::set($tag,$src,'rt:paginator')){
 				$param = '$'.$tag->in_attr('param','paginator');
@@ -50,5 +51,6 @@ class TwitterBootstrapPagination{
 				$src = str_replace($tag->plain(),$func,$src);
 			}
 		}
+		$obj->set($src);
 	}
 }

@@ -54,6 +54,15 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 			$r = new \ReflectionClass($this->type);
 			$this->connection_module = $r->newInstanceArgs(array($this->encode));
 			$this->set_object_module($this->connection_module);
+			/**
+			 * 接続定義
+			 * @param string $dbname
+			 * @param string $host
+			 * @param integer $port
+			 * @param string $user
+			 * @param string $password
+			 * @param string $sock
+			 */
 			$this->connection = $this->object_module('connect',$this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
 			if(empty($this->connection)) throw new \RuntimeException('connection fail '.$this->dbname);
 			$this->connection->beginTransaction();

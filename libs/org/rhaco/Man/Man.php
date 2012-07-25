@@ -289,14 +289,17 @@ class Man{
 		return $type;
 	}
 	static private function	get_desc(&$modules,$match,$k,$name,$src,$class){
-		$modules[$name] = array(null,array());
+		if(!isset($modules[$name])) $modules[$name] = array(null,array(),array());
 		$doc = substr($src,0,$match[0][$k][1]);
 		$doc = trim(substr($doc,0,strrpos($doc,"\n")));
 		if(substr($doc,-2) == '*'.'/'){
 			$doc = substr($doc,strrpos($doc,'/'.'**'));
 			$doc = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$doc)));
 			if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$doc,$m)){
-				foreach($m[2] as $n => $p) $modules[$name][1][] = array($m[2][$n],self::type($m[1][$n],$class),trim($m[3][$n]));
+				foreach($m[2] as $n => $p) $modules[$name][1][$m[2][$n]] = array($m[2][$n],self::type($m[1][$n],$class),trim($m[3][$n]));
+			}
+			if(preg_match("/@return\s+([^\s]+)(.*)/",$doc,$m)){
+				$modules[$name][2] = array(self::type(trim($m[1]),$class),trim($m[2]));
 			}
 			$modules[$name][0] = trim(preg_replace('/@.+/','',$doc));
 		}
