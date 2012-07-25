@@ -170,11 +170,11 @@ class Template extends \org\rhaco\Object{
 		 * 実行前処理
 		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('before_exec_template',\org\rhaco\lang\String::ref($obj,$_src_));
+		$this->object_module('before_exec_template',\org\rhaco\lang\String::ref($_obj_,$_src_));
 		$this->vars('_t_',new Template\Helper());
 		ob_start();
 			if(is_array($this->vars) && !empty($this->vars)) extract($this->vars);
-			eval('?><?php $_display_exception_='.((\org\rhaco\Conf::get('display_exception') === true) ? 'true' : 'false').'; ?>'.((string)$obj));
+			eval('?><?php $_display_exception_='.((\org\rhaco\Conf::get('display_exception') === true) ? 'true' : 'false').'; ?>'.((string)$_obj_));
 		$_eval_src_ = ob_get_clean();
 
 		if(strpos($_eval_src_,'Parse error: ') !== false){
@@ -194,8 +194,8 @@ class Template extends \org\rhaco\Object{
 		 * 実行後処理
 		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('after_exec_template',\org\rhaco\lang\String::ref($obj,$_eval_src_));
-		return (string)$obj;
+		$this->object_module('after_exec_template',\org\rhaco\lang\String::ref($_obj_,$_eval_src_));
+		return (string)$_obj_;
 	}
 	private function error_handler($errno,$errstr,$errfile,$errline){
 		throw new \ErrorException($errstr,0,$errno,$errfile,$errline);
