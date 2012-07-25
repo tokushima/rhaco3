@@ -149,13 +149,13 @@ class Template extends \org\rhaco\Object{
 		 * @param org.rhaco.lang.String $obj
 		 */
 		$this->object_module('before_template',\org\rhaco\lang\String::ref($obj,$src));
-		$src = $this->rtif($this->rtloop($this->rtunit($this->html_form($this->html_list((string)$src)))));
+		$src = $this->rtif($this->rtloop($this->rtunit($this->html_form($this->html_list((string)$obj)))));
 		/**
 		 * テンプレート作成の後処理
 		 * @param org.rhaco.lang.String $obj
 		 */
 		$this->object_module('after_template',\org\rhaco\lang\String::ref($obj,$src));
-		$src = str_replace('__PHP_ARROW__','->',(string)$src);
+		$src = str_replace('__PHP_ARROW__','->',(string)$obj);
 		$src = $this->parse_print_variable($src);
 		$php = array(' ?>','<?php ','->');
 		$str = array('__PHP_TAG_END__','__PHP_TAG_START__','__PHP_ARROW__');

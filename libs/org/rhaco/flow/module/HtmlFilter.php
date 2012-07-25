@@ -6,9 +6,15 @@ namespace org\rhaco\flow\module;
  * @author tokushima
  */
 class HtmlFilter{
-	public function before_exec_template(&$src){
+	/**
+	 * @module org.rhaco.Template
+	 * @param \org\rhaco\lang\String $obj
+	 */
+	public function before_exec_template(\org\rhaco\lang\String $obj){
+		$src = $obj->get();
 		if(preg_match_all('/@print\((.+?)\);/ms',$src,$match)){
 			$src = str_replace($match[0],array_map(array($this,'add_escape'),$match[1]),$src);
+			$obj->set($src);
 		}
 	}
 	private function add_escape($value){
