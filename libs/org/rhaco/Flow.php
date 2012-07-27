@@ -101,18 +101,14 @@ class Flow{
 	 * 出力する
 	 * @param array $map
 	 */
-	public function output($p0=null,$p1=null,$p2=null,$p3=null,$p4=null){
+	public function output($map_array){
+		$args = func_get_args();
 		$pathinfo = preg_replace("/(.*?)\?.*/","\\1",(isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null));
 		/**
 		 * ハンドリングマップ配列を取得する
-		 * @param mixed $p0
-		 * @param mixed $p1
-		 * @param mixed $p2
-		 * @param mixed $p3
-		 * @param mixed $p4
 		 * @return array
 		 */
-		$map = ($this->has_object_module('flow_map_loader')) ? $this->object_module('flow_map_loader',$p0,$p1,$p2,$p3,$p4) : $p0;
+		$map = ($this->has_object_module('flow_map_loader')) ? $this->object_module('flow_map_loader',$args) : $map_array;
 		$apps = $urls = array();
 		$idx = $pkg_id =0;
 		$theme = $put_block = null;
@@ -459,12 +455,14 @@ class Flow{
 		}
 		return false;
 	}
-	private function object_module($n,&$p0=null,&$p1=null,&$p2=null,&$p3=null,&$p4=null,&$p5=null,&$p6=null,&$p7=null,&$p8=null,&$p9=null){
+	private function object_module($n){
 		$r = null;
+		$a = func_get_args();
+		array_shift($a);
 		foreach($this->module as $o){
-			if(method_exists($o,$n)) $r = call_user_func_array(array($o,$n),array(&$p0,&$p1,&$p2,&$p3,&$p4,&$p5,&$p6,&$p7,&$p8,&$p9));
+			if(method_exists($o,$n)) $r = call_user_func_array(array($o,$n),$a);
 		}
-		return $r;
+		return $r;		
 	}
 	/**
 	 * ローダーを指定してインスタンスを作成する
