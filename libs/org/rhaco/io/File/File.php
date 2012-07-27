@@ -14,9 +14,6 @@ namespace org\rhaco\io;
  * @conf string $resource_dir リソースディレクトリを設定する
  */
 class File extends \org\rhaco\Object{
-	static private $work_dir;
-	static private $resource_dir;	
-	
 	protected $fullname;
 	protected $value;
 	protected $mime;
@@ -101,6 +98,7 @@ class File extends \org\rhaco\Object{
 				case 'css': $this->mime = 'text/css'; break;
 				case 'txt': $this->mime = 'text/plain'; break;
 				case 'html': $this->mime = 'text/html'; break;
+				case 'csv': $this->mime = 'text/csv'; break;
 				case 'xml': $this->mime = 'application/xml'; break;
 				case 'js': $this->mime = 'text/javascript'; break;
 				case 'flv':
@@ -343,22 +341,17 @@ class File extends \org\rhaco\Object{
 	 * @return string
 	 */
 	static public function work_path($path=null){
-		return self::$work_dir.$path;
+		$dir = str_replace("\\",'/',\org\rhaco\Conf::get('work_dir',getcwd().'/work/'));
+		if(substr($dir,-1) != '/') $dir = $dir.'/';
+		return $dir.$path;
 	}
 	/**
 	 * リソースディレクトリを返す
 	 * @return string
 	 */
 	static public function resource_path($path=null){
-		return self::$resource_dir.$path;
-	}
-	static public function __import__(){
-		$work_dir = str_replace("\\",'/',\org\rhaco\Conf::get('work_dir',getcwd().'/work/'));
-		if(substr($work_dir,-1) != '/') $work_dir = $work_dir.'/';
-		self::$work_dir = $work_dir;
-		
-		$resource_dir = str_replace("\\",'/',\org\rhaco\Conf::get('resource_dir',getcwd().'/resources/'));
-		if(substr($resource_dir,-1) != '/') $resource_dir = $resource_dir.'/';
-		self::$resource_dir = $resource_dir;
+		$dir = str_replace("\\",'/',\org\rhaco\Conf::get('resource_dir',getcwd().'/resources/'));
+		if(substr($dir,-1) != '/') $dir = $dir.'/';
+		return $dir.$path;
 	}
 }

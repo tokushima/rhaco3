@@ -16,8 +16,8 @@ use \org\rhaco\Conf;
 //\org\rhaco\net\Session::set_module('org.rhaco.flow.module.SessionDao');
 //\org\rhaco\Template::set_module('org.rhaco.store.template.File');
 \org\rhaco\Log::set_module('org.rhaco.io.log.Growl');
-\org\rhaco\Log::set_module('org.rhaco.io.log.File');
-
+//\org\rhaco\Log::set_module('org.rhaco.io.log.File');
+\org\rhaco\Log::set_module(new \org\rhaco\io\log\File());
 
 
 

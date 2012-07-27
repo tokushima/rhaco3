@@ -21,6 +21,17 @@ class File{
 		self::output_file_content($filename,'attachment');
 	}
 	static private function output_file_content($filename,$disposition){
+		if($filename instanceof \org\rhaco\io\File){
+			if(is_file($filename->fullname())){
+				$filename = $filename->fullname();
+			}else{
+				\org\rhaco\net\http\Header::send('Last-Modified',gmdate('D, d M Y H:i:s').' GMT');
+				\org\rhaco\net\http\Header::send('Content-Type',$filename->mime().'; name='.$filename->name());
+				\org\rhaco\net\http\Header::send('Content-Disposition',$disposition.'; filename='.$filename->name());
+				print($filename->value());
+				exit;
+			}
+		}
 		if(is_file($filename)){
 			$update = @filemtime($filename);			
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $update <= strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE'])){
@@ -77,6 +88,7 @@ class File{
 			case 'tgz':
 			case 'tar':
 			case 'gz': return 'application/x-compress';
+			case 'csv': return 'text/csv';
 			case null:
 			default:
 				return 'application/octet-stream';

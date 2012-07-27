@@ -34,6 +34,14 @@ class Growl{
 	public function error(\org\rhaco\Log $log,$id){
 		$this->growl->emergency($this->value($log),$log->file().':'.$log->line(),true);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
+	public function trace(\org\rhaco\Log $log,$id){
+		$this->growl->emergency($this->value($log),$log->file().':'.$log->line(),true);
+	}
 	private function value(\org\rhaco\Log $log){
 		$lines = 3;
 		$ln = array();

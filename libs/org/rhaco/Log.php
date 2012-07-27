@@ -27,7 +27,7 @@ class Log extends \org\rhaco\Object{
 	protected $value;
 
 	static public function __import__(){
-		self::$id = uniqid('');
+		self::$id = base_convert(date('md'),10,36).base_convert(date('G'),10,36).base_convert(mt_rand(1296,46655),10,36);
 		self::$logs[] = new self(4,'--- logging start '
 									.date('Y-m-d H:i:s')
 									.' ( '.(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : (isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : null)).' )'
@@ -84,7 +84,7 @@ class Log extends \org\rhaco\Object{
 		return $this->value;
 	}
 	protected function __fm_level__(){
-		return self::$level_strs[$this->level()];
+		return ($this->level() >= 0) ? self::$level_strs[$this->level()] : 'trace';
 	}
 	protected function __get_time__($format='Y/m/d H:i:s'){
 		return (empty($format)) ? $this->time : date($format,$this->time);
@@ -125,6 +125,13 @@ class Log extends \org\rhaco\Object{
 						 * @param string $id
 						 */
 						case 'error': self::module('error',$log,self::$id); break;
+						default:
+						/**
+						 * traceログの場合の処理
+						 * @param self $log
+						 * @param string $id
+						 */
+						self::module('trace',$log,self::$id);
 					}
 				}
 			}
@@ -201,6 +208,13 @@ class Log extends \org\rhaco\Object{
 		if(self::cur_level() >= 4){
 			foreach(func_get_args() as $value) self::$logs[] = new self(4,$value);
 		}
+	}
+	/**
+	 * traceを生成
+	 * @param mixed $value 内容
+	 */
+	static public function trace($value){
+		foreach(func_get_args() as $value) self::$logs[] = new self(-1,$value);
 	}
 	/**
 	 * var_dumpで出力する

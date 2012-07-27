@@ -49,4 +49,12 @@ class File{
 	public function error(\org\rhaco\Log $log,$id){
 		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);
 	}
+	/**
+	 * @module org.rhaco.Log
+	 * @param \org\org.rhaco.Log\Log $log
+	 * @param string $id
+	 */
+	public function trace(\org\rhaco\Log $log,$id){
+		file_put_contents($this->path,((string)$log).PHP_EOL,FILE_APPEND);
+	}
 }
