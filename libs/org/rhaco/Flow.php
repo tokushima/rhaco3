@@ -108,7 +108,7 @@ class Flow{
 		 * ハンドリングマップ配列を取得する
 		 * @return array
 		 */
-		$map = ($this->has_object_module('flow_map_loader')) ? $this->object_module('flow_map_loader',$args) : $map_array;
+		$map = ($this->has_object_module('flow_map_loader')) ? call_user_func_array(array($this,'object_module'),array_merge(array('flow_map_loader'),$args)) : $map_array;
 		$apps = $urls = array();
 		$idx = $pkg_id =0;
 		$theme = $put_block = null;
