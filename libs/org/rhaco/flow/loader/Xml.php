@@ -1,6 +1,11 @@
 <?php
 namespace org\rhaco\flow\loader;
-
+/**
+ * @incomplete
+ * Enter description here ...
+ * @author tokushima
+ *
+ */
 class Xml{
 	public function flow_map_loader($xml_file){
 		$app = array();
@@ -8,7 +13,7 @@ class Xml{
 		if(\org\rhaco\Xml::set($xml,$src,'app')){
 			foreach($xml->in('patterns') as $pattern){
 				foreach($pattern->in('map') as $map){
-					$app['pattenrs'][$map->in_attr('url')] = array(
+					$app['patterns'][$map->in_attr('url')] = array(
 						'mode'=>$map->in_attr('mode'),
 						'action'=>$map->in_attr('action'),
 					);

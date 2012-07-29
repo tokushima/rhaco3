@@ -4,7 +4,7 @@ namespace org\rhaco\io;
  * 画像操作ライブラリ
  * Jpegの処理時には非圧縮の画像に変換するので、その分メモリが必要になる
  * @author tokushima
- * @author riaf <riafweb@gmail.com>
+ * @author riaf
  * @var integer $width 画像の幅
  * @var integer $height 画像の高さ
  * @var choice $type 画像の種類 @['choices'=>['jpg','gif','png','bmp']]
@@ -58,7 +58,7 @@ class Image extends \org\rhaco\Object{
 	static public function load($filename){
 		if(!is_file($filename)) throw new Image\ImageException('`'.$filename.'` file not found.');
 		$size = getimagesize($filename);
-		if($size === false) throw new Image\ImageException("invalid file");
+		if($size === false) throw new Image\ImageException('invalid file');
 		$self = new self(null,null);
 		try{
 			switch($size[2]){
@@ -191,7 +191,7 @@ class Image extends \org\rhaco\Object{
 	 * @param boolean $keep
 	 * @return $this
 	 */
-	function resize_height($height,$keep=false){
+	public function resize_height($height,$keep=false){
 		$dst_width  = $keep ? $this->width : ($this->width / ($this->height / $height));
 		return $this->image_resize($dst_width,$height);
 	}
@@ -243,7 +243,7 @@ class Image extends \org\rhaco\Object{
 			case 'png': $bool = imagepng($this->resource,$filename,10-ceil($this->quality)); break;
 			case 'bmp': $bool = imagewbmp($this->resource,$filename); break;
 		}
-		if(!$bool) throw new Image\ImageException("invalid type");
+		if(!$bool) throw new Image\ImageException('invalid type');
 		return $filename;
 	}
 	/**
@@ -259,12 +259,12 @@ class Image extends \org\rhaco\Object{
 	private function output_image($type=null){
 		if($type !== null) $this->type($type);
 		switch($this->type()){
-			case 'gif': return imagejpeg($this->resource);
-			case 'jpg': return imagegif($this->resource,ceil($this->quality*10));
-			case 'png': return imagepng($this->resource,10-ceil($this->quality));
-			case 'bmp': return imagewbmp($this->resource);
+			case 'gif': return imagegif($this->resource,null);
+			case 'jpg': return imagejpeg($this->resource,null,ceil($this->quality*10));
+			case 'png': return imagepng($this->resource,null,10-ceil($this->quality));
+			case 'bmp': return imagewbmp($this->resource,null);
 		}
-		throw new Image\ImageException("invalid type");
+		throw new Image\ImageException('invalid type');
 	}
 	/**
 	 * 標準出力に出力する
@@ -277,11 +277,106 @@ class Image extends \org\rhaco\Object{
 	}
 	private function type_no(){
 		switch($this->type){
-			case "gif": return IMAGETYPE_GIF;
-			case "jpg": return IMAGETYPE_JPEG;
-			case "png": return IMAGETYPE_PNG;
-			case "bmp": return IMAGETYPE_WBMP;
+			case 'gif': return IMAGETYPE_GIF;
+			case 'jpg': return IMAGETYPE_JPEG;
+			case 'png': return IMAGETYPE_PNG;
+			case 'bmp': return IMAGETYPE_WBMP;
 		}
 		return IMAGETYPE_JPEG;
-	}	
+	}
+	/**
+	 * 文字列のサイズを取得する
+	 * @param string $font_file フォントファイルのパス
+	 * @param integer $font_size ポイント数
+	 * @param string $text 対象の文字列
+	 * @param integer $linespacing 行間
+	 * @param integer $letterspacing 文字間
+	 * @throws \InvalidArgumentException
+	 */
+	static public function text_size($font_file,$font_size,$text,$linespacing=2,$letterspacing=1){
+		$lines = explode(PHP_EOL,str_replace(array("\r\n","\r","\n"),PHP_EOL,$text));
+		$width = $height = $sp = 0;
+		$char_width = $char_height = $line_height = array();
+		foreach($lines as $i => $line){
+			$line_height[$i] = $height;
+			$w = $h = 0;
+			$strlen = mb_strlen($line);
+			for($y=0;$y<$strlen;$y++){
+				$result = imagettfbbox($font_size,0,$font_file,mb_substr($line,$y,1));
+				if($result === false) throw new \InvalidArgumentException('failure '.$font_path);
+				$char_width[$i][$y] = $w;
+				$w = $w + ($result[2] - $result[6]) + ((($strlen-1) > $y) ? $letterspacing : 0);
+				$h = ($result[3] - $result[7]);
+			}
+			$char_height[$i] = $h;
+			if($w > $width) $width = $w;
+			$height = $height + $h + (($i<sizeof($lines)-1) ? $linespacing : 0);
+		}
+		return array($width,$height,$char_width,$char_height,$line_height);
+	}
+	/**
+	 * テキストを挿入する
+	 * @param string $text　挿入する文字列
+	 * @param integer $x 横位置
+	 * @param integer $y 縦位置
+	 * @param string $font_file フォントファイルのパス
+	 * @param integer $font_size ポイント数
+	 * @param string $color 文字色 #000000
+	 * @param integer $linespacing 行間
+	 * @param integer $letterspacing 文字間
+	 * @return $this
+	 */
+	public function set_text($text,$x,$y,$font_file,$font_size,$color='#000000',$linespacing=2,$letterspacing=1){
+		list($bx,$by,$char_width,$char_height,$line_height) = self::text_size($font_file,$font_size,$text,$linespacing,$letterspacing);
+		$c = $this->get_color($color);
+		$lines = explode(PHP_EOL,str_replace(array("\r\n","\r","\n"),PHP_EOL,$text));
+		
+		foreach($line_height as $i => $y){
+			foreach($char_width[$i] as $j => $x){
+				imagettftext($this->resource,$font_size,0,$x,$y+$char_height[$i],$c,$font_file,mb_substr($lines[$i],$j,1));
+			}
+		}
+		return $this;
+	}
+	/**
+	 * 網点
+	 * @param integer $range
+	 * @param string $color
+	 * @return $this
+	 */
+	public function halftone($range,$color='#ffffff'){
+		for($x=0;$x<$this->width;$x+=$range){
+			for($y=0;$y<$this->height;$y+=$range) imagesetpixel($this->resource,$x,$y,$this->get_color($color));
+		}
+		return $this;
+	}
+	/**
+	 * ぼかし(ガウス)
+	 * @return $this
+	 */
+	public function gaussian(){
+		imagefilter($this->resource,IMG_FILTER_GAUSSIAN_BLUR);
+		return $this;
+	}
+	/**
+	 * グレースケール
+	 * @return $this
+	 */
+	public function grayscale(){
+		imagefilter($this->resource,IMG_FILTER_GRAYSCALE);
+		return $this;
+	}
+	/**
+	 * 矩形を挿入する
+	 * @param integer $xs 横の開始位置
+	 * @param integer $xs 横の開始位置
+	 * @param integer $xe 横の終了位置
+	 * @param integer $ye 横の終了位置
+	 * @param string $color 背景色 #000000
+	 * @return $this
+	 */
+	public function rectangle($xs,$xs,$xe,$ye,$color){
+		imagefilledrectangle($this->resource,$xs,$xs,$xe,$ye,$this->get_color($color));
+		return $this;
+	}
 }
