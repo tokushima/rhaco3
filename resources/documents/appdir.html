@@ -1,0 +1,20 @@
+<rt:block name="document">
+	<h2>アプリケーションのファイル構成</h2>
+	<p>
+		標準的な構成は以下になりますが、それぞれ設定により別の場所に配置する事が可能です。
+	</p>
+
+	<tree caption="[APPLICATION_ROOT]">
+		commons: モード毎の共通設定ファイル
+			local.php: モード名.php
+		libs: 各種ライブラリ
+			_vendors: サードパーティのライブラリ
+			_extlibs: PEAR等
+		resources: 各種リソース
+			media: 画像ファイルやCSSファイル等
+			templates: <a href="{$t.map_url('rhaco3_document','documnet/template.html')}">html等のテンプレートファイル</a>
+		tests: テストファイル群
+		__settings__.php: 設定ファイル
+		index.php: <a href="{$t.map_url('rhaco3_document','document/entry.html')}">エントリーポイント</a>		
+	</tree>
+</rt:block>

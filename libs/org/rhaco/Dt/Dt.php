@@ -41,8 +41,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	public function get_template_modules(){
 		return array(
 					new \org\rhaco\flow\module\TwitterBootstrapPagination()
+					,new \org\rhaco\flow\module\TwitterBootstrapExtHtml()
 					,new \org\rhaco\flow\module\Exceptions()
-					,new Dt\Formatter()
 					,new \org\rhaco\flow\module\Dao()
 				);
 	}
@@ -512,10 +512,11 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$trace = debug_backtrace(false);
 		$entry = array_pop($trace);
 		$entry_list = array();
+
 		foreach(new \DirectoryIterator(dirname($entry['file'])) as $f){
 			if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
 				$src = file_get_contents($f->getPathname());
-				if(strpos($src,'Flow') !== false && strpos($src,'patterns') !== false && strpos($src,'output') !== false && strpos($src,'class Rhaco3') === false){
+				if(strpos($src,'Flow') !== false && (strpos($src,'->output(') !== false || strpos($src,'Flow::out(') !== false)){
 					$maps = \org\rhaco\Flow::get_maps($f->getFilename());
 					$dev_index = null;
 					foreach($maps as $m){
@@ -533,7 +534,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					$obj->summary = $summary;
 					$obj->url = $dev_index;
 					
-					if($this->search_str($obj->entry,$obj->name,$obj->summary)) $entry_list[] = $obj;
+					if($this->search_str($obj->entry,$obj->name,$obj->summary)) $entry_list[] = $obj;					
 				}
 			}
 		}
@@ -590,5 +591,34 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			$result = \org\rhaco\Man::method_info($this->in_vars('class'),$this->in_vars('method'));
 		}catch(\Exception $e){}
 		\org\rhaco\lang\Json::output($result);
+	}
+	/**
+	 * @automap
+	 */
+	public function document(){
+		$filename = $this->in_vars('page');
+		if($filename[0] === '/') $filename = substr($filename,1);
+		$path = \org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('documents'));
+		if(substr($path,-1) !== '/') $path = $path.'/';
+		$list = array();
+		$paginator = null;
+
+		if(is_file($path.$filename)) $this->set_block($path.$filename);
+		foreach(\org\rhaco\io\File::ls($path,true) as $f){
+			$name = $file = str_replace($path,'',$f->fullname());
+			$dirname = dirname($name);
+			if($dirname == '.') $dirname = '';
+			$src = file_get_contents($f->fullname());
+			
+			if($this->search_str($src)){
+				if(\org\rhaco\Xml::set($xml,$src,'h2')) $name = trim($xml->value());
+				$list[$file] = array($name,$dirname);
+				if(isset($paginator)) $paginator->add($file);
+			}
+		}
+		if(isset($paginator)) $paginator->vars('q',$this->in_vars('q'));
+		$this->vars('document_list',$list);
+		$this->vars('paginator',$paginator);
+		$this->vars('q',$this->in_vars('q'));
 	}
 }

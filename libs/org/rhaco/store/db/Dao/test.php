@@ -665,6 +665,15 @@ eq(4,Find::find_count(
 	),
 	Q::neq("value1","aaa")
 ));
+// TOOD
+$q = new Q();
+$q->add(Q::neq("value1","abc"));
+$q->add(Q::ob(
+		Q::b(Q::eq("order",2)),
+		Q::b(Q::eq("order",4))
+	));
+$q->add(Q::neq("value1","aaa"));
+eq(4,Find::find_count($q));
 
 
 $paginator = new \org\rhaco\Paginator(1,2);

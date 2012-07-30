@@ -145,7 +145,7 @@ if(isset($_SERVER['argv'][1])){
 		foreach(new DirectoryIterator(__DIR__) as $f){
 			if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_' && $f->getPathname() != __FILE__ && $f->getFilename() != 'index.php'){
 				$src = file_get_contents($f->getPathname());
-				if(strpos($src,'Flow') !== false && strpos($src,'patterns') !== false && strpos($src,'output') !== false){
+				if(strpos($src,'Flo'.'w') !== false && (strpos($src,'->outpu'.'t(') !== false || strpos($src,'Flo'.'w::out(') !== false)){
 					$app = substr($f->getFilename(),0,-4);
 					$rules .= "RewriteCond %{REQUEST_FILENAME} !-f\nRewriteCond %{REQUEST_FILENAME} !-d\nRewriteRule ^".$app."[/]{0,1}(.*)\$ ".$app.".php/\$1?%{QUERY_STRING} [L]\n\n";
 				}

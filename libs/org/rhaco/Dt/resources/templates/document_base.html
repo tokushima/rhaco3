@@ -1,0 +1,23 @@
+<rt:extends href="base.html" />
+
+<rt:block name="content">
+<div>
+	<rt:block name="document"></rt:block>
+</div>
+ 
+<rt:if param="{$paginator}">
+<ul class="pager">
+	<rt:if param="{$paginator.is_prev()}">
+		<li><a href="{$t.package_method_url('document')}?{$paginator.query_prev()}">Previous</a></li>
+	<rt:else>
+		<li><a href="#" style="color:#000;" onclick="return false;">Previous</a></li>
+	</rt:if>
+	<rt:if param="{$paginator.is_next()}">
+		<li><a href="{$t.package_method_url('document')}?{$paginator.query_next()}">Next</a></li>
+	<rt:else>
+		<li><a href="#" style="color:#000;" onclick="return false;">Next</a></li>
+	</rt:if>
+</ul>
+</rt:if>
+
+</rt:block>

@@ -108,7 +108,7 @@ class Flow{
 		 * ハンドリングマップ配列を取得する
 		 * @return array
 		 */
-		$map = ($this->has_object_module('flow_map_loader')) ? call_user_func_array(array($this,'object_module'),array_merge(array('flow_map_loader'),$args)) : $map_array;
+		$map = ($this->has_object_module('flow_map_loader')) ? call_user_func_array(array($this,'object_module'),array_merge(array('flow_map_loader'),$args)) : $map_array;	
 		$apps = $urls = array();
 		$idx = $pkg_id =0;
 		$theme = $put_block = null;
@@ -198,6 +198,7 @@ class Flow{
 			list($url,$surl) = array($this->branch_url,str_replace('http://','https://',$this->branch_url));
 			$map_secure = (isset($map['secure']) && $map['secure'] === true);
 			$conf_secure = (\org\rhaco\Conf::get('secure',true) === true);
+
 			foreach($apps as $u => $m){
 				$m['secure'] = ($conf_secure && (((isset($m['secure']) && $m['secure'] === true)) || (!isset($m['secure']) && $map_secure)));
 				$cnt = 0;
@@ -394,7 +395,7 @@ class Flow{
 		}else{
 			$template = $template_path.$template;
 		}
-		if(!empty($put_block)) $this->template->put_block($this->template_path.$put_block);
+		if(!empty($put_block)) $this->template->put_block(\org\rhaco\net\Path::absolute($this->template_path,$put_block));
 		if(isset($apps[$index]['template_super'])) $this->template->template_super($this->template_path.$apps[$index]['template_super']);
 
 		$this->template->media_url($media_url);
