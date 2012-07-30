@@ -286,7 +286,6 @@ abstract class Base extends \org\rhaco\Object{
 				}
 			}
 			if(!empty($and_block_sql)) $where_sql .= ' ('.implode(' and ',$and_block_sql).') ';
-
 			foreach($q->ar_or_block() as $or_block){
 				list($where,$var) = $this->where_sql($dao,$from,$or_block,$self_columns,null,$alias);
 				if(!empty($where)){
