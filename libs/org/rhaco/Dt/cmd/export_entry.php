@@ -11,7 +11,8 @@ function output($output_file,$template_file,$vars,$option){
 	$template->template_super($template_base);
 	
 	$template->set_object_module(new \org\rhaco\Dt\Replace());
-	$template->set_object_module(new \org\rhaco\Dt\Formatter());
+	$template->set_object_module(new \org\rhaco\flow\module\TwitterBootstrapPagination());
+	$template->set_object_module(new \org\rhaco\flow\module\TwitterBootstrapExtHtml());
 	foreach($vars as $k => $v) $template->vars($k,$v);
 	$template->vars('t',new \org\rhaco\flow\module\Helper());
 	$template->vars('f',$helper);
@@ -112,7 +113,10 @@ output($output_file,$template_file,$vars,$option);
 foreach($class_list as $package => $c){
 	$class_info = \org\rhaco\Man::class_info($package);
 
-	foreach(array('static_methods','methods') as $k){
+	foreach(array(
+		'static_methods','methods','protected_static_methods','protected_methods',
+		'inherited_methods','inherited_static_methods','inherited_protected_static_methods','inherited_protected_methods'
+	) as $k){
 		foreach($class_info[$k] as $method => $doc){
 			$method_info = \org\rhaco\Man::method_info($package,$method);
 			$output_file = $out_dir.$package.'__'.$method.'.html';
@@ -120,6 +124,19 @@ foreach($class_list as $package => $c){
 			$vars = array_merge($method_info,array('app_name'=>$entry));
 			output($output_file,$template_file,$vars,$option);
 		}
+	}
+	foreach($class_info['modules'] as $module_name => $v){
+		$vars = array(
+					'package'=>$package,
+					'module_name'=>$module_name,
+					'description'=>$v[0],
+					'params'=>$v[1],
+					'return',$v[2],
+				);
+		$output_file = $out_dir.$package.'___'.$module_name.'.html';
+		$template_file = $template_dir.'class_module_info.html';
+		$vars = array_merge($vars,array('app_name'=>$entry));
+		output($output_file,$template_file,$vars,$option);
 	}
 	$output_file = $out_dir.$package.'.html';
 	$template_file = $template_dir.'class_info.html';

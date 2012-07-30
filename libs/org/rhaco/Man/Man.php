@@ -11,7 +11,7 @@ class Man{
 	 */
 	static public function class_info($class){
 		$r = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$class));
-		if($r->getFilename() === false) throw new \InvalidArgumentException('`'.$class.'` file not found.');
+		if($r->getFilename() === false || !is_file($r->getFileName())) throw new \InvalidArgumentException('`'.$class.'` file not found.');
 		$src = implode(array_slice(file($r->getFileName()),$r->getStartLine(),($r->getEndLine()-$r->getStartLine()-1)));
 		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$r->getDocComment())));
 		$extends = ($r->getParentClass() === false) ? null : $r->getParentClass()->getName();
@@ -124,104 +124,105 @@ class Man{
 	 */
 	static public function method_info($class,$method){
 		$ref = new \ReflectionMethod('\\'.str_replace(array('.','/'),array('\\','\\'),$class),$method);
-		$src = implode(array_slice(file($ref->getDeclaringClass()->getFileName()),$ref->getStartLine(),($ref->getEndLine()-$ref->getStartLine()-1)));
-		$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$ref->getDocComment())));
-		$deprecated = (strpos($ref->getDocComment(),'@deprecated') !== false);
-		$params = $return = $modules = $see = array();
+		$params = $return = $modules = $see = $request = $context = $args = $throws =array();
+		$document = $src = null;
+		$deprecated = false;
 		
-		if(preg_match("/@return\s+([^\s]+)(.*)/",$document,$match)){
-			// type, summary
-			$return = array(self::type(trim($match[1]),$class),trim($match[2]));
-		}
-		foreach($ref->getParameters() as $p){
-			$params[$p->getName()] = array(
-							// type, is_ref, has_default, default, summary
-							'mixed'
-							,$p->isPassedByReference()
-							,$p->isDefaultValueAvailable()
-							,($p->isDefaultValueAvailable() ? $p->getDefaultValue() : null)
-							,null
-						);
-		}
-		if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
-			foreach($match[0] as $k => $v){
-				if(isset($params[$match[2][$k]])){
-					$params[$match[2][$k]][0] = self::type($match[1][$k],$class);
-					$params[$match[2][$k]][4] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+		if(is_file($ref->getDeclaringClass()->getFileName())){
+			$src = implode(array_slice(file($ref->getDeclaringClass()->getFileName()),$ref->getStartLine(),($ref->getEndLine()-$ref->getStartLine()-1)));
+			$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$ref->getDocComment())));
+			$deprecated = (strpos($ref->getDocComment(),'@deprecated') !== false);
+			
+			if(preg_match("/@return\s+([^\s]+)(.*)/",$document,$match)){
+				// type, summary
+				$return = array(self::type(trim($match[1]),$class),trim($match[2]));
+			}
+			foreach($ref->getParameters() as $p){
+				$params[$p->getName()] = array(
+								// type, is_ref, has_default, default, summary
+								'mixed'
+								,$p->isPassedByReference()
+								,$p->isDefaultValueAvailable()
+								,($p->isDefaultValueAvailable() ? $p->getDefaultValue() : null)
+								,null
+							);
+			}
+			if(preg_match_all("/@param\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
+				foreach($match[0] as $k => $v){
+					if(isset($params[$match[2][$k]])){
+						$params[$match[2][$k]][0] = self::type($match[1][$k],$class);
+						$params[$match[2][$k]][4] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+					}
 				}
 			}
-		}
-		$request = $context = array();
-		if(preg_match_all('/->in_vars\((["\'])(.+?)\\1/',$src,$match)){
-			foreach($match[2] as $n) $request[$n] = $context[$n] = array("mixed",null);
-		}
-		if(preg_match_all('/\$this->rm_vars\((["\'])(.+?)\\1/',$src,$match)){
-			foreach($match[2] as $n){
-				if(isset($context[$n])) unset($context[$n]);
+			if(preg_match_all('/->in_vars\((["\'])(.+?)\\1/',$src,$match)){
+				foreach($match[2] as $n) $request[$n] = $context[$n] = array("mixed",null);
 			}
-		}
-		if(strpos($src,'$this->rm_vars()') !== false){
-			$context = array();
-		}
-		if(preg_match_all('/\$this->vars\((["\'])(.+?)\\1/',$src,$match)){				
-			foreach($match[2] as $n) $context[$n] = array("mixed",null);
-		}
-		if(preg_match_all("/@request\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
-			foreach($match[0] as $k => $v){
-				if(isset($request[$match[2][$k]])){
-					$request[$match[2][$k]][0] = self::type($match[1][$k],$class);
-					$request[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+			if(preg_match_all('/\$this->rm_vars\((["\'])(.+?)\\1/',$src,$match)){
+				foreach($match[2] as $n){
+					if(isset($context[$n])) unset($context[$n]);
 				}
-				if(isset($context[$match[2][$k]])){
+			}
+			if(strpos($src,'$this->rm_vars()') !== false){
+				$context = array();
+			}
+			if(preg_match_all('/\$this->vars\((["\'])(.+?)\\1/',$src,$match)){				
+				foreach($match[2] as $n) $context[$n] = array("mixed",null);
+			}
+			if(preg_match_all("/@request\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
+				foreach($match[0] as $k => $v){
+					if(isset($request[$match[2][$k]])){
+						$request[$match[2][$k]][0] = self::type($match[1][$k],$class);
+						$request[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+					}
+					if(isset($context[$match[2][$k]])){
+						$context[$match[2][$k]][0] = self::type($match[1][$k],$class);
+						$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+					}
+				}
+			}
+			if(preg_match_all("/@context\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
+				foreach($match[0] as $k => $v){
 					$context[$match[2][$k]][0] = self::type($match[1][$k],$class);
 					$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 				}
 			}
-		}
-		if(preg_match_all("/@context\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
-			foreach($match[0] as $k => $v){
-				$context[$match[2][$k]][0] = self::type($match[1][$k],$class);
-				$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+			if(preg_match_all('/\$this->(map_arg|redirect_by_map)\((["\'])(.+?)\\2/',$src,$match)){
+				foreach($match[3] as $n) $args[$n] = "";
 			}
-		}
-		$args = array();
-		if(preg_match_all('/\$this->(map_arg|redirect_by_map)\((["\'])(.+?)\\2/',$src,$match)){
-			foreach($match[3] as $n) $args[$n] = "";
-		}
-		if(preg_match_all("/@arg\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
-			foreach($match[0] as $k => $v){
-				if(isset($args[$match[2][$k]])){
-					$args[$match[2][$k]] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+			if(preg_match_all("/@arg\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
+				foreach($match[0] as $k => $v){
+					if(isset($args[$match[2][$k]])){
+						$args[$match[2][$k]] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
+					}
+				}
+			}			
+			if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\(([\"\'])(.+)\\2/",$src,$match)){
+				foreach($match[1] as $k => $n) $throws[md5($n.$match[3][$k])] = array($n,trim($match[3][$k]));
+			}
+			if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$document,$match)){
+				foreach($match[1] as $k => $n) $throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
+			}
+			ksort($throws);
+	
+			if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$document,$match)){
+				foreach($match[1] as $v) $modules[trim($v)] = true;
+			}
+			$modules = array_keys($modules);
+			sort($modules);
+			
+			if(preg_match_all("/@see\s+([\w\.\:\\\\]+)/",$document,$match)){
+				foreach($match[1] as $v){
+					$class = $v = trim($v);
+					$method = null;
+					if(strpos($v,'::') !== false){
+						list($class,$method) = explode('::',$v,2);
+					}
+					$see[$v] = array($class,$method);
 				}
 			}
+			ksort($see);
 		}
-		$throws = array();
-		if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\(([\"\'])(.+)\\2/",$src,$match)){
-			foreach($match[1] as $k => $n) $throws[md5($n.$match[3][$k])] = array($n,trim($match[3][$k]));
-		}
-		if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$document,$match)){
-			foreach($match[1] as $k => $n) $throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
-		}
-		ksort($throws);
-
-		if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$document,$match)){
-			foreach($match[1] as $v) $modules[trim($v)] = true;
-		}
-		$modules = array_keys($modules);
-		sort($modules);
-		
-		if(preg_match_all("/@see\s+([\w\.\:\\\\]+)/",$document,$match)){
-			foreach($match[1] as $v){
-				$class = $v = trim($v);
-				$method = null;
-				if(strpos($v,'::') !== false){
-					list($class,$method) = explode('::',$v,2);
-				}
-				$see[$v] = array($class,$method);
-			}
-		}
-		ksort($see);
-
 		$description = trim(preg_replace('/@.+/','',$document));
 		return array(
 				'package'=>$class,'method_name'=>$method,'params'=>$params,'request'=>$request,'context'=>$context

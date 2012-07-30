@@ -167,6 +167,10 @@ class Helper{
 		$html = $package.'__'.$method.'.html';
 		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
 	}
+	public function module_html_filename($package,$method){
+		$html = $package.'___'.$method.'.html';
+		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
+	}	
 	public function class_html_filename($package){
 		$html = $package.'.html';
 		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
