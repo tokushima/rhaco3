@@ -60,10 +60,16 @@ class TwitterBootstrapExtHtml{
 					$b->value($v);
 					$plain = $b->get();
 				}else{
-					$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);
-					$value = str_replace("\t","&nbsp;&nbsp;",$value);
-					$b->value($value);
-					$plain = str_replace(array('$','='),array('__RTD__','__RTE__'),$b->get());
+					$format = $b->in_attr('format');
+					$b->rm_attr('format');
+					if($format == 'plain'){
+						$plain = $b->get();
+					}else{
+						$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);
+						$value = str_replace("\t","&nbsp;&nbsp;",$value);
+						$b->value($value);
+						$plain = str_replace(array('$','='),array('__RTD__','__RTE__'),$b->get());
+					}
 					if(!empty($caption)) $plain = '<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">'.$caption.'</div>'.$plain;
 				}
 				$src = str_replace($b->plain(),$plain,$src);

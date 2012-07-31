@@ -417,7 +417,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					
 					if($count >= 100) break;
 				}
-				$this->rm_vars('sql');
 				$this->vars('excute_sql',implode(';'.PHP_EOL,$excute_sql));
 			}
 		}catch(\Exception $e){
