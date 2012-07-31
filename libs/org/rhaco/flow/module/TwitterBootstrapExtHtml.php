@@ -41,22 +41,23 @@ class TwitterBootstrapExtHtml{
 				if($tag == 'tree'){
 					$tree = array();
 					$len = 0;
+					$v = '';
 					foreach(explode("\n",$value) as $k => $line){
-						if(preg_match("/^(\s*)([\.\w]+):(.+)$/",$line,$m)){
+						if(preg_match("/^(\s*)([\.\w\{\}\[\]\(\)]+)[:]{0,1}(.*)$/",$line,$m)){
 							$tree[$k] = array(strlen(str_replace("\t",' ',$m[1])),trim($m[2]),trim($m[3]));
 							$tree[$k][3] = strlen($tree[$k][1]);
 							if($len < ($tree[$k][3] + $tree[$k][0])) $len = $tree[$k][3] + $tree[$k][0];
 						}
 					}
-					if(!empty($caption)) $value = $caption.PHP_EOL;
-					$value .= '.'.PHP_EOL;
+					if(!empty($caption)) $v = $caption.PHP_EOL;
+					$v .= '.'.PHP_EOL;
 					$last = sizeof($tree) - 1;
 					foreach($tree as $k => $t){
-						$value .= str_repeat('| ',$t[0]);
-						$value .= (($t[0] > 0 && isset($tree[$k+1]) && $tree[$k+1][0] < $t[0]) || $k == $last) ? '`' : '|';
-						$value .= '-- '.$t[1].str_repeat(' ',$len - $t[3] - ($t[0]*2) + 4).' .. '.$t[2].PHP_EOL;
+						$v .= str_repeat('| ',$t[0]);
+						$v .= (($t[0] > 0 && isset($tree[$k+1]) && $tree[$k+1][0] < $t[0]) || $k == $last) ? '`' : '|';
+						$v .= '-- '.$t[1].str_repeat(' ',$len - $t[3] - ($t[0]*2) + 4).(empty($t[2]) ? '' : ' .. ').$t[2].PHP_EOL;
 					}
-					$b->value($value);
+					$b->value($v);
 					$plain = $b->get();
 				}else{
 					$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);

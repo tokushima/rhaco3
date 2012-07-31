@@ -603,17 +603,22 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$list = array();
 		$paginator = null;
 
-		if(is_file($path.$filename)) $this->set_block($path.$filename);
-		foreach(\org\rhaco\io\File::ls($path,true) as $f){
-			$name = $file = str_replace($path,'',$f->fullname());
-			$dirname = dirname($name);
-			if($dirname == '.') $dirname = '';
-			$src = file_get_contents($f->fullname());
-			
-			if($this->search_str($src)){
-				if(\org\rhaco\Xml::set($xml,$src,'h2')) $name = trim($xml->value());
-				$list[$file] = array($name,$dirname);
-				if(isset($paginator)) $paginator->add($file);
+		if(is_file($path.$filename)){
+			$this->set_block($path.$filename);
+			$paginator = \org\rhaco\Paginator::dynamic_contents(1,$filename);
+		}
+		if(is_dir($path)){
+			foreach(\org\rhaco\io\File::ls($path,true) as $f){
+				$name = $file = str_replace($path,'',$f->fullname());
+				$dirname = dirname($name);
+				if($dirname == '.') $dirname = '';
+				$src = file_get_contents($f->fullname());
+				
+				if($this->search_str($src)){
+					if(\org\rhaco\Xml::set($xml,$src,'h2')) $name = trim($xml->value());
+					$list[$file] = array($name,$dirname);
+					if(isset($paginator)) $paginator->add($file);
+				}
 			}
 		}
 		if(isset($paginator)) $paginator->vars('q',$this->in_vars('q'));

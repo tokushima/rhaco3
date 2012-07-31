@@ -12,11 +12,10 @@
 </form>
 
 <rt:if param="{$excute_sql}">
-<pre>
-{$excute_sql}
-</pre>
+<div class="alert alert-block alert-info">
+{$t.html($excute_sql)}
+</div>
 </rt:if>
-
 
 <rt:if param="maximum">
 	<div class="alert alert-error">
