@@ -322,11 +322,7 @@ class Flow{
 					}catch(\Exception $e){
 						if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
-							try{
-								\org\rhaco\Exceptions::throw_over();
-							}catch(\org\rhaco\Exceptions $err){
-								\org\rhaco\Log::$level($err);
-							}
+							\org\rhaco\Log::$level(\org\rhaco\Exceptions::trace());
 						}
 						if($this->has_object_module('flow_handle_exception')){
 							/**

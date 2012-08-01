@@ -14,6 +14,13 @@ class Exceptions extends \org\rhaco\Exception{
 	private $messages = array();
 
 	/**
+	 * 現在の例外群を返す
+	 * @return self
+	 */
+	static public function trace(){
+		return (isset(self::$self) ? self::$self : new self());
+	}
+	/**
 	 * ID
 	 * @return string
 	 */
