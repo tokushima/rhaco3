@@ -320,8 +320,13 @@ class Flow{
 						}
 						exit;
 					}catch(\Exception $e){
+						if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
-							\org\rhaco\Log::$level($e);
+							try{
+								\org\rhaco\Exceptions::throw_over();
+							}catch(\org\rhaco\Exceptions $err){
+								\org\rhaco\Log::$level($err);
+							}
 						}
 						if($this->has_object_module('flow_handle_exception')){
 							/**
@@ -346,7 +351,6 @@ class Flow{
 							}
 							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
 						}else{
-							if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 							if(isset($apps[$k]['error_template'])){
 								$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 								exit;

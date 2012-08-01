@@ -31,13 +31,12 @@ class Exceptions{
 										."<?php \$%s = \\org\\rhaco\\Exceptions::gets(%s); ?>"
 										."<?php \$%s = \\org\\rhaco\\Exceptions::messages(%s); ?>"
 										."<?php \$%s = \\org\\rhaco\\Exceptions::id(); ?>"
-										."%s"
+										.preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$value)
 									."<?php } ?>"
 									,$param
 									,$var,$param
 									,$messages,$param
 									,$id
-									,$value
 							),
 							$src);
 			}
