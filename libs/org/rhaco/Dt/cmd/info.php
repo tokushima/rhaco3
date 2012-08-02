@@ -2,6 +2,8 @@
 /**
  * application information
  */
+if(!class_exists('\Rhaco3')) throw new \LogicException('Class Rhaco3 not found');
+
 $flow = new \org\rhaco\Flow();
 
 $info = array(

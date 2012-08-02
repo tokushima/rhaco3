@@ -236,6 +236,7 @@ class Man{
 	 * @return array
 	 */
 	static public function libs(){
+		if(!class_exists('\Rhaco3')) throw new \LogicException('Class Rhaco3 not found');
 		$result = array();
 		if(is_dir(\Rhaco3::lib_dir())){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::lib_dir(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
