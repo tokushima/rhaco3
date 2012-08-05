@@ -1,6 +1,5 @@
 <?php
 ##RHACO3_PHP##
-define('LIBDIR',\Rhaco3::lib_dir());
 ##AUTOLOAD_PHP##
 if(sizeof(debug_backtrace(false))>0){
 	if(is_file($f=(__DIR__.'/__settings__.php'))){

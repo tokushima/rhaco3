@@ -234,7 +234,7 @@ class Flow{
 			foreach($urls as $k => $null){
 				if(preg_match("/^".(empty($k) ? '' : "\/").str_replace(array("\/",'/','@#S'),array('@#S',"\/","\/"),$k).'[\/]{0,1}$/',$pathinfo,$p)){
 					if(isset($apps[$k]['mode']) && !empty($apps[$k]['mode'])){
-						$mode = class_exists('\Rhaco3') ? \Rhaco3::mode() : constant('APP_MODE');
+						$mode = defined('APP_MODE') ? constant('APP_MODE') : null;
 						$bool = false;
 						foreach(explode(',',$apps[$k]['mode']) as $m){
 							if($mode == trim($m)){

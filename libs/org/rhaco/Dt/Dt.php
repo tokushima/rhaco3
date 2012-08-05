@@ -33,7 +33,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
 		$this->vars('app_dirname',basename(dirname($d['file'])));
-		$this->vars('app_mode',class_exists('\Rhaco3') ? \Rhaco3::mode() : constant('APP_MODE'));
+		$this->vars('app_mode',(defined('APP_MODE') ? constant('APP_MODE') : null));
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
 		$this->vars('has_dao',class_exists($this->dao));

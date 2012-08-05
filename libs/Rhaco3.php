@@ -16,17 +16,21 @@ if(!class_exists('Rhaco3')){
 		 * @param string $common_dir 設定ファイルのディレクトリ 
 		 */
 		static public function config_path($mode=null,$libs_dir=null,$common_dir=null){
-			if(self::$mode === null && $mode !== null) self::$mode = $mode;
-			if(self::$common_dir === null && $common_dir !== null){
-				self::$common_dir = str_replace('\\','/',$common_dir);
-				if(substr(self::$common_dir,-1) != '/') self::$common_dir = self::$common_dir.'/';
-			}
-			if(self::$lib_dir === null && $libs_dir !== null){
+			if(self::$mode === null) self::$mode = (empty($mode) ? 'local' : $mode);
+			if(self::$lib_dir === null){
+				if(empty($libs_dir)) $libs_dir = getcwd().'/libs/';				
 				self::$lib_dir = str_replace('\\','/',$libs_dir);
 				if(substr(self::$lib_dir,-1) != '/') self::$lib_dir = self::$lib_dir.'/';
 				set_include_path(self::$lib_dir.'_extlibs'.PATH_SEPARATOR.get_include_path());
-				define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlibs/data');
+				define('PEAR_DATA_DIR',self::$lib_dir.'_extlibs/data');
 			}
+			if(self::$common_dir === null){
+				if(empty($common_dir)) $common_dir = getcwd().'/commons/';
+				self::$common_dir = str_replace('\\','/',$common_dir);
+				if(substr(self::$common_dir,-1) != '/') self::$common_dir = self::$common_dir.'/';
+			}			
+			define('APP_MODE',self::$mode);
+			define('LIB_DIR',self::$lib_dir);
 		}
 		/**
 		 * リポジトリの場所を指定する
@@ -47,11 +51,7 @@ if(!class_exists('Rhaco3')){
 		 * @return string
 		 */
 		static public function lib_dir(){
-			if(self::$lib_dir === null){
-				self::$lib_dir = getcwd().'/libs/';
-				set_include_path(self::$lib_dir.'_extlibs'.PATH_SEPARATOR.get_include_path());
-				define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlibs/data');
-			}
+			if(self::$lib_dir === null) self::config_path();
 			return self::$lib_dir;
 		}
 		/**
@@ -59,7 +59,7 @@ if(!class_exists('Rhaco3')){
 		 * @return string
 		 */
 		static public function common_dir(){
-			if(self::$common_dir === null) self::$common_dir = getcwd().'/commons/';
+			if(self::$common_dir === null) self::config_path();
 			return self::$common_dir;
 		}
 		/**
@@ -67,7 +67,7 @@ if(!class_exists('Rhaco3')){
 		 * @return string モード
 		 */
 		static public function mode(){
-			if(self::$mode === null) self::$mode = 'local';
+			if(self::$mode === null) self::config_path();
 			return self::$mode;
 		}
 	}

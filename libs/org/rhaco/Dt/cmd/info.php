@@ -2,14 +2,11 @@
 /**
  * application information
  */
-if(!class_exists('\Rhaco3')) throw new \LogicException('Class Rhaco3 not found');
-
 $flow = new \org\rhaco\Flow();
 
 $info = array(
-'mode'=>\Rhaco3::mode(),
-'lib'=>\Rhaco3::lib_dir(),
-'commons'=>\Rhaco3::common_dir(),
+'mode'=>(defined('APP_MODE') ? constant('APP_MODE') : null),
+'lib'=>(defined('LIB_DIR') ? constant('LIB_DIR') : null),
 'CWD'=>getcwd(),
 'url'=>\org\rhaco\Conf::get('org.rhaco.Flow@app_url'),
 'url secure'=>(\org\rhaco\Conf::get('org.rhaco.Flow@secure') ? 'true' : 'false'),

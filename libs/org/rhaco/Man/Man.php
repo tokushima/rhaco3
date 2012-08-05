@@ -236,10 +236,10 @@ class Man{
 	 * @return array
 	 */
 	static public function libs(){
-		if(!class_exists('\Rhaco3')) throw new \LogicException('Class Rhaco3 not found');
+		if(!defined('LIB_DIR')) throw new \LogicException('undefined LIB_DIR');
 		$result = array();
-		if(is_dir(\Rhaco3::lib_dir())){
-			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(\Rhaco3::lib_dir(),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
+		if(is_dir(constant('LIB_DIR'))){
+			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(constant('LIB_DIR'),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 				if(strpos($e->getPathname(),'/.') === false){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'
 						&& (strpos($e->getPathname(),'/_') === false || strpos($e->getPathname(),'/_vendors') !== false)
@@ -265,12 +265,12 @@ class Man{
 					$f = null;
 					$d = false;
 					$n = str_replace('\\','/',$r->getName());
-					$p = \Rhaco3::lib_dir().$n;
+					$p = constant('LIB_DIR').$n;
 					if(is_file($f=$p.'.php')){
 					}else if(is_file($f=$p.'/'.basename($p).'.php')){
 						$d = true;
 					}else{
-						$p = \Rhaco3::lib_dir().'_vendors/'.$n;
+						$p = constant('LIB_DIR').'_vendors/'.$n;
 						if(is_file($f=$p.'.php')){
 						}else if(is_file($f=$p.'/'.basename($p).'.php')){
 							$d = true;
