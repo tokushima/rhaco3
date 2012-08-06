@@ -33,7 +33,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('app_summary',$summary);
 		$this->vars('app_description',$description);
 		$this->vars('app_dirname',basename(dirname($d['file'])));
-		$this->vars('app_mode',(defined('APP_MODE') ? constant('APP_MODE') : null));
+		$this->vars('app_mode',\org\rhaco\Conf::appenv());
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
 		$this->vars('has_dao',class_exists($this->dao));
@@ -52,7 +52,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function model_list(){
 		$list = $errors = $error_query = $model_list = $con = array();
-		foreach(\org\rhaco\Man::libs() as $package => $info){
+		foreach(\org\rhaco\Man::classes() as $package => $info){
 			if($info['dir']){
 				foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($info['filename']),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
@@ -143,7 +143,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function classes(){
 		$libs = array();
-		foreach(\org\rhaco\Man::libs() as $package => $info){
+		foreach(\org\rhaco\Man::classes() as $package => $info){
 			$r = new \ReflectionClass($info['class']);
 			$src = file_get_contents($r->getFileName());
 			$class_doc = $r->getDocComment();
@@ -545,7 +545,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function module_list(){
 		$list = array();
-		foreach(\org\rhaco\Man::libs() as $package => $info){
+		foreach(\org\rhaco\Man::classes() as $package => $info){
 			$i = \org\rhaco\Man::class_info($package);
 			foreach($i['modules'] as $name => $m){
 				$obj = new \org\rhaco\Object();

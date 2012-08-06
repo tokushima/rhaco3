@@ -235,11 +235,11 @@ class Man{
 	 * ライブラリ一覧
 	 * @return array
 	 */
-	static public function libs(){
-		if(!defined('LIB_DIR')) throw new \LogicException('undefined LIB_DIR');
+	static public function classes(){
+		$libdir = \org\rhaco\Conf::libdir();
 		$result = array();
-		if(is_dir(constant('LIB_DIR'))){
-			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(constant('LIB_DIR'),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
+		if(!empty($libdir) && is_dir($libdir)){
+			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($libdir,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 				if(strpos($e->getPathname(),'/.') === false){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'
 						&& (strpos($e->getPathname(),'/_') === false || strpos($e->getPathname(),'/_vendor') !== false)
@@ -247,7 +247,7 @@ class Man{
 						try{
 							include_once($e->getPathname());
 						}catch(\Exeption $ex){}
-					}else if($e->getFilename() == 'vendors.phar'){
+					}else if($e->getFilename() == 'vendor.phar'){
 						$p = new \Phar($e->getPathname());
 						foreach(new \RecursiveIteratorIterator($p) as $v){
 							if(ctype_upper(substr($v->getFilename(),0,1)) && substr($v->getFilename(),-4) == '.php'){
@@ -265,12 +265,12 @@ class Man{
 					$f = null;
 					$d = false;
 					$n = str_replace('\\','/',$r->getName());
-					$p = constant('LIB_DIR').$n;
+					$p = $libdir.$n;
 					if(is_file($f=$p.'.php')){
 					}else if(is_file($f=$p.'/'.basename($p).'.php')){
 						$d = true;
 					}else{
-						$p = constant('LIB_DIR').'_vendor/'.$n;
+						$p = $libdir.'_vendor/'.$n;
 						if(is_file($f=$p.'.php')){
 						}else if(is_file($f=$p.'/'.basename($p).'.php')){
 							$d = true;

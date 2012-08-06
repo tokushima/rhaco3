@@ -299,7 +299,7 @@ if(isset($_SERVER['argv'][1])){
 				if($cmd[0] == '-'){
 					if(is_file($f=(__DIR__.'/__settings__.php'))){
 						require_once($f);
-						if(Rhaco3::mode() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::mode().'.php'))) require_once($f);
+						if(Rhaco3::env() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::env().'.php'))) require_once($f);
 					}
 					$package = substr($cmd,1);
 					$download(array($package),false);

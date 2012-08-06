@@ -5,32 +5,32 @@ if(!class_exists('Rhaco3')){
 	 * @author tokushima
 	 */
 	class Rhaco3{
-		static private $mode;
+		static private $env;
 		static private $common_dir;
 		static private $lib_dir;
 		static private $rep = array('http://rhaco.org/repository/3/lib/');
 		/**
 		 * ライブラリのパスを設定する
-		 * @param string $mode 実行モード
+		 * @param string $env 実行モード
 		 * @param string $lib_dir ライブラリのディレクトリパス
 		 * @param string $common_dir 設定ファイルのディレクトリ 
 		 */
-		static public function config_path($mode=null,$lib_dir=null,$common_dir=null){
-			if(self::$mode === null) self::$mode = (empty($mode) ? 'local' : $mode);
+		static public function config_path($env=null,$lib_dir=null,$common_dir=null){
+			if(self::$env === null) self::$env = (empty($env) ? 'local' : $env);
 			if(self::$lib_dir === null){
 				if(empty($lib_dir)) $lib_dir = getcwd().'/lib/';				
 				self::$lib_dir = str_replace('\\','/',$lib_dir);
 				if(substr(self::$lib_dir,-1) != '/') self::$lib_dir = self::$lib_dir.'/';
 				set_include_path(self::$lib_dir.'_extlib'.PATH_SEPARATOR.get_include_path());
-				define('PEAR_DATA_DIR',self::$lib_dir.'_extlib/data');
 			}
 			if(self::$common_dir === null){
 				if(empty($common_dir)) $common_dir = getcwd().'/commons/';
 				self::$common_dir = str_replace('\\','/',$common_dir);
 				if(substr(self::$common_dir,-1) != '/') self::$common_dir = self::$common_dir.'/';
 			}			
-			define('APP_MODE',self::$mode);
-			define('LIB_DIR',self::$lib_dir);
+			define('APPENV',self::$env);
+			define('LIBDIR',self::$lib_dir);
+			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlib/data');
 		}
 		/**
 		 * リポジトリの場所を指定する
@@ -63,17 +63,17 @@ if(!class_exists('Rhaco3')){
 			return self::$common_dir;
 		}
 		/**
-		 * 実行モードを設定/取得
+		 * 実行環境を設定/取得
 		 * @return string モード
 		 */
-		static public function mode(){
-			if(self::$mode === null) self::config_path();
-			return self::$mode;
+		static public function env(){
+			if(self::$env === null) self::config_path();
+			return self::$env;
 		}
 	}
 }
 spl_autoload_register(function($c){
-	$libdir = constant('LIB_DIR');
+	$libdir = constant('LIBDIR');
 	if(substr($libdir,-1) != '/') $libdir = $libdir.'/';
 	if($c[0] == '\\') $c = substr($c,1);
 	$p = str_replace('\\','/',$c);
@@ -110,7 +110,7 @@ if(extension_loaded('mbstring')){
 if(sizeof(debug_backtrace(false))>0){
 	if(is_file($f=(__DIR__.'/__settings__.php'))){
 		require_once($f);
-		if(Rhaco3::mode() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::mode().'.php'))) require_once($f);
+		if(Rhaco3::env() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::env().'.php'))) require_once($f);
 	}
 	return;
 }
@@ -413,7 +413,7 @@ if(isset($_SERVER['argv'][1])){
 				if($cmd[0] == '-'){
 					if(is_file($f=(__DIR__.'/__settings__.php'))){
 						require_once($f);
-						if(Rhaco3::mode() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::mode().'.php'))) require_once($f);
+						if(Rhaco3::env() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::env().'.php'))) require_once($f);
 					}
 					$package = substr($cmd,1);
 					$download(array($package),false);

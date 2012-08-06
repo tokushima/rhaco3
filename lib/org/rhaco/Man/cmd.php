@@ -9,7 +9,7 @@ try{
 }catch(\Exception $e){
 	$libs = array();
 	$len = 0;
-	foreach(\org\rhaco\Man::libs() as $k => $v){
+	foreach(\org\rhaco\Man::classes() as $k => $v){
 		if(empty($value) || strpos(strtolower($k),strtolower($value)) !== false){
 			$info = \org\rhaco\Man::class_info($k);
 			list($libs[$k]) = explode("\n",$info['description']);

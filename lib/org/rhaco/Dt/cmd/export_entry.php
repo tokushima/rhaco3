@@ -89,7 +89,7 @@ output($output_file,$template_file,$vars,$option);
 
 // class list 
 $class_list = $classes = array();
-foreach(\org\rhaco\Man::libs() as $package => $info){
+foreach(\org\rhaco\Man::classes() as $package => $info){
 	$r = new \ReflectionClass($info['class']);
 	$class_doc = $r->getDocComment();
 	$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));

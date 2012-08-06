@@ -79,7 +79,7 @@ class Conf{
 			return $gets;
 		};
 		$gets = array();
-		foreach(\org\rhaco\Man::libs() as $p => $lib){
+		foreach(\org\rhaco\Man::classes() as $p => $lib){
 			if($lib['dir']){
 				$ret = array();
 				foreach(new \RecursiveIteratorIterator(
@@ -99,5 +99,19 @@ class Conf{
 			}
 		}
 		return $gets;
+	}
+	/**
+	 * アプリケーションの動作環境
+	 * @return string
+	 */
+	static public function appenv(){
+		return defined('APPENV') ? constant('APPENV') : null;
+	}
+	/**
+	 * ライブラリの配置してあるパス
+	 * @return string
+	 */
+	static public function libdir(){
+		return defined('LIBDIR') ? constant('LIBDIR') : null;
 	}
 }

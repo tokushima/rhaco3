@@ -1,6 +1,6 @@
 <?php
 spl_autoload_register(function($c){
-	$libdir = constant('LIB_DIR');
+	$libdir = constant('LIBDIR');
 	if(substr($libdir,-1) != '/') $libdir = $libdir.'/';
 	if($c[0] == '\\') $c = substr($c,1);
 	$p = str_replace('\\','/',$c);

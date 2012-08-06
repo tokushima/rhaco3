@@ -98,7 +98,7 @@ class Pear{
 		$baseinstalldir = $output_path.$attr['baseinstalldir'];
 		$name = $attr['name'];
 		$src = $download_path.'/'.$target_package.'-'.$target_version.'/'.$name;
-		$data = defined('PEAR_DATA_DIR') ? constant('PEAR_DATA_DIR') : $output_path.'data';
+		$data = defined('__PEAR_DATA_DIR__') ? constant('__PEAR_DATA_DIR__') : $output_path.'data';
 
 		if($role == 'php'){
 			$dest = $baseinstalldir.'/'.$name;
@@ -108,7 +108,7 @@ class Pear{
 			$det_src = file_get_contents($dest);
 			if(preg_match_all("/[^\\\\]([\"']).*@data_dir@/",$det_src,$match)){
 				foreach($match[0] as $k => $v){
-					$det_src = str_replace($v,str_replace('@data_dir@',$match[1][$k].'.constant(\'PEAR_DATA_DIR\').'.$match[1][$k],$v),$det_src);
+					$det_src = str_replace($v,str_replace('@data_dir@',$match[1][$k].'.constant(\'__PEAR_DATA_DIR__\').'.$match[1][$k],$v),$det_src);
 				}
 				file_put_contents($dest,$det_src);
 			}
