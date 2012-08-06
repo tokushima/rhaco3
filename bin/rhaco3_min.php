@@ -21,7 +21,6 @@ if(!class_exists('Rhaco3')){
 				if(empty($lib_dir)) $lib_dir = getcwd().'/lib/';				
 				self::$lib_dir = str_replace('\\','/',$lib_dir);
 				if(substr(self::$lib_dir,-1) != '/') self::$lib_dir = self::$lib_dir.'/';
-				set_include_path(self::$lib_dir.'_extlib'.PATH_SEPARATOR.get_include_path());
 			}
 			if(self::$common_dir === null){
 				if(empty($common_dir)) $common_dir = getcwd().'/commons/';
@@ -31,6 +30,7 @@ if(!class_exists('Rhaco3')){
 			define('APPENV',self::$env);
 			define('LIBDIR',self::$lib_dir);
 			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlib/data');
+			set_include_path(self::$lib_dir.'_extlib'.PATH_SEPARATOR.get_include_path());			
 		}
 		/**
 		 * リポジトリの場所を指定する
