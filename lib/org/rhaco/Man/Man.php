@@ -242,7 +242,7 @@ class Man{
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(constant('LIB_DIR'),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 				if(strpos($e->getPathname(),'/.') === false){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'
-						&& (strpos($e->getPathname(),'/_') === false || strpos($e->getPathname(),'/_vendors') !== false)
+						&& (strpos($e->getPathname(),'/_') === false || strpos($e->getPathname(),'/_vendor') !== false)
 					){
 						try{
 							include_once($e->getPathname());
@@ -270,7 +270,7 @@ class Man{
 					}else if(is_file($f=$p.'/'.basename($p).'.php')){
 						$d = true;
 					}else{
-						$p = constant('LIB_DIR').'_vendors/'.$n;
+						$p = constant('LIB_DIR').'_vendor/'.$n;
 						if(is_file($f=$p.'.php')){
 						}else if(is_file($f=$p.'/'.basename($p).'.php')){
 							$d = true;

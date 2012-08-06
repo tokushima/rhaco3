@@ -12,7 +12,6 @@ $info = array(
 'url secure'=>(\org\rhaco\Conf::get('org.rhaco.Flow@secure') ? 'true' : 'false'),
 'media'=>$flow->media_url(),
 'template'=>$flow->template_path(),
-'session'=>\org\rhaco\net\Session::get_module_name(),
 'umask'=>sprintf('%04o',umask()),
 'log level'=>\org\rhaco\Conf::get('org.rhaco.Log@level'),
 );

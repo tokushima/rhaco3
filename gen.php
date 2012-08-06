@@ -5,7 +5,7 @@ $rhaco3_min = str_replace(
 		'##AUTOLOAD_PHP##'
 	),
 	array(
-		trim(str_replace('<?php','',file_get_contents(__DIR__.'/libs/Rhaco3.php'))),
+		trim(str_replace('<?php','',file_get_contents(__DIR__.'/lib/Rhaco3.php'))),
 		trim(str_replace('<?php','',file_get_contents(__DIR__.'/bin/autoload.php'))),
 	),
 	file_get_contents(__DIR__.'/bin/templates/rhaco3_min.template.php')

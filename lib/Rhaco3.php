@@ -12,17 +12,17 @@ if(!class_exists('Rhaco3')){
 		/**
 		 * ライブラリのパスを設定する
 		 * @param string $mode 実行モード
-		 * @param string $libs_dir ライブラリのディレクトリパス
+		 * @param string $lib_dir ライブラリのディレクトリパス
 		 * @param string $common_dir 設定ファイルのディレクトリ 
 		 */
-		static public function config_path($mode=null,$libs_dir=null,$common_dir=null){
+		static public function config_path($mode=null,$lib_dir=null,$common_dir=null){
 			if(self::$mode === null) self::$mode = (empty($mode) ? 'local' : $mode);
 			if(self::$lib_dir === null){
-				if(empty($libs_dir)) $libs_dir = getcwd().'/libs/';				
-				self::$lib_dir = str_replace('\\','/',$libs_dir);
+				if(empty($lib_dir)) $lib_dir = getcwd().'/lib/';				
+				self::$lib_dir = str_replace('\\','/',$lib_dir);
 				if(substr(self::$lib_dir,-1) != '/') self::$lib_dir = self::$lib_dir.'/';
-				set_include_path(self::$lib_dir.'_extlibs'.PATH_SEPARATOR.get_include_path());
-				define('PEAR_DATA_DIR',self::$lib_dir.'_extlibs/data');
+				set_include_path(self::$lib_dir.'_extlib'.PATH_SEPARATOR.get_include_path());
+				define('PEAR_DATA_DIR',self::$lib_dir.'_extlib/data');
 			}
 			if(self::$common_dir === null){
 				if(empty($common_dir)) $common_dir = getcwd().'/commons/';

@@ -80,7 +80,7 @@ class Test{
 	 */
 	static public function search_path(){
 		$cwd = str_replace("\\",'/',getcwd()).'/';
-		return array($cwd,$cwd.'tests/',$cwd.'libs/');
+		return array($cwd,$cwd.'tests/',$cwd.'lib/');
 	}
 	/**
 	 * テストを実行する

@@ -43,10 +43,10 @@ if(isset($value)){
 }else{
 	$dup = array();	
 	$exceptions = array();
-	list($entry_path,$tests_path,$libs_path) = \org\rhaco\Test::search_path();
+	list($entry_path,$tests_path,$lib_path) = \org\rhaco\Test::search_path();
 	
-	if(is_dir($libs_path)){
-		foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($libs_path,FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS),RecursiveIteratorIterator::SELF_FIRST) as $p){
+	if(is_dir($lib_path)){
+		foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($lib_path,FilesystemIterator::CURRENT_AS_FILEINFO|FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS),RecursiveIteratorIterator::SELF_FIRST) as $p){
 			if(substr($p->getFilename(),-4) == '.php' && strpos($p->getPathname(),'/.') === false && strpos($p->getPathname(),'/_') === false){
 				$r = str_replace("\\",'/',$p);
 				$n = substr(basename($r),0,-4);
@@ -60,17 +60,17 @@ if(isset($value)){
 						}
 					}
 					if($b){
-						if(preg_match("/^(.*)\/(\w+)\/(\w+)\.php$/",$r,$m) && $m[2] == $m[3] && !preg_match('/[A-Z]/',str_replace($libs_path,'',$m[1]))){
+						if(preg_match("/^(.*)\/(\w+)\/(\w+)\.php$/",$r,$m) && $m[2] == $m[3] && !preg_match('/[A-Z]/',str_replace($lib_path,'',$m[1]))){
 							$dir = dirname($r);
 							$dup[] = $dir.'/';
-							$class_name = "\\".str_replace(array($libs_path,'/'),array('',"\\"),$dir);
+							$class_name = "\\".str_replace(array($lib_path,'/'),array('',"\\"),$dir);
 							try{
 								$verify_format($class_name);
 							}catch(\Exception $e){
 								$exceptions[$class_name] = $e->getMessage();
 							}
-						}else if(!preg_match('/[A-Z]/',str_replace($libs_path,'',dirname($r)))){
-							$class_name = "\\".str_replace(array($libs_path,'/'),array('',"\\"),substr($r,0,-4));
+						}else if(!preg_match('/[A-Z]/',str_replace($lib_path,'',dirname($r)))){
+							$class_name = "\\".str_replace(array($lib_path,'/'),array('',"\\"),substr($r,0,-4));
 							try{
 								$verify_format($class_name);
 							}catch(\Exception $e){

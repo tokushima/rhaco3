@@ -5,13 +5,13 @@ spl_autoload_register(function($c){
 	if($c[0] == '\\') $c = substr($c,1);
 	$p = str_replace('\\','/',$c);
 	if(ctype_upper($p[0]) || preg_match('/^(.+)\/([A-Z][\w_]*)$/',$p,$m)){
-		foreach(array('','_vendors/') as $q){
+		foreach(array('','_vendor/') as $q){
 			if(is_file($f=($libdir.$q.$p.'.php'))){require_once($f);break;
 			}else if(isset($m[2]) && is_file($f=($libdir.$q.$p.'/'.$m[2].'.php'))){require_once($f);break;}
 		}
 	}
 	if(!class_exists($c,false) && !interface_exists($c,false)){
-		$e = $libdir.'_extlibs/';
+		$e = $libdir.'_extlib/';
 		if(is_file($f=$e.$p.'.php')){require_once($f);
 		}else if(is_file($f=$e.str_replace('_','/',$c).'.php')){require_once($f);
 		}else if(is_file($f=$e.strtolower($c).'.php')){require_once($f);
