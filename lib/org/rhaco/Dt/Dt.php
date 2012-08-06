@@ -37,6 +37,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
 		$this->vars('has_dao',class_exists($this->dao));
+		$this->vars('has_document',is_dir(\org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('documents'))));
 	}
 	public function get_template_modules(){
 		return array(
