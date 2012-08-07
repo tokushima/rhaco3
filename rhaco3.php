@@ -73,7 +73,7 @@ if(!class_exists('Rhaco3')){
 	}
 }
 spl_autoload_register(function($c){
-	$libdir = constant('LIBDIR');
+	$libdir = Rhaco3::lib_dir();
 	if(substr($libdir,-1) != '/') $libdir = $libdir.'/';
 	if($c[0] == '\\') $c = substr($c,1);
 	$p = str_replace('\\','/',$c);
@@ -199,7 +199,7 @@ if(isset($_SERVER['argv'][1])){
 		$pkg = function(&$imported,$package) use(&$pkg,$rm,$search,$println){
 			if(isset($imported[$package])) return true;
 			$imported[$package] = true;
-			$dl = str_replace('/','_',$package);
+			$dl = str_replace(array('/',':','-'),array('.','_','_'),$package);
 			$dp = Rhaco3::lib_dir().'_download/';
 			$ep = Rhaco3::lib_dir().'_download/extract/'.$package.'/';
 			$vp = Rhaco3::lib_dir().'_vendor/';
@@ -208,6 +208,7 @@ if(isset($_SERVER['argv'][1])){
 				try{
 					$rp = str_replace('\\','/',$rp);					
 					if(substr($rp,-1) != '/') $rp = $rp.'/';
+					if(strpos($dl,'_') !== false) $rp = $rp.'previous/';
 					if(strpos($rp,'://') !== false){
 						if(!is_dir($dp)) mkdir($dp,0777,true);
 						if(is_file($dp.$dl.'.tgz')) unlink($dp.$dl.'.tgz');
@@ -333,7 +334,7 @@ if(isset($_SERVER['argv'][1])){
 				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
 				if(isset($params['repository'])) Rhaco3::repository($params['repository']);
 				if(is_file(Rhaco3::lib_dir()) || strpos(Rhaco3::lib_dir(),'://') !== false) throw new RuntimeException(Rhaco3::lib_dir().' is not a directory');
-				$download(empty($value) ? array() : array($value),true);
+				$download(empty($value) ? array() : array($value.(isset($params['v']) ? ':'.$params['v'] : '')),true);
 				exit;
 			case '-phar':
 				if(!Phar::canWrite()) die('write operations disabled by the php.ini setting phar.readonly'.PHP_EOL.' > php -d phar.readonly=0 '.basename(__FILE__).' '.$_SERVER['argv'][1].PHP_EOL);

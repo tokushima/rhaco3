@@ -1,7 +1,7 @@
 <?php
 namespace org\rhaco;
 /**
- * 例外
+ * 例外の集合
  * @author tokushima
  * @var integer $line
  * @var string $code

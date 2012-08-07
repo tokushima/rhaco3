@@ -136,7 +136,7 @@ foreach($list[0] as $p){
 						tgz($input_path,$dir,$output_path.$package.'.tgz');
 						$time = last_update($dir);
 						if(0 < $time){
-							$tn = $output_path.'history/'.$package.'_'.date('Ymd',$time).'.tgz';
+							$tn = $output_path.'previous/'.$package.'_'.date('Ymd',$time).'.tgz';
 							copy($output_path.$package.'.tgz',$tn);
 							touch($tn,$time);
 							touch($output_path.$package.'.tgz',$time);
@@ -150,7 +150,7 @@ foreach($list[0] as $p){
 						tgz($input_path,$r,$output_path.$package.'.tgz');			
 						$time = last_update($r);
 						if(0 < $time){
-							$tn = $output_path.'history/'.$package.'_'.date('Ymd',$time).'.tgz';
+							$tn = $output_path.'previous/'.$package.'_'.date('Ymd',$time).'.tgz';
 							if(!is_dir(dirname($tn))) mkdir(dirname($tn),0777,true);
 							copy($output_path.$package.'.tgz',$tn);
 							touch($tn,$time);

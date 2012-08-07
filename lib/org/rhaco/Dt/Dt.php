@@ -5,6 +5,7 @@ use \org\rhaco\store\db\Q;
 /**
  * マップ情報、モデル情報、パッケージ情報を表示
  * @author tokushima
+ * @conf string $document_path ドキュメントの配置されたフォルダ
  */
 class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	private $smtp_blackhole_dao;

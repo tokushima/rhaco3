@@ -1,6 +1,7 @@
 <?php
 namespace org\rhaco\service;
 /**
+ * Instagramを操作する
  * @see http://instagram.com/developer/clients/manage/
  * @see http://www.dcrew.jp/ja-instagram-api-doc-v1/
  * @author tokushima

@@ -88,7 +88,10 @@ class Conf{
 						,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS)
 						,\RecursiveIteratorIterator::SELF_FIRST
 				) as $e){
-					if(substr($e->getPathname(),-4) == '.php'){
+					if(substr($e->getPathname(),-4) == '.php' 
+						&& strpos($e->getPathname(),'/cmd/') === false 
+						&& $e->getFilename() != 'cmd.php'
+					){
 						$ret = array_merge($ret,$conf_get($e->getPathname()));
 					}
 				}
