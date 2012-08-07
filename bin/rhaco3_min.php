@@ -73,7 +73,7 @@ if(!class_exists('Rhaco3')){
 	}
 }
 spl_autoload_register(function($c){
-	$libdir = constant('LIBDIR');
+	$libdir = Rhaco3::lib_dir();
 	if(substr($libdir,-1) != '/') $libdir = $libdir.'/';
 	if($c[0] == '\\') $c = substr($c,1);
 	$p = str_replace('\\','/',$c);
