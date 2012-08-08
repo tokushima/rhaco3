@@ -15,7 +15,7 @@ class TwitterBootstrapExtHtml{
 		$src = $obj->get();
 
 		if(\org\rhaco\Xml::set($tag,$src,'body')){			
-			foreach($tag->in(array('pre','cli','tree')) as $b){
+			foreach($tag->in(array('pre','cli','tree','chart')) as $b){
 				$plain = $b->plain();
 				$tag = strtolower($b->name());
 				$b->escape(false);
@@ -27,8 +27,12 @@ class TwitterBootstrapExtHtml{
 					$b->attr('style','background-color:#fff; color:#000; border-color:#000;');
 				}else if($tag == 'tree'){
 					$b->name('pre');
-					$b->attr('style','padding: 5px; line-height: 20px');
+					$b->attr('style','padding: 5px; line-height: 20px;');
 					$b->attr('class','prettyprint lang-c');
+				}else if($tag == 'chart'){
+					$b->name('pre');
+					$b->attr('style','padding: 5px; line-height: 20px; background-color:#fff; border: 1px dotted;');
+					$b->attr('class','');
 				}else{
 					$b->attr('class','prettyprint');
 				}
@@ -62,11 +66,19 @@ class TwitterBootstrapExtHtml{
 				}else{
 					$format = $b->in_attr('format');
 					$b->rm_attr('format');
+					
 					if($format == 'plain'){
 						$plain = $b->get();
 					}else{
-						$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);
+						if($tag == 'chart'){
+							$value = str_replace("\t","&nbsp;&nbsp;&nbsp;&nbsp;",$value);
+						}
 						$value = str_replace("\t","&nbsp;&nbsp;",$value);
+
+						$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);
+						if($tag == 'chart'){
+							$value = preg_replace('/(['.preg_quote('`-*|').']+)/','<span style="color: #ff6600; font-weight:bold;">\\1</span>',$value);
+						}
 						$b->value($value);
 						$plain = str_replace(array('$','='),array('__RTD__','__RTE__'),$b->get());
 					}
