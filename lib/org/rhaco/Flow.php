@@ -131,8 +131,8 @@ class Flow{
 						$maps_tem = isset($maps['template_path']) ? $maps['template_path'] : null;
 						$maps_err = isset($maps['error_template']) ? $maps['error_template'] : null;
 						$maps_sup = isset($maps['template_super']) ? $maps['template_super'] : null;
-						$maps_mod = isset($maps['modules']) ? (is_array($maps['modules']) ? $maps['modules'] : array($maps['modules'])) : array();
-						$maps_arg = isset($maps['args']) ? (is_array($maps['args']) ? $maps['args'] : array($maps['args'])) : array();
+						$maps_mod = (isset($maps['modules']) && !empty($maps['modules'])) ? (is_array($maps['modules']) ? $maps['modules'] : array($maps['modules'])) : array();
+						$maps_arg = (isset($maps['args']) && !empty($maps['args'])) ? (is_array($maps['args']) ? $maps['args'] : array($maps['args'])) : array();
 						foreach($maps['patterns'] as $u => $m){
 							if(!empty($maps_act) && isset($m['action'])) $m['action'] = $maps_act.'::'.$m['action'];
 							if(!empty($maps_nam)) $m['name'] = $maps_nam.((isset($m['name']) && !empty($m['name'])) ? '/'.$m['name'] : '');
