@@ -1384,13 +1384,13 @@ class Template extends \org\rhaco\Object{
 	private function check_selected($name,$value,$selected){
 		return sprintf('<?php if('
 					.'isset(%s) && (%s === %s '
-										.' || (ctype_digit((string)%s) && (string)%s === (string)%s)'
+										.' || (!is_array(%s) && ctype_digit((string)%s) && (string)%s === (string)%s)'
 										.' || ((%s === "true" || %s === "false") ? (%s === (%s == "true")) : false)'
 										.' || in_array(%s,((is_array(%s)) ? %s : (is_null(%s) ? array() : array(%s))),true) '
 									.') '
 					.'){print(" %s=\"%s\"");} ?>'
 					,$name,$name,$value
-					,$name,$name,$value
+					,$name,$name,$name,$value
 					,$value,$value,$name,$value
 					,$value,$name,$name,$name,$name
 					,$selected,$selected
