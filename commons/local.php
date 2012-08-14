@@ -1,6 +1,8 @@
 <?php
 use \org\rhaco\Conf;
 
+date_default_timezone_set('Asia/Tokyo');
+
 \org\rhaco\Conf::set('org.rhaco.store.db.Dao','connection',array(
 		'org.rhaco'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app')
 		,'org.rhaco.store.db.Dao'=>array('dbname'=>'testA')
