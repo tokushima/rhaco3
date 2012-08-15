@@ -483,6 +483,7 @@ class Flow{
 	 * @param array $maps
 	 */
 	static public function out($maps){
+		if(is_string($maps) && preg_match('/^[\w\.]+$/',$maps)) $maps = array('patterns'=>array(''=>array('action'=>$maps)));
 		$self = new self();
 		$self->output($maps);
 	}
