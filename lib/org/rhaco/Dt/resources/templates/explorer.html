@@ -15,6 +15,7 @@
 		$("#method_description").html("");
 		$("#request_param").html("");
 		$("#request_request").html("");
+		$("#request_request_box").html("");
 		$("#url").val("");
 
 		select_name_num = $("#map_name_list").children(":selected").val().split("|");
@@ -53,6 +54,7 @@
 						$("#method_type").val((data.is_post ? "post" : "get"));
 						$("#request_param").html($("<div>").text(param_str).html());
 						$("#request_request").html($("<div>").text(request_str).html());
+						$("#request_request_box").html($("<div>").text(request_str).html());
 						$("#data_json").val("{\n" + request_query_str + "\n}");
 						$("#method_description").html($("<div>").text(("[ " + (data.is_post ? "POST" : "GET") + " ]\n") + ((data.description) ? data.description : "")).html());
 					},
@@ -84,13 +86,7 @@
 					$("#result_header").html(header.getAllResponseHeaders());
 					$("#result_body").html($("<div>").text(data).html());
 					$("#result_body").addClass("prettyprint");
-				    prettyPrint();
-				    
-				    if($("#display_header").attr("checked")){
-						$("#header_field").show();
-					}else{
-						$("#header_field").hide();
-					}
+				    prettyPrint();				    
 				},
 				error: function(data){
 					alert(data.status + " " + data.statusText);
@@ -103,48 +99,45 @@
 </script>
 
 
+<div id="filter" class="modal hide fade" style="display: none;">
+	<form method="post" name="request_frm">
+	<div class="modal-body">
+		<div>Jsonで入力してください</div>
+		<textarea name="data_json" id="data_json" style="width:520px; height:300px;">{
+
+}</textarea>
+
+		<pre id="request_request_box" caption="Description"></pre>
+	</div>
+	</form>
+</div>
+
 <h2>Explorer</h2>
 
 <form>
 <div>
-	<div class="control-group success">
-		<select name="method_type" id="method_type" style="width:5em;">
+	<div class="control-group" style="margin-bottom: 0px;">
+		<select id="map_name_list" onchange="select_map()" style="font-size: small; height:25px; width:100px; margin-bottom: 0px;"></select>	
+		<input type="text" id="url" style="font-size: small; width: 500px; height:20px; padding: 1px; margin-bottom: 0px;" />
+		<select name="method_type" id="method_type" style="font-size: small; height:25px; width:70px; margin-bottom: 0px;">
 			<option value="get">GET</option>
 			<option value="post">POST</option>
 		</select>
-		<input type="text" id="url" style="width: 70%;" />
-		<input class="button" type="button" value="Send" style="width:100px;" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,this.form.data_json.value)" />
+		<input class="btn" type="button" value="Send" style="font-size: small; width:60px; height:25px; margin-bottom: 0px;" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,request_frm.data_json.value)" />
 	</div>
+	<div style="margin: 0px 20px 0px 110px; font-size: x-small;"><a data-toggle="modal" href="#filter">リクエストクエリの入力</a></div>
 </div>
 <div class="container-fluid" style="margin-top: 20px;">
 	<div class="row-fluid">
 		<div class="span8">
-			<h4>response <span id="result_status" style="font-weight: bold;"></span>:</h4>
-			<pre id="result_body" class="prettyprint" style="padding: 5px;"></pre>
-			
-			<div id="header_field" style="display: none;">
-				<h4>headers</h4>
-				<pre id="result_header"></pre>
-			</div>
+			<cli id="result_body" class="prettyprint" style="padding: 5px;"></cli>
+			<cli id="result_header" class="prettyprint" style="padding: 5px;"></cli>
 	    </div>
 		<div class="span4">
-			 <h5>request query</h5>
-			<textarea name="data_json" id="data_json" style="width:250px; height:100px;">{}</textarea><br />
-			<input type="checkbox" id="display_header" /> <span style="font-weight: bold;">view headers</span>
-			
-			<hr />
-			<div style="margin-top: 20px;">
-				<h3>Maps</h3>
-			
-				<select id="map_name_list" onchange="select_map()" style="width:290px;">
-				</select>
-				
-				<pre id="method_description"></pre>
-				<h5>parameter</h5>
-				<pre id="request_param"></pre>
-				<h5>request</h5>
-				<pre id="request_request"></pre>
-			</div>
+			<pre id="method_description" caption="Description"></pre>
+			<pre id="request_param" caption="Parameter"></pre>
+			<pre id="request_request" caption="Request"></pre>
+
 		</div>
 	</div>
 </div>
