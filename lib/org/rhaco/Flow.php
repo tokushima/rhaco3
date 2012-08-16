@@ -109,6 +109,7 @@ class Flow{
 		 * @return array
 		 */
 		$map = ($this->has_object_module('flow_map_loader')) ? call_user_func_array(array($this,'object_module'),array_merge(array('flow_map_loader'),$args)) : $map_array;	
+		if(is_string($map) && preg_match('/^[\w\.]+$/',$map)) $map = array('patterns'=>array(''=>array('action'=>$map)));
 		$apps = $urls = array();
 		$idx = $pkg_id =0;
 		$theme = $put_block = null;
@@ -486,7 +487,6 @@ class Flow{
 	 * @param array $maps
 	 */
 	static public function out($maps){
-		if(is_string($maps) && preg_match('/^[\w\.]+$/',$maps)) $maps = array('patterns'=>array(''=>array('action'=>$maps)));
 		$self = new self();
 		$self->output($maps);
 	}
