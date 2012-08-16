@@ -13,10 +13,10 @@ class Exception extends \Exception{
 			$class_name = is_object($group) ? get_class($group) : $group;
 			$l = str_replace("\\",'.',$class_name);
 			$s = basename(str_replace("\\",'/',$class_name));
-			$this->message = str_replace(array('{L}','{S}'),array($l,$s),$message);
+			if(isset($message)) $this->message = str_replace(array('{L}','{S}'),array($l,$s),$message);
 			$this->group = $l;
 		}else{
-			$this->message = $message;
+			if(isset($message)) $this->message = $message;
 			$this->group = $group;
 		}
 	}

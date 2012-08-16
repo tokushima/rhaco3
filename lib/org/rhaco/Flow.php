@@ -397,7 +397,10 @@ class Flow{
 		}
 		if(!empty($put_block)) $this->template->put_block(\org\rhaco\net\Path::absolute($this->template_path,$put_block));
 		if(isset($apps[$index]['template_super'])) $this->template->template_super($this->template_path.$apps[$index]['template_super']);
-
+		if(is_array($obj) && isset($obj[0]) && isset($obj[1])){
+			foreach(((is_array($obj[1])) ? $obj[1] : array($obj[1])) as $o) $this->template->set_object_module($o);
+			$obj = $obj[0];
+		}
 		$this->template->media_url($media_url);
 		$this->template->cp($obj);
 		if(isset($apps[$index]['vars'])) $this->template->cp($apps[$index]['vars']);
