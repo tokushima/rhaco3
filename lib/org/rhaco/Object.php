@@ -40,13 +40,16 @@ class Object{
 		$result = array();
 		$decode_func = function($s){
 			if(empty($s)) return array();
-			if(preg_match_all('/([\"\']).+?\\1/',$s,$m)){
-				foreach($m[0] as $v) $s = str_replace($v,str_replace(array('[',']'),array('#{#','#}#'),$v),$s);
+			if(PHP_MAJOR_VERSION > 5 || PHP_MINOR_VERSION > 3){
+				$d = @eval('return '.$s.';');
+			}else{
+				if(preg_match_all('/([\"\']).+?\\1/',$s,$m)){
+					foreach($m[0] as $v) $s = str_replace($v,str_replace(array('[',']'),array('#{#','#}#'),$v),$s);
+				}
+				$d = @eval('return '.str_replace(array('[',']','#{#','#}#'),array('array(',')','[',']'),$s).';');
 			}
-			$d = @eval('return '.str_replace(array('[',']','#{#','#}#'),array('array(',')','[',']'),$s).';');
 			if(!is_array($d)) throw new \InvalidArgumentException('annotation error : `'.$s.'`');
 			return $d;
-			
 		};
 		if($ns_name !== null && preg_match_all("/@".$name."\s([\.\w_]+[\[\]\{\}]*)\s\\\$([\w_]+)(.*)/",$d,$m)){
 			foreach($m[2] as $k => $n){

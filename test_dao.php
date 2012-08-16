@@ -1,16 +1,17 @@
 <?php
 include_once('rhaco3.php');
 
-\org\rhaco\Flow::out(array(''
-,'modules'=>array(
+\org\rhaco\Flow::out([''
+,'modules'=>[
 	'org.rhaco.flow.module.Dao'
-)
-,'patterns'=>array(
-	'insert'=>array('name'=>'insert','action'=>'test.flow.Model::insert')
-	,'update'=>array('name'=>'update','action'=>'test.flow.Model::update')
-	,'delete'=>array('name'=>'delete','action'=>'test.flow.Model::delete')
-	,'get'=>array('name'=>'get','action'=>'test.flow.Model::get')
-)));
+]
+,'patterns'=>[
+	'insert'=>['name'=>'insert','action'=>'test.flow.Model::insert']
+	,'update'=>['name'=>'update','action'=>'test.flow.Model::update']
+	,'delete'=>['name'=>'delete','action'=>'test.flow.Model::delete']
+	,'get'=>['name'=>'get','action'=>'test.flow.Model::get']
+]]);
+
 /***
 	# error
 	$b = b();
