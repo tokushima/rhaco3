@@ -32,7 +32,7 @@ class Exceptions extends \org\rhaco\Exception{
 	 * @param string $id
 	 */
 	static public function parse_id($id){
-		return sprintf('%04d, %02d: %s',base_convert(substr($id,0,2),36,10),hexdec(substr($id,2,1)),substr($id,3,3));
+		return sprintf('%04d, %02d: %s',base_convert(substr($id,0,2),36,10),base_convert(substr($id,2,1),36,10),substr($id,3,3));
 	}
 	/**
 	 * Exceptionを追加する
