@@ -94,7 +94,7 @@ class Facebook{
 	 * @param boolean $reset
 	 * @return $this
 	 */
-	public function get_access_token($scope=null,$redirect_url=null,$reset=false){
+	public function get_access_token($scope=null,$redirect_url=null,$reset=false,$display='page'){
 		if(empty($redirect_url)) $redirect_url = \org\rhaco\Request::current_url();
 		$sess = new \org\rhaco\net\Session();
 		$http = new \org\rhaco\net\Http();
@@ -109,6 +109,7 @@ class Facebook{
 				$http->vars('redirect_uri',$redirect_url);
 				$http->vars('state',$sess->in_vars('state'));
 				$http->vars('scope',$scope);
+				if($display == 'page' || $display == 'touch') $http->vars('display',$display);
 				$http->do_redirect('https://graph.facebook.com/oauth/authorize');
 			}
 		}
