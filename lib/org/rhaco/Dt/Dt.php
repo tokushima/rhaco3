@@ -38,7 +38,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
 		$this->vars('has_dao',class_exists($this->dao));
-		$this->vars('has_document',is_dir(\org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('documents'))));
+		$this->vars('has_document',is_dir(\org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('document'))));
 	}
 	public function get_template_modules(){
 		return array(
@@ -46,6 +46,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					,new \org\rhaco\flow\module\TwitterBootstrapExtHtml()
 					,new \org\rhaco\flow\module\Exceptions()
 					,new \org\rhaco\flow\module\Dao()
+					,new Dt\Formatter()
 				);
 	}
 	/**
@@ -599,32 +600,50 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	public function document(){
 		$filename = $this->in_vars('page');
 		if($filename[0] === '/') $filename = substr($filename,1);
-		$path = \org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('documents'));
+		$path = \org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('document'));
 		if(substr($path,-1) !== '/') $path = $path.'/';
-		$list = array();
+		$template_path = $path.'templates/';
+		$list = $document_list = array();
 		$paginator = null;
 
-		if(is_file($path.$filename)){
-			$this->set_block($path.$filename);
+		if(is_file($template_path.$filename)){
+			$this->set_block($template_path.$filename);
 			$paginator = \org\rhaco\Paginator::dynamic_contents(1,$filename);
 		}
-		if(is_dir($path)){
-			foreach(\org\rhaco\io\File::ls($path,true) as $f){
-				$name = $file = str_replace($path,'',$f->fullname());
+		if(is_dir($template_path)){
+			foreach(\org\rhaco\io\File::ls($template_path,true) as $f){
+				$name = $file = str_replace($template_path,'',$f->fullname());
 				$dirname = dirname($name);
 				if($dirname == '.') $dirname = '';
 				$src = file_get_contents($f->fullname());
 				
-				if($this->search_str($src)){
+				if($this->search_str($dirname.$src)){
 					if(\org\rhaco\Xml::set($xml,$src,'h2')) $name = trim($xml->value());
-					$list[$file] = array($name,$dirname);
-					if(isset($paginator)) $paginator->add($file);
+					$list[$dirname.'/'.$f->fullname()] = array($name,$dirname,$file);
 				}
+			}
+			$keys = array_keys($list);
+			natcasesort($keys);
+
+			foreach($keys as $k){
+				if(isset($paginator) && !$paginator->add($list[$k][2])) break;
+				$document_list[$list[$k][2]] = $list[$k];
 			}
 		}
 		if(isset($paginator)) $paginator->vars('q',$this->in_vars('q'));
-		$this->vars('document_list',$list);
+		$this->vars('document_list',$document_list);
 		$this->vars('paginator',$paginator);
 		$this->vars('q',$this->in_vars('q'));
+	}
+	/**
+	 * @automap
+	 * @param string $file
+	 */
+	public function document_media($file){
+		$path = \org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('document'));
+		if(substr($path,-1) !== '/') $path = $path.'/';
+		$media_path = $path.'media/'.$file;
+		
+		\org\rhaco\net\http\File::attach($media_path);
 	}
 }
