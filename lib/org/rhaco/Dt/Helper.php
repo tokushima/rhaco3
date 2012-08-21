@@ -163,16 +163,42 @@ class Helper{
 	public function htmlspecialchars($src){
 		return htmlspecialchars($src);
 	}
+	
+	/**
+	 * export用ダミー
+	 * @param string $package
+	 * @param string $method
+	 * @return string
+	 */
 	public function method_html_filename($package,$method){
 		$html = $package.'__'.$method.'.html';
 		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
 	}
+	/**
+	 * export用ダミー
+	 * @param string $package
+	 * @param string $method
+	 * @return string
+	 */
 	public function module_html_filename($package,$method){
 		$html = $package.'___'.$method.'.html';
 		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
-	}	
+	}
+	/**
+	 * export用ダミー
+	 * @param string $package
+	 * @param string $method
+	 * @return string
+	 */
 	public function class_html_filename($package){
 		$html = $package.'.html';
 		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
+	}
+	
+	/**
+	 * ダミー
+	 * @param string $path
+	 */
+	public function docimg($path){
 	}
 }
