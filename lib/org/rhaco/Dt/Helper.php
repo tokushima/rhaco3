@@ -194,11 +194,4 @@ class Helper{
 		$html = $package.'.html';
 		return (empty($this->html_replace_map_url)) ? $html : sprintf('{$t.map_url(\'%s\',\'%s%s\')}',$this->html_replace_map_url,$this->html_replace_prefix,$html);
 	}
-	
-	/**
-	 * ダミー
-	 * @param string $path
-	 */
-	public function docimg($path){
-	}
 }

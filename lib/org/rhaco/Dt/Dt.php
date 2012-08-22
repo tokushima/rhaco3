@@ -46,7 +46,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					,new \org\rhaco\flow\module\TwitterBootstrapExtHtml()
 					,new \org\rhaco\flow\module\Exceptions()
 					,new \org\rhaco\flow\module\Dao()
-					,new Dt\Formatter()
 				);
 	}
 	/**
