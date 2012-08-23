@@ -531,7 +531,7 @@ if(is_dir(Rhaco3::lib_dir())){
 			if($len < strlen($package)) $len = strlen($package);
 			$doc = is_file($dir.'/cmd.php') ? file_get_contents($dir.'/cmd.php') : (is_file($dir.'/cmd/__setup__.php') ? file_get_contents($dir.'/cmd/__setup__.php') : null);
 			$summary = null;
-			if(preg_match('/\/\*\*.+?\*\//s',$doc,$m)) list($summary) = explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0]))));
+			if(preg_match('/\/\*\*.+?\*\//s',$doc,$m)) list($summary) = explode("\n",trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array('/'.'**','*'.'/'),'',$m[0]))));				
 			$list[$package] = $summary;
 		}
 	}

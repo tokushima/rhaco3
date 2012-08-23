@@ -6,7 +6,7 @@ $rhaco3_min = str_replace(
 	),
 	array(
 		trim(str_replace('<?php','',file_get_contents(__DIR__.'/lib/Rhaco3.php'))),
-		str_replace('constant(\'LIBDIR\')','Rhaco3::lib_dir()',trim(str_replace('<?php','',file_get_contents(__DIR__.'/bin/autoload.php')))),
+		str_replace('defined(\'LIBDIR\') ? constant(\'LIBDIR\') : getcwd().\'/lib/\'','Rhaco3::lib_dir()',trim(str_replace('<?php','',file_get_contents(__DIR__.'/bin/autoload.php')))),
 	),
 	file_get_contents(__DIR__.'/bin/templates/rhaco3_min.template.php')
 );
