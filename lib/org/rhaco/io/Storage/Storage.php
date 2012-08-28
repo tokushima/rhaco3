@@ -11,7 +11,7 @@ class Storage{
 	 * ランダムなノードのパスを返す
 	 * ディレクトリが存在しなかった場合はディレクトリを作成する
 	 * @param string $type
-	 * @return string
+	 * @return string ノード/サービス名/タイプ/Y/md/H
 	 */
 	static public function get_save_path($type='mixed'){
 		$nodes = \org\rhaco\Conf::get('save_nodes');
