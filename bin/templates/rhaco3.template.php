@@ -29,7 +29,7 @@ if(isset($_SERVER['argv'][1])){
 		$base = empty($base) ? '/'.basename(getcwd()) : $base;
 		if(substr($base,0,1) !== '/') $base = '/'.$base;
 		$rules = "RewriteEngine On\nRewriteBase ".$base."\n\n";
-		foreach(new DirectoryIterator(__DIR__) as $f){
+		foreach(new DirectoryIterator(getcwd()) as $f){
 			if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_' && $f->getPathname() != __FILE__ && $f->getFilename() != 'index.php'){
 				$src = file_get_contents($f->getPathname());
 				if(strpos($src,'Flo'.'w') !== false && (strpos($src,'->outpu'.'t(') !== false || strpos($src,'Flo'.'w::out(') !== false)){
@@ -168,7 +168,7 @@ if(isset($_SERVER['argv'][1])){
 		$error = $invalid = $imported = array();
 		$argv = array_flip($argv);
 		if(empty($argv)){
-			foreach(new DirectoryIterator(__DIR__) as $f){
+			foreach(new DirectoryIterator(getcwd()) as $f){
 				if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getFilename(),-4) == '.php' && strpos($f->getPathname(),Rhaco3::lib_dir()) === false){
 					foreach($search(file_get_contents($f->getPathname())) as $k => $v) $argv[$v] = $f->getPathname();
 				}
@@ -183,8 +183,8 @@ if(isset($_SERVER['argv'][1])){
 					if($f->isFile() && strpos($f->getPathname(),'/_') === false && substr($f->getPathname(),-4) == '.php'){ foreach($search(file_get_contents($f->getPathname())) as $k => $v){ $argv[$v] = $f->getPathname(); } }
 				}
 			}
-			if(is_file(__DIR__.'/__settings__.php')){
-				foreach($search(file_get_contents(__DIR__.'/__settings__.php')) as $k => $v){ $argv[$v] = $f->getPathname(); }
+			if(is_file(getcwd().'/__settings__.php')){
+				foreach($search(file_get_contents(getcwd().'/__settings__.php')) as $k => $v){ $argv[$v] = $f->getPathname(); }
 			}
 		}
 		foreach($argv as $arg => $f){
@@ -217,14 +217,14 @@ if(isset($_SERVER['argv'][1])){
 		
 		switch($cmd){
 			case '-import':
-				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
+				if(is_file($f=getcwd().'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
 				if(isset($params['repository'])) Rhaco3::repository($params['repository']);
 				if(is_file(Rhaco3::lib_dir()) || strpos(Rhaco3::lib_dir(),'://') !== false) throw new RuntimeException(Rhaco3::lib_dir().' is not a directory');
 				$download(empty($value) ? array() : array($value.(isset($params['v']) ? ':'.$params['v'] : '')),true);
 				exit;
 			case '-phar':
 				if(!Phar::canWrite()) die('write operations disabled by the php.ini setting phar.readonly'.PHP_EOL.' > php -d phar.readonly=0 '.basename(__FILE__).' '.$_SERVER['argv'][1].PHP_EOL);
-				$path = __DIR__.'/lib_'.date('Ymd_Hi').'.phar';
+				$path = getcwd().'/lib_'.date('Ymd_Hi').'.phar';
 				$phar = new Phar($path,0,'lib.phar');
 				print('Written: '.$path.PHP_EOL);
 				$phar->setDefaultStub((isset($phar['cli.php']) ? 'cli.php' : '<?php return; __HALT_COMPILER();'),(isset($phar['web.php']) ? 'web.php' : '<?php return; __HALT_COMPILER();'));
@@ -237,7 +237,7 @@ if(isset($_SERVER['argv'][1])){
 				if(is_file($path)) unlink($path);
 				exit;
 			case '-search':
-				if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
+				if(is_file($f=getcwd().'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
 				if(isset($params['repository'])) Rhaco3::repository($params['repository']);
 				$q = strtolower($value);
 				$list = array();
@@ -298,7 +298,7 @@ if(isset($_SERVER['argv'][1])){
 				exit;
 			default:
 				if($cmd[0] == '-'){
-					if(is_file($f=(__DIR__.'/__settings__.php'))){
+					if(is_file($f=(getcwd().'/__settings__.php'))){
 						require_once($f);
 						if(Rhaco3::env() !== null && is_file($f=(Rhaco3::common_dir().Rhaco3::env().'.php'))) require_once($f);
 					}
@@ -401,7 +401,7 @@ if(isset($_SERVER['argv'][1])){
 	}
 	exit;
 }
-if(is_file($f=__DIR__.'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
+if(is_file($f=getcwd().'/__settings__.php') && preg_match_all('/\n\s*[\\\\]{0,1}Rhaco3::.+?\);/ms',file_get_contents($f),$m)){foreach($m[0] as $e){eval($e);}}
 $list = array('import'=>'Download package','phar'=>'Create a phar','search'=>'Search package','htaccess'=>'Create .htaccess','settings'=>'Create __settings__.php');
 $len = 8;
 if(is_dir(Rhaco3::lib_dir())){

@@ -12,22 +12,22 @@ class CoreTestModule extends \org\rhaco\flow\parts\RequestFlow{
 		$flow->vars('exception_flow_handle','EXCEPTION_FLOW_HANDLE');
 	}
 	
-	public function init_template(&$src){
-		$src = $src.'INIT_TEMPLATE'.PHP_EOL;
+	public function init_template(\org\rhaco\lang\String $obj){
+		$obj->set($obj->get().'INIT_TEMPLATE'.PHP_EOL);
 	}
-	public function before_template(&$src){
-		$src = $src.'BEFORE_TEMPLATE'.PHP_EOL;
+	public function before_template(\org\rhaco\lang\String $obj){
+		$obj->set($obj->get().'BEFORE_TEMPLATE'.PHP_EOL);
 	}
-	public function after_template(&$src){
-		$src = $src.'AFTER_TEMPLATE'.PHP_EOL;
+	public function after_template(\org\rhaco\lang\String $obj){
+		$obj->set($obj->get().'AFTER_TEMPLATE'.PHP_EOL);
 	}
-	public function before_flow_print_template(&$src){
-		$src = $src.'BEFORE_FLOW_PRINT_TEMPLATE'.PHP_EOL;
+	public function before_flow_print_template(\org\rhaco\lang\String $obj){
+		$obj->set($obj->get().'BEFORE_FLOW_PRINT_TEMPLATE'.PHP_EOL);
 	}
-	public function before_exec_template(&$src){
-		$src = $src.'BEFORE_EXEC_TEMPLATE'.PHP_EOL;
+	public function before_exec_template(\org\rhaco\lang\String $obj){
+		$obj->set($obj->get().'BEFORE_EXEC_TEMPLATE'.PHP_EOL);
 	}
-	public function after_exec_template(&$src){
-		$src = $src.'AFTER_EXEC_TEMPLATE'.PHP_EOL;
+	public function after_exec_template(\org\rhaco\lang\String $obj){
+		$obj->set($obj->get().'AFTER_EXEC_TEMPLATE'.PHP_EOL);
 	}
 }

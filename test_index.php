@@ -1,5 +1,5 @@
 <?php
-include_once('rhaco3.php');
+include_once('bin/rhaco3.php');
 /**
  * @name rhaco.org
  * @summary site
@@ -92,7 +92,20 @@ array(''
 	,'upload_value'=>array('name'=>'upload_value','action'=>'test.SampleFlow::upload_value')
 	,'upload_file'=>array('name'=>'upload_file','action'=>'test.SampleFlow::upload_file')
 	
-	,'dev'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
+	
+
+	,'dao'=>array(
+		'modules'=>array('org.rhaco.flow.module.Dao'),
+		'patterns'=>array(
+			'insert'=>array('name'=>'dao/insert','action'=>'test.flow.Model::insert')
+			,'update'=>array('name'=>'dao/update','action'=>'test.flow.Model::update')
+			,'delete'=>array('name'=>'dao/delete','action'=>'test.flow.Model::delete')
+			,'get'=>array('name'=>'dao/get','action'=>'test.flow.Model::get')
+		)
+	)
+
+	
+	,'dt'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
 )));
 
 /***
@@ -376,7 +389,7 @@ eq('<result><init_var>INIT</init_var></result>',$b->body());
 $b = b();
 $b->do_get(test_map_url('module_throw_exception'));
 eq(403,$b->status());
-eq('<error><message group="exceptions" class="LogicException" type="LogicException">flow handle begin exception</message></error>',$b->body());
+meq('<message group="exceptions" class="LogicException" type="LogicException">flow handle begin exception</message>',$b->body());
 */
 
 
@@ -385,7 +398,7 @@ eq('<error><message group="exceptions" class="LogicException" type="LogicExcepti
 $b = b();
 $b->do_get(test_map_url('method_not_allowed'));
 eq(405,$b->status());
-eq('<error><message group="exceptions" class="LogicException" type="LogicException">Method Not Allowed</message></error>',$b->body());
+meq('<message group="exceptions" class="LogicException" type="LogicException">Method Not Allowed</message>',$b->body());
 */
 
 /***
@@ -497,7 +510,7 @@ eq('<result><abc>ABC</abc><newtag><hoge>HOGE</hoge></newtag></result>',$b->body(
 $b = b();
 $b->do_get(test_map_url('sample_flow_exception_package_throw_xml'));
 eq(403,$b->status());
-eq('<error><message group="exceptions" class="test.exception.SampleException" type="SampleException">sample error</message></error>',$b->body());
+meq('<message group="exceptions" class="test.exception.SampleException" type="SampleException">sample error</message>',$b->body());
 */
 
 /***
@@ -505,7 +518,38 @@ eq('<error><message group="exceptions" class="test.exception.SampleException" ty
 $b = b();
 $b->do_get(test_map_url('sample_flow_exception_throw_xml'));
 eq(403,$b->status());
-eq('<error><message group="exceptions" class="LogicException" type="LogicException">error</message></error>',$b->body());
+meq('<message group="exceptions" class="LogicException" type="LogicException">error</message></error>',$b->body());
 */
+
+/***
+$b = b();
+$b->do_post(test_map_url('dao/insert'));
+$b->do_post(test_map_url('dao/get'));
+eq(200,$b->status());
+meq('<string>abcdefg</string><text />',$b->body());
+
+$b = b();
+$b->do_post(test_map_url('dao/update'));
+$b->do_post(test_map_url('dao/get'));
+meq('<string>abcdefg</string><text>xyz</text>',$b->body());
+
+$b = b();
+$b->do_post(test_map_url('dao/delete'));
+
+$b = b();
+$b->do_post(test_map_url('dao/insert'));
+$b->do_post(test_map_url('dao/get'));
+meq('<string>abcdefg</string><text />',$b->body());
+
+$b = b();
+$b->do_post(test_map_url('dao/update'));
+$b->do_post(test_map_url('dao/get'));
+meq('<string>abcdefg</string><text>xyz</text>',$b->body());
+
+$b = b();
+$b->do_post(test_map_url('dao/delete'));
+eq('<result />',$b->body());
+*/
+
 
 

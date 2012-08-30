@@ -10,10 +10,11 @@ date_default_timezone_set('Asia/Tokyo');
 		,'test'=>array('dbname'=>'app')
 ));
 
-
+\org\rhaco\Conf::set('org.rhaco.Flow','exception_log_level','warn');
 \org\rhaco\Conf::set('org.rhaco.Template','display_exception',true);
 \org\rhaco\Conf::set('org.rhaco.flow.module.SimpleAuth','auth',array('user_name'=>md5(sha1('password'))));
 
+\org\rhaco\Conf::set('org.rhaco.Log','level','info');
 
 //\org\rhaco\net\Session::set_module('org.rhaco.flow.module.SessionDao');
 //\org\rhaco\Template::set_module('org.rhaco.store.template.File');

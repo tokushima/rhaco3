@@ -409,10 +409,10 @@ class Flow{
 		$src = $this->template->read($template);
 		/**
 		 * テンプレートの出力
-		 * @param string $src
+		 * @param org.rhaco.lang.String $obj
 		 */
-		$this->object_module('before_flow_print_template',$src);
-		print($src);
+		$this->object_module('before_flow_print_template',\org\rhaco\lang\String::ref($obj,$src));
+		print((string)$obj);
 	}
 	private function handle_exception_xml(){
 		$xml = new \org\rhaco\Xml('error');
