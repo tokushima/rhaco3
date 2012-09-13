@@ -23,4 +23,5 @@ date_default_timezone_set('Asia/Tokyo');
 \org\rhaco\Log::set_module(new \org\rhaco\io\log\File());
 
 
+//\org\rhaco\Conf::set('org.rhaco.Flow','app_url','http://127.0.0.1:8888/rhaco3');
 

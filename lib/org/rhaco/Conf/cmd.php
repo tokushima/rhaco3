@@ -2,26 +2,18 @@
 /**
  * Configuration list 
  */
-if(empty($value)){
-	$all = \org\rhaco\Conf::all();
-	$length = 0;
-	foreach($all as $p => $confs){
-		foreach($confs as $n => $conf){
-			if($length < strlen($p.$n)) $length= strlen($p.$n);
-		}
+$all = \org\rhaco\Conf::all();
+$length = 0;
+foreach($all as $p => $confs){
+	foreach($confs as $n => $conf){
+		if($length < strlen($p.$n)) $length = strlen($p.$n);
 	}
-	print('Config list:'.PHP_EOL);
-	foreach($all as $p => $confs){
-		foreach($confs as $n => $conf){
+}
+print('Config list:'.PHP_EOL);
+foreach($all as $p => $confs){
+	foreach($confs as $n => $conf){
+		if(empty($value) || strpos($p.$n,$value) !== false){
 			print('    '.(\org\rhaco\Conf::exists($p,$n) ? '[*]' : '[-]').' '.str_pad($p.'@'.$n,$length+1).' : '.(empty($conf) ? '' : sprintf('(%s) %s',$conf[0],$conf[1])).PHP_EOL);
 		}
-	}
-}else{
-	print($value.': '.PHP_EOL.' ');
-	ob_start();
-		var_dump(\org\rhaco\Conf::get($value));
-	$dump = ob_get_clean();
-	foreach(explode(PHP_EOL,$dump) as $line){
-		print('  '.$line.PHP_EOL);
 	}
 }
