@@ -124,7 +124,7 @@ class Man{
 	 */
 	static public function method_info($class,$method){
 		$ref = new \ReflectionMethod('\\'.str_replace(array('.','/'),array('\\','\\'),$class),$method);
-		$params = $return = $modules = $see = $request = $context = $args = $throws =array();
+		$params = $return = $modules = $see_method = $see_url = $request = $context = $args = $throws =array();
 		$document = $src = null;
 		$deprecated = false;
 		
@@ -213,22 +213,27 @@ class Man{
 			
 			if(preg_match_all("/@see\s+([\w\.\:\\\\]+)/",$document,$match)){
 				foreach($match[1] as $v){
-					$class = $v = trim($v);
-					$method = null;
 					if(strpos($v,'::') !== false){
-						list($class,$method) = explode('::',$v,2);
+						list($see_class,$see_method) = explode('::',trim($v),2);
+						$see_method[$v] = array($see_class,$see_method);
 					}
-					$see[$v] = array($class,$method);
 				}
 			}
-			ksort($see);
+			ksort($see_method);
+					
+			if(preg_match_all("/@see\s+(\w+:\/\/.+)/",$document,$match)){
+				foreach($match[1] as $v){
+					$v = trim($v);
+					$see_url[$v] = $v;
+				}
+			}
 		}
 		$description = trim(preg_replace('/@.+/','',$document));
 		return array(
 				'package'=>$class,'method_name'=>$method,'params'=>$params,'request'=>$request,'context'=>$context
 				,'args'=>$args,'return'=>$return,'description'=>$description,'throws'=>$throws
 				,'is_post'=>((strpos($src,'$this->is_post()') !== false) && (strpos($src,'!$this->is_post()') === false))
-				,'deprecated'=>$deprecated,'modules'=>$modules,'see'=>$see
+				,'deprecated'=>$deprecated,'modules'=>$modules,'see_method'=>$see_method,'see_url'=>$see_url
 				);
 	}
 	/**
