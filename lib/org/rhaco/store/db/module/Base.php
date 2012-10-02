@@ -236,17 +236,17 @@ abstract class Base extends \org\rhaco\Object{
 	protected function which_aggregator_sql($exe,Dao $dao,$target_name,$gorup_name,Q $query){
 		$select = $from = array();
 		$target_column = $group_column = null;
-		$self_columns = $dao->self_columns();
 		if(empty($target_name)){
+			$self_columns = $dao->self_columns();
 			$primary_columns = $dao->primary_columns();
 			if(!empty($primary_columns)) $target_column = current($primary_columns);
 			if(empty($target_column) && !empty($self_columns)) $target_column = current($self_columns);
 		}else{
-			$target_column = $this->get_column($target_name,$self_columns);
+			$target_column = $this->get_column($target_name,$dao->columns());
 		}
 		if(empty($target_column)) throw new \LogicException('undef primary');
 		if(!empty($gorup_name)){
-			$group_column = $this->get_column($gorup_name,$self_columns);
+			$group_column = $this->get_column($gorup_name,$dao->columns());
 			$select[] = $group_column->table_alias().'.'.$this->quotation($group_column->column()).' key_column';
 		}
 		foreach($dao->columns() as $column){
@@ -402,8 +402,11 @@ abstract class Base extends \org\rhaco\Object{
 		return $this->column_value($dao,$name,$dao->{$name}());
 	}
 	protected function get_column($column_str,array $self_columns){
-		if(!isset($self_columns[$column_str])) throw new \LogicException('undef '.$column_str);
-		return $self_columns[$column_str];
+		if(isset($self_columns[$column_str])) return $self_columns[$column_str];
+		foreach($self_columns as $c){
+			if($c->name() == $column_str) return $c;
+		}
+		throw new \LogicException('undef '.$column_str);
 	}
 	protected function column_alias_sql(Dao $dao,Column $column,Q $q,$alias=true){
 		$column_str = ($alias) ? $column->table_alias().'.'.$this->quotation($column->column()) : $this->quotation($column->column());
