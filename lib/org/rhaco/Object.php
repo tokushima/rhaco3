@@ -235,7 +235,7 @@ class Object{
 			try{
 				$hoge->ggg("fuga");
 				eq(true,false);
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				eq(true,true);
 			}
 			$hoge->hhh(true);
@@ -245,13 +245,12 @@ class Object{
 			try{
 				$hoge->hhh("hoge");
 				eq(true,false);
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				eq(true,true);
 			}
 			try{
 				$hoge->iii();
-				fail();
-			}catch(Exception $e){
+			}catch(ErrorException $e){
 				success();
 			}
 		*/
@@ -386,7 +385,7 @@ class Object{
 			try{
 				$obj->gg("1:2:3:4");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			$obj->gg("20時40分50秒");
@@ -426,106 +425,106 @@ class Object{
 			try{
 				$obj->jj(array("jkl","mno"));
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->kk("Abc@example.com");
 				success();
-			}catch(Exception $e){
-				fail();
+			}catch(InvalidArgumentException $e){
+				notice();
 			}
 			try{
 				$obj->kk(" Abc@example.com ");
 				eq("Abc@example.com",$obj->kk());
 				success();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				fail();
 			}
 			try{
 				$obj->kk("aaa.bbb.ccc@example.com");
 				success();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				fail();
 			}
 			try{
 				$obj->kk("aaa.bbb.ccc@example.aa.bb.com");
 				success();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				fail();
 			}
 			try{
 				$obj->kk("aaa..bbb.ccc@example.com");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				eq("kk must be an email",$e->getMessage());
 				success();
 			}
 			try{
 				$obj->kk("aaa.bbb.ccc.@example.com");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->kk("aaa.bbb.ccc@example.c");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->kk("123@example.com");
 				success();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				fail();
 			}
 			try{
 				$obj->kk("user+mailbox/department=shipping@example.com");
 				success();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				fail();
 			}
 			try{
 				$obj->kk("!#$%&'*+-/=?^_`.{|}~@example.com");
 				success();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				fail();
 			}
 			try{
 				$obj->kk("Abc.@example.com");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->kk("Abc..123@example.com");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->kk(".Abc@example.com");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->kk("Abc@.example.com");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->kk("Abc@example.com.");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			eq(null,$obj->nn());
 			try{
 				$obj->nn("1004");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			$obj->nn("123451004");
@@ -560,7 +559,7 @@ class Object{
 			try{
 				$obj->mm("/abc");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			eq(false,$obj->is_oo());
@@ -575,52 +574,52 @@ class Object{
 			
 			try{
 				$obj->oo("123F");
-				fail();
-			}catch(Exception $e){
+				neq("123F",$obj->oo());
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->oo(123.45);
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->oo("123.0");
 				success();
-			}catch(Exception $e){
-				fail();
+			}catch(InvalidArgumentException $e){
+				notice();
 			}
 			
 			try{
 				$obj->oo("123.000000001");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->oo(123.000000001);
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->oo("123.0000000001");
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->oo(123.0000000001);
 				fail();
-			}catch(Exception $e){
+			}catch(InvalidArgumentException $e){
 				success();
 			}
 			try{
 				$obj->oo(123.0);
 				success();
-			}catch(Exception $e){
-				fail();
+			}catch(InvalidArgumentException $e){
+				notice();
 			}
 			$obj->qq(2);
 			eq(2,$obj->qq());

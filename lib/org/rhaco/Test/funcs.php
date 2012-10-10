@@ -73,7 +73,8 @@ if(!function_exists('fail')){
 	 * 失敗
 	 */
 	function fail($msg=null){
-		throw new \LogicException('Test fail: '.$msg);
+		list($debug) = debug_backtrace(false);
+		\org\rhaco\Test::fail($debug['line'],$debug['file']);
 	}
 }
 if(!function_exists('notice')){

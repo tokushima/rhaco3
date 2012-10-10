@@ -67,6 +67,15 @@ class Test{
 		self::$result[(empty(self::$current_file) ? $file : self::$current_file)][self::$current_class][self::$current_method][$line][] = array('notice',$msg,$file,$line);
 	}
 	/**
+	 * 失敗を登録
+	 * @param string $msg メッセージ
+	 * @param int $line 行番号
+	 * @param string $file ファイル名
+	 */
+	final static public function fail($line,$file=null){
+		self::$result[(empty(self::$current_file) ? $file : self::$current_file)][self::$current_class][self::$current_method][$line][] = array('fail','failure',$file,$line);
+	}
+	/**
 	 * 取得済みのFlowの定義を返す
 	 * @param string $entry_name
 	 * @return array
@@ -311,7 +320,7 @@ class Test{
 										$result .= str_repeat("-",80)."\n";
 										$print_head = true;
 									}
-									$color = ($l[0] == 'exception') ? 31 : 34;
+									$color = ($l[0] == 'exception' || $l[0] == 'fail') ? 31 : 34;
 									$result .= "[".$line."]".$method.": ".self::fcolor($l[0],"1;".$color)."\n";
 									$result .= $tab.str_repeat("=",70)."\n";
 									$result .= self::fcolor($tab.$l[1]."\n\n".$tab.$l[2].":".$l[3],$color);
