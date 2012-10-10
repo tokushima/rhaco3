@@ -900,9 +900,10 @@ class Object{
 						return (float)(isset($dp) ? (floor($v * pow(10,$dp)) / pow(10,$dp)) : $v);
 					case 'serial':
 					case 'integer':
-						if(is_numeric($v) && preg_match('/./',$v) return (float)$v;
 						if(!is_numeric($v) || (int)$v != $v) throw new \InvalidArgumentException();
 						return (int)$v;
+					case 'float':
+						return (float)$v;
 					case 'boolean':
 						if(is_string($v)){ $v = ($v === 'true' || $v === '1') ? true : (($v === 'false' || $v === '0') ? false : $v);
 						}else if(is_int($v)){ $v = ($v === 1) ? true : (($v === 0) ? false : $v); }
