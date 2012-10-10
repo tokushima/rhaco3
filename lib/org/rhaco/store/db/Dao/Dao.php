@@ -904,7 +904,7 @@ abstract class Dao extends \org\rhaco\Object{
 	protected function set_prop($name,$type,$value){
 		try{
 			if(is_numeric($value) && preg_match('/./',$value)){
-				$type = 'float'
+				$type = 'float';
 				return parent::set_prop($name,$type,$value);
 			}
 			return parent::set_prop($name,$type,$value);
