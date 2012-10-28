@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit colors="true" bootstrap="bin/rhaco3.php">
-    <testsuite name="Xml">
-        <directory>unittest</directory>
-    </testsuite>
-</phpunit>
