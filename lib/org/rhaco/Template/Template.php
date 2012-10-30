@@ -14,8 +14,8 @@ class Template extends \org\rhaco\Object{
 	private $file;
 	private $selected_template;
 	private $selected_src;
-	
-	protected $secure = false;	
+
+	protected $secure = false;
 	protected $vars = array();
 	protected $put_block;
 	protected $template_super;
@@ -30,7 +30,7 @@ class Template extends \org\rhaco\Object{
 	 */
 	final public function cp($array){
 		if(is_array($array) || is_object($array)){
-			foreach($array as $k => $v) $this->vars[$k] = $v;			
+			foreach($array as $k => $v) $this->vars[$k] = $v;
 		}else{
 			throw new \InvalidArgumentException('must be an of array');
 		}
@@ -181,9 +181,9 @@ class Template extends \org\rhaco\Object{
 			if(preg_match("/Parse error\:(.+?) in .+eval\(\)\'d code on line (\d+)/",$_eval_src_,$match)){
 				list($msg,$line) = array(trim($match[1]),((int)$match[2]));
 				$lines = explode("\n",$_src_);
-				$plrp = substr_count(implode("\n",array_slice($lines,0,$line)),"<?php 'PLRP'; ?>\n");				
+				$plrp = substr_count(implode("\n",array_slice($lines,0,$line)),"<?php 'PLRP'; ?>\n");
 				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [compile]: '.trim($lines[$line-1]));
-				
+
 				$lines = explode("\n",$this->selected_src);
 				\org\rhaco\Log::error($msg.' on line '.($line-$plrp).' [plain]: '.trim($lines[$line-1-$plrp]));
 				if(\org\rhaco\Conf::get('display_exception') === true) $_eval_src_ = $msg.' on line '.($line-$plrp).': '.trim($lines[$line-1-$plrp]);
@@ -199,7 +199,7 @@ class Template extends \org\rhaco\Object{
 	}
 	private function error_handler($errno,$errstr,$errfile,$errline){
 		throw new \ErrorException($errstr,0,$errno,$errfile,$errline);
-	}	
+	}
 	private function replace_xtag($src){
 		if(preg_match_all("/<\?(?!php[\s\n])[\w]+ .*?\?>/s",$src,$null)){
 			foreach($null[0] as $value) $src = str_replace($value,'#PS#'.substr($value,2,-2).'#PE#',$src);
@@ -250,7 +250,7 @@ class Template extends \org\rhaco\Object{
 		}
 		$al = preg_split("/\//",$a,-1,PREG_SPLIT_NO_EMPTY);
 		$bl = preg_split("/\//",$b,-1,PREG_SPLIT_NO_EMPTY);
-	
+
 		for($i=0;$i<sizeof($al)-substr_count($b,'../');$i++){
 			if($al[$i] != '.' && $al[$i] != '..') $d .= $al[$i].'/';
 		}
@@ -263,7 +263,7 @@ class Template extends \org\rhaco\Object{
 	}
 	private function read_src($filename){
 		$src = file_get_contents($filename);
-		return (strpos($filename,'://') !== false) ? $this->parse_url($src,dirname($filename)) : $src;
+		return (preg_match('/^http[s]*\:\/\//',$filename)) ? $this->parse_url($src,dirname($filename)) : $src;
 	}
 	private function rttemplate($src){
 		$values = array();
@@ -349,7 +349,7 @@ class Template extends \org\rhaco\Object{
 				$ucols = '$_ucols_'.$uniq;
 				$urows = '$_urows_'.$uniq;
 				$ulimit = '$_ulimit_'.$uniq;
-				$ufirst = '$_ufirst_'.$uniq;				
+				$ufirst = '$_ufirst_'.$uniq;
 				$ufirstnm = '_ufirstnm_'.$uniq;
 
 				$ukey = '_ukey_'.$uniq;
@@ -383,7 +383,7 @@ class Template extends \org\rhaco\Object{
 											,$var,$ufirst,$cols_count,$rows_count
 										,$cols_count
 							)
-							.($tag->is_attr('rows') ? 
+							.($tag->is_attr('rows') ?
 								sprintf('<?php for(;%s<=%s;%s++){ %s=array(); ?>%s<?php } ?>',$rows_count,$rows,$rows_count,$var,$value) : ''
 							)
 							,$src
@@ -418,10 +418,10 @@ class Template extends \org\rhaco\Object{
 			# rows_fill
 			$src = pre('<rt:unit param="abc" var="abc_var" cols="3" rows="3">[<rt:loop param="abc_var" var="a" limit="3"><rt:fill>0<rt:else />{$a}</rt:fill></rt:loop>]</rt:unit>');
 			$result = '[123][400][000]';
-			$t = new self();			
+			$t = new self();
 			$t->vars("abc",array(1,2,3,4));
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:unit param="abc" var="abc_var" offset="3" cols="3" rows="3">[<rt:loop param="abc_var" var="a" limit="3"><rt:fill>0<rt:else />{$a}</rt:fill></rt:loop>]</rt:unit>');
 			$result = '[340][000][000]';
 			$t = new self();
@@ -459,7 +459,7 @@ class Template extends \org\rhaco\Object{
 				$var = '$'.$tag->in_attr('var','_var_'.$uniq);
 				$key = '$'.$tag->in_attr('key','_key_'.$uniq);
 				$total = '$'.$tag->in_attr('total','_total_'.$uniq);
-				$vtotal = '$__vtotal__'.$uniq;				
+				$vtotal = '$__vtotal__'.$uniq;
 				$counter = '$'.$tag->in_attr('counter','_counter_'.$uniq);
 				$loop_counter = '$'.$tag->in_attr('loop_counter','_loop_counter_'.$uniq);
 				$reverse = (strtolower($tag->in_attr('reverse') === 'true'));
@@ -493,7 +493,7 @@ class Template extends \org\rhaco\Object{
 					$is_fill = true;
 					$value = str_replace($subtag->plain(),sprintf('<?php if(%s > %s){ ?>%s<?php } ?>',$lcountname,$total
 					,preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$this->rtloop($subtag->value()))),$value);
-				}				
+				}
 				$value = $this->rtif($value);
 				if(preg_match("/^(.+)<rt\:else[\s]*.*?>(.+)$/ims",$value,$match)){
 					list(,$value,$empty_value) = $match;
@@ -511,7 +511,7 @@ class Template extends \org\rhaco\Object{
 											." foreach(%s as %s => %s){"
 												." if(%s <= %s){"
 													." if(!%s){ %s=true; %s='%s'; }"
-													." if((%s > 0 && (%s+1) == %s) || %s===%s){ %s=true; %s='%s'; %s=(%s-%s+1) * -1;}"													
+													." if((%s > 0 && (%s+1) == %s) || %s===%s){ %s=true; %s='%s'; %s=(%s-%s+1) * -1;}"
 													." %s=((%s %% 2) === 0) ? '%s' : '%s';"
 													." %s=%s; %s=%s;"
 													." ?>%s<?php "
@@ -726,7 +726,7 @@ class Template extends \org\rhaco\Object{
 			$result = pre('EMPTY');
 			$t->vars("abc",array());
 			eq($result,$t->get($src));
-			
+
 			$t = new self();
 			$src = pre('<rt:loop param="abc">aaaaaa<rt:else>EMPTY</rt:loop>');
 			$result = pre('EMPTY');
@@ -740,12 +740,12 @@ class Template extends \org\rhaco\Object{
 			$result = pre('F45hogehogeL');
 			$t->vars("abc",array(1,2,3,4,5));
 			eq($result,$t->get($src));
-			
+
 			$t = new self();
 			$src = pre('<rt:loop param="abc" var="a" offset="4" limit="4"><rt:fill><rt:first>f</rt:first>hoge<rt:last>L</rt:last><rt:else /><rt:first>F</rt:first>{$a}</rt:fill><rt:else />empty</rt:loop>');
 			$result = pre('fhogehogehogehogeL');
 			$t->vars("abc",array());
-			eq($result,$t->get($src));			
+			eq($result,$t->get($src));
 		*/
 		/***
 			# fill_no_limit
@@ -762,18 +762,18 @@ class Template extends \org\rhaco\Object{
 			$result = pre('45hogeLast');
 			$t->vars("abc",array(1,2,3,4,5));
 			eq($result,$t->get($src));
-			
+
 			$t = new self();
 			$src = pre('<rt:loop param="abc" var="a" limit="3"><rt:fill>hoge<rt:else />{$a}</rt:fill><rt:last>Last</rt:last></rt:loop>');
 			$result = pre('123Last');
 			$t->vars("abc",array(1,2,3,4,5));
 			eq($result,$t->get($src));
-			
+
 			$t = new self();
 			$src = pre('<rt:loop param="abc" var="a" offset="6" limit="3"><rt:fill>hoge<rt:else />{$a}</rt:fill><rt:last>Last</rt:last></rt:loop>');
 			$result = pre('hogehogehogeLast');
 			$t->vars("abc",array(1,2,3,4,5));
-			eq($result,$t->get($src));			
+			eq($result,$t->get($src));
 		*/
 		/***
 			# fill_first
@@ -860,44 +860,44 @@ class Template extends \org\rhaco\Object{
 			$t->vars("abc",2);
 			$t->vars("a",2);
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:loop range="1,5" var="c"><rt:if param="{$c}" value="{$a}">A<rt:else />{$c}</rt:if></rt:loop>');
 			$result = pre('1A345');
 			$t = new self();
 			$t->vars("abc",2);
 			$t->vars("a",2);
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:if param="abc">aa<rt:else />bb</rt:if>');
 			$result = pre('aa');
 			$t = new self();
 			$t->vars("abc",array(1));
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:if param="abc">aa<rt:else />bb</rt:if>');
 			$result = pre('bb');
 			$t = new self();
 			$t->vars("abc",array());
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:if param="abc">aa<rt:else />bb</rt:if>');
 			$result = pre('aa');
 			$t = new self();
 			$t->vars("abc",true);
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:if param="abc">aa<rt:else />bb</rt:if>');
 			$result = pre('bb');
 			$t = new self();
 			$t->vars("abc",false);
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:if param="abc">aa<rt:else />bb</rt:if>');
 			$result = pre('aa');
 			$t = new self();
 			$t->vars("abc","a");
 			eq($result,$t->get($src));
-			
+
 			$src = pre('<rt:if param="abc">aa<rt:else />bb</rt:if>');
 			$result = pre('bb');
 			$t = new self();
@@ -965,7 +965,7 @@ class Template extends \org\rhaco\Object{
 					$obj->rm_attr('rt:aref');
 					$obj->escape(false);
 					$value = $obj->get();
-					
+
 					if($bool){
 						foreach($obj->in(array('input','select','textarea')) as $tag){
 							if(!$tag->is_attr('rt:ref') && ($tag->is_attr('name') || $tag->is_attr('id'))){
@@ -1259,7 +1259,7 @@ class Template extends \org\rhaco\Object{
 			$t->vars("ddd_name","ddd");
 			$t->vars("eee_name","eee");
 			$t->vars("fff_name","fff");
-			
+
 			$t->vars("aaa","hogehoge");
 			$t->vars("bbb","hoge");
 			$t->vars("XYZ","B");
@@ -1306,7 +1306,7 @@ class Template extends \org\rhaco\Object{
 			$src = pre('<form rt:ref="true"><input type="password" name="hoge" /></form>');
 			$t = new self();
 			eq('<form><input type="password" name="hoge" value="" /></form>',$t->get($src));
-			
+
 			$src = pre('<form rt:ref="true"><input type="hidden" name="hoge" /></form>');
 			$t = new self();
 			eq('<form><input type="hidden" name="hoge" value="" /></form>',$t->get($src));
@@ -1314,7 +1314,7 @@ class Template extends \org\rhaco\Object{
 			$src = pre('<form rt:ref="true"><input type="checkbox" name="hoge" /></form>');
 			$t = new self();
 			eq('<form><input type="checkbox" name="hoge[]" /></form>',$t->get($src));
-			
+
 			$src = pre('<form rt:ref="true"><input type="radio" name="hoge" /></form>');
 			$t = new self();
 			eq('<form><input type="radio" name="hoge" /></form>',$t->get($src));
@@ -1654,7 +1654,7 @@ class Template extends \org\rhaco\Object{
 			$class = ' '.$tr->in_attr('class').' ';
 			if(preg_match('/[\s](even|odd)[\s]/',$class,$match)){
 				$tr->attr('class',trim(str_replace($match[0],' {$'.$even_odd.'} ',$class)));
-				$src = str_replace($tr->plain(),$tr->get(),$src);				
+				$src = str_replace($tr->plain(),$tr->get(),$src);
 			}
 		}
 		return $src;
