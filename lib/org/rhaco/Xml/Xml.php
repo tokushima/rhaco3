@@ -10,7 +10,7 @@ class Xml implements \IteratorAggregate{
 	private $name;
 	private $value;
 	private $close_empty = true;
-	
+
 	private $plain;
 	private $pos;
 	private $esc = true;
@@ -66,7 +66,7 @@ class Xml implements \IteratorAggregate{
 	/**
 	 * 要素名
 	 * @return string
-	 */	
+	 */
 	final public function name($name=null){
 		if(isset($name)) $this->name = $name;
 		return $this->name;
@@ -105,7 +105,7 @@ class Xml implements \IteratorAggregate{
 						');
 			$self = new self('abc',$obj);
 			eq('<abc><aaa>hoge</aaa><ccc>123</ccc></abc>',$self->get());
-			
+
 			$n = get_class($obj);
 			$obj1 = clone($obj);
 			$obj2 = clone($obj);
@@ -146,13 +146,14 @@ class Xml implements \IteratorAggregate{
 			$xml->escape(true);
 			eq("<abc>123</abc>",$xml->value("<abc>123</abc>"));
 			eq("<b>123</b>",$xml->value(new self("b","123")));
-			
+
 			$xml = new self("test");
 			$xml->escape(false);
 			eq("<abc>123</abc>",$xml->value("<abc>123</abc>",false));
 		 */
 		/***
 			$obj = new \org\rhaco\Request();
+			$obj->rm_vars();
 			$obj->vars('aaa','hoge');
 			$obj->vars('ccc',123);
 			$self = new self('abc',$obj);
@@ -164,7 +165,7 @@ class Xml implements \IteratorAggregate{
 			$xml->add($add);
 			$xml->add($add->get());
 			$xml->add((string)$add);
-			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());			
+			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());
 		 */
 		/***
 			$xml = new self("test");
@@ -172,7 +173,7 @@ class Xml implements \IteratorAggregate{
 			$xml->add($add);
 			$xml->add($add->get());
 			$xml->add((string)$add);
-			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());			
+			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());
 		 */
 	}
 	/**
@@ -211,13 +212,13 @@ class Xml implements \IteratorAggregate{
 			eq("123",$x->in_attr("abc"));
 			eq(null,$x->in_attr("def"));
 			eq("456",$x->in_attr("ghi",456));
-			
+
 			$x->attr("def","'<>'");
-			
+
 			$x->escape(true);
 			eq("&#039;&lt;&gt;&#039;",$x->in_attr("def"));
 			eq('<test abc="123" def="&#039;&lt;&gt;&#039;" />',$x->get());
-			
+
 			$x->escape(false);
 			eq("'<>'",$x->in_attr("def"));
 			eq('<test abc="123" def="\'<>\'" />',$x->get());
@@ -238,7 +239,7 @@ class Xml implements \IteratorAggregate{
 			$x->attr("abc",123);
 			$x->attr("def",456);
 			$x->attr("ghi",789);
-			
+
 			eq(array("abc"=>123,"def"=>456,"ghi"=>789),iterator_to_array($x));
 			$x->rm_attr("def");
 			eq(array("abc"=>123,"ghi"=>789),iterator_to_array($x));

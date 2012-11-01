@@ -16,7 +16,7 @@ class Request implements \IteratorAggregate{
 		}
 		if(isset($_SERVER['REQUEST_METHOD'])){
 			$args = func_get_args();
-			if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST'){					
+			if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST'){
 				if(isset($_POST) && is_array($_POST)){
 					foreach($_POST as $k => $v) $this->vars[$k] = (get_magic_quotes_gpc() && is_string($v)) ? stripslashes($v) : $v;
 				}
@@ -59,10 +59,11 @@ class Request implements \IteratorAggregate{
 		return new \ArrayIterator($this->vars);
 		/***
 			$req = new self();
+			$req->rm_vars();
 			$req->vars('abc',1);
 			$req->vars('def',2);
 			$req->vars('ghi',3);
-			
+
 			$i = 0;
 			$keys = array('abc','def','ghi');
 			$values = array(1,2,3);
@@ -93,19 +94,19 @@ class Request implements \IteratorAggregate{
 		$server = preg_replace("/^(.+):\d+$/","\\1",isset($_SERVER['HTTP_X_FORWARDED_HOST']) ?
 					$_SERVER['HTTP_X_FORWARDED_HOST'] :
 					(
-						isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 
+						isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] :
 						(isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '')
 					));
-		$path = isset($_SERVER['REQUEST_URI']) ? 
-					preg_replace("/^(.+)\?.*$/","\\1",$_SERVER['REQUEST_URI']) : 
+		$path = isset($_SERVER['REQUEST_URI']) ?
+					preg_replace("/^(.+)\?.*$/","\\1",$_SERVER['REQUEST_URI']) :
 					(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'].(isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '') : '');
 		if($port != $port_http && $port != $port_https) $server = $server.':'.$port;
 		if(empty($server)) return null;
 		return (($port == $port_https) ? 'https' : 'http').'://'.preg_replace("/^(.+?)\?.*/","\\1",$server).$path;
-	}	
+	}
 	/**
 	 * 現在のリクエストクエリを返す
-	 * @param boolean $sep 先頭に?をつけるか 
+	 * @param boolean $sep 先頭に?をつけるか
 	 * @return string
 	 */
 	static public function request_string($sep=false){
