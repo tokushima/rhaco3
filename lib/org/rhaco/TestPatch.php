@@ -42,4 +42,10 @@ class TestPatch{
 	public function teardown(){
 		\org\rhaco\Exceptions::clear();
 	}
+	public function test_dir(){
+		return str_replace('\\','/',getcwd()).'/tests';
+	}
+	public function lib_dir(){
+		return str_replace('\\','/',getcwd()).'/lib';
+	}
 }
