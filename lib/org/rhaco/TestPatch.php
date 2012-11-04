@@ -33,7 +33,6 @@ class TestPatch{
 
 					}
 				}
-				file_put_contents('maps',print_r($this->flow_output_maps,true));
 			}
 		}
 		return $this->flow_output_maps;
