@@ -126,6 +126,15 @@ class Http{
 		$this->vars[$key] = $value;
 	}
 	/**
+	 * 送信する値(ファイル)を設定する
+	 * @param string $key
+	 * @param string $filename
+	 * @param string $value
+	 */
+	public function file_vars($key,$filename,$value=null){
+		$this->vars[$key] = new \org\rhaco\io\File($filename,$value);
+	}
+	/**
 	 * 送信するHEADを設定する
 	 * @param string $key
 	 * @param string $value
@@ -172,13 +181,13 @@ class Http{
 	}
 	/**
 	 * 配列、またはオブジェクトから値を設定する
-	 * @param mixed $array 
+	 * @param mixed $array
 	 * @throws \InvalidArgumentException
 	 * @return $this
 	 */
 	public function cp($array){
 		if(is_array($array)){
-			foreach($array as $k => $v) $this->vars[$k] = $v;			
+			foreach($array as $k => $v) $this->vars[$k] = $v;
 		}else if(is_object($array)){
 			if(in_array('Traversable',class_implements($array))){
 				foreach($array as $k => $v) $this->vars[$k] = $v;
@@ -510,7 +519,7 @@ class Http{
 					$boundary = '-----------------'.md5(microtime());
 					$header['Content-Type'] = 'multipart/form-data;  boundary='.$boundary;
 					$raws = array();
-	
+
 					foreach($query_vars[0] as $v){
 						$raws[] = sprintf('Content-Disposition: form-data; name="%s"',$v[0])
 									."\r\n\r\n"

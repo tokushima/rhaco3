@@ -1,0 +1,6 @@
+{
+ "bootstrap":"bin/rhaco3.php",
+ "patch":"org.rhaco.TestPatch"
+}
+
+
