@@ -141,6 +141,19 @@ class Facebook{
 		return $data;
 	}
 	/**
+	 * アプリ情報を取得する
+	 * @return array
+	 */
+	public function app(){
+		if(empty($this->access_token)) $this->get_access_token();
+		$http = new \org\rhaco\net\Http();
+		$http->vars('access_token',$this->access_token);
+		$http->do_get('https://graph.facebook.com/app');
+		$data = json_decode($http->body(),true);
+		$this->check_error($data);
+		return $data;
+	}
+	/**
 	 * アルバム一覧を取得する
 	 * @param string $next_url
 	 * @return array
