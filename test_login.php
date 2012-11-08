@@ -73,12 +73,8 @@ eq('<result><user><nickname>hogeuser</nickname><code>1234</code></user></result>
 */
 
 /***
+#logout
 $b = b();
-
-$b->do_post(test_map_url('logout'));
-eq(401,$b->status());
-eq(test_map_url('login'),$b->url());
-meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
 
 $b->vars('user_name','hogeuser');
 $b->vars('password','hogehoge');
@@ -93,6 +89,11 @@ eq('<result><user><nickname>hogeuser</nickname><code>1234</code></user></result>
 $b->do_post(test_map_url('logout'));
 eq(200,$b->status());
 eq('<result><login>false</login></result>',$b->body());
+
+$b->do_post(test_map_url('aaa'));
+eq(401,$b->status());
+meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
+
 */
 
 
