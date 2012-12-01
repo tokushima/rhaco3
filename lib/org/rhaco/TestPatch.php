@@ -37,16 +37,4 @@ class TestPatch{
 		}
 		return $this->flow_output_maps;
 	}
-	public function setup(){
-		\org\rhaco\Exceptions::clear();
-	}
-	public function teardown(){
-		\org\rhaco\Exceptions::clear();
-	}
-	public function test_dir(){
-		return str_replace('\\','/',getcwd()).'/tests';
-	}
-	public function lib_dir(){
-		return str_replace('\\','/',getcwd()).'/lib';
-	}
 }
