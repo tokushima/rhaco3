@@ -8,7 +8,7 @@ namespace org\rhaco;
 class TestPatch{
 	private $flow_output_maps = array();
 
-	public function maps(){
+	public function urls(){
 		if(empty($this->flow_output_maps)){
 			$entry_path = getcwd();
 

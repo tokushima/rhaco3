@@ -1,6 +1,6 @@
 {
  "bootstrap":"bin/rhaco3.php",
- "maps":"org.rhaco.TestPatch::maps",
+ "urls":"org.rhaco.TestPatch::urls",
  "report_dir":"work/report",
  "test_dir":"tests"
 }
