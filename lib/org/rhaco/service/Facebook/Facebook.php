@@ -198,4 +198,21 @@ class Facebook{
 		}
 		return $next;
 	}
+	/**
+	 * ユーザ情報を取得する
+	 * @return array
+	 */
+	static public function test_users($app_access_token,$name,$locale='en_US',$permissions='read_stream'){
+		$http = new \org\rhaco\net\Http();
+		$http->vars('installed',true);
+		$http->vars('name',$name);
+		$http->vars('locale',$locale);
+		$http->vars('permissions',$permissions);
+		$http->vars('method','post');
+		$http->vars('access_token',$app_access_token);
+		$http->do_get('https://graph.facebook.com/APP_ID/accounts/test-users');
+		$data = json_decode($http->body(),true);
+		$this->check_error($data);
+		return $data;
+	}
 }
