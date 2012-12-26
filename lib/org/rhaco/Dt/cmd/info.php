@@ -6,7 +6,6 @@ $flow = new \org\rhaco\Flow();
 
 $info = array(
 'mode'=>\org\rhaco\Conf::appenv(),
-'lib'=>\org\rhaco\Conf::libdir(),
 'CWD'=>getcwd(),
 'url'=>\org\rhaco\Conf::get('org.rhaco.Flow@app_url'),
 'url secure'=>(\org\rhaco\Conf::get('org.rhaco.Flow@secure') ? 'true' : 'false'),

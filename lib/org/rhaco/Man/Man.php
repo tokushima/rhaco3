@@ -241,7 +241,7 @@ class Man{
 	 * @return array
 	 */
 	static public function classes(){
-		$libdir = \org\rhaco\Conf::libdir();
+		$libdir = constant('LIBDIR');
 		$result = array();
 		if(!empty($libdir) && is_dir($libdir)){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($libdir,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){

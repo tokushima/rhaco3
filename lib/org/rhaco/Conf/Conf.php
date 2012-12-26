@@ -110,11 +110,4 @@ class Conf{
 	static public function appenv(){
 		return defined('APPENV') ? constant('APPENV') : null;
 	}
-	/**
-	 * ライブラリの配置してあるパス
-	 * @return string
-	 */
-	static public function libdir(){
-		return defined('LIBDIR') ? constant('LIBDIR') : null;
-	}
 }
