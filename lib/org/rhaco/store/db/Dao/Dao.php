@@ -146,7 +146,7 @@ abstract class Dao extends \org\rhaco\Object{
 				$column->column_alias('c'.self::$_cnt_++);
 
 				if($anon_cond === null){
-					if(class_exists($column_type) && is_subclass_of($column_type,__CLASS__)) throw new DaoException("undef ".$name." annotation 'cond'");
+					if(ctype_upper($column_type[0]) && class_exists($column_type) && is_subclass_of($column_type,__CLASS__)) throw new DaoException("undef ".$name." annotation 'cond'");
 					$column->table($this->table());
 					$column->table_alias($root_table_alias);
 					$column->primary($this->prop_anon($name,'primary',false));

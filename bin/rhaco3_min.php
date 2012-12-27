@@ -79,7 +79,7 @@ if(!class_exists('Rhaco3')){
 spl_autoload_register(function($c){
 	$cp = str_replace('\\','//',(($c[0] == '\\') ? substr($c,1) : $c));
 	foreach(explode(PATH_SEPARATOR,get_include_path()) as $p){
-		if(($r = realpath($p)) !== false){
+		if(!empty($p) && ($r = realpath($p)) !== false){
 			if(is_file($f=($r.'/'.$cp.'.php')) || is_file($f=($r.'/'.$cp.'/'.basename($cp).'.php'))){
 				require_once($f);
 				

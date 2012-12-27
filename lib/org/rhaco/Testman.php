@@ -1,11 +1,11 @@
 <?php
 namespace org\rhaco;
 /**
- * TestRunner用のpatchモジュール
+ * TestRunner用のモジュール
  * @author tokushima
  *
  */
-class TestPatch{
+class Testman{
 	private $flow_output_maps = array();
 
 	public function urls(){
