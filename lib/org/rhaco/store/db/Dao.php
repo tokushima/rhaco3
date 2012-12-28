@@ -42,6 +42,9 @@ abstract class Dao extends \org\rhaco\Object{
 		return $connections;
 	}
 	final static private function connection($class){
+		if(!isset(self::$_connections_[self::$_co_anon_[$class][0]])){
+			throw new DaoException('unable to connect to '.$class);
+		}
 		return self::$_connections_[self::$_co_anon_[$class][0]];
 	}
 	/**
@@ -685,7 +688,7 @@ abstract class Dao extends \org\rhaco\Object{
 		if(isset($errors[1])){
 			throw new DaoException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : ''));
 		}
-		return new Dao\StatementIterator($dao,$statement);
+		return new StatementIterator($dao,$statement);
 	}
 	/**
 	 * 検索を実行する

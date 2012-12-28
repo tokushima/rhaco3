@@ -1,6 +1,5 @@
 <?php
-namespace org\rhaco\store\db\Dao;
-use \org\rhaco\store\db\Dao;
+namespace org\rhaco\store\db;
 /**
  * DBデータイテレータ
  * @author tokushima
