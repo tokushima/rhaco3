@@ -55,55 +55,6 @@ class Conf{
 		return $result;
 	}
 	/**
-	 * Configの一覧を取得する
-	 * @return array
-	 */
-	static public function all(){
-		$conf_get = function($filename){
-			$src = file_get_contents($filename);
-			$gets = array();
-			if(preg_match_all('/[^\w]Conf::'.'(get)\(([\"\'])(.+?)\\2/',$src,$m)){
-				foreach($m[3] as $k => $n){
-					if(!isset($gets[$n])) $gets[$n] = array('string','');
-				}
-			}			
-			if(preg_match_all("/@conf\s+([^\s]+)\s+\\$(\w+)(.*)/",$src,$m)){
-				foreach($m[0] as $k => $v) $docs[trim($m[2][$k])] = array($m[1][$k],trim($m[3][$k]));
-			}
-			if(preg_match_all("/@conf\s+\\$(\w+)(.*)/",$src,$m)){
-				foreach($m[0] as $k => $v) $docs[trim($m[1][$k])] = array('string',trim($m[2][$k]));
-			}
-			foreach($gets as $n => $v){
-				if(isset($docs[$n])) $gets[$n] = $docs[$n];
-			}
-			return $gets;
-		};
-		$gets = array();
-		foreach(\org\rhaco\Man::classes() as $p => $lib){
-			if($lib['dir']){
-				$ret = array();
-				foreach(new \RecursiveIteratorIterator(
-					new \RecursiveDirectoryIterator(
-						dirname($lib['filename'])
-						,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS)
-						,\RecursiveIteratorIterator::SELF_FIRST
-				) as $e){
-					if(substr($e->getPathname(),-4) == '.php' 
-						&& strpos($e->getPathname(),'/cmd/') === false 
-						&& $e->getFilename() != 'cmd.php'
-					){
-						$ret = array_merge($ret,$conf_get($e->getPathname()));
-					}
-				}
-				if(!empty($ret)) $gets[$p] = $ret;
-			}else{
-				$ret = $conf_get($lib['filename']);
-				if(!empty($ret)) $gets[$p] = $ret;
-			}
-		}
-		return $gets;
-	}
-	/**
 	 * アプリケーションの動作環境
 	 * @return string
 	 */

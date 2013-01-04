@@ -4,14 +4,17 @@
  * @param string $value package path
  * @param string $m method name
  */
+
+$value = $_ENV['value'];
+$params = $_ENV['params'];
 try{
-	$rtn = \org\rhaco\Man::class_info($value);
+	$rtn = \org\rhaco\Dt::class_info($value);
 }catch(\Exception $e){
 	$libs = array();
 	$len = 0;
-	foreach(\org\rhaco\Man::classes() as $k => $v){
+	foreach(\org\rhaco\Dt::classes() as $k => $v){
 		if(empty($value) || strpos(strtolower($k),strtolower($value)) !== false){
-			$info = \org\rhaco\Man::class_info($k);
+			$info = \org\rhaco\Dt::class_info($k);
 			list($libs[$k]) = explode("\n",$info['description']);
 			if(strlen($k) > $len) $len = strlen($k);
 		}
@@ -23,7 +26,7 @@ try{
 	exit;
 }
 if(isset($params['m'])){
-	$rtn = \org\rhaco\Man::method_info($value,$params['m']);
+	$rtn = \org\rhaco\Dt::method_info($value,$params['m']);
 	print("\n".'class '.$value.' in method '.$rtn['method_name'].':'.PHP_EOL);
 	print(' Description:'.PHP_EOL);
 	print('   '.str_replace("\n","\n   ",$rtn['description']).PHP_EOL);
@@ -33,9 +36,11 @@ if(isset($params['m'])){
 		print(sprintf('   %s%s : [%s%s] %s',($v[1] ? '&' : ' '),str_pad($k,$len),$v[0],($v[2] ? '='.(isset($v[3]) ? $v[3] : 'null') : ''),$v[4]).PHP_EOL);
 	}
 	print("\n".' Return:'.PHP_EOL);
-	print(sprintf('   %s %s',$rtn['return'][0],$rtn['return'][1]).PHP_EOL);
+	if(!empty($rtn['return'])){
+		print(sprintf('   %s %s',$rtn['return'][0],$rtn['return'][1]).PHP_EOL);
+	}
 }else if(isset($params['module'])){
-	$rtn = \org\rhaco\Man::class_info($value);
+	$rtn = \org\rhaco\Dt::class_info($value);
 	if(!isset($rtn['modules'][$params['module']])) throw new \RuntimeException('module `'.$params['module'].'` not found');
 	$module = $rtn['modules'][$params['module']];
 	
@@ -48,7 +53,7 @@ if(isset($params['m'])){
 		print('    '.str_pad('',$len).'    ('.$p[1].') '.$p[0].' : '.$p[2].PHP_EOL);
 	}	
 }else{
-	$rtn = \org\rhaco\Man::class_info($value);
+	$rtn = \org\rhaco\Dt::class_info($value);
 	print("\n".'class '.$rtn['package'].':'.PHP_EOL);
 	print('  Version: '.$rtn['version'].PHP_EOL.PHP_EOL);
 	print('  Description:'.PHP_EOL);

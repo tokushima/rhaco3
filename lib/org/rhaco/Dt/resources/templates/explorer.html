@@ -115,32 +115,30 @@
 <h2>Explorer</h2>
 
 <form>
-<div>
-	<div class="control-group" style="margin-bottom: 0px;">
-		<select id="map_name_list" onchange="select_map()" style="font-size: small; height:25px; width:100px; margin-bottom: 0px;"></select>	
-		<input type="text" id="url" style="font-size: small; width: 500px; height:20px; padding: 1px; margin-bottom: 0px;" />
-		<select name="method_type" id="method_type" style="font-size: small; height:25px; width:70px; margin-bottom: 0px;">
-			<option value="get">GET</option>
-			<option value="post">POST</option>
-		</select>
-		<input class="btn" type="button" value="Send" style="font-size: small; width:60px; height:25px; margin-bottom: 0px;" onclick="send(this.form.url.value,this.form.method_type.options[this.form.method_type.selectedIndex].value,request_frm.data_json.value)" />
+	<div class="container-fluid" >
+		<div class="input-append">
+			<input type="text" id="url" class="span8" />		
+			<input class="btn" type="button" value="GET" onclick="send(this.form.url.value,'get',request_frm.data_json.value)" />
+			<input class="btn" type="button" value="POST" onclick="send(this.form.url.value,'post',request_frm.data_json.value)" />		
+		</div>
+		<small><a data-toggle="modal" href="#filter">Query</a></small>
 	</div>
-	<div style="margin: 0px 20px 0px 110px; font-size: x-small;"><a data-toggle="modal" href="#filter">リクエストクエリの入力</a></div>
-</div>
-<div class="container-fluid" style="margin-top: 20px;">
-	<div class="row-fluid">
-		<div class="span8">
-			<cli id="result_body" class="prettyprint" style="padding: 5px;"></cli>
-			<cli id="result_header" class="prettyprint" style="padding: 5px;"></cli>
-	    </div>
-		<div class="span4">
-			<pre id="method_description" caption="Description"></pre>
-			<pre id="request_param" caption="Parameter"></pre>
-			<pre id="request_request" caption="Request"></pre>
 
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span8">
+				<cli id="result_body" class="prettyprint" style="font-size: x-small; line-height: 15px;"></cli>
+				<cli id="result_header" class="prettyprint" style="font-size: x-small; line-height: 15px;"></cli>
+		    </div>
+			<div class="span4" style="margin-top: 20px;">
+				<select id="map_name_list" onchange="select_map()"></select>
+				<pre id="method_description" caption="Description"></pre>
+				<pre id="request_param" caption="Parameter"></pre>
+				<pre id="request_request" caption="Request"></pre>
+	
+			</div>
 		</div>
 	</div>
-</div>
-
 </form>
+
 </rt:block>

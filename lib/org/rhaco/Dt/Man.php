@@ -1,5 +1,5 @@
 <?php
-namespace org\rhaco;
+namespace org\rhaco\Dt;
 /**
  * ドキュメントの取得
  * @author tokushima

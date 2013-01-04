@@ -12,11 +12,13 @@ if(extension_loaded('mbstring')){
 }
 $parse_args = function($json_file=null,$merge_keys=array()){
 	$params = array();
-	$value = null;
+	$value = $cmd = null;
 	if(isset($_SERVER['REQUEST_METHOD'])){
 		$params = isset($_GET) ? $_GET : array();
 	}else{
-		$argv = array_slice($_SERVER['argv'],1);
+		$argv = $_SERVER['argv'];
+		$argv = array_slice($argv,1);
+		$cmd = array_shift($argv);
 		$value = (empty($argv)) ? null : array_shift($argv);
 		$params = array();
 		
@@ -43,9 +45,10 @@ $parse_args = function($json_file=null,$merge_keys=array()){
 			}
 		}
 	}
-	$_ENV['params'] = $params;
+	$_ENV['cmd'] = $cmd;
 	$_ENV['value'] = $value;
-	return array($value,$params);
+	$_ENV['params'] = $params;
+	return array($cmd,$value,$params);
 };
 $has = function($key){
 	return (isset($_ENV['params']) && array_key_exists($key,$_ENV['params']));
@@ -80,7 +83,7 @@ $autoload_func = function($c){
 };
 $json_file = preg_replace('/^.+\:\/\/(.+)$/','\\1',preg_replace('/^(.+)\.[^\/]+/','\\1',__FILE__)).'.json';
 $merge_keys = array('bootstrap');
-list($value,$params) = $parse_args($json_file,$merge_keys);
+list($cmd,$value,$params) = $parse_args($json_file,$merge_keys);
 
 if($has('bootstrap')){
 	foreach($in_array('bootstrap') as $bp){
@@ -132,12 +135,15 @@ $command = function($is_summary,$is_help,$cmd,$pathname,$package_base) use($prin
 	if(!$is_summary && !$is_help && isset($cmd_array[$cmd])){
 		try{
 			$_ENV['return'] = $return = 0;
+			$value = $_ENV['value'];
+
 			if(sizeof($cmd_array) == 1){
 				try{
 					if(is_file(dirname($pathname).'/__setup__.php')) include(dirname($pathname).'/__setup__.php');
 					$_ENV['return'] = $return = include($pathname);
 					if(is_file(dirname($pathname).'/__teardown__.php')) include(dirname($pathname).'/__teardown__.php');
 				}catch(Exception $e){
+					$_ENV['exception'] = $e;
 					if(is_file(dirname($pathname).'/__exception__.php')) include(dirname($pathname).'/__exception__.php');
 					throw $e;
 				}
@@ -216,9 +222,9 @@ $command = function($is_summary,$is_help,$cmd,$pathname,$package_base) use($prin
 	return array();
 };
 
-$is_summary = empty($value);
-$is_help = (substr($value,-1) == '?');
-$value = ($is_help) ? substr($value,0,-1) : $value;
+$is_summary = empty($cmd);
+$is_help = (substr($cmd,-1) == '?');
+$cmd = ($is_help) ? substr($cmd,0,-1) : $cmd;
 $summary_array = $load_array = array();
 $include_path = explode(PATH_SEPARATOR,get_include_path());
 rsort($include_path);
@@ -239,7 +245,7 @@ foreach($include_path as $p){
 					foreach($command(
 								$is_summary,
 								$is_help,
-								$value,
+								$cmd,
 								$cf,
 								str_replace($r.'/','',$f->getPathname())
 					) as $n => $s){
@@ -255,7 +261,7 @@ foreach($include_path as $p){
 							foreach($command(
 										$is_summary,
 										$is_help,
-										$value,
+										$cmd,
 										$fi->getPathname(),
 										str_replace($r.'/','',dirname($fi->getPath())).'::'.substr($fi->getFilename(),0,-4)
 							) as $n => $s){
@@ -281,6 +287,6 @@ if($is_summary){
 		print('  '.str_pad($n,$len).' : '.$s.PHP_EOL);
 	}
 }else{
-	print($value.' not found'.PHP_EOL);
+	print($cmd.' not found'.PHP_EOL);
 }
 

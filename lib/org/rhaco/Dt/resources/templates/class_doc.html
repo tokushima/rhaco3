@@ -11,7 +11,7 @@
 	</rt:if>
 </h2>
 <rt:if param="{$extends}">
-	extends <a href="{$t.package_method_url('class_info',$f.package_name($extends))}">{$f.package_name($extends)}</a>
+	extends <a href="{$t.package_method_url('class_doc',$f.package_name($extends))}">{$f.package_name($extends)}</a>
 </rt:if>
 
 <div class="alert alert-info" style="margin-top: 30px;">
@@ -29,7 +29,7 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td><a href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -47,7 +47,7 @@
 	</thead>
 	<tbody>
 		<tr class="even">
-			<td class="span3"><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td class="span3"><a href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -71,7 +71,7 @@
 			<td>{$prop_name}</td>
 			<td>
 				<rt:if param="{$f.type($prop[0])}">
-					<a href="{$t.package_method_url('class_info',$f.type($prop[0]))}">{$prop[0]}</a>
+					<a href="{$t.package_method_url('class_doc',$f.type($prop[0]))}">{$prop[0]}</a>
 				<rt:else />
 					{$prop[0]}
 				</rt:if>
@@ -119,11 +119,11 @@
 	<tbody>
 		<tr>
 			<td class="span3">
-				<a href="{$t.package_method_url('class_info',$f.package_name($class_name))}">{$f.package_name($class_name)}</a>
+				<a href="{$t.package_method_url('class_doc',$f.package_name($class_name))}">{$f.package_name($class_name)}</a>
 			</td>
 			<td>
 				<rt:loop param="method_name_list" var="method_name">
-					<div><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></div>
+					<div><a href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></div>
 				</rt:loop>
 			</td>
 		</tr>
@@ -145,7 +145,7 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td><a href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -163,7 +163,7 @@
 	</thead>
 	<tbody>
 		<tr class="even">
-			<td class="span3"><a name="{$method_name}" href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td class="span3"><a name="{$method_name}" href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -184,7 +184,7 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td><a href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -202,7 +202,7 @@
 	</thead>
 	<tbody>
 		<tr class="even">
-			<td class="span3"><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td class="span3"><a href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -221,7 +221,7 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td><a href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td><a href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>
@@ -239,7 +239,7 @@
 	</thead>
 	<tbody>
 		<tr class="even">
-			<td class="span3"><a name="{$method_name}" href="{$t.package_method_url('method_info',$package,$method_name)}">{$method_name}</a></td>
+			<td class="span3"><a name="{$method_name}" href="{$t.package_method_url('method_doc',$package,$method_name)}">{$method_name}</a></td>
 			<td>{$t.html($summary)}</td>
 		</tr>
 	</tbody>

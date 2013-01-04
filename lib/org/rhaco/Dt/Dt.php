@@ -54,7 +54,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function model_list(){
 		$list = $errors = $error_query = $model_list = $con = array();
-		foreach(\org\rhaco\Man::classes() as $package => $info){
+		foreach(Dt\Man::classes() as $package => $info){
 			if($info['dir']){
 				foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($info['filename']),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
 					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
@@ -152,9 +152,9 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * ライブラリの一覧
 	 * @automap
 	 */
-	public function classes(){
+	public function class_list(){
 		$libs = array();
-		foreach(\org\rhaco\Man::classes() as $package => $info){
+		foreach(Dt\Man::classes() as $package => $info){
 			$r = new \ReflectionClass($info['class']);
 			$src = file_get_contents($r->getFileName());
 			$class_doc = $r->getDocComment();
@@ -193,7 +193,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function class_src($class){
-		$info = \org\rhaco\Man::class_info($class);
+		$info = Dt\Man::class_info($class);
 		foreach($info as $k => $v){
 			$this->vars($k,$v);
 		}
@@ -204,8 +204,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @param string $class
 	 * @automap
 	 */
-	public function class_info($class){
-		$info = \org\rhaco\Man::class_info($class);
+	public function class_doc($class){
+		$info = Dt\Man::class_info($class);
 		foreach($info as $k => $v){
 			$this->vars($k,$v);
 		}
@@ -229,8 +229,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @param string $method
 	 * @automap
 	 */
-	public function method_info($class,$method){
-		foreach(\org\rhaco\Man::method_info($class,$method) as $k => $v){
+	public function method_doc($class,$method){
+		foreach(Dt\Man::method_info($class,$method) as $k => $v){
 			$this->vars($k,$v);
 		}
 	}
@@ -241,7 +241,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function class_module_info($class,$module_name){
-		$ref = \org\rhaco\Man::class_info($class);
+		$ref = Dt\Man::class_info($class);
 		if(!isset($ref['modules'][$module_name])) throw new \LogicException($module_name.' not found');
 		$this->vars('package',$class);
 		$this->vars('module_name',$module_name);
@@ -500,7 +500,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function conf_list(){
 		$list = array();
-		foreach(\org\rhaco\Conf::all() as $p => $confs){
+		foreach(self::config_all() as $p => $confs){
 			foreach($confs as $n => $conf){
 				$obj = new \org\rhaco\Object();
 				$obj->package = $p;
@@ -556,8 +556,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function module_list(){
 		$list = array();
-		foreach(\org\rhaco\Man::classes() as $package => $info){
-			$i = \org\rhaco\Man::class_info($package);
+		foreach(Dt\Man::classes() as $package => $info){
+			$i = Dt\Man::class_info($package);
 			foreach($i['modules'] as $name => $m){
 				$obj = new \org\rhaco\Object();
 				$obj->package = $package;
@@ -598,7 +598,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	public function method_info_json(){
 		$result = array();
 		try{
-			$result = \org\rhaco\Man::method_info($this->in_vars('class'),$this->in_vars('method'));
+			$result = Dt\Man::method_info($this->in_vars('class'),$this->in_vars('method'));
 		}catch(\Exception $e){}
 		\org\rhaco\lang\Json::output($result);
 	}
@@ -653,5 +653,64 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$media_path = $path.'media/'.$file;
 		
 		\org\rhaco\net\http\File::attach($media_path);
+	}
+	
+	/**
+	 * Configの一覧を取得する
+	 * @return array
+	 */
+	static public function config_all(){
+		$conf_get = function($filename){
+			$src = file_get_contents($filename);
+			$gets = array();
+			if(preg_match_all('/[^\w]Conf::'.'(get)\(([\"\'])(.+?)\\2/',$src,$m)){
+				foreach($m[3] as $k => $n){
+					if(!isset($gets[$n])) $gets[$n] = array('string','');
+				}
+			}
+			if(preg_match_all("/@conf\s+([^\s]+)\s+\\$(\w+)(.*)/",$src,$m)){
+				foreach($m[0] as $k => $v) $docs[trim($m[2][$k])] = array($m[1][$k],trim($m[3][$k]));
+			}
+			if(preg_match_all("/@conf\s+\\$(\w+)(.*)/",$src,$m)){
+				foreach($m[0] as $k => $v) $docs[trim($m[1][$k])] = array('string',trim($m[2][$k]));
+			}
+			foreach($gets as $n => $v){
+				if(isset($docs[$n])) $gets[$n] = $docs[$n];
+			}
+			return $gets;
+		};
+		$gets = array();
+		foreach(Dt\Man::classes() as $p => $lib){
+			if($lib['dir']){
+				$ret = array();
+				foreach(new \RecursiveIteratorIterator(
+						new \RecursiveDirectoryIterator(
+								dirname($lib['filename'])
+								,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS)
+						,\RecursiveIteratorIterator::SELF_FIRST
+				) as $e){
+					if(substr($e->getPathname(),-4) == '.php'
+							&& strpos($e->getPathname(),'/cmd/') === false
+							&& $e->getFilename() != 'cmd.php'
+					){
+						$ret = array_merge($ret,$conf_get($e->getPathname()));
+					}
+				}
+				if(!empty($ret)) $gets[$p] = $ret;
+			}else{
+				$ret = $conf_get($lib['filename']);
+				if(!empty($ret)) $gets[$p] = $ret;
+			}
+		}
+		return $gets;
+	}
+	static public function class_info($class){
+		return Dt\Man::class_info($class);
+	}
+	static public function method_info($class,$method){
+		return Dt\Man::method_info($class,$method);
+	}
+	static public function classes(){
+		return Dt\Man::classes();
 	}
 }

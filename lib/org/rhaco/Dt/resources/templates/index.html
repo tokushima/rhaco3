@@ -18,7 +18,7 @@
 		<tr class="even{$t.cond_switch($map['debug'],' muted','')}" style="{$t.cond_switch($map['deprecated'],'text-decoration: line-through;','')}">
 			<td nowrap>
 				<rt:if param="{$map['class']}">
-					<a href="{$t.package_method_url('method_info',$map['class'],$map['method'])}">{$map['name']}</a>
+					<a href="{$t.package_method_url('method_doc',$map['class'],$map['method'])}">{$map['name']}</a>
 				<rt:else />
 					{$map['name']}
 				</rt:if>

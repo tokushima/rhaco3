@@ -41,12 +41,6 @@
           <a class="brand" href="{$t.package_method_url('index')}">{$app_name}</a>
           <div class="nav-collapse collapse">
 
-			<rt:block name="search_form">
-				<form class="navbar-search pull-left" rt:ref="true">
-					<input type="text" class="search-query span2" placeholder="Search" name="q">
-				</form>
-			</rt:block>
-
 			<ul class="nav">
 				<li class="{$t.endswith_pattern_switch('entry_list','active','inactive')}"><a href="{$t.package_method_url('entry_list')}">Entry</a></li>
 				<li class="{$t.endswith_pattern_switch('index','active','inactive')}"><a href="{$t.package_method_url('index')}">Map</a></li>
@@ -54,7 +48,7 @@
 					<li class="{$t.endswith_pattern_switch('document','active','inactive')}"><a href="{$t.package_method_url('document')}">Document</a></li>
 				</rt:if>
 				<li class="{$t.endswith_pattern_switch('explorer','active','inactive')}"><a href="{$t.package_method_url('explorer')}">Explorer</a></li>
-				<li class="{$t.endswith_pattern_switch('classes','active','inactive')}"><a href="{$t.package_method_url('classes')}">Classes</a></li>
+				<li class="{$t.endswith_pattern_switch('class_list','active','inactive')}"><a href="{$t.package_method_url('class_list')}">Classes</a></li>
 				<li class="{$t.endswith_pattern_switch('module_list','active','inactive')}"><a href="{$t.package_method_url('module_list')}">Module</a></li>
 				<li class="{$t.endswith_pattern_switch('conf_list','active','inactive')}"><a href="{$t.package_method_url('conf_list')}">Conf</a></li>
 				<rt:if param="{$has_dao}">
@@ -78,7 +72,8 @@
     <div class="container">
 		<rt:block name="content">
 		</rt:block>
-    </div> <!-- /container -->
+    </div>
+    <!-- /container -->
 		<footer>
 			<hr />
 		</footer>

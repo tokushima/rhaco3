@@ -21,13 +21,14 @@ class TwitterBootstrapExtHtml{
 				$b->escape(false);
 				$caption = $b->in_attr('caption');
 				$b->rm_attr('caption');
+				$style = $b->in_attr('style');
 
 				if($tag == 'cli'){
 					$b->name('pre');
-					$b->attr('style','background-color:#fff; color:#000; border-color:#000;');
+					$b->attr('style','background-color:#fff; color:#000; border-color:#000; padding:5px;'.$style);
 				}else if($tag == 'tree'){
 					$b->name('pre');
-					$b->attr('style','padding: 5px; line-height: 20px;');
+					$b->attr('style','padding: 5px; line-height: 20px;'.$style);
 					$b->attr('class','prettyprint lang-c');
 				}else{
 					$b->attr('class','prettyprint');
