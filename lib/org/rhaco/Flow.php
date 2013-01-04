@@ -115,11 +115,10 @@ class Flow{
 		$theme = $put_block = null;
 
 		if(isset($map['patterns']) && is_array($map['patterns'])){
+			$exp_patterns = array();
 			foreach($map['patterns'] as $k => $v){
 				if(is_int($k) || isset($map['patterns'][$k]['patterns'])){
-					if(empty($map['patterns'][$k])){
-						unset($map['patterns'][$k]);
-					}else{
+					if(!empty($map['patterns'][$k])){
 						$maps = $map['patterns'][$k];
 						unset($map['patterns'][$k]);
 						if(!isset($maps['patterns']) || !is_array($maps['patterns'])) throw new \InvalidArgumentException('patterns not found');
@@ -144,11 +143,14 @@ class Flow{
 							if(!empty($maps_sup)) $m['template_super'] = $maps_sup;
 							if(!empty($maps_mod)) $m['modules'] = array_merge($maps_mod,(isset($m['modules']) ? (is_array($m['modules']) ? $m['modules'] : array($m['modules'])) : array()));
 							if(!empty($maps_arg)) $m['args'] = array_merge($maps_arg,(isset($m['args']) ? (is_array($m['args']) ? $m['args'] : array($m['args'])) : array()));
-							$map['patterns'][$maps_url.$u] = $m;
+							$exp_patterns[$maps_url.$u] = $m;
 						}
 					}
+				}else{
+					$exp_patterns[$k] = $v;
 				}
 			}
+			$map['patterns'] = $exp_patterns;
 			foreach($map['patterns'] as $k => $v){
 				if(preg_match('/^(.*)\$(.+)$/',$k,$m)) list($k,$v['name']) = array(trim($m[1]),trim($m[2]));
 				if(substr($k,0,1) == '/') $k = substr($k,1);

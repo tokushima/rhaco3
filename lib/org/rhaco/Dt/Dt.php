@@ -106,12 +106,17 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		foreach($this->maps() as $k => $m){
 			if(!isset($m['class']) || $m['class'] != $self_name){
 				$m['summary'] = $m['error'] = '';
+				$m['see'] = array();
 				if(isset($m['class']) && isset($m['method'])){
 					try{
 						$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
 						$mr = $cr->getMethod($m['method']);
-						list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment())))));
+						$document = preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment()));
+						list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",$document)));
 						if(!isset($m['deprecated'])) $m['deprecated'] = (strpos($mr->getDocComment(),'@deprecated') !== false);
+						if(preg_match_all("/@see\s+(\w+:\/\/.+)/",$document,$match)){
+							foreach($match[1] as $v) $m['see'][] = trim($v);
+						}
 					}catch(\ReflectionException $e){
 						$m['error'] = $e->getMessage();
 					}
@@ -122,6 +127,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					,(isset($m['method'])?$m['method']:'')
 					,(isset($m['template'])?$m['template']:'')
 					,(isset($m['deprecated'])?$m['deprecated']:false)
+					,(isset($m['debug'])?$m['debug']:false)
 					,$m['url']
 					,$m['summary']
 				)) $maps[$k] = $m;
