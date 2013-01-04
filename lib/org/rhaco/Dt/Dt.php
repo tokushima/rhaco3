@@ -105,14 +105,16 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$self_name = str_replace("\\",'.',__CLASS__);
 		foreach($this->maps() as $k => $m){
 			if(!isset($m['class']) || $m['class'] != $self_name){
-				$m['summary'] = $m['error'] = '';
+				$m['error'] = '';
+				$m['summary'] = isset($m['summary']) ? $m['summary'] : '';
 				$m['see'] = array();
 				if(isset($m['class']) && isset($m['method'])){
 					try{
 						$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
 						$mr = $cr->getMethod($m['method']);
 						$document = preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment()));
-						list($m['summary']) = explode("\n",trim(preg_replace("/@.+/","",$document)));
+						list($summary) = explode("\n",trim(preg_replace("/@.+/","",$document)));
+						$m['summary'] = $summary.(empty($m['summary']) ? '' : PHP_EOL).$m['summary'];
 						if(!isset($m['deprecated'])) $m['deprecated'] = (strpos($mr->getDocComment(),'@deprecated') !== false);
 						if(preg_match_all("/@see\s+(\w+:\/\/.+)/",$document,$match)){
 							foreach($match[1] as $v) $m['see'][] = trim($v);
@@ -121,6 +123,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 						$m['error'] = $e->getMessage();
 					}
 				}
+				$m['summary'] = preg_replace('/\{i:(.+?)}/','<i class="icon-\\1"></i>',$m['summary']);
 				if($this->search_str(
 					$m['name']
 					,(isset($m['class'])?$m['class']:'')
