@@ -80,7 +80,7 @@ function tar($base,$input,$output){
 	fclose($fp);
 }
 function get_desc($path){
-	$summary = $modules = array();
+	$summary = $modules = '';
 	$src = file_get_contents($path);
 	if(is_file($path) && preg_match('/\/\*\*[^\*](.+?)\*\//ms',$src,$m)){
 		list($summary) = explode("\n",trim(preg_replace('/@.+/','',preg_replace('/^[\s]*\*[\s]{0,1}/m','',str_replace(array('/'.'**','*'.'/'),'',$m[0])))));	

@@ -89,7 +89,7 @@ output($output_file,$template_file,$vars,$option);
 
 // class list 
 $class_list = $classes = array();
-foreach(\org\rhaco\Man::classes() as $package => $info){
+foreach(\org\rhaco\Dt::classes() as $package => $info){
 	$r = new \ReflectionClass($info['class']);
 	$class_doc = $r->getDocComment();
 	$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
@@ -104,23 +104,23 @@ foreach(\org\rhaco\Man::classes() as $package => $info){
 }
 ksort($class_list);
 
-$output_file = $out_dir.'classes.html';
-$template_file = $template_dir.'classes.html';
+$output_file = $out_dir.'class_list.html';
+$template_file = $template_dir.'class_list.html';
 $vars = array('app_name'=>$entry,'class_list'=>$classes);
 output($output_file,$template_file,$vars,$option);
 
 //class info
 foreach($class_list as $package => $c){
-	$class_info = \org\rhaco\Man::class_info($package);
+	$class_info = \org\rhaco\Dt::class_info($package);
 
 	foreach(array(
 		'static_methods','methods','protected_static_methods','protected_methods',
 		'inherited_methods','inherited_static_methods','inherited_protected_static_methods','inherited_protected_methods'
 	) as $k){
 		foreach($class_info[$k] as $method => $doc){
-			$method_info = \org\rhaco\Man::method_info($package,$method);
+			$method_info = \org\rhaco\Dt::method_info($package,$method);
 			$output_file = $out_dir.$package.'__'.$method.'.html';
-			$template_file = $template_dir.'method_info.html';
+			$template_file = $template_dir.'method_doc.html';
 			$vars = array_merge($method_info,array('app_name'=>$entry));
 			output($output_file,$template_file,$vars,$option);
 		}
@@ -139,7 +139,7 @@ foreach($class_list as $package => $c){
 		output($output_file,$template_file,$vars,$option);
 	}
 	$output_file = $out_dir.$package.'.html';
-	$template_file = $template_dir.'class_info.html';
+	$template_file = $template_dir.'class_doc.html';
 	$vars = array_merge($class_info,array('app_name'=>$entry));
 	output($output_file,$template_file,$vars,$option);
 }
