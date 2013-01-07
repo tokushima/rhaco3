@@ -1,4 +1,8 @@
 <?php
+/**
+ * ライブラリのインポート
+ * @param string $value package
+ */
 $println = function($value,$fmt=null,$indent=0){
 	if($indent > 0) $value = str_repeat(' ',$indent).implode(PHP_EOL.str_repeat(' ',$indent),explode(PHP_EOL,$value));
 	if(substr(PHP_OS,0,3) == 'WIN'){
