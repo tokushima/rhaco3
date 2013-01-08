@@ -66,7 +66,7 @@ class Man{
 			}
 		}
 		$tasks = array();
-		if(preg_match_all("/TODO[\040\t](.+)/",$src,$match)){
+		if(preg_match_all("/T"."ODO[\040\t](.+)/",$src,$match)){
 			foreach($match[1] as $t) $tasks[] = trim($t);
 		}
 		$modules = array();
