@@ -27,8 +27,6 @@ class Session extends \org\rhaco\Object{
 
 			if(static::has_module('session_read')){
 				ini_set('session.save_handler','user');
-				$noop_func = create_function('','');
-				$true_func = create_function('','return true;');
 				session_set_save_handler(
 					array($this,'open'),
 					array($this,'close'),
