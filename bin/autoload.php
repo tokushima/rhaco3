@@ -1,6 +1,6 @@
 <?php
 spl_autoload_register(function($c){
-	$cp = str_replace('\\','//',(($c[0] == '\\') ? substr($c,1) : $c));
+	$cp = str_replace('\\','/',(($c[0] == '\\') ? substr($c,1) : $c));
 	foreach(explode(PATH_SEPARATOR,get_include_path()) as $p){
 		if(!empty($p) && ($r = realpath($p)) !== false){
 			if(is_file($f=($r.'/'.$cp.'.php')) 
