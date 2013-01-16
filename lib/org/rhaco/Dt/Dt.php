@@ -131,6 +131,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					,(isset($m['template'])?$m['template']:'')
 					,(isset($m['deprecated'])?$m['deprecated']:false)
 					,(isset($m['debug'])?$m['debug']:false)
+					,(isset($m['em'])?$m['em']:false)
 					,$m['url']
 					,$m['summary']
 				)) $maps[$k] = $m;
