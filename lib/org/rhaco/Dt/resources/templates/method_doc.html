@@ -18,6 +18,21 @@
 	{$t.html($description)}
 </div>
 
+<rt:if param="{$see_class}">
+	<h3>See</h3>
+	<table rt:param="{$see_class}" rt:var="class">
+	<thead>
+		<tr>
+			<th>class</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="even">
+			<td><a href="{$t.package_method_url('class_doc',$f.type($class))}">{$f.type($class)}</a></td>
+		</tr>
+	</tbody>
+	</table>	
+</rt:if>
 <rt:if param="{$see_method}">
 	<h3>See</h3>
 	<table rt:param="{$see_method}" rt:var="class_method">

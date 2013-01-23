@@ -115,7 +115,7 @@ class Twitter{
 	 * @return array
 	 */
 	public function verify_credentials(){
-		$verify_credentials_url = 'https://api.twitter.com/1/account/verify_credentials.json';
+		$verify_credentials_url = 'https://api.twitter.com/1.1/account/verify_credentials.json';
 		$authorization_query = $this->authorization_query(
 								'GET',
 								$verify_credentials_url,
