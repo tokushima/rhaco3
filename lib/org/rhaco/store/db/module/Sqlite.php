@@ -37,7 +37,7 @@ class Sqlite extends Base{
 	 * @see org\rhaco\store\db\module.Base::last_insert_id_sql()
 	 */
 	public function last_insert_id_sql(){
-		return \org\rhaco\store\db\Daq::get('select last_insert_rowid() as last_insert_id;');
+		return new \org\rhaco\store\db\Daq('select last_insert_rowid() as last_insert_id;');
 	}
 	/**
 	 * create table

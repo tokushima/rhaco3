@@ -5,13 +5,30 @@ namespace org\rhaco\store\db;
  * @author tokushima
  * @var mixed[] $vars
  */
-class Daq extends \org\rhaco\Object{
+class Daq{
 	static private $count = 0;
-	protected $sql;
-	protected $vars = array();
-	protected $id;
+	private $sql;
+	private $vars = array();
+	private $id;
 
-	protected function __is_vars__(){
+	public function __construct($sql=null,array $vars=array(),$id_name=null){
+		$this->sql = $sql;
+		$this->vars = $vars;
+		$this->id = $id_name;
+	}
+	public function id(){
+		return $this->id;
+	}
+	public function sql(){
+		return $this->sql;
+	}
+	public function ar_vars(){
+		return (empty($this->vars) ? array() : $this->vars);
+	}
+	public function is_id(){
+		return !empty($this->id);
+	}
+	public function is_vars(){
 		return !empty($this->vars);
 	}
 	public function unique_sql(){
@@ -27,19 +44,5 @@ class Daq extends \org\rhaco\Object{
 			}
 		}
 		return $sql;
-	}
-	/**
-	 * Daqを返す
-	 * @param string $sql
-	 * @param array $vars
-	 * @param string $id_name
-	 * @return Daq
-	 */
-	final static public function get($sql,array $vars=array(),$id_name=null){
-		$self = new self();
-		$self->sql = $sql;
-		$self->vars = $vars;	
-		$self->id = $id_name;
-		return $self;
 	}
 }

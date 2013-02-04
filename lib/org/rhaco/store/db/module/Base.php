@@ -51,7 +51,7 @@ abstract class Base extends \org\rhaco\Object{
 			$insert[] = $this->quotation($column->column());
 			$vars[] = $this->update_value($dao,$column->name());
 		}
-		return Daq::get('insert into '.$this->quotation($column->table()).' ('.implode(',',$insert).') values ('.implode(',',array_fill(0,sizeof($insert),'?')).');'
+		return new Daq('insert into '.$this->quotation($column->table()).' ('.implode(',',$insert).') values ('.implode(',',array_fill(0,sizeof($insert),'?')).');'
 					,$vars
 					,$autoid
 				);
@@ -77,7 +77,7 @@ abstract class Base extends \org\rhaco\Object{
 		}
 		$vars = array_merge($updatevars,$wherevars);
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(),null,false);
-		return Daq::get(
+		return new Daq(
 						'update '.$this->quotation($column->table()).' set '.implode(',',$update).' where '.implode(' and ',$where).(empty($where_sql) ? '' : ' and '.$where_sql)
 						,array_merge($vars,$where_vars)
 					);
@@ -94,7 +94,7 @@ abstract class Base extends \org\rhaco\Object{
 			$vars[] = $dao->{$column->name()}();
 		}
 		if(empty($where)) throw new \LogicException('not primary');
-		return Daq::get(
+		return new Daq(
 						'delete from '.$this->quotation($column->table()).' where '.implode(' and ',$where)
 						,$vars
 					);
@@ -108,7 +108,7 @@ abstract class Base extends \org\rhaco\Object{
 	public function find_delete_sql(Dao $dao,Q $query){
 		$from = array();
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(),null,false);
-		return Daq::get(
+		return new Daq(
 						'delete from '.$this->quotation($dao->table()).(empty($where_sql) ? '' : ' where '.$where_sql)
 						,$where_vars
 					);
@@ -141,7 +141,7 @@ abstract class Base extends \org\rhaco\Object{
 		}
 		if(empty($select)) throw new \LogicException('select invalid');
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(true),$this->where_cond_columns($dao->conds(),$from));
-		return Daq::get(('select '.implode(',',$select).' from '.implode(',',$from)
+		return new Daq(('select '.implode(',',$select).' from '.implode(',',$from)
 										.(empty($where_sql) ? '' : ' where '.$where_sql)
 										.$this->select_option_sql($paginator,$this->select_order($query,$self_columns))
 							)
@@ -153,7 +153,7 @@ abstract class Base extends \org\rhaco\Object{
 		if($query->is_order_by_rand()){
 			$order[] = $this->order_random_str;
 		}else{
-			foreach($query->order_by() as $q){
+			foreach($query->ar_order_by() as $q){
 				foreach($q->ar_arg1() as $column_str){
 					$order[] = $this->get_column($column_str,$self_columns)->column_alias().(($q->type() == Q::ORDER_ASC) ? ' asc' : ' desc');
 				}
@@ -253,7 +253,7 @@ abstract class Base extends \org\rhaco\Object{
 			$from[$column->table_alias()] = $column->table().' '.$column->table_alias();
 		}
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(true),$this->where_cond_columns($dao->conds(),$from));
-		return Daq::get(('select '.$exe.'('.$target_column->table_alias().'.'.$this->quotation($target_column->column()).') target_column'
+		return new Daq(('select '.$exe.'('.$target_column->table_alias().'.'.$this->quotation($target_column->column()).') target_column'
 										.(empty($select) ? '' : ','.implode(',',$select))
 										.' from '.implode(',',$from)
 										.(empty($where_sql) ? '' : ' where '.$where_sql)
@@ -323,7 +323,7 @@ abstract class Base extends \org\rhaco\Object{
 			return $this->where_sql($dao,$from,$query,$self_columns,null,$alias);
 		}
 		$and = $vars = array();
-		$arg2 = ($q->arg2() === null) ? array(null) : $q->ar_arg2();
+		$arg2 = $q->is_arg2() ? $q->ar_arg2() : array(null);
 		foreach($arg2 as $base_value){
 			$or = array();
 			foreach($q->ar_arg1() as $column_str){
@@ -368,7 +368,7 @@ abstract class Base extends \org\rhaco\Object{
 				}
 				if($value instanceof Daq){
 					$is_add_value = false;
-					$vars = array_merge($vars,$value->vars());
+					$vars = array_merge($vars,$value->ar_vars());
 				}
 				$add_join_conds = $dao->join_conds($column->name());
 				if(!empty($add_join_conds)) $column_alias .= ' and '.$this->where_cond_columns($add_join_conds,$from);

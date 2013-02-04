@@ -3,24 +3,16 @@ namespace org\rhaco\store\db;
 /**
  * DBコントローラ
  * @author tokushima
- * @var string $type モジュールのクラス
- * @var string $host 接続先ホスト
- * @var string $dbname 接続先DB名
- * @var string $user 接続ユーザ
- * @var string $password 接続パスワード
- * @var integer $port 接続ポート番号
- * @var string $sock 接続先のソケットパス(unix_socket)
- * @var string $encode エンコード
  */
-class Dbc extends \org\rhaco\Object implements \Iterator{
-	protected $type;
-	protected $host;
-	protected $dbname;
-	protected $user;
-	protected $password;
-	protected $port;
-	protected $sock;
-	protected $encode;
+class Dbc implements \Iterator{
+	private $type;
+	private $host;
+	private $dbname;
+	private $user;
+	private $password;
+	private $port;
+	private $sock;
+	private $encode;
 
 	private $connection;
 	private $statement;
@@ -32,42 +24,26 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 	 * コンストラクタ
 	 * @param string{} $def 接続情報の配列
 	 */
-	public function __new__(array $def){
+	public function __construct(array $def=array()){
 		foreach(array('type','host','dbname','user','password','port','sock','encode') as $k){
-			if(isset($def[$k])) $this->{$k}($def[$k]);
+			if(isset($def[$k])) $this->{$k} = $def[$k];
 		}
-		$this->connect();
-	}
-	/**
-	 * 接続
-	 * @throws \RuntimeException
-	 */
-	public function connect(){
-		if($this->connection === null){
-			if(empty($this->type)) $this->type('org.rhaco.store.db.module.Mysql');
-			if(empty($this->encode)) $this->encode('utf8');
-			if(empty($this->user)){
-				$this->user('root');
-				$this->password('root');
-			}
-			if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('could not find module `'.((substr($s=str_replace("\\",'.',$this->type),0,1) == '.') ? substr($s,1) : $s).'`');
-			$r = new \ReflectionClass($this->type);
-			$this->connection_module = $r->newInstanceArgs(array($this->encode));
-			$this->set_object_module($this->connection_module);
-			/**
-			 * 接続定義
-			 * @param string $dbname
-			 * @param string $host
-			 * @param integer $port
-			 * @param string $user
-			 * @param string $password
-			 * @param string $sock
-			 */
-			$this->connection = $this->object_module('connect',$this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
-			if(empty($this->connection)) throw new \RuntimeException('connection fail '.$this->dbname);
-			$this->connection->beginTransaction();
+		if(empty($this->type)) $this->type = 'org.rhaco.store.db.module.Mysql';
+		if(empty($this->encode)) $this->encode = 'utf8';
+		if(empty($this->user)){
+			$this->user = 'root';
+			$this->password = 'root';
 		}
-		return $this;
+		$this->type = str_replace('.','\\',$this->type);
+		if($this->type[0] !== '\\') $this->type = '\\'.$this->type;
+		if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('could not find module `'.((substr($s=str_replace("\\",'.',$this->type),0,1) == '.') ? substr($s,1) : $s).'`');
+		$r = new \ReflectionClass($this->type);
+		$this->connection_module = $r->newInstance();
+		if($this->connection_module instanceof \org\rhaco\store\db\module\Base){
+			$this->connection = $this->connection_module->connect($this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
+		}
+		if(empty($this->connection)) throw new \RuntimeException('connection fail '.$this->dbname);
+		$this->connection->beginTransaction();
 	}
 	/**
 	 * 接続モジュール
@@ -75,14 +51,7 @@ class Dbc extends \org\rhaco\Object implements \Iterator{
 	public function connection_module(){
 		return $this->connection_module;
 	}
-	protected function __set_type__($type){
-		if(!empty($type)){
-			$this->type = str_replace('.',"\\",$type);
-			if($this->type[0] !== "\\") $this->type = "\\".$this->type;
-		}
-		return $this;
-	}
-	protected function __del__(){
+	public function __destruct(){
 		if($this->connection !== null){
 			try{
 				$this->connection->commit();

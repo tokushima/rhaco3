@@ -42,6 +42,9 @@ class Column{
 	public function base($v=null){
 		return $this->accessor('base',$v);
 	}
+	public function is_base(){
+		return ($this->base === true);
+	}
 	static public function cond_instance($column,$column_alias,$table,$table_alias){
 		$self = new self();
 		$self->column($column);

@@ -1,15 +1,10 @@
 <?php
 namespace org\rhaco\store\db;
 /**
- * 条件
+ * Where query
  * @author tokushima
- * @var number $type @['set'=>false]
- * @var number $param @['set'=>false]
- * @var Q[] $and_block @['set'=>false]
- * @var Q[] $order_by @['set'=>false]
- * @var org.rhaco.Paginator $paginator @['set'=>false]
  */
-class Q extends \org\rhaco\Object{
+class Q{
 	const EQ = 1;
 	const NEQ = 2;
 	const GT = 3;
@@ -32,16 +27,16 @@ class Q extends \org\rhaco\Object{
 	const IGNORE = 2;
 	const NOT = 4;
 
-	protected $arg1;
-	protected $arg2;
-	protected $type;
-	protected $param;
-	protected $and_block = array();
-	protected $or_block = array();
-	protected $paginator;
-	protected $order_by = array();
+	private $arg1;
+	private $arg2;
+	private $type;
+	private $param;
+	private $and_block = array();
+	private $or_block = array();
+	private $paginator;
+	private $order_by = array();
 
-	protected function __new__($type=self::AND_BLOCK,$arg1=null,$arg2=null,$param=null){
+	public function __construct($type=self::AND_BLOCK,$arg1=null,$arg2=null,$param=null){
 		if($type === self::AND_BLOCK){
 			$this->and_block = $arg1;
 		}else if($type === self::OR_BLOCK){
@@ -59,6 +54,55 @@ class Q extends \org\rhaco\Object{
 			if(!ctype_digit((string)$param)) throw new \InvalidArgumentException('`'.(string)$param.'` invalid param type');
 			$this->param = decbin($param);
 		}
+	}
+	private function ar_value($v){
+		return is_array($v) ? $v : (($v === null) ? array() : array($v));
+	}
+	public function is_arg1(){
+		return (isset($this->arg1) && $this->arg1 !== '');
+	}
+	public function ar_arg1(){
+		if(empty($this->arg1)) return array();
+		if(is_string($this->arg1)){
+			$result = array();
+			foreach(explode(',',$this->arg1) as $arg){
+				if(!empty($arg)) $result[] = $arg;
+			}
+			return $result;
+		}else if($this->arg1 instanceof Column){
+			return array($this->arg1);
+		}
+		throw new \InvalidArgumentException('invalid arg1');
+	}
+	public function ar_arg2(){
+		return $this->ar_value($this->arg2);
+	}
+	public function is_arg2(){
+		return (isset($this->arg2) && $this->arg2 !== '');
+	}
+	public function type(){
+		return $this->type;
+	}
+	public function param(){
+		return $this->param;
+	}
+	public function ar_and_block(){
+		return $this->ar_value($this->and_block);
+	}
+	public function ar_or_block(){
+		return $this->ar_value($this->or_block);
+	}
+	public function is_order_by(){
+		return !empty($this->order_by);
+	}
+	public function in_order_by($key){
+		return isset($this->order_by[$key]) ? $this->order_by[$key] : null;
+	}
+	public function ar_order_by(){
+		return $this->ar_value($this->order_by);
+	}
+	public function paginator(){
+		return $this->paginator;
 	}
 	/**
 	 * ソート順がランダムか
@@ -79,7 +123,7 @@ class Q extends \org\rhaco\Object{
 		$args = func_get_args();
 		foreach($args as $arg){
 			if(!empty($arg)){
-				if($arg instanceof Q){
+				if($arg instanceof self){
 					if($arg->type() == self::ORDER_ASC || $arg->type() == self::ORDER_DESC || $arg->type() == self::ORDER_RAND){
 						$this->order_by[] = $arg;
 					}else if($arg->type() == self::ORDER){
@@ -92,11 +136,11 @@ class Q extends \org\rhaco\Object{
 						}
 					}else if($arg->type() == self::AND_BLOCK){
 						if(!$arg->none()){
-							call_user_func_array(array($this,'add'),$arg->and_block());
-							$this->or_block = array_merge($this->or_block,$arg->or_block());
+							call_user_func_array(array($this,'add'),$arg->ar_and_block());
+							$this->or_block = array_merge($this->or_block,$arg->ar_or_block());
 						}
 					}else if($arg->type() == self::OR_BLOCK){
-						if(!$arg->none()) $this->or_block = array_merge($this->or_block,$arg->or_block());
+						if(!$arg->none()) $this->or_block = array_merge($this->or_block,$arg->ar_or_block());
 					}else{
 						$this->and_block[] = $arg;
 					}
@@ -108,19 +152,6 @@ class Q extends \org\rhaco\Object{
 			}
 		}
 		return $this;
-	}
-	protected function __ar_arg1__(){
-		if(empty($this->arg1)) return array();
-		if(is_string($this->arg1)){
-			$result = array();
-			foreach(explode(',',$this->arg1()) as $arg){
-				if(!empty($arg)) $result[] = $arg;
-			}
-			return $result;
-		}else if($this->arg1 instanceof Column){
-			return array($this->arg1);
-		}
-		throw new \InvalidArgumentException('invalid arg1');
 	}
 	/**
 	 * 条件が存在しない
@@ -247,7 +278,7 @@ class Q extends \org\rhaco\Object{
 	 * in
 	 * @param string $column_str 指定のプロパティ名
 	 * @param string $words 絞り込み文字列
-	 * @param integer $param 
+	 * @param integer $param
 	 */
 	static public function in($column_str,$words,$param=null){
 		try{
