@@ -92,7 +92,7 @@ class Facebook{
 	 * @param string  $scope 
 	 * @param string $redirect_url
 	 * @param boolean $reset
-	 * @param string $display page, touch
+	 * @param string $display page: PC表示, wap: モバイル表示
 	 * @return $this
 	 */
 	public function get_access_token($scope=null,$redirect_url=null,$reset=false,$display=null){
@@ -111,7 +111,7 @@ class Facebook{
 				$http->vars('state',$sess->in_vars('state'));
 				$http->vars('scope',$scope);
 				if(!empty($display)) $http->vars('display',$display);
-				$http->do_redirect('https://graph.facebook.com/oauth/authorize');
+				$http->do_redirect('https://www.facebook.com/dialog/oauth');
 			}
 		}
 		if($req->is_vars('state') && $req->in_vars('state') == $sess->in_vars('state')){
