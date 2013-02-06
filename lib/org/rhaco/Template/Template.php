@@ -160,10 +160,32 @@ class Template extends \org\rhaco\Object{
 		$php = array(' ?>','<?php ','->');
 		$str = array('__PHP_TAG_END__','__PHP_TAG_START__','__PHP_ARROW__');
 		$src = str_replace($php,$str,$src);
+		if($bool = $this->html_script_search($src,$keys,$tags)) $src = str_replace($tags,$keys,$src);
 		$src = $this->parse_url($src,$this->media_url);
+		if($bool) $src = str_replace($keys,$tags,$src);
 		$src = str_replace($str,$php,$src);
 		$src = str_replace(array('__ESC_DQ__','__ESC_SQ__','__ESC_DESC__'),array("\\\"","\\'","\\\\"),$src);
 		return $src;
+		
+		/***
+		 $src = pre('
+		 		<script language="javascript">
+		 		var i = "{$abc}";
+		 		var img = "<img src=\'hoge.jpg\' />";
+		 		</script>
+		 		<img src=\'hoge.jpg\' />
+		 		');
+		$result = pre('
+				<script language="javascript">
+				var i = "123";
+				var img = "<img src=\'hoge.jpg\' />";
+				</script>
+				<img src=\'http://localhost/hoge/media/hoge.jpg\' />
+				');
+		$t = new self('http://localhost/hoge/media');
+		$t->vars("abc",123);
+		eq($result,$t->get($src));
+		*/
 	}
 	private function exec($_src_){
 		/**
@@ -955,6 +977,17 @@ class Template extends \org\rhaco\Object{
 	}
 	private function variable_string($src){
 		return (empty($src) || isset($src[0]) && $src[0] == '$') ? $src : '$'.$src;
+	}
+	private function html_script_search($src,&$keys,&$tags){
+		$keys = $tags = array();
+		$uniq = uniqid('uniq');		
+		$i = 0;
+		Xml::set($tag,'<:>'.$src.'</:>');
+		foreach($tag->in('script') as $obj){
+			$keys[] = '__'.$uniq.($i++).'__';
+			$tags[] = $obj->plain();
+		}
+		return ($i > 0);
 	}
 	private function html_reform($src){
 		if(strpos($src,'rt:aref') !== false){
