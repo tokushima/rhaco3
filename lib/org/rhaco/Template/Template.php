@@ -169,6 +169,7 @@ class Template extends \org\rhaco\Object{
 		
 		/***
 		 $src = pre('
+		 		<script src="abc.js"></script>
 		 		<script language="javascript">
 		 		var i = "{$abc}";
 		 		var img = "<img src=\'hoge.jpg\' />";
@@ -176,6 +177,7 @@ class Template extends \org\rhaco\Object{
 		 		<img src=\'hoge.jpg\' />
 		 		');
 		$result = pre('
+				<script src="http://localhost/hoge/media/abc.js"></script>
 				<script language="javascript">
 				var i = "123";
 				var img = "<img src=\'hoge.jpg\' />";
@@ -984,8 +986,10 @@ class Template extends \org\rhaco\Object{
 		$i = 0;
 		Xml::set($tag,'<:>'.$src.'</:>');
 		foreach($tag->in('script') as $obj){
-			$keys[] = '__'.$uniq.($i++).'__';
-			$tags[] = $obj->plain();
+			if(!$obj->is_attr('src')){
+				$keys[] = '__'.$uniq.($i++).'__';
+				$tags[] = $obj->plain();
+			}
 		}
 		return ($i > 0);
 	}
