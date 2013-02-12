@@ -4,8 +4,3 @@
 /.project
 /.htaccess
 /work
-/appdb
-/tmp.php
-/xdebug.db
-/testman_coverage_client.php
-/testman.php
