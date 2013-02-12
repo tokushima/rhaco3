@@ -10,12 +10,12 @@ use \org\rhaco\store\db\Column;
  * DB操作モジュールの基底クラス
  * @author tokushima
  */
-abstract class Base extends \org\rhaco\Object{
+abstract class Base{
 	protected $encode;
-	protected $quotation = '`';
 	protected $order_random_str = 'rand()';
+	protected $quotation = '`';
 
-	protected function __new__($encode=null){
+	public function __construct($encode=null){
 		$this->encode = $encode;
 	}
 	/**

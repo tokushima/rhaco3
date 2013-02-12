@@ -38,7 +38,7 @@ class Dbc implements \Iterator{
 		if($this->type[0] !== '\\') $this->type = '\\'.$this->type;
 		if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('could not find module `'.((substr($s=str_replace("\\",'.',$this->type),0,1) == '.') ? substr($s,1) : $s).'`');
 		$r = new \ReflectionClass($this->type);
-		$this->connection_module = $r->newInstance();
+		$this->connection_module = $r->newInstanceArgs(array($this->encode));
 		if($this->connection_module instanceof \org\rhaco\store\db\module\Base){
 			$this->connection = $this->connection_module->connect($this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
 		}
