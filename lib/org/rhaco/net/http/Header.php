@@ -83,7 +83,7 @@ class Header{
 	 */
 	static public function redirect($url,array $vars=array()){
 		if(!empty($vars)){
-			$requestString = \org\rhaco\net\Http::query($vars);
+			$requestString = \org\rhaco\net\Query::get($vars);
 			if(substr($requestString,0,1) == "?") $requestString = substr($requestString,1);
 			$url = sprintf("%s?%s",$url,$requestString);
 		}
