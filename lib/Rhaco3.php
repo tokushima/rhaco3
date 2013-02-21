@@ -31,11 +31,13 @@ if(!class_exists('Rhaco3')){
 			define('LIBDIR',self::$lib_dir);
 			define('EXTLIBDIR',self::$lib_dir.'_extlib/');
 			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlib/data');
-			set_include_path(self::$lib_dir.PATH_SEPARATOR
-								.self::$lib_dir.'_vendor'.PATH_SEPARATOR
-								.self::$lib_dir.'_extlib'.PATH_SEPARATOR
-								.get_include_path()
-			);
+			if(strpos(get_include_path(),self::$lib_dir) === false){
+				set_include_path(self::$lib_dir.PATH_SEPARATOR
+									.self::$lib_dir.'_vendor'.PATH_SEPARATOR
+									.self::$lib_dir.'_extlib'.PATH_SEPARATOR
+									.get_include_path()
+				);
+			}
 		}
 		/**
 		 * リポジトリの場所を指定する

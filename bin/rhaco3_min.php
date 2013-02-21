@@ -31,11 +31,13 @@ if(!class_exists('Rhaco3')){
 			define('LIBDIR',self::$lib_dir);
 			define('EXTLIBDIR',self::$lib_dir.'_extlib/');
 			define('__PEAR_DATA_DIR__',self::$lib_dir.'_extlib/data');
-			set_include_path(self::$lib_dir.PATH_SEPARATOR
-								.self::$lib_dir.'_vendor'.PATH_SEPARATOR
-								.self::$lib_dir.'_extlib'.PATH_SEPARATOR
-								.get_include_path()
-			);
+			if(strpos(get_include_path(),self::$lib_dir) === false){
+				set_include_path(self::$lib_dir.PATH_SEPARATOR
+									.self::$lib_dir.'_vendor'.PATH_SEPARATOR
+									.self::$lib_dir.'_extlib'.PATH_SEPARATOR
+									.get_include_path()
+				);
+			}
 		}
 		/**
 		 * リポジトリの場所を指定する
@@ -103,10 +105,18 @@ ini_set('html_errors','Off');
 set_error_handler(function($n,$s,$f,$l){
 	throw new \ErrorException($s,0,$n,$f,$l);
 });
-if(ini_get('date.timezone') == '') date_default_timezone_set('Asia/Tokyo');
+if(ini_get('date.timezone') == ''){
+	date_default_timezone_set('Asia/Tokyo');
+}
 if(extension_loaded('mbstring')){
 	if('neutral' == mb_language()) mb_language('Japanese');
 	mb_internal_encoding('UTF-8');
+}
+if(($libpath=realpath('./lib')) !== false && strpos(get_include_path(),$libpath) === false){
+	set_include_path($libpath
+		.PATH_SEPARATOR.$libpath.'/_vendor'
+		.PATH_SEPARATOR.get_include_path()
+	);
 }
 if(sizeof(debug_backtrace(false))>0){
 	if(is_file($f=(getcwd().'/__settings__.php'))){
