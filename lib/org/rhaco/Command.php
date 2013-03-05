@@ -144,14 +144,14 @@ class Command{
 	static public function stdin($msg,$default=null,$choice=array(),$multiline=false,$invisible=false){
 		$result = null;
 		print($msg.(empty($choice) ? '' : ' ('.implode(' / ',$choice).')').(empty($default) ? '' : ' ['.$default.']').': ');
-		if($invisible && substr(PHP_OS,0,3) != 'WIN') `stty -echo`;
+		if($invisible && substr(PHP_OS,0,3) != 'WIN') `tty -s && stty -echo`;
 		while(true){
 			fscanf(STDIN,'%s',$b);
 			if($multiline && $b == '.') break;
 			$result .= $b."\n";
 			if(!$multiline) break;
 		}
-		if($invisible && substr(PHP_OS,0,3) != 'WIN') `stty echo`;
+		if($invisible && substr(PHP_OS,0,3) != 'WIN') `tty -s && stty echo`;
 		$result = substr(str_replace(array("\r\n","\r","\n"),"\n",$result),0,-1);
 		if(empty($result)) $result = $default;
 		if(empty($choice) || in_array($result,$choice)) return $result;
