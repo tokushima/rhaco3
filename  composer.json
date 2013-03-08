@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-0": {
-            "rhaco3": "lib"
+            "org\\rhaco": "lib/org/rhaco"
         }
     }
 }
