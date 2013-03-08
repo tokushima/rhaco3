@@ -1020,5 +1020,63 @@ if(eq(1,sizeof($result))){
 
 
 
+/**
+ * @var integer $id1 @['primary'=>true]
+ * @var integer $id2 @['primary'=>true]
+ * @var string $value
+ */
+class CompositePrimaryKeys extends Dao{
+	protected $id1;
+	protected $id2;
+	protected $value;
+}
+/**
+ * @var serial $id
+ * @var integer $ref_id
+ * @var integer $type_id
+ */
+class CompositePrimaryKeysRef extends Dao{
+	protected $id;
+	protected $ref_id;
+	protected $type_id;
+}
+/**
+ * @var string $value @['cond'=>'type_id(composite_primary_keys.id2.id1,ref_id)']
+ */
+class CompositePrimaryKeysRefValue extends CompositePrimaryKeysRef{
+	protected $value;
+}
+
+
+CompositePrimaryKeys::find_delete();
+r(new CompositePrimaryKeys())->id1(1)->id2(1)->value('AAA1')->save();
+r(new CompositePrimaryKeys())->id1(1)->id2(2)->value('AAA2')->save();
+r(new CompositePrimaryKeys())->id1(1)->id2(3)->value('AAA3')->save();
+
+r(new CompositePrimaryKeys())->id1(2)->id2(1)->value('BBB1')->save();
+r(new CompositePrimaryKeys())->id1(2)->id2(2)->value('BBB2')->save();
+r(new CompositePrimaryKeys())->id1(2)->id2(3)->value('BBB3')->save();
+
+CompositePrimaryKeysRef::find_delete();
+r(new CompositePrimaryKeysRef())->ref_id(1)->type_id(1)->save();
+r(new CompositePrimaryKeysRef())->ref_id(2)->type_id(1)->save();
+r(new CompositePrimaryKeysRef())->ref_id(1)->type_id(2)->save();
+r(new CompositePrimaryKeysRef())->ref_id(2)->type_id(2)->save();
+
+
+$i = 0;
+$r = array(
+array(1,1,'AAA1'),
+array(2,1,'BBB1'),
+array(1,2,'AAA2'),
+array(2,2,'BBB2'),
+);
+foreach(CompositePrimaryKeysRefValue::find(Q::order('type_id,id')) as $o){
+	eq($r[$i][0],$o->ref_id());
+	eq($r[$i][1],$o->type_id());
+	eq($r[$i][2],$o->value());
+	$i++;
+}
+eq(4,$i);
 
 

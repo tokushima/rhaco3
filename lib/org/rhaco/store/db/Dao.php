@@ -167,18 +167,23 @@ abstract class Dao extends \org\rhaco\Object{
 						if(!empty($conds_string)){
 							foreach(explode(',',$conds_string) as $key => $cond){
 								$tcc = explode('.',$cond,3);
-								if(sizeof($tcc) < 2) throw new \LogicException('annotation error : `'.$name.'`');
-								if(sizeof($tcc) === 3){
-									list($t,$c1,$c2) = $tcc;
-									$ref_table = self::set_table_name($t,$p);
-									$ref_table_alias = 't'.self::$_cnt_++;
-									$conds[] = Column::cond_instance($c1,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
-									$conds[] = Column::cond_instance($c2,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
-								}else{
-									list($t,$c1) = $tcc;
-									$ref_table = self::set_table_name($t,$p);
-									$ref_table_alias = 't'.self::$_cnt_++;
-									$conds[] = Column::cond_instance($c1,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
+								switch(sizeof($tcc)){
+									case 1:
+										$conds[] = Column::cond_instance($tcc[0],'c'.self::$_cnt_++,$this->table(),$root_table_alias);
+										break;
+									case 2:
+										list($t,$c1) = $tcc;
+										$ref_table = self::set_table_name($t,$p);
+										$ref_table_alias = 't'.self::$_cnt_++;
+										$conds[] = Column::cond_instance($c1,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
+										break;
+									case 3:
+										list($t,$c1,$c2) = $tcc;
+										$ref_table = self::set_table_name($t,$p);
+										$ref_table_alias = 't'.self::$_cnt_++;
+										$conds[] = Column::cond_instance($c1,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
+										$conds[] = Column::cond_instance($c2,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
+										break;
 								}
 							}
 						}

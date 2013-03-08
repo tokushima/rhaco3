@@ -157,3 +157,17 @@ CREATE TABLE `update_model` (
   `value` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
+
+
+CREATE TABLE `composite_primary_keys` (
+  `id1` int(11) NOT NULL,
+  `id2` int(11) NOT NULL,
+  `value` varchar(233) NOT NULL,
+  PRIMARY KEY (`id1`,`id2`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `composite_primary_keys_ref` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ref_id` int(11) NOT NULL,
+  `type_id` int(11) NOT NULL
+) ENGINE=InnoDB;
