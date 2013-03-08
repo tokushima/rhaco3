@@ -169,5 +169,6 @@ CREATE TABLE `composite_primary_keys` (
 CREATE TABLE `composite_primary_keys_ref` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ref_id` int(11) NOT NULL,
-  `type_id` int(11) NOT NULL
+  `type_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;

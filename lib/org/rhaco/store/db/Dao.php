@@ -184,6 +184,8 @@ abstract class Dao extends \org\rhaco\Object{
 										$conds[] = Column::cond_instance($c1,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
 										$conds[] = Column::cond_instance($c2,'c'.self::$_cnt_++,$ref_table,$ref_table_alias);
 										break;
+									default:
+										throw new \LogicException('annotation error : `'.$name.'`');
 								}
 							}
 						}
@@ -497,28 +499,31 @@ abstract class Dao extends \org\rhaco\Object{
 		$daq = static::module($exe.'_sql',$this,$target_name,$gorup_name,$query);
 		return $this->func_query($daq,$is_list);
 	}
-	final static private function exec_aggregator($exec,$target_name,$args,$format=true){
+	final static private function exec_aggregator_result_cast($dao,$target_name,$value,$cast){
+		switch($cast){
+			case 'float': return (float)$value;
+			case 'integer': return (int)$value;
+		}
+		$dao->{$target_name}($value);
+		return $dao->{$target_name}();
+	}
+	final static private function exec_aggregator($exec,$target_name,$args,$cast=null){
 		$dao = new static();
 		$args[] = $dao->__find_conds__();
 		$result = $dao->which_aggregator($exec,$args);
-		$current = current($result);
-		if($format){
-			$dao->{$target_name}($current);
-			$current = $dao->{$target_name}();
-		}
-		return $current;
+		return static::exec_aggregator_result_cast($dao,$target_name,current($result),$cast);
 	}
-	final static private function exec_aggregator_by($exec,$target_name,$gorup_name,$args){
+	final static private function exec_aggregator_by($exec,$target_name,$gorup_name,$args,$cast=null){
 		if(empty($target_name) || !is_string($target_name)) throw new DaoException('undef target_name');
 		if(empty($gorup_name) || !is_string($gorup_name)) throw new DaoException('undef group_name');
 		$dao = new static();
 		$args[] = $dao->__find_conds__();
 		$results = array();
 		foreach($dao->which_aggregator($exec,$args,true) as $key => $value){
-			$dao->{$target_name}($value['target_column']);
 			$dao->{$gorup_name}($value['key_column']);
-			$results[$dao->{$gorup_name}()] = $dao->{$target_name}();
+			$results[$dao->{$gorup_name}()] = static::exec_aggregator_result_cast($dao,$target_name,$value['target_column'],$cast);
 		}
+		ksort($results);
 		return $results;
 	}
 	/**
@@ -528,7 +533,7 @@ abstract class Dao extends \org\rhaco\Object{
 	 */
 	final static public function find_count($target_name=null){
 		$args = func_get_args();
-		return (int)static::exec_aggregator('count',$target_name,$args,false);
+		return (int)static::exec_aggregator('count',$target_name,$args,'integer');
 	}
 	/**
 	 * グルーピングしてカウントを取得する
@@ -606,7 +611,7 @@ abstract class Dao extends \org\rhaco\Object{
 	 */
 	final static public function find_avg($target_name){
 		$args = func_get_args();
-		return static::exec_aggregator('avg',$target_name,$args);
+		return static::exec_aggregator('avg',$target_name,$args,'float');
 	}
 	/**
 	 * グルーピングして平均を取得する
@@ -616,7 +621,7 @@ abstract class Dao extends \org\rhaco\Object{
 	 */
 	final static public function find_avg_by($target_name,$gorup_name){
 		$args = func_get_args();
-		return static::exec_aggregator_by('avg',$target_name,$gorup_name,$args);
+		return static::exec_aggregator_by('avg',$target_name,$gorup_name,$args,'float');
 	}
 	/**
 	 * distinctした一覧を取得する
