@@ -98,6 +98,35 @@ class Flow{
 		return self::$output_maps[$key];
 	}
 	/**
+	 * エントリのURLの一覧を取得する
+	 * @param string $dir
+	 * @return array
+	 */
+	static public function get_urls($dir=null){
+		if(empty($dir)) $dir = getcwd();
+		$list = array();
+		foreach(new \RecursiveDirectoryIterator(
+				$dir,
+				\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+		) as $e){
+			if(substr($e->getFilename(),-4) == '.php' &&
+					strpos($e->getPathname(),'/.') === false &&
+					strpos($e->getPathname(),'/_') === false
+			){
+				$entry_name = substr($e->getFilename(),0,-4);
+				$src = file_get_contents($e->getFilename());
+	
+				if(strpos($src,'Flow') !== false){
+					$entry_name = substr($e->getFilename(),0,-4);
+					foreach(self::get_maps($e->getPathname()) as $p => $m){
+						$list[$entry_name.'::'.$m['name']] = $m['pattern'];
+					}
+				}	
+			}
+		}
+		return $list;
+	}
+	/**
 	 * 出力する
 	 * @param array $map
 	 */
