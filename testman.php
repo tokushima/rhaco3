@@ -3,7 +3,7 @@ namespace testman{
 	// common
 	class Coverage{
 		static private $base_dir;
-		static private $target_dir;
+		static private $target_dir = array();
 		static private $start = false;
 		static private $savedb;
 	
@@ -27,10 +27,10 @@ namespace testman{
 				$exist = (is_file(self::$savedb));
 	
 				if(!empty($target_dir) && !is_array($target_dir)) $target_dir = array($target_dir);
-				self::$target_dir = $target_dir;
+				self::$target_dir = empty($target_dir) ? array() : $target_dir;
 				self::$base_dir = str_replace('\\','/',$base_dir);
 				if(substr(self::$base_dir,-1) != '/') self::$base_dir = self::$base_dir.'/';
-					
+				
 				if($db = new \PDO('sqlite:'.self::$savedb)){
 					if(!$exist){
 						$sql = 'create table coverage('.
@@ -131,7 +131,7 @@ namespace testman{
 	
 								$pre_id = $pre_line = null;
 								$getid_ps->execute(array($p));
-								while($resultset = $getid_ps->fetch(PDO::FETCH_ASSOC)){
+								while($resultset = $getid_ps->fetch(\PDO::FETCH_ASSOC)){
 									$pre_id = $resultset['id'];
 									$pre_line = $resultset['covered_line'];
 								}
@@ -228,7 +228,7 @@ namespace testman{
 				$update_ps = $db->prepare($update_sql);
 				if($update_ps === false) throw new \LogicException($update_sql);
 					
-				while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 					$percent = 0;
 					$dir = dirname($resultset['file_path']);
 					list($active_len,$ignore_line,$src_count) = self::parse_line($resultset['src']);
@@ -259,7 +259,7 @@ namespace testman{
 	
 				foreach($dirlist as $dir => $parent_dir){
 					$cnt_ps->execute(array($parent_dir,$dir));
-					$resultset = $cnt_ps->fetch(PDO::FETCH_ASSOC);
+					$resultset = $cnt_ps->fetch(\PDO::FETCH_ASSOC);
 					if((int)$resultset['cnt'] === 0){
 						$insert_ps->execute(array($parent_dir,$dir));
 					}
@@ -268,7 +268,7 @@ namespace testman{
 				$ps = $db->prepare($sql);
 				$ps->execute(array(
 						json_encode(\testman\TestRunner::get()),
-						json_encode(\testman\TestRunner::search_path())
+						json_encode(\testman\TestRunner::get_dir())
 				));
 			}
 		}
@@ -281,7 +281,7 @@ namespace testman{
 				$success = $fail = $none = 0;
 				$failure = array();
 					
-				while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 					$result = json_decode($resultset['result'],true);
 					$test_path = json_decode($resultset['test_path'],true);
 					if(!is_array($result)) $result = array();
@@ -346,7 +346,7 @@ namespace testman{
 					$ps = $db->prepare($sql);
 					$ps->execute();
 	
-					while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+					while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 						$result_dir[] = $resultset['path'];
 					}
 	
@@ -354,7 +354,7 @@ namespace testman{
 					$avg_ps = $db->prepare($avg_sql);
 					$avg_ps->execute();
 	
-					if($resultset = $avg_ps->fetch(PDO::FETCH_ASSOC)){
+					if($resultset = $avg_ps->fetch(\PDO::FETCH_ASSOC)){
 						$avg['avg'] = floor($resultset['percent_avg']);
 						$avg['uncovered'] = 100 - $resultset['percent_avg'];
 						$avg['covered'] = 100 - $avg['uncovered'];
@@ -363,14 +363,14 @@ namespace testman{
 					$sql = 'select parent_path from coverage_tree where path=?';
 					$ps = $db->prepare($sql);
 					$ps->execute(array($dir));
-					while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+					while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 						$parent_path = $resultset['parent_path'];
 					}
 	
 					$sql = 'select path from coverage_tree where parent_path=? order by path';
 					$ps = $db->prepare($sql);
 					$ps->execute(array($dir));
-					while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+					while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 						$result_dir[] = $resultset['path'];
 					}
 	
@@ -378,7 +378,7 @@ namespace testman{
 					$ps = $db->prepare($sql);
 					$ps->execute(array($dir));
 	
-					while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+					while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 						$resultset['uncovered'] = 100 - $resultset['percent'];
 						$resultset['covered'] = 100 - $resultset['uncovered'];
 						$result_file[] = $resultset;
@@ -388,7 +388,7 @@ namespace testman{
 					$avg_ps = $db->prepare($avg_sql);
 					$avg_ps->execute(array($dir.'/%'));
 	
-					if($resultset = $avg_ps->fetch(PDO::FETCH_ASSOC)){
+					if($resultset = $avg_ps->fetch(\PDO::FETCH_ASSOC)){
 						$avg['avg'] = floor($resultset['percent_avg']);
 						$avg['uncovered'] = 100 - $resultset['percent_avg'];
 						$avg['covered'] = 100 - $avg['uncovered'];
@@ -407,7 +407,7 @@ namespace testman{
 				$ps = $db->prepare($sql);
 				$ps->execute();
 	
-				while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 					$resultset['uncovered'] = 100 - $resultset['percent'];
 					$resultset['covered'] = 100 - $resultset['uncovered'];
 					$result_file[] = $resultset;
@@ -417,7 +417,7 @@ namespace testman{
 				$ps = $db->prepare($sql);
 				$ps->execute();
 					
-				if($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+				if($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 					$avg['avg'] = floor($resultset['percent_avg']);
 					$avg['uncovered'] = 100 - $resultset['percent_avg'];
 					$avg['covered'] = 100 - $avg['uncovered'];
@@ -436,7 +436,7 @@ namespace testman{
 				if($ps === false) throw new \LogicException($sql);
 				$ps->execute(array($file_path));
 					
-				while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 					foreach(explode(',',$resultset['covered_line']) as $line){
 						if(!isset($covered_line[$line])) $covered_line[$line] = array();
 						$covered_line[$line][$resultset['test_path']] = $resultset['test_path'];
@@ -448,7 +448,7 @@ namespace testman{
 				if($ps === false) throw new \LogicException($sql);
 				$ps->execute(array($file_path));
 					
-				while($resultset = $ps->fetch(PDO::FETCH_ASSOC)){
+				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
 					$src_lines = explode(PHP_EOL,$resultset['src']);
 					$covered_lines = array_flip(json_decode($resultset['covered_line'],true));
 					$ignore_lines = array_flip(json_decode($resultset['ignore_line'],true));
@@ -1106,10 +1106,12 @@ namespace testman{
 			return $src;
 		}
 		private function read_src($filename){
+			// TODO
 			$src = file_get_contents($filename);
 			return (preg_match('/^http[s]*\:\/\//',$filename)) ? $this->parse_url($src,dirname($filename)) : $src;
 		}
 		private function rttemplate($src){
+			// TODO
 			$values = array();
 			$bool = false;
 			while(\testman\Xml::set($tag,$src,'rt:template')){
@@ -1140,6 +1142,7 @@ namespace testman{
 							$paths[$n] = $filename;
 						}
 					}
+					// TODO
 					$src = $this->rttemplate($this->replace_xtag($this->read_src($filename = $href)));
 					$this->selected_template = $e->in_attr('name');
 				}
@@ -2081,10 +2084,6 @@ namespace testman{
 		public function __toString(){
 			return self::stdout();
 		}
-	
-		/**
-		 * @return integer
-		 */
 		static public function init($entry_dir=null,$test_dir=null,$lib_dir=null,$func_dir=null){
 			$path_format = function($path,$op=''){
 				$path = empty($path) ? (str_replace('\\','/',getcwd()).'/'.$op) : $path;
@@ -2118,6 +2117,9 @@ namespace testman{
 					}
 				}
 			}
+		}
+		static public function get_dir(){
+			return array(static::$entry_dir,static::$test_dir,static::$lib_dir,static::$func_dir);
 		}
 		static public function info(){
 			print(str_repeat(' ',2).'ENTRY_PATH:'.self::$entry_dir.PHP_EOL);
@@ -3128,7 +3130,8 @@ FILE;
 			if(!isset($params[$key])) return $default;
 			return $params[$key];
 		};
-		$report_dir = getcwd();
+		// TODO
+		$report_dir = getcwd().'/report';
 		$dblist = array();
 		if(is_dir($report_dir)){
 			foreach(new RecursiveDirectoryIterator(
@@ -3155,7 +3158,7 @@ FILE;
 
 			switch($in_value('view_mode')){
 				case 'source':
-					if(isset($params['file']) && !empty($params['file'])){
+					if($in_value('file') != ''){
 						$template->vars('info',\testman\Coverage::file($db_file,$in_value('file')));
 						$template->vars('file',$in_value('file'));
 						$template_file = 'source.html';
@@ -3261,26 +3264,18 @@ FILE;
 		if(isset($params['func_dir'])) $func_dir = realpath($func_dir);
 		if(!isset($entry_dir)) $entry_dir = __DIR__;
 		
+		// TODO
 		if(isset($params['report'])){
 			if(!extension_loaded('xdebug')) die('xdebug extension not loaded');
-			$db = $params['report'];
-		
-			if(empty($db)){
-				$db = date('Ymd_His');
-				if(!empty($value)) $db = $db.'-'.str_replace(array('\\','/'),'_',$value);
-				if(isset($params['m'])) $db = $db.'-'.$params['m'];
-				if(isset($params['b'])) $db = $db.'-'.$params['b'];
-			}
-			$db = \testman\Util::path_absolute($report_dir,$db.'.report');
-			if(is_file($db)){
-				if($has('f')){
-					unlink($db);
-				}else{
-					die($db.': File exists'.PHP_EOL);
-				}
-			}
-			if(!is_dir(dirname($db))) mkdir(dirname($db),0777,true);
-			\testman\Coverage::start($db,$entry_path,$lib_path);
+			
+			$db = getcwd().'/report';
+			if(!is_dir($db)) mkdir($db,0777,true);
+			$db = $db.'/'.date('Ymd_His').(empty($value) ? '' : '_'.str_replace(array('\\','/'),'_',$value));
+			if(isset($params['m'])) $db = $db.'_'.$params['m'];
+			if(isset($params['b'])) $db = $db.'_'.$params['b'];
+			$db = $db.'.report';
+
+			\testman\Coverage::start($db,$entry_dir,$lib_dir);
 		}
 		
 		\testman\TestRunner::init($entry_dir,$test_dir,$lib_dir,$func_dir);
