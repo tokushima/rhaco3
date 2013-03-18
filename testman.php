@@ -91,7 +91,7 @@ if(!isset($_SERVER['REQUEST_URI']) || !isset($_SERVER['REQUEST_METHOD'])){
 	if(isset($params['report_dir'])) $report_dir = realpath($params['report_dir']);
 	if(!isset($entry_dir)) $entry_dir = __DIR__;
 	if(!isset($report_dir)) $report_dir = __DIR__.'/report';
-	if(array_key_exists('out',$params)) $output_xml = true;
+	if(array_key_exists('xml',$params)) $output_xml = true;
 	
 	if(isset($params['encode'])){
 		$p = realpath($params['encode']);
