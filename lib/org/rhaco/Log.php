@@ -12,6 +12,8 @@ namespace org\rhaco;
  * @conf string $level ログレベル (none,error,warn,info,debug)
  * @conf boolean $disp 標準出力に出すか
  */
+use org\rhaco\net\listener\exception\ShutdownException;
+
 class Log extends \org\rhaco\Object{
 	static private $stdout = true;
 	static private $level_strs = array('none','error','warn','info','debug');
@@ -26,23 +28,25 @@ class Log extends \org\rhaco\Object{
 	protected $line;
 	protected $value;
 
-	static public function __import__(){
+	
+	static private function init(){
 		self::$id = base_convert(date('md'),10,36).base_convert(date('G'),10,36).base_convert(mt_rand(1296,46655),10,36);
 		self::$logs[] = new self(4,'--- logging start '
 									.date('Y-m-d H:i:s')
 									.' ( '.(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : (isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : null)).' )'
 									.' { '.(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null).' }'
 								.' --- ');
-	}
-	static public function __shutdown__(){
-		if(self::cur_level() >= 4){
-			if(function_exists('memory_get_usage')){
-				self::$logs[] = new self(4,sprintf('--- end logger ( %s MByte) --- ',round(number_format((memory_get_usage() / 1024 / 1024),3),2)));
+		register_shutdown_function(function(){
+			if(self::cur_level() >= 4){
+				if(function_exists('memory_get_usage')){
+					self::$logs[] = new self(4,sprintf('--- end logger ( %s MByte) --- ',round(number_format((memory_get_usage() / 1024 / 1024),3),2)));
+				}
 			}
-		}
-		self::flush();
+			self::flush();
+		});
 	}
 	static private function cur_level(){
+		if(!isset(self::$id)) self::init();
 		if(self::$current_level === null) self::$current_level = array_search(\org\rhaco\Conf::get('level','none'),self::$level_strs);
 		return self::$current_level;
 	}

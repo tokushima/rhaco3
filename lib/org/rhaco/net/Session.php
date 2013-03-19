@@ -42,6 +42,9 @@ class Session extends \org\rhaco\Object{
 				if(isset($this->vars[$session_name]) && (!static::has_module('session_verify') || static::module('session_verify') !== true)) session_regenerate_id(true);
 			}
 			session_start();
+			register_shutdown_function(function(){
+				if('' != session_id()) session_write_close();
+			});
 		}
 	}
 	final public function open($path,$name){
@@ -123,8 +126,5 @@ class Session extends \org\rhaco\Object{
 	 */
 	public function rm_vars(){
 		foreach(((func_num_args() === 0) ? array_keys($_SESSION[$this->ses_n]) : func_get_args()) as $n) unset($_SESSION[$this->ses_n][$n]);
-	}
-	static public function __shutdown__(){
-		if('' != session_id()) session_write_close();
 	}
 }

@@ -30,9 +30,6 @@ class Mail extends \org\rhaco\Object{
 	private $eol = "\n";
 	private $boundary = array('mixed'=>'mixed','alternative'=>'alternative','related'=>'related');
 
-	static public function __import__(){
-		mb_language(('neutral' == mb_language()) ? 'Japanese' : mb_language());
-	}
 	protected function __init__(){
 		$this->boundary = array('mixed'=>'----=_Part_'.uniqid('mixed'),'alternative'=>'----=_Part_'.uniqid('alternative'),'related'=>'----=_Part_'.uniqid('related'));
 	}
