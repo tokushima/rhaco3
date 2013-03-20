@@ -15,7 +15,7 @@
         	"org\\rhaco\\": "lib/"
 	    },
 	    "file": [
-	    	"bin/composer_autoload.php"
+	    	"bootstrap.php"
 	   	]
 	}
 }
