@@ -1,5 +1,5 @@
 <?php
-include_once('bin/rhaco3.php');
+include_once('bootstrap.php');
 /**
  * @name rhaco.org
  * @summary site

@@ -207,7 +207,8 @@ class Flow{
 								if(empty($automaps) || $automap){
 									$url = $k.(($m->getName() == 'index') ? '' : (($k == '') ? '' : '/').$m->getName()).str_repeat('/(.+)',$m->getNumberOfRequiredParameters());
 									for($i=0;$i<=$m->getNumberOfParameters()-$m->getNumberOfRequiredParameters();$i++){
-										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>dirname($r->getFilename()),'pkg_id'=>$pkg_id));
+										$p = is_dir(substr($r->getFilename(),0,-4)) ? substr($r->getFilename(),0,-4) : dirname($r->getFilename());
+										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>$p,'pkg_id'=>$pkg_id));
 										if($automap){
 											$automaps[$url.$suffix] = $mapvar;
 										}else{
@@ -266,7 +267,7 @@ class Flow{
 			foreach($urls as $k => $null){
 				if(preg_match("/^".(empty($k) ? '' : "\/").str_replace(array("\/",'/','@#S'),array('@#S',"\/","\/"),$k).'[\/]{0,1}$/',$pathinfo,$p)){
 					if(isset($apps[$k]['mode']) && !empty($apps[$k]['mode'])){
-						$mode = \org\rhaco\Conf::appenv();
+						$mode = \org\rhaco\Conf::appmode();
 						$bool = false;
 						foreach(explode(',',$apps[$k]['mode']) as $m){
 							if($mode == trim($m)){

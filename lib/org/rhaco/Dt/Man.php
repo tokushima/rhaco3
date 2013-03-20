@@ -255,15 +255,6 @@ class Man{
 						try{
 							include_once($e->getPathname());
 						}catch(\Exeption $ex){}
-					}else if($e->getFilename() == 'vendor.phar'){
-						$p = new \Phar($e->getPathname());
-						foreach(new \RecursiveIteratorIterator($p) as $v){
-							if(ctype_upper(substr($v->getFilename(),0,1)) && substr($v->getFilename(),-4) == '.php'){
-								try{
-									include_once($v->getPathname());
-								}catch(\Exeption $ex){}
-							}
-						}
 					}
 				}
 			}

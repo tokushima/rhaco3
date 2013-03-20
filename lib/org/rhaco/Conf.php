@@ -58,7 +58,7 @@ class Conf{
 	 * アプリケーションの動作環境
 	 * @return string
 	 */
-	static public function appenv(){
-		return defined('APPENV') ? constant('APPENV') : null;
+	static public function appmode(){
+		return defined('APPMODE') ? constant('APPMODE') : null;
 	}
 }
