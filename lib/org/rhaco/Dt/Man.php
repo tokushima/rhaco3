@@ -244,7 +244,7 @@ class Man{
 	 * @return array
 	 */
 	static public function classes(){
-		$libdir = constant('LIBDIR');
+		$libdir = defined('LIBDIR') ? constant('LIBDIR') : getcwd().'/lib';
 		$result = array();
 		if(!empty($libdir) && is_dir($libdir)){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($libdir,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
