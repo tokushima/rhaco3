@@ -29,6 +29,27 @@
 	<?php
 	define('APPMODE','local');
 
+### edit index.php
+	<?php
+	include_once('bootstrap.php');
+	
+	$flow = new \org\rhaco\Flow();
+	$flow->out(array(
+		'patterns'=>array(
+			'dev'=>array('action'=>'org.rhaco.Dt')
+		)
+	));
+
+### cmdman install
+	curl -O https://raw.github.com/tokushima/cmdman/master/cmdman.php
+
+### create .htaccess
+	php cmdman.php org.rhaco.Dt::htaccess
+
+### view
+	http://〜/〜/dev
+
+
 
 ## IDE
  <http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops4/R-4.2-201206081400/eclipse-SDK-4.2-macosx-cocoa-x86_64.tar.gz>
