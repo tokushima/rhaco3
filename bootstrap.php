@@ -80,7 +80,7 @@ if(sizeof(debug_backtrace(false))>0){
 		require_once($f);
 		
 		if(!defined('APPMODE')) define('APPMODE','local'); 
-		if(!defined('COMMONDIR')) define('_COMMONDIR',getcwd().'/commons');
+		if(!defined('COMMONDIR')) define('COMMONDIR',getcwd().'/commons');
 		if(is_file($f=(constant('COMMONDIR').'/'.constant('APPMODE').'.php'))){
 			require_once($f);
 		}

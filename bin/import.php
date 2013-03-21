@@ -1,15 +1,17 @@
 <?php
-set_time_limit(0);
-
-$package = $_SERVER['argv'][1];
+// import先のライブラリのフォルダ
 $output = getcwd().'/lib';
+// 検索するライブラリのリポジトリ
 $repository = array(
 					'http://rhaco.org/repository/3/lib/',
 					dirname(__DIR__).'/pkgman/repository',
 				);
 
 
+set_time_limit(0);
+
 $imported = array();
+$package = $_SERVER['argv'][1];
 package_import($imported,$package,$repository,$output);
 
 
@@ -113,7 +115,6 @@ function package_import(&$imported,$package,$repository,$output=null){
 					copy($rp.$dl.'.tgz',$dp.$dl.'.tgz');
 				}
 			}
-			// TODO
 			if(is_file($dp.$dl.'.tgz')){
 				$p = str_replace('.','/',$package);
 				if(is_file($vp.$p.'.php')) unlink($vp.$p.'.php');
