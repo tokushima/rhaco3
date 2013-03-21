@@ -1,18 +1,33 @@
 ##rhaco3
 
-@see [rhaco.org](http://rhaco.org)
+## Install
+
+### composer install
+	curl -s http://getcomposer.org/installer | php
+
+### edit composer.json
+	{
+    	"require": {
+			"tokushima/rhaco3":"master-dev"
+    	},
+    	"autoload":{
+    		"psr-0": {
+    	    	"site": "lib/"
+		    }
+    	}
+	}
+
+### rhaco3 install
+	php composer.phar install
 
 
-### quick start
+### edit bootstrap.php
+	<?php
+	include_once('vendor/autoload.php');
 
-    mkdir newapp
-    cd newapp
-    curl -O http://rhaco.org/rhaco3.php
-    php rhaco3.php -org.rhaco.Dt new -htaccess
-    php rhaco3.php -import
-
-
-<http://localhost/newapp/>
+### edit \_\_settings\_\_.php
+	<?php
+	define('APPMODE','local');
 
 
 ## IDE
@@ -33,5 +48,4 @@
     SVNKit - JNA Library
            - SVNKit Client Adapter (Not required)
            - SVNKit Library
- 
-
+ 	
