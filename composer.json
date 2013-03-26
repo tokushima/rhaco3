@@ -14,7 +14,7 @@
     	"psr-0": {
         	"org\\rhaco\\": "lib/"
 	    },
-	    "file": [
+	    "files": [
 	    	"bin/composer_autoload.php"
 	   	]
 	}
