@@ -441,12 +441,7 @@ exit;
 	stepping PDT by sending an XDEBUG_SESSION_START=ECLIPSE_DBGP.
 	</p>
 	</div>
-	
-	<div style="margin-bottom: 50px;">
-	<h4>Code coverage records in remote testing</h4>
-	<a href="?coverage_client=dl">download</a> - to include this script
-	</div>
-	
+		
 	
 	<div style="margin-bottom: 50px;">
 	<h3>Running Tests</h3>
@@ -467,32 +462,8 @@ exit;
 		<td>block name</td>
 	</tr>
 	<tr>
-		<td>-bootstrap</td>
-		<td>bootstrap options include the path to the file</td>
-	</tr>
-	<tr>
-		<td>-dir</td>
-		<td>htdocs directory</td>
-	</tr>
-	<tr>
-		<td>-test_dir</td>
-		<td>unit test files directory</td>
-	</tr>
-	<tr>
-		<td>-lib_dir</td>
-		<td>library class files directory</td>
-	</tr>
-	<tr>
-		<td>-func_dir</td>
-		<td>function files directory</td>
-	</tr>
-	<tr>
 		<td>-report</td>
 		<td>filename for the report</td>
-	</tr>
-	<tr>
-		<td>-xml</td>
-		<td>XML output to a file of test results</td>
 	</tr>
 	</tbody>
 	</table>
