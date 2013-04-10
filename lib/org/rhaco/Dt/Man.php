@@ -244,13 +244,42 @@ class Man{
 	 * @return array
 	 */
 	static public function classes(){
-		$libdir = defined('LIBDIR') ? constant('LIBDIR') : getcwd().'/lib';
 		$result = array();
-		if(!empty($libdir) && is_dir($libdir)){
-			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($libdir,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
-				if(strpos($e->getPathname(),'/.') === false){
-					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'
-						&& (strpos($e->getPathname(),'/_') === false || strpos($e->getPathname(),'/_vendor') !== false)
+		$include_path = array();
+		if(is_dir(getcwd().'/lib')){
+			$include_path[] = getcwd().'/lib';
+		}
+		if(class_exists('Composer\Autoload\ClassLoader')){
+			$r = new \ReflectionClass('Composer\Autoload\ClassLoader');
+			$composer_dir = dirname($r->getFileName());
+		
+			if(is_file($bf=realpath(dirname($composer_dir).'/autoload.php'))){
+				ob_start();
+				include_once($bf);
+				if(is_file($an=$composer_dir.'//autoload_namespaces.php')){
+					$class_loader = include($bf);
+					foreach($class_loader->getPrefixes() as $v){
+						foreach($v as $p){
+							$include_path[] = $p;
+						}
+					}
+				}
+				ob_end_clean();
+			}
+		}
+		foreach($include_path as $libdir){
+			if($libdir !== '.'){
+				foreach(new \RecursiveIteratorIterator(
+							new \RecursiveDirectoryIterator(
+									$libdir,
+									\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+							),\RecursiveIteratorIterator::SELF_FIRST
+				) as $e){
+					if(strpos($e->getPathname(),'/.') === false 
+							&& strpos($e->getPathname(),'/_') === false 
+							&& strpos(strtolower($e->getPathname()),'/test') === false							
+							&& ctype_upper(substr($e->getFilename(),0,1)) 
+							&& substr($e->getFilename(),-4) == '.php'
 					){
 						try{
 							include_once($e->getPathname());
@@ -258,27 +287,13 @@ class Man{
 					}
 				}
 			}
-			foreach(get_declared_classes() as $class){
-				$r = new \ReflectionClass($class);
-				if(!$r->isInterface() && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
-					$f = null;
-					$d = false;
-					$n = str_replace('\\','/',$r->getName());
-					$p = $libdir.$n;
-					if(is_file($f=$p.'.php')){
-					}else if(is_file($f=$p.'/'.basename($p).'.php')){
-						$d = true;
-					}else{
-						$p = $libdir.'_vendor/'.$n;
-						if(is_file($f=$p.'.php')){
-						}else if(is_file($f=$p.'/'.basename($p).'.php')){
-							$d = true;
-						}
-					}
-					if(is_file($f)){
-						$result[str_replace('/','.',$n)] = array('filename'=>$f,'dir'=>$d,'class'=>'\\'.$class);
-					}
-				}
+		}
+		foreach(get_declared_classes() as $class){
+			$r = new \ReflectionClass($class);
+
+			if(!$r->isInterface() && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
+				$n = str_replace('\\','/',$r->getName());
+				$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$class);
 			}
 		}
 		return $result;

@@ -54,17 +54,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function model_list(){
 		$list = $errors = $error_query = $model_list = $con = array();
-		foreach(Dt\Man::classes() as $package => $info){
-			if($info['dir']){
-				foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($info['filename']),\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),\RecursiveIteratorIterator::SELF_FIRST) as $e){
-					if(ctype_upper(substr($e->getFilename(),0,1)) && substr($e->getFilename(),-4) == '.php'){
-						try{
-							include_once($e->getPathname());
-						}catch(\Exeption $ex){}
-					}
-				}
-			}			
-		}
+		Dt\Man::classes();
+		
 		foreach(get_declared_classes() as $class){
 			$r = new \ReflectionClass($class);
 			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,$this->dao)){
@@ -682,26 +673,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		};
 		$gets = array();
 		foreach(Dt\Man::classes() as $p => $lib){
-			if($lib['dir']){
-				$ret = array();
-				foreach(new \RecursiveIteratorIterator(
-						new \RecursiveDirectoryIterator(
-								dirname($lib['filename'])
-								,\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS)
-						,\RecursiveIteratorIterator::SELF_FIRST
-				) as $e){
-					if(substr($e->getPathname(),-4) == '.php'
-							&& strpos($e->getPathname(),'/cmd/') === false
-							&& $e->getFilename() != 'cmd.php'
-					){
-						$ret = array_merge($ret,$conf_get($e->getPathname()));
-					}
-				}
-				if(!empty($ret)) $gets[$p] = $ret;
-			}else{
-				$ret = $conf_get($lib['filename']);
-				if(!empty($ret)) $gets[$p] = $ret;
-			}
+			$ret = $conf_get($lib['filename']);
+			if(!empty($ret)) $gets[$p] = $ret;
 		}
 		return $gets;
 	}
