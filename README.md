@@ -1,4 +1,4 @@
-##rhaco3
+##rhaco3 PHP framework (PHP 5 >= 5.3.0)
 
 ## Install
 
@@ -12,7 +12,7 @@
     	},
     	"autoload":{
     		"psr-0": {
-    	    	"site": "lib/"
+    	    	"local": "lib/"
 		    }
     	}
 	}
