@@ -578,7 +578,7 @@ class Http{
 			case 303:
 			case 307:
 				if(preg_match("/Location:[\040](.*)/i",$result->head,$redirect_url)){
-					$result->redirect = preg_replace("/[\r\n]/","",Path::absolute($url,$redirect_url[1]));
+					$result->redirect = preg_replace("/[\r\n]/","",trim(Path::absolute($url,$redirect_url[1])));
 					if($method == 'GET' && $result->redirect === $result->url){
 						$result->redirect = null;
 					}else if($status_redirect){
