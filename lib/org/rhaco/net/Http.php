@@ -1,172 +1,182 @@
 <?php
 namespace org\rhaco\net;
 /**
- * HTTP関連処理
+ * HTTP接続クラス
  * @author tokushima
- * @see http://jp2.php.net/manual/ja/context.ssl.php
+ *
  */
 class Http{
+	private $resource;
+	private $agent;
+	private $timeout = 30;
+	private $redirect_max = 20;
+	private $redirect_count = 1;
+
+	private $request_header = array();
+	private $request_vars = array();
+	private $request_file_vars = array();
+	private $head;
+	private $body;
+	private $cookie = array();
+	private $url;
+	private $status;
+	
 	private $user;
 	private $password;
 
-	private $agent;
-	private $timeout = 30;
-	private $status_redirect = true;
-
-	private $body;
-	private $head;
-	private $url;
-	private $status;
-	private $cmd;
-
-	private $raw;
-	protected $vars = array();
-	protected $header = array();
-
-	private $cookie = array();
-	private $form = array();
-
-	private $api_url;
-	private $api_key;
-	private $api_key_name = 'api_key';
-
-	public function __construct($agent=null,$timeout=30,$status_redirect=true){
+	public function __construct($agent=null,$timeout=30,$redirect_max=20){
 		$this->agent = $agent;
 		$this->timeout = (int)$timeout;
-		$this->status_redirect = (boolean)$status_redirect;
+		$this->redirect_max = (int)$redirect_max;
+		$this->resource = curl_init();
+	}
+	/**
+	 * 最大リダイレクト回数を設定
+	 * @param integer $redirect_max
+	 */
+	public function redirect_max($redirect_max){
+		$this->redirect_max = (integer)$redirect_max;
+	}
+	/**
+	 * タイムアウト時間を設定
+	 * @param integer $timeout
+	 */
+	public function timeout($timeout){
+		$this->timeout = (int)$timeout;
+	}
+	/**
+	 * ユーザエージェントを設定
+	 * @param string $agent
+	 */
+	public function agent($agent){
+		$this->agent = $agent;
+	}
+	/**
+	 * Basic認証
+	 * @param string $user ユーザ名
+	 * @param string $password パスワード
+	 */
+	public function basic($user,$password){
+		$this->user = $user;
+		$this->password = $password;
+		return $this;
 	}
 	public function __toString(){
-		return $this->body;
+		return $this->body();
 	}
 	/**
-	 * 自動でリダイレクトするか
-	 * @param boolean $bool
-	 */
-	public function status_redirect($bool){
-		$this->status_redirect = (boolean)$bool;
-		return $this;
-	}
-	/**
-	 * APIのベースURLを設定する
-	 * @param string $url
-	 * @return $this
-	 */
-	public function api_url($url){
-		$this->api_url = $url;
-		return $this;
-	}
-	/**
-	 * APIへ送信するキーを設定する
+	 * ヘッダを設定
 	 * @param string $key
-	 * @param string $keyname
-	 * @return $this
+	 * @param string $value
 	 */
-	public function api_key($key,$keyname='api_key'){
-		$this->api_key = $key;
-		$this->api_key_name = $keyname;
-		return $this;
+	public function header($key,$value=null){
+		$this->request_header[$key] = $value;
 	}
 	/**
-	 * 送信するRAWデータをセットする
-	 * @param string $raw
-	 * @return $this
+	 * クエリを設定
+	 * @param string $key
+	 * @param string $value
 	 */
-	public function raw($raw){
-		$this->raw = $raw;
-		return $this;
+	public function vars($key,$value=null){
+		if(is_bool($value)) $value = ($value) ? 'true' : 'false'; 
+		$this->request_vars[$key] = $value;
+		if(isset($this->request_file_vars[$key])) unset($this->request_file_vars[$key]);
 	}
 	/**
-	 * 結果のHTTPステータスを取得する
-	 * @return int
+	 * クエリにファイルを設定
+	 * @param string $key
+	 * @param string $filename
 	 */
-	public function status(){
-		return $this->status;
+	public function file_vars($key,$filename){
+		$this->request_file_vars[$key] = $filename;
+		if(isset($this->request_vars[$key])) unset($this->request_vars[$key]);
 	}
 	/**
-	 * 結果のBODYを取得する
-	 * @return string
+	 * cURL 転送用オプションを設定する
+	 * @param string $key
+	 * @param mixed $value
 	 */
-	public function body(){
-		return $this->body;
+	public function setopt($key,$value){
+		curl_setopt($this->resource,$key,$value);
 	}
 	/**
-	 * 結果のHEADを取得する
+	 * 結果のヘッダを取得
 	 * @return string
 	 */
 	public function head(){
 		return $this->head;
 	}
 	/**
-	 * 送信したURLを取得する
+	 * 結果の本文を取得
+	 * @return string
+	 */
+	public function body(){
+		return ($this->body === null || is_bool($this->body)) ? '' : $this->body;
+	}
+	/**
+	 * 結果のURLを取得
 	 * @return string
 	 */
 	public function url(){
 		return $this->url;
 	}
 	/**
-	 * 送信した生データを取得する
-	 * @return string
-	 */
-	public function cmd(){
-		return $this->cmd;
-	}
-	/**
-	 * 送信する値を取得する
-	 * @return mixed[]
-	 */
-	public function get_vars(){
-		return $this->vars;
-	}
-	/**
-	 * 送信する値を設定する
-	 * @param string $key
-	 * @param mixed $value
-	 */
-	public function vars($key,$value){
-		$this->vars[$key] = $value;
-	}
-	/**
-	 * 送信する値(ファイル)を設定する
-	 * @param string $key
-	 * @param string $filename
-	 * @param string $value
-	 */
-	public function file_vars($key,$filename,$value=null){
-		$this->vars[$key] = new \org\rhaco\io\File($filename,$value);
-	}
-	/**
-	 * 送信するHEADを設定する
-	 * @param string $key
-	 * @param string $value
-	 */
-	public function header($key,$value){
-		$this->header[$key] = $value;
-	}
-	/**
-	 * URLが有効かを調べる
-	 * @param string $url 確認するURL
-	 * @return boolean
-	 */
-	static public function is_url($url){
-		try{
-			$self = new self();
-			$result = $self->request($url,'HEAD',array(),array(),null,false);
-			return ($result->status === 200);
-		}catch(\Exception $e){}
-		return false;
-	}
-	/**
-	 * URLのステータスを確認する
-	 * @param string $url 確認するURL
+	 * 結果のステータスを取得
 	 * @return integer
 	 */
-	static public function request_status($url){
-		try{
-			$self = new self();
-			$result = $self->request($url,'HEAD',array(),array(),null,false);
-			return $result->status;
-		}catch(\Exception $e){}
-		return 404;
+	public function status(){
+		return $this->status;
+	}
+	/**
+	 * HEADリクエスト
+	 * @param string $url
+	 */
+	public function do_head($url){
+		return $this->request('HEAD',$url);
+	}
+	/**
+	 * PUTリクエスト
+	 * @param string $url
+	 */
+	public function do_put($url){
+		return $this->request('PUT',$url);
+	}
+	/**
+	 * DELETEリクエスト
+	 * @param string $url
+	 */
+	public function do_delete($url){
+		return $this->request('DELETE',$url);
+	}
+	/**
+	 * GETリクエスト
+	 * @param string $url
+	 */
+	public function do_get($url){
+		return $this->request('GET',$url);
+	}
+	/**
+	 * POSTリクエスト
+	 * @param string $url
+	 */
+	public function do_post($url){
+		return $this->request('POST',$url);
+	}
+	/**
+	 * GETリクエストでダウンロードする
+	 * @param string $url
+	 * @param string $filename
+	 */
+	public function do_download($url,$filename){
+		return $this->request('GET',$url,$filename);
+	}
+	/**
+	 * POSTリクエストでダウンロードする
+	 * @param string $url
+	 * @param string $filename
+	 */
+	public function do_post_download($url,$filename){
+		return $this->request('POST',$url,$filename);
 	}
 	/**
 	 * ヘッダ情報をハッシュで取得する
@@ -181,178 +191,176 @@ class Http{
 	}
 	/**
 	 * 配列、またはオブジェクトから値を設定する
-	 * @param mixed $array
+	 * @param array|object $vars
 	 * @throws \InvalidArgumentException
 	 * @return $this
 	 */
-	public function cp($array){
-		if(is_array($array)){
-			foreach($array as $k => $v) $this->vars[$k] = $v;
-		}else if(is_object($array)){
-			if(in_array('Traversable',class_implements($array))){
-				foreach($array as $k => $v) $this->vars[$k] = $v;
+	public function cp($vars){
+		if(is_array($vars)){
+			foreach($vars as $k => $v) $this->vars[$k] = $v;
+		}else if(is_object($vars)){
+			if(in_array('Traversable',class_implements($vars))){
+				foreach($vars as $k => $v) $this->vars[$k] = $v;
 			}else{
-				foreach(get_object_vars($array) as $k => $v) $this->vars[$k] = $v;
+				foreach(get_object_vars($vars) as $k => $v) $this->vars[$k] = $v;
 			}
 		}else{
 			throw new \InvalidArgumentException('must be an of array');
 		}
 		return $this;
 	}
-	private function build_url($url){
-		if($this->api_key !== null) $this->vars($this->api_key_name,$this->api_key);
-		if($this->api_url !== null) return Path::absolute($this->api_url,(substr($url,0,1) == '/') ? substr($url,1) : $url);
-		return $url;
-	}
-	/**
-	 * getでアクセスする
-	 * @param string $url アクセスするURL
-	 * @param boolean $form formタグの解析を行うか
-	 * @return $this
-	 */
-	public function do_get($url=null,$form=true){
-		return $this->browse($this->build_url($url),'GET',$form);
-	}
-	/**
-	 * postでアクセスする
-	 * @param string $url アクセスするURL
-	 * @param boolean $form formタグの解析を行うか
-	 * @return $this
-	 */
-	public function do_post($url=null,$form=true){
-		return $this->browse($this->build_url($url),'POST',$form);
-	}
-	/**
-	 * putでアクセスする
-	 * @param string $url アクセスするURL
-	 * @return $this
-	 */
-	public function do_put($url=null){
-		return $this->browse($this->build_url($url),'PUT',false);
-	}
-	/**
-	 * deleteでアクセスする
-	 * @param string $url アクセスするURL
-	 * @return $this
-	 */
-	public function do_delete($url=null){
-		return $this->browse($this->build_url($url),'DELETE',false);
-	}
-	/**
-	 * ダウンロードする
-	 *
-	 * @param string $url アクセスするURL
-	 * @param string $download_path ダウンロード先のファイルパス
-	 * @return $this
-	 */
-	public function do_download($url=null,$download_path){
-		return $this->browse($this->build_url($url),'GET',false,$download_path);
-	}
-	/**
-	 * POSTでダウンロードする
-	 *
-	 * @param string $url アクセスするURL
-	 * @param string $download_path ダウンロード先のファイルパス
-	 * @return $this
-	 */
-	public function do_post_download($url=null,$download_path){
-		return $this->browse($this->build_url($url),'POST',false,$download_path);
-	}
-	/**
-	 * HEADでアクセスする formの取得はしない
-	 * @param string $url アクセスするURL
-	 * @return $this
-	 */
-	public function do_head($url=null){
-		return $this->browse($this->build_url($url),'HEAD',false);
-	}
-	/**
-	 * 指定の時間から更新されているか
-	 * @param string $url アクセスするURL
-	 * @param integer $time 基点となる時間
-	 * @return string
-	 */
-	public function do_modified($url,$time){
-		$this->header('If-Modified-Since',date('r',$time));
-		return $this->browse($this->build_url($url),'GET',false)->body();
-	}
-	/**
-	 * リダイレクトする
-	 * @param string $url アクセスするURL
-	 */
-	public function do_redirect($url=null){
-		$url = $this->build_url($url);
-		$url = (strpos($url,'?') === false) ? $url.'?' : $url.'&';
-		header('Location: '.$url.Query::get($this->vars,null,true));
-		exit;
-	}
-	/**
-	 * Basic認証
-	 * @param string $user ユーザ名
-	 * @param string $password パスワード
-	 */
-	public function basic($user,$password){
-		$this->user = $user;
-		$this->password = $password;
-		return $this;
-	}
-	private function browse($url,$method,$form=true,$download_path=null){
-		$cookies = '';
-		$variables = '';
-		$headers = $this->header;
-		$cookie_base_domain = preg_replace("/^[\w]+:\/\/(.+)$/","\\1",$url);
-
-		foreach($this->cookie as $domain => $cookie_value){
-			if(strpos($cookie_base_domain,$domain) === 0 || strpos($cookie_base_domain,(($domain[0] == '.') ? $domain : '.'.$domain)) !== false){
-				foreach($cookie_value as $name => $value){
-					if(!$value['secure'] || ($value['secure'] && substr($url,0,8) == 'https://')) $cookies .= sprintf("%s=%s; ",$name,$value['value']);
+	private function request($method,$url,$download_path=null){
+		$url_info = parse_url($url);
+		$cookie_base_domain = $url_info['host'].(isset($url_info['path']) ? $url_info['path'] : '');
+		if(isset($url_info['query'])){
+			parse_str($url_info['query'],$vars);
+			foreach($vars as $k => $v){
+				if(!isset($this->request_vars[$k])) $this->request_vars[$k] = $v;
+			}
+			list($url) = explode('?',$url,2);
+		}
+		switch($method){
+			case 'POST': curl_setopt($this->resource,CURLOPT_POST,true); break;
+			case 'GET': curl_setopt($this->resource,CURLOPT_HTTPGET,true); break;
+			case 'HEAD': curl_setopt($this->resource,CURLOPT_NOBODY,true); break;
+			case 'PUT': curl_setopt($this->resource,CURLOPT_PUT,true); break;
+			case 'DELETE': curl_setopt($this->resource,CURLOPT_CUSTOMREQUEST,'DELETE'); break;
+		}
+		switch($method){
+			case 'POST':
+				if(!empty($this->request_file_vars)){
+					$vars = array();
+					if(!empty($this->request_vars)){
+						foreach(explode('&',http_build_query($this->request_vars)) as $q){
+							$s = explode('=',$q,2);
+							$vars[urldecode($s[0])] = isset($s[1]) ? urldecode($s[1]) : null;
+						}
+					}
+					foreach(explode('&',http_build_query($this->request_file_vars)) as $q){
+						$s = explode('=',$q,2);
+						$vars[urldecode($s[0])] = isset($s[1]) ? '@'.urldecode($s[1]) : null;
+					}
+					curl_setopt($this->resource,CURLOPT_POSTFIELDS,$vars);
+				}else{
+					curl_setopt($this->resource,CURLOPT_POSTFIELDS,http_build_query($this->request_vars));
+				}
+				break;
+			case 'GET':
+			case 'HEAD':
+			case 'PUT':
+			case 'DELETE':
+				$url = $url.(!empty($this->request_vars) ? '?'.http_build_query($this->request_vars) : '');
+		}
+		curl_setopt($this->resource,CURLOPT_URL,$url);
+		curl_setopt($this->resource,CURLOPT_FOLLOWLOCATION,false);
+		curl_setopt($this->resource,CURLOPT_HEADER,false);
+		curl_setopt($this->resource,CURLOPT_RETURNTRANSFER,false);
+		curl_setopt($this->resource,CURLOPT_FORBID_REUSE,true);
+		curl_setopt($this->resource,CURLOPT_FAILONERROR,false);
+		curl_setopt($this->resource,CURLOPT_TIMEOUT,$this->timeout);
+		
+		if(!empty($this->user)){
+			curl_setopt($this->resource,CURLOPT_USERPWD,$this->user.':'.$this->password);
+		}		
+		if(!isset($this->request_header['Expect'])){
+			$this->request_header['Expect'] = null;
+		}
+		if(!isset($this->request_header['Cookie'])){
+			$cookies = '';
+			foreach($this->cookie as $domain => $cookie_value){
+				if(strpos($cookie_base_domain,$domain) === 0 || strpos($cookie_base_domain,(($domain[0] == '.') ? $domain : '.'.$domain)) !== false){
+					foreach($cookie_value as $k => $v){
+						if(!$v['secure'] || ($v['secure'] && substr($url,0,8) == 'https://')) $cookies .= sprintf('%s=%s; ',$k,$v['value']);
+					}
 				}
 			}
+			curl_setopt($this->resource,CURLOPT_COOKIE,$cookies);
 		}
-		if(!empty($cookies)) $headers["Cookie"] = $cookies;
-		if(!empty($this->user)){
-			if(preg_match("/^([\w]+:\/\/)(.+)$/",$url,$match)){
-				$url = $match[1].$this->user.':'.$this->password.'@'.$match[2];
-			}else{
-				$url = 'http://'.$this->user.':'.$this->password.'@'.$url;
-			}
+		if(!isset($this->request_header['User-Agent'])){
+			curl_setopt($this->resource,CURLOPT_USERAGENT,
+					(empty($this->agent) ?
+							(isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null) :
+							$this->agent
+					)
+			);
 		}
-		if($this->raw !== null) $headers['rawdata'] = $this->raw;
-		$result = $this->request($url,$method,$headers,$this->vars,$download_path,false);
-		$this->cmd = $result->cmd;
-		$this->head = $result->head;
-		$this->url = $result->url;
-		$this->status = $result->status;
-		$this->body = $result->body;
-		$this->form = array();
+		if(!isset($this->request_header['Accept']) && isset($_SERVER['HTTP_ACCEPT'])){
+			$this->request_header['Accept'] = $_SERVER['HTTP_ACCEPT'];
+		}
+		if(!isset($this->request_header['Accept-Language']) && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
+			$this->request_header['Accept-Language'] = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+		}
+		if(!isset($this->request_header['Accept-Charset']) && isset($_SERVER['HTTP_ACCEPT_CHARSET'])){
+			$this->request_header['Accept-Charset'] = $_SERVER['HTTP_ACCEPT_CHARSET'];
+		}
+		
+		curl_setopt($this->resource,CURLOPT_HTTPHEADER,
+			array_map(function($k,$v){
+					return $k.': '.$v;
+				}
+				,array_keys($this->request_header)
+				,$this->request_header
+			)
+		);
+		curl_setopt($this->resource,CURLOPT_HEADERFUNCTION,function($c,$data){
+			$this->head .= $data;
+			return strlen($data);
+		});
+		if(empty($download_path)){
+			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,function($c,$data){
+				$this->body .= $data;
+				return strlen($data);
+			});
+		}else{
+			if(!is_dir(dirname($download_path))) mkdir(dirname($download_path),0777,true);
+			$fp = fopen($download_path,'wb');
+				
+			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,function($c,$data) use(&$fp){
+				if($fp) fwrite($fp,$data);
+				return strlen($data);
+			});
+		}
+		$this->request_header = $this->request_vars = array();
+		$this->head = $this->body = '';
+		curl_exec($this->resource);
+		if(!empty($download_path) && $fp){
+			fclose($fp);
+		}
 
-		if(preg_match_all("/Set-Cookie:[\s]*(.+)/i",$this->head,$match)){
+		$this->url = trim(curl_getinfo($this->resource,CURLINFO_EFFECTIVE_URL));
+		$this->status = curl_getinfo($this->resource,CURLINFO_HTTP_CODE);
+
+		if($err_code = curl_errno($this->resource) > 0){
+			if($err_code == 47) return $this;
+			throw new \RuntimeException($err_code.': '.curl_error($this->resource));
+		}
+		if(preg_match_all('/Set-Cookie:[\s]*(.+)/i',$this->head,$match)){
 			$unsetcookie = $setcookie = array();
 			foreach($match[1] as $cookies){
 				$cookie_name = $cookie_value = $cookie_domain = $cookie_path = $cookie_expires = null;
 				$cookie_domain = $cookie_base_domain;
 				$cookie_path = '/';
 				$secure = false;
-
+		
 				foreach(explode(';',$cookies) as $cookie){
 					$cookie = trim($cookie);
 					if(strpos($cookie,'=') !== false){
-						list($name,$value) = explode('=',$cookie,2);
-						$name = trim($name);
-						$value = trim($value);
-						switch(strtolower($name)){
-							case 'expires': $cookie_expires = ctype_digit($value) ? (int)$value : strtotime($value); break;
-							case 'domain': $cookie_domain = preg_replace("/^[\w]+:\/\/(.+)$/","\\1",$value); break;
-							case 'path': $cookie_path = $value; break;
+						list($k,$v) = explode('=',$cookie,2);
+						$k = trim($k);
+						$v = trim($v);
+						switch(strtolower($k)){
+							case 'expires': $cookie_expires = ctype_digit($v) ? (int)$v : strtotime($v); break;
+							case 'domain': $cookie_domain = preg_replace('/^[\w]+:\/\/(.+)$/','\\1',$v); break;
+							case 'path': $cookie_path = $v; break;
 							default:
-								$cookie_name = $name;
-								$cookie_value = $value;
+								$cookie_name = $k;
+								$cookie_value = $v;
 						}
 					}else if(strtolower($cookie) == 'secure'){
 						$secure = true;
 					}
 				}
-				$cookie_domain = substr(Path::absolute('http://'.$cookie_domain,$cookie_path),7);
+				$cookie_domain = substr(\org\rhaco\net\Path::absolute('http://'.$cookie_domain,$cookie_path),7);
 				if($cookie_expires !== null && $cookie_expires < time()){
 					if(isset($this->cookie[$cookie_domain][$cookie_name])) unset($this->cookie[$cookie_domain][$cookie_name]);
 				}else{
@@ -360,295 +368,25 @@ class Http{
 				}
 			}
 		}
-		$this->vars = array();
-		if($this->status_redirect){
-			if(isset($result->redirect)) return $this->browse($result->redirect,'GET',$form,$download_path);
-			if(\org\rhaco\Xml::set($tag,$result->body,'head')){
-				foreach($tag->in('meta') as $meta){
-					if(strtolower($meta->in_attr('http-equiv')) == 'refresh'){
-						if(preg_match("/^[\d]+;url=(.+)$/i",$meta->in_attr('content'),$refresh)){
-							$this->vars = array();
-							return $this->browse(Path::absolute(dirname($url),$refresh[1]),'GET',$form,$download_path);
-						}
+		if($this->redirect_count++ < $this->redirect_max){
+			switch($this->status){
+				case 300:
+				case 301:
+				case 302:
+				case 303:
+				case 307:
+					if(preg_match('/Location:[\040](.*)/i',$this->head,$redirect_url)){
+						return $this->request('GET',trim(\org\rhaco\net\Path::absolute($url,$redirect_url[1])),$download_path);
 					}
-				}
 			}
 		}
-		if($form) $this->parse_form();
+		$this->redirect_count = 1;
 		return $this;
 	}
-	private function parse_form(){
-		$tag = new \org\rhaco\Xml('<:>'.$this->body.'</:>',':');
-		foreach($tag->in('form') as $key => $formtag){
-			$form = new \stdClass();
-			$form->name = $formtag->in_attr('name',$formtag->in_attr('id',$key));
-			$form->action = Path::absolute($this->url,$formtag->in_attr('action',$this->url));
-			$form->method = strtolower($formtag->in_attr('method','get'));
-			$form->multiple = false;
-			$form->element = array();
-
-			foreach($formtag->in('input') as $count => $input){
-				$obj = new \stdClass();
-				$obj->name = $input->in_attr('name',$input->in_attr('id','input_'.$count));
-				$obj->type = strtolower($input->in_attr('type','text'));
-				$obj->value = self::htmldecode($input->in_attr('value'));
-				$obj->selected = ('selected' === strtolower($input->in_attr('checked',$input->in_attr('checked'))));
-				$obj->multiple = false;
-				$form->element[] = $obj;
-			}
-			foreach($formtag->in('textarea') as $count => $input){
-				$obj = new \stdClass();
-				$obj->name = $input->in_attr('name',$input->in_attr('id','textarea_'.$count));
-				$obj->type = 'textarea';
-				$obj->value = self::htmldecode($input->value());
-				$obj->selected = true;
-				$obj->multiple = false;
-				$form->element[] = $obj;
-			}
-			foreach($formtag->in('select') as $count => $input){
-				$obj = new \stdClass();
-				$obj->name = $input->in_attr('name',$input->in_attr('id','select_'.$count));
-				$obj->type = 'select';
-				$obj->value = array();
-				$obj->selected = true;
-				$obj->multiple = ('multiple' == strtolower($input->param('multiple',$input->attr('multiple'))));
-
-				foreach($input->in('option') as $count => $option){
-					$op = new \stdClass();
-					$op->value = self::htmldecode($option->in_attr('value',$option->value()));
-					$op->selected = ('selected' == strtolower($option->in_attr('selected',$option->in_attr('selected'))));
-					$obj->value[] = $op;
-				}
-				$form->element[] = $obj;
-			}
-			$this->form[] = $form;
-		}
+	public function __destruct(){
+		curl_close($this->resource);
 	}
-	/**
-	 * formをsubmitする
-	 * @param string $form FORMタグの名前、または順番
-	 * @param string $submit 実行するINPUTタグ(type=submit)の名前
-	 * @return $this
-	 */
-	public function submit($form=0,$submit=null){
-		foreach($this->form as $key => $f){
-			if($f->name === $form || $key === $form){
-				$form = $key;
-				break;
-			}
-		}
-		if(isset($this->form[$form])){
-			$inputcount = 0;
-			$onsubmit = ($submit === null);
-
-			foreach($this->form[$form]->element as $element){
-				switch($element->type){
-					case 'hidden':
-					case 'textarea':
-						if(!array_key_exists($element->name,$this->vars)){
-							$this->vars($element->name,$element->value);
-						}
-						break;
-					case 'text':
-					case 'password':
-						$inputcount++;
-						if(!array_key_exists($element->name,$this->vars)) $this->vars($element->name,$element->value); break;
-						break;
-					case 'checkbox':
-					case 'radio':
-						if($element->selected !== false){
-							if(!array_key_exists($element->name,$this->vars)) $this->vars($element->name,$element->value);
-						}
-						break;
-					case 'submit':
-					case 'image':
-						if(($submit === null && $onsubmit === false) || $submit == $element->name){
-							$onsubmit = true;
-							if(!array_key_exists($element->name,$this->vars)) $this->vars($element->name,$element->value);
-							break;
-						}
-						break;
-					case 'select':
-						if(!array_key_exists($element->name,$this->vars)){
-							if($element->multiple){
-								$list = array();
-								foreach($element->value as $option){
-									if($option->selected) $list[] = $option->value;
-								}
-								$this->vars($element->name,$list);
-							}else{
-								foreach($element->value as $option){
-									if($option->selected){
-										$this->vars($element->name,$option->value);
-									}
-								}
-							}
-						}
-						break;
-					case "button":
-						break;
-				}
-			}
-			if($onsubmit || $inputcount == 1){
-				return ($this->form[$form]->method == 'post') ?
-							$this->browse($this->form[$form]->action,'POST') :
-							$this->browse($this->form[$form]->action,'GET');
-			}
-		}
-		return $this;
-	}
-	private function request($url,$method,array $header=array(),array $vars=array(),$download_path=null,$status_redirect=true){
-		$url = (string)$url;
-		$result = (object)array('url'=>$url,'status'=>200,'head'=>null,'redirect'=>null,'body'=>null,'encode'=>null,'cmd'=>null);
-		$raw = isset($header['rawdata']) ? $header['rawdata'] : null;
-		if(isset($header['rawdata'])) unset($header['rawdata']);
-		$header['Content-Type'] = 'application/x-www-form-urlencoded';
-
-		if(!isset($raw) && !empty($vars)){
-			if($method == 'GET'){
-				$url = (strpos($url,'?') === false) ? $url.'?' : $url.'&';
-				$url .= Query::get($vars,null,true);
-			}else{
-				$query_vars = array(array(),array());
-				foreach(Query::expand_vars($tmp,$vars,null,false) as $v){
-					$query_vars[is_string($v[1]) ? 0 : 1][] = $v;
-				}
-				if(empty($query_vars[1])){
-					$raw = Query::get($vars,null,true);
-				}else{
-					$boundary = '-----------------'.md5(microtime());
-					$header['Content-Type'] = 'multipart/form-data;  boundary='.$boundary;
-					$raws = array();
-
-					foreach($query_vars[0] as $v){
-						$raws[] = sprintf('Content-Disposition: form-data; name="%s"',$v[0])
-									."\r\n\r\n"
-									.$v[1]
-									."\r\n";
-					}
-					foreach($query_vars[1] as $v){
-						$raws[] = sprintf('Content-Disposition: form-data; name="%s"; filename="%s"',$v[0],$v[1]->name())
-									."\r\n".sprintf('Content-Type: %s',$v[1]->mime())
-									."\r\n".sprintf('Content-Transfer-Encoding: %s',"binary")
-									."\r\n\r\n"
-									.$v[1]->get()
-									."\r\n";
-					}
-					$raw = "--".$boundary."\r\n".implode("--".$boundary."\r\n",$raws)."--".$boundary."--\r\n"."\r\n";
-				}
-			}
-		}
-		$ulist = parse_url(preg_match("/^([\w]+:\/\/)(.+?):(.+)(@.+)$/",$url,$m) ? ($m[1].urlencode($m[2]).":".urlencode($m[3]).$m[4]) : $url);
-		$ssl = (isset($ulist['scheme']) && ($ulist['scheme'] == 'ssl' || $ulist['scheme'] == 'https'));
-		$port = isset($ulist['port']) ? $ulist['port'] : null;
-		$errorno = $errormsg = null;
-
-		if(!isset($ulist['host']) || substr($ulist['host'],-1) === '.') throw new \InvalidArgumentException('Connection fail `'.$url.'`');
-		$fp	= fsockopen((($ssl) ? 'ssl://' : '').$ulist['host'],(isset($port) ? $port : ($ssl ? 443 : 80)),$errorno,$errormsg,$this->timeout);
-		if($fp == false || false == stream_set_blocking($fp,true) || false == stream_set_timeout($fp,$this->timeout)) throw new \InvalidArgumentException('Connection fail `'.$url.'` '.$errormsg.' '.$errorno);
-		$cmd = sprintf("%s %s%s HTTP/1.1\r\n",$method,((!isset($ulist["path"])) ? "/" : $ulist["path"]),(isset($ulist["query"])) ? sprintf("?%s",$ulist["query"]) : "")
-				.sprintf("Host: %s\r\n",$ulist['host'].(empty($port) ? '' : ':'.$port));
-
-		if(!isset($header['User-Agent'])) $header['User-Agent'] = empty($this->agent) ? (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null) : $this->agent;
-		if(!isset($header['Accept'])) $header['Accept'] = isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : null;
-		if(!isset($header['Accept-Language'])) $header['Accept-Language'] = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : null;
-		if(!isset($header['Accept-Charset'])) $header['Accept-Charset'] = isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : (isset($header['Accept-Language']) ? 'UTF-8' : null);
-		$header['Connection'] = 'Close';
-
-		foreach($header as $k => $v){
-			if(isset($v)) $cmd .= sprintf("%s: %s\r\n",$k,$v);
-		}
-		if(!isset($header['Authorization']) && isset($ulist["user"]) && isset($ulist["pass"])){
-			$cmd .= sprintf("Authorization: Basic %s\r\n",base64_encode(sprintf("%s:%s",urldecode($ulist["user"]),urldecode($ulist["pass"]))));
-		}
-		$result->cmd = $cmd.((!empty($raw)) ? ('Content-length: '.strlen($raw)."\r\n\r\n".$raw) : "\r\n");
-		fwrite($fp,$result->cmd);
-
-		while(!feof($fp) && substr($result->head,-4) != "\r\n\r\n"){
-			$result->head .= fgets($fp,4096);
-			self::check_timeout($fp,$url);
-		}
-		$result->status = (preg_match("/HTTP\/.+[\040](\d\d\d)/i",$result->head,$httpCode)) ? intval($httpCode[1]) : 0;
-		$result->encode = (preg_match("/Content-Type.+charset[\s]*=[\s]*([\-\w]+)/",$result->head,$match)) ? trim($match[1]) : null;
-
-		switch($result->status){
-			case 300:
-			case 301:
-			case 302:
-			case 303:
-			case 307:
-				if(preg_match("/Location:[\040](.*)/i",$result->head,$redirect_url)){
-					$result->redirect = preg_replace("/[\r\n]/","",trim(Path::absolute($url,$redirect_url[1])));
-					if($method == 'GET' && $result->redirect === $result->url){
-						$result->redirect = null;
-					}else if($status_redirect){
-						fclose($fp);
-						return $this->request($result->redirect,"GET",$h,array(),$download_path,$status_redirect);
-					}
-				}
-		}
-		$download_handle = ($download_path !== null && (is_dir(dirname($download_path)) || \org\rhaco\io\File::mkdir(dirname($download_path),0777))) ? fopen($download_path,'wb') : null;
-		if(preg_match("/^Content\-Length:[\s]+([0-9]+)\r\n/i",$result->head,$m)){
-			if(0 < ($length = $m[1])){
-				$rest = $length % 4096;
-				$count = ($length - $rest) / 4096;
-
-				while(!feof($fp)){
-					if($count-- > 0){
-						self::write_body($result,$download_handle,fread($fp,4096));
-					}else{
-						self::write_body($result,$download_handle,fread($fp,$rest));
-						break;
-					}
-					self::check_timeout($fp,$url);
-				}
-			}
-		}else if(preg_match("/Transfer\-Encoding:[\s]+chunked/i",$result->head)){
-			while(!feof($fp)){
-				$size = hexdec(trim(fgets($fp,4096)));
-				$buffer = "";
-
-				while($size > 0 && strlen($buffer) < $size){
-					$value = fgets($fp,$size);
-					if($value === feof($fp)) break;
-					$buffer .= $value;
-				}
-				self::write_body($result,$download_handle,substr($buffer,0,$size));
-				self::check_timeout($fp,$url);
-			}
-		}else{
-			while(!feof($fp)){
-				self::write_body($result,$download_handle,fread($fp,4096));
-				self::check_timeout($fp,$url);
-			}
-		}
-		fclose($fp);
-		if($download_handle !== null) fclose($download_handle);
-		return $result;
-	}
-	static private function check_timeout($fp,$url){
-		$info = stream_get_meta_data($fp);
-		if($info['timed_out']){
-			fclose($fp);
-			throw new \LogicException('Connection time out. `'.$url.'`');
-		}
-	}
-	static private function write_body(&$result,&$download_handle,$value){
-		if($download_handle !== null) return fwrite($download_handle,$value);
-		return $result->body .= $value;
-	}
-	static public function htmldecode($value){
-		if(!empty($value) && is_string($value)){
-			$value = mb_convert_encoding($value,"UTF-8",mb_detect_encoding($value));
-			$value = preg_replace("/&#[xX]([0-9a-fA-F]+);/eu","'&#'.hexdec('\\1').';'",$value);
-			$value = mb_decode_numericentity($value,array(0x0,0x10000,0,0xfffff),"UTF-8");
-			$value = html_entity_decode($value,ENT_QUOTES,"UTF-8");
-			$value = str_replace(array("\\\"","\\'","\\\\"),array("\"","\'","\\"),$value);
-		}
-		return $value;
-		/***
-		 * eq("ほげほげ",self::htmldecode("&#12411;&#12370;&#12411;&#12370;"));
-		 * eq("&gt;&lt;ほげ& ほげ",self::htmldecode("&amp;gt;&amp;lt;&#12411;&#12370;&amp; &#12411;&#12370;"));
-		 */
+	private function info(){
+		return curl_getinfo($this->resource);
 	}
 }
