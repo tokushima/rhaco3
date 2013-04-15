@@ -8,19 +8,29 @@ class Conf{
 	static private $value = array();
 	/**
 	 * 定義情報をセットする
-	 * @param string $class
+	 * @param string|array $class
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	static public function set($class,$key,$value){
-		$class = str_replace("\\",'.',$class);
-		if($class[0] === '.') $class = substr($class,1);
-		if(func_num_args() > 3){
-			$value = func_get_args();
-			array_shift($value);
-			array_shift($value);
+	static public function set($class,$key=null,$value=null){
+		if(is_array($class)){
+			foreach($class as $c => $v){
+				foreach($v as $k => $value){
+					if(!isset(self::$value[$c]) || !array_key_exists($k,self::$value[$c])){
+						self::$value[$c][$k] = $value;
+					}
+				}
+			}
+		}else if(!empty($key)){
+			$class = str_replace("\\",'.',$class);
+			if($class[0] === '.') $class = substr($class,1);
+			if(func_num_args() > 3){
+				$value = func_get_args();
+				array_shift($value);
+				array_shift($value);
+			}
+			if(!isset(self::$value[$class]) || !array_key_exists($key,self::$value[$class])) self::$value[$class][$key] = $value;
 		}
-		if(!isset(self::$value[$class]) || !array_key_exists($key,self::$value[$class])) self::$value[$class][$key] = $value;
 	}
 	/**
 	 * 定義されているか
