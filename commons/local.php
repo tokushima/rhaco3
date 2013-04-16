@@ -13,17 +13,16 @@ date_default_timezone_set('Asia/Tokyo');
 	'org.rhaco.Flow'=>array('exception_log_level'=>'warn'),
 	'org.rhaco.Template'=>array('display_exception'=>true),
 	'org.rhaco.flow.module.SimpleAuth'=>array('auth'=>array('user_name'=>md5(sha1('password')))),
-	'org.rhaco.Log'=>array('level'=>'info'),
+	'org.rhaco.Log'=>array(
+		'level'=>'info'
+	),
 ));
 
 
-
-//\org\rhaco\net\Session::set_module('org.rhaco.flow.module.SessionDao');
-//\org\rhaco\Template::set_module('org.rhaco.store.template.File');
 \org\rhaco\Log::set_module('org.rhaco.io.log.Growl');
 \org\rhaco\Log::set_module(new \org\rhaco\io\log\OneFile());
 \org\rhaco\Log::set_module(new \org\rhaco\io\log\File());
 
 
-//\org\rhaco\Conf::set('org.rhaco.Flow','app_url','http://127.0.0.1:8888/rhaco3');
-
+//\org\rhaco\net\Session::set_module('org.rhaco.flow.module.SessionDao');
+//\org\rhaco\Template::set_module('org.rhaco.store.template.File');
