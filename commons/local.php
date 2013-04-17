@@ -14,15 +14,9 @@ date_default_timezone_set('Asia/Tokyo');
 	'org.rhaco.Template'=>array('display_exception'=>true),
 	'org.rhaco.flow.module.SimpleAuth'=>array('auth'=>array('user_name'=>md5(sha1('password')))),
 	'org.rhaco.Log'=>array(
-		'level'=>'info'
+		'level'=>'info',
+		'file'=>\org\rhaco\io\File::work_path('output.log'),
 	),
 ));
-
-
-\org\rhaco\Log::set_module('org.rhaco.io.log.Growl');
-\org\rhaco\Log::set_module(new \org\rhaco\io\log\OneFile());
-\org\rhaco\Log::set_module(new \org\rhaco\io\log\File());
-
-
 //\org\rhaco\net\Session::set_module('org.rhaco.flow.module.SessionDao');
 //\org\rhaco\Template::set_module('org.rhaco.store.template.File');

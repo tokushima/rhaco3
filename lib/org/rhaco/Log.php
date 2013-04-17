@@ -99,6 +99,12 @@ class Log extends \org\rhaco\Object{
 	 */
 	final static public function flush(){
 		if(!empty(self::$logs)){
+			$stdout = \org\rhaco\Conf::get('stdout',false);
+			$file = \org\rhaco\Conf::get('file');
+			if(!empty($file)){
+				if(!is_dir($dir = dirname($file))) mkdir($dir,0777,true);
+				file_put_contents($file,'',FILE_APPEND);
+			}			
 			foreach(self::$logs as $log){
 				if(self::cur_level() >= $log->level()){
 					if(self::disp() && self::$stdout) print(((string)$log).PHP_EOL);
@@ -135,6 +141,8 @@ class Log extends \org\rhaco\Object{
 						 */
 						self::module('trace',$log,self::$id);
 					}
+					if(is_file($file)) file_put_contents($file,((string)$log),FILE_APPEND);
+					if($stdout) print(((string)$log).PHP_EOL);
 				}
 			}
 		}
