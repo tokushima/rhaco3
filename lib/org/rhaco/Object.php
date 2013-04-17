@@ -675,7 +675,16 @@ class Object{
 	 * @param object $o
 	 */
 	final static public function set_module($o){
-		self::$_m[2][get_called_class()][] = $o;
+		if(is_array($o)){
+			foreach($o as $c => $plugins){
+				$r = new \ReflectionClass('\\'.str_replace('.','\\',$c));
+				if($r->isSubclassOf(__CLASS__)){
+					foreach($plugins as $p) call_user_func_array(array($r->getName(),'set_module'),array($p));
+				}
+			}
+		}else{
+			self::$_m[2][get_called_class()][] = $o;
+		}
 	}
 	/**
 	 * 指定のクラスモジュールを実行する
