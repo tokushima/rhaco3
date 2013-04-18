@@ -14,12 +14,10 @@ if(extension_loaded('mbstring')){
 }
 if(is_file($f=(getcwd().'/__settings__.php'))){
 	require_once($f);
-
-	if(!defined('APPMODE')) define('APPMODE','local');
-	if(!defined('COMMONDIR')) define('COMMONDIR',getcwd().'/commons');
-	if(is_file($f=(constant('COMMONDIR').'/'.constant('APPMODE').'.php'))){
-		require_once($f);
-	}
 }
-
+if(!defined('APPMODE')) define('APPMODE','local');
+if(!defined('COMMONDIR')) define('COMMONDIR',getcwd().'/commons');
+if(is_file($f=(constant('COMMONDIR').'/'.constant('APPMODE').'.php'))){
+	require_once($f);
+}
 
