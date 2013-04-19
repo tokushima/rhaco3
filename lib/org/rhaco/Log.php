@@ -12,8 +12,6 @@ namespace org\rhaco;
  * @conf string $level ログレベル (none,error,warn,info,debug)
  * @conf boolean $disp 標準出力に出すか
  */
-use org\rhaco\net\listener\exception\ShutdownException;
-
 class Log extends \org\rhaco\Object{
 	static private $stdout = true;
 	static private $level_strs = array('none','error','warn','info','debug');
