@@ -92,7 +92,7 @@ class Log extends \org\rhaco\Object{
 		return (empty($format)) ? $this->time : date($format,$this->time);
 	}
 	protected function __str__(){
-		return '['.$this->time().']'.'['.self::$id.']'.'['.$this->fm_level().']'.':['.$this->file().':'.$this->line().']'.' '.$this->fm_value();
+		return '['.date('Y-m-d H:i:s',$this->time).']'.'['.self::$id.']'.'['.$this->fm_level().']'.':['.$this->file().':'.$this->line().']'.' '.$this->fm_value();
 	}
 	/**
 	 * 格納されたログを出力する
@@ -141,7 +141,7 @@ class Log extends \org\rhaco\Object{
 						 */
 						self::module('trace',$log,self::$id);
 					}
-					if(is_file($file)) file_put_contents($file,((string)$log),FILE_APPEND);
+					if(is_file($file)) file_put_contents($file,((string)$log).PHP_EOL,FILE_APPEND);
 					if($stdout) print(((string)$log).PHP_EOL);
 				}
 			}

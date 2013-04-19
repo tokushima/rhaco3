@@ -14,14 +14,12 @@ date_default_timezone_set('Asia/Tokyo');
 	'org.rhaco.Template'=>array('display_exception'=>true),
 	'org.rhaco.flow.module.SimpleAuth'=>array('auth'=>array('user_name'=>md5(sha1('password')))),
 	'org.rhaco.Log'=>array(
-		'level'=>'info',
+		'level'=>'warn',
 		'file'=>dirname(__DIR__).'/work/output.log',
 	
 	),
 	'org.rhaco.io.File'=>array('work_dir'=>dirname(__DIR__).'/work/'),
 ));
 \org\rhaco\Object::set_module(array(
-	'org.rhaco.Log'=>array('org.rhaco.io.log.File','org.rhaco.io.log.OneFile')
+	'org.rhaco.net.Session'=>array('org.rhaco.flow.module.SessionDao')
 ));
-//\org\rhaco\net\Session::set_module('org.rhaco.flow.module.SessionDao');
-//\org\rhaco\Template::set_module('org.rhaco.store.template.File');
