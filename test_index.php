@@ -74,6 +74,10 @@ array(''
 
 	,'theme_none'=>array('name'=>'theme_none','action'=>'test.CoreTestTheme::index','template'=>'abc.html')
 	,'sample_flow'=>array('name'=>'sample_flow','action'=>'test.SampleFlow')
+
+	,'set_session'=>array('name'=>'set_session','action'=>'test.flow.Session::set_session')
+	,'get_session'=>array('name'=>'get_session','action'=>'test.flow.Session::get_session')
+	,'plain_noop'=>array('request_redirect','action'=>'test.flow.PlainFlow::noop')
 	
 	,'sample_flow_theme'=>array(
 		'theme_path'=>'theme_path'
@@ -549,6 +553,43 @@ meq('<string>abcdefg</string><text>xyz</text>',$b->body());
 $b = b();
 $b->do_post(test_map_url('dao/delete'));
 eq('<result />',$b->body());
+*/
+
+/***
+$b = b();
+$b->do_get(test_map_url('get_session'));
+eq('<result><abc /></result>',$b->body());
+
+$b->vars('abc','hoge');
+$b->do_get(test_map_url('set_session'));
+
+$b->do_get(test_map_url('get_session'));
+eq('<result><abc>hoge</abc></result>',$b->body());
+*/
+
+/***
+$b = b();
+$b->do_get(test_map_url('get_session'));
+eq('<result><abc /></result>',$b->body());
+
+$b->vars('abc','hoge');
+$b->vars('redirect',test_map_url('get_session'));
+$b->do_get(test_map_url('set_session'));
+eq('<result><abc>hoge</abc></result>',$b->body());
+eq(test_map_url('get_session'),$b->url());
+*/
+
+/***
+$b = b();
+$b->do_get(test_map_url('get_session'));
+eq('<result><abc /></result>',$b->body());
+
+$b->vars('abc','hoge');
+$b->vars('redirect',test_map_url('plain_noop'));
+$b->do_get(test_map_url('set_session'));
+
+$b->do_get(test_map_url('get_session'));
+eq('<result><abc>hoge</abc></result>',$b->body());
 */
 
 
