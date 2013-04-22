@@ -211,7 +211,7 @@ class Http{
 	}
 	private function request($method,$url,$download_path=null){
 		$url_info = parse_url($url);
-		$cookie_base_domain = $url_info['host'].(isset($url_info['path']) ? $url_info['path'] : '');
+		$cookie_base_domain = (isset($url_info['host']) ? $url_info['host'] : '').(isset($url_info['path']) ? $url_info['path'] : '');
 		if(isset($url_info['query'])){
 			parse_str($url_info['query'],$vars);
 			foreach($vars as $k => $v){
