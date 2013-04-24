@@ -151,11 +151,6 @@ class Log extends \org\rhaco\Object{
 		 * @param boolean $stdout 標準出力に出力するか
 		 */
 		self::module('flush',self::$logs,self::$id,self::$stdout);
-		/**
-		 * フラッシュの後処理
-		 * @param string $id
-		 */
-		self::module('after_flush',self::$id);
 		self::$logs = array();
 	}
 	/**
@@ -222,6 +217,7 @@ class Log extends \org\rhaco\Object{
 	 * @param mixed $value 内容
 	 */
 	static public function trace($value){
+		self::cur_level();
 		foreach(func_get_args() as $value) self::$logs[] = new self(-1,$value);
 	}
 	/**
