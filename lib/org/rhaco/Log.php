@@ -217,8 +217,9 @@ class Log extends \org\rhaco\Object{
 	 * @param mixed $value 内容
 	 */
 	static public function trace($value){
-		self::cur_level();
-		foreach(func_get_args() as $value) self::$logs[] = new self(-1,$value);
+		if(self::cur_level() >= -1){
+			foreach(func_get_args() as $value) self::$logs[] = new self(-1,$value);
+		}
 	}
 	/**
 	 * var_dumpで出力する
