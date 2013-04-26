@@ -29,6 +29,7 @@
 ### edit \_\_settings\_\_.php
 	<?php
 	define('APPMODE','local');
+	define('COMMONDIR',__DIR__.'/commons');
 
 ### edit index.php
 	<?php
