@@ -15,7 +15,13 @@
         	"org\\rhaco\\": "lib/"
 	    },
 	    "files": [
-	    	"bin/composer_autoload.php"
+	    	"bootstap.php"
 	   	]
-	}
+	},
+	"scripts": {
+        "post-install-cmd": [
+            "org\rhaco\Dt::startup"
+        ],
+    }
+
 }

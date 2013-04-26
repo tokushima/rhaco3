@@ -687,4 +687,28 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	static public function classes(){
 		return Dt\Man::classes();
 	}
+	static public function startup(){
+		$cwd = getcwd();
+		
+		$bool = true;
+		foreach(\org\rhaco\io\File::ls($cwd,false) as $f){
+			if($f->is_ext('php')){
+				$bool = false;
+				break;
+			}
+		}
+		if($bool){
+			file_put_contents($cwd.'/index.php',file_get_contents(__DIR__.'/Dt/resources/index.tmpl'));
+		}
+		if(!is_file($f=$cwd.'/bootstrap.php')){
+			file_put_contents($f,'<?php'.PPH_EOL.'include_once(\'vendor/autoload.php\');');
+		}
+		if(!is_file($f=$cwd.'/kate.php')){
+			file_put_contents($f,file_get_contents('https://raw.github.com/tokushima/kate/master/kate.php'));
+		}
+		if(!is_file($f=$cwd.'/angela.php')){
+			file_put_contents($f,file_get_contents('https://raw.github.com/tokushima/angela/master/angela.php'));
+			file_put_contents($cwd.'/angela_cc.php',file_get_contents('https://raw.github.com/tokushima/angela/master/angela_cc.php'));			
+		}
+	}
 }

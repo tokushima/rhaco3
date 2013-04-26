@@ -1,0 +1,9 @@
+<?php
+include_once('bootstrap.php');
+
+$flow = new \org\rhaco\Flow();
+$flow->out(array(
+    'patterns'=>array(
+        'dev'=>array('action'=>'org.rhaco.Dt')
+    )
+));
