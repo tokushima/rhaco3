@@ -16,6 +16,7 @@ date_default_timezone_set('Asia/Tokyo');
 	'org.rhaco.Log'=>array(
 		'level'=>'warn',
 		'file'=>dirname(__DIR__).'/work/output.log',
+		'stdout'=>true,
 	
 	),
 	'org.rhaco.io.File'=>array('work_dir'=>dirname(__DIR__).'/work/'),

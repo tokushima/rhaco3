@@ -10,15 +10,14 @@ namespace org\rhaco;
  * @var integer $line 発生した行
  * @var mixed $value 内容
  * @conf string $level ログレベル (none,error,warn,info,debug)
- * @conf boolean $disp 標準出力に出すか
+ * @conf boolean $stdout 標準出力に出すか
  */
 class Log extends \org\rhaco\Object{
-	static private $stdout = true;
 	static private $level_strs = array('none','error','warn','info','debug');
 	static private $logs = array();
 	static private $id;
 	static private $current_level;
-	static private $disp;
+	static private $disp = true;
 
 	protected $level;
 	protected $time;
@@ -29,26 +28,10 @@ class Log extends \org\rhaco\Object{
 	static private function cur_level(){
 		if(!isset(self::$id)){
 			self::$id = base_convert(date('md'),10,36).base_convert(date('G'),10,36).base_convert(mt_rand(1296,46655),10,36);
-			self::$logs[] = new self(4,'--- logging start '
-					.date('Y-m-d H:i:s')
-					.' ( '.(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : (isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : null)).' )'
-					.' { '.(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null).' }'
-					.' --- ');
-			register_shutdown_function(function(){
-				if(self::cur_level() >= 4){
-					if(function_exists('memory_get_usage')){
-						self::$logs[] = new self(4,sprintf('--- end logger ( %s MByte) --- ',round(number_format((memory_get_usage() / 1024 / 1024),3),2)));
-					}
-				}
-				self::flush();
-			});
+			register_shutdown_function(array(__CLASS__,'flush'));
 		}
 		if(self::$current_level === null) self::$current_level = array_search(\org\rhaco\Conf::get('level','none'),self::$level_strs);
 		return self::$current_level;
-	}
-	static private function disp(){
-		if(self::$disp === null) self::$disp = (boolean)\org\rhaco\Conf::get('disp',false);
-		return self::$disp;
 	}
 	final protected function __new__($level,$value,$file=null,$line=null,$time=null){
 		$class = null;
@@ -105,7 +88,6 @@ class Log extends \org\rhaco\Object{
 			}			
 			foreach(self::$logs as $log){
 				if(self::cur_level() >= $log->level()){
-					if(self::disp() && self::$stdout) print(((string)$log).PHP_EOL);
 					switch($log->fm_level()){
 						/**
 						 * debugログの場合の処理
@@ -140,18 +122,18 @@ class Log extends \org\rhaco\Object{
 						self::module('trace',$log,self::$id);
 					}
 					if(is_file($file)) file_put_contents($file,((string)$log).PHP_EOL,FILE_APPEND);
-					if($stdout) print(((string)$log).PHP_EOL);
+					if(self::$disp === true && $stdout) print(((string)$log).PHP_EOL);
 				}
 			}
+			/**
+			 * フラッシュ時の処理
+			 * @param self[] $logs
+			 * @param string $id
+			 * @param boolean $stdout 標準出力に出力するか
+			 */
+			self::module('flush',self::$logs,self::$id,$stdout);
+			self::$logs = array();
 		}
-		/**
-		 * フラッシュ時の処理
-		 * @param self[] $logs
-		 * @param string $id
-		 * @param boolean $stdout 標準出力に出力するか
-		 */
-		self::module('flush',self::$logs,self::$id,self::$stdout);
-		self::$logs = array();
 	}
 	/**
 	 * 一時的に無効にされた標準出力へのログ出力を有効にする
@@ -159,7 +141,7 @@ class Log extends \org\rhaco\Object{
 	 */
 	static public function enable_display(){
 		self::debug('log stdout on');
-		self::$stdout = true;
+		self::$disp = true;
 	}
 
 	/**
@@ -167,14 +149,7 @@ class Log extends \org\rhaco\Object{
 	 */
 	static public function disable_display(){
 		self::debug('log stdout off');
-		self::$stdout = false;
-	}
-	/**
-	 * 標準出力へのログ可不可
-	 * @return boolean
-	 */
-	static public function is_display(){
-		return self::$stdout;
+		self::$disp = false;
 	}
 	/**
 	 * errorを生成
