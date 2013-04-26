@@ -37,14 +37,14 @@ class Log extends \org\rhaco\Object{
 		$class = null;
 		if($file === null){
 			$debugs = debug_backtrace(false);
-			if(sizeof($debugs) > 4){
-				list($dumy,$dumy,$dumy,$debug,$op) = $debugs;
-			}else{
-				list($dumy,$debug) = $debugs;
+			foreach($debugs as $d){
+				if(isset($d['file'])){
+					$file = $d['file'];
+					$line = $d['line'];
+					$class = isset($d['class']) ? $d['class'] : null;
+					break;
+				}
 			}
-			$file = (isset($debug['file']) ? $debug['file'] : $dumy['file']);
-			$line = (isset($debug['line']) ? $debug['line'] : $dumy['line']);
-			$class = (isset($op['class']) ? $op['class'] : $dumy['class']);
 		}
 		$this->level = $level;
 		$this->file = $file;
@@ -83,9 +83,9 @@ class Log extends \org\rhaco\Object{
 			$stdout = \org\rhaco\Conf::get('stdout',false);
 			$file = \org\rhaco\Conf::get('file');
 			if(!empty($file)){
-				if(!is_dir($dir = dirname($file))) mkdir($dir,0777,true);
-				file_put_contents($file,'',FILE_APPEND);
-			}			
+				if(!is_dir($dir = dirname($file))) @mkdir($dir,0777,true);
+				@file_put_contents($file,'',FILE_APPEND);
+			}
 			foreach(self::$logs as $log){
 				if(self::cur_level() >= $log->level()){
 					switch($log->fm_level()){
@@ -121,7 +121,7 @@ class Log extends \org\rhaco\Object{
 						 */
 						self::module('trace',$log,self::$id);
 					}
-					if(is_file($file)) file_put_contents($file,((string)$log).PHP_EOL,FILE_APPEND);
+					if(is_file($file) && is_writable($file)) file_put_contents($file,((string)$log).PHP_EOL,FILE_APPEND);
 					if(self::$disp === true && $stdout) print(((string)$log).PHP_EOL);
 				}
 			}
