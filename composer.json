@@ -17,11 +17,5 @@
 	    "files": [
 	    	"bootstap.php"
 	   	]
-	},
-	"scripts": {
-        "post-install-cmd": [
-            "org\rhaco\Dt::startup"
-        ],
-    }
-
+	}
 }
