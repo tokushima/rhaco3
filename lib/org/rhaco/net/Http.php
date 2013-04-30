@@ -209,12 +209,25 @@ class Http{
 		}
 		return $this;
 	}
-	// TODO
-	public function add_head($v){
-		$this->head .= $v;
+	/**
+	 * ヘッダデータを書き込む処理
+	 * @param resource $resource
+	 * @param string $data
+	 * @return number
+	 */
+	public function callback_head($resource,$data){
+		$this->head .= $data;
+		return strlen($data);
 	}
-	public function add_body($v){
-		$this->body .= $v;
+	/**
+	 * データを書き込む処理
+	 * @param resource $resource
+	 * @param string $data
+	 * @return number
+	 */
+	public function callback_body($resource,$data){
+		$this->body .= $data;
+		return strlen($data);
 	}
 	private function request($method,$url,$download_path=null){
 		$url_info = parse_url($url);
@@ -309,18 +322,10 @@ class Http{
 				,$this->request_header
 			)
 		);
+		curl_setopt($this->resource,CURLOPT_HEADERFUNCTION,array($this,'callback_head'));
 		
-		// TODO
-		$http = $this;
-		curl_setopt($this->resource,CURLOPT_HEADERFUNCTION,function($c,$data) use($http){
-			$http->add_head($data);
-			return strlen($data);
-		});
 		if(empty($download_path)){
-			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,function($c,$data) use($http){
-				$http->add_body($data);
-				return strlen($data);
-			});
+			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,array($this,'callback_body'));
 		}else{
 			if(!is_dir(dirname($download_path))) mkdir(dirname($download_path),0777,true);
 			$fp = fopen($download_path,'wb');
