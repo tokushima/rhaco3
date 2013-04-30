@@ -18,6 +18,7 @@ class Log extends \org\rhaco\Object{
 	static private $id;
 	static private $current_level;
 	static private $disp = true;
+	static private $logfile;
 
 	protected $level;
 	protected $time;
@@ -25,14 +26,6 @@ class Log extends \org\rhaco\Object{
 	protected $line;
 	protected $value;
 	
-	static private function cur_level(){
-		if(!isset(self::$id)){
-			self::$id = base_convert(date('md'),10,36).base_convert(date('G'),10,36).base_convert(mt_rand(1296,46655),10,36);
-			register_shutdown_function(array(__CLASS__,'flush'));
-		}
-		if(self::$current_level === null) self::$current_level = array_search(\org\rhaco\Conf::get('level','none'),self::$level_strs);
-		return self::$current_level;
-	}
 	final protected function __new__($level,$value,$file=null,$line=null,$time=null){
 		$class = null;
 		if($file === null){
@@ -75,17 +68,31 @@ class Log extends \org\rhaco\Object{
 	protected function __str__(){
 		return '['.date('Y-m-d H:i:s',$this->time).']'.'['.self::$id.']'.'['.$this->fm_level().']'.':['.$this->file().':'.$this->line().']'.' '.$this->fm_value();
 	}
+	static private function cur_level(){
+		if(!isset(self::$id)){
+			self::$id = base_convert(date('md'),10,36).base_convert(date('G'),10,36).base_convert(mt_rand(1296,46655),10,36);
+			register_shutdown_function(array(__CLASS__,'flush'));
+			
+			self::$logfile = \org\rhaco\Conf::get('file');
+			if(!empty(self::$logfile)){
+				if(!is_dir($dir = dirname(self::$logfile)) && (@mkdir($dir,0777,true) == false)){
+					self::$logfile = '';
+				}
+				if(!empty(self::$logfile) && @file_put_contents(self::$logfile,'',FILE_APPEND) === false){
+					self::$logfile = '';
+				}
+			}
+		}
+		if(self::$current_level === null) self::$current_level = array_search(\org\rhaco\Conf::get('level','none'),self::$level_strs);
+		return self::$current_level;
+	}
 	/**
 	 * 格納されたログを出力する
 	 */
 	final static public function flush(){
 		if(!empty(self::$logs)){
 			$stdout = \org\rhaco\Conf::get('stdout',false);
-			$file = \org\rhaco\Conf::get('file');
-			if(!empty($file)){
-				if(!is_dir($dir = dirname($file))) @mkdir($dir,0777,true);
-				@file_put_contents($file,'',FILE_APPEND);
-			}
+
 			foreach(self::$logs as $log){
 				if(self::cur_level() >= $log->level()){
 					switch($log->fm_level()){
@@ -121,7 +128,7 @@ class Log extends \org\rhaco\Object{
 						 */
 						self::module('trace',$log,self::$id);
 					}
-					if(is_file($file) && is_writable($file)) file_put_contents($file,((string)$log).PHP_EOL,FILE_APPEND);
+					if(!empty(self::$logfile) && is_file(self::$logfile)) file_put_contents(self::$logfile,((string)$log).PHP_EOL,FILE_APPEND);
 					if(self::$disp === true && $stdout) print(((string)$log).PHP_EOL);
 				}
 			}
