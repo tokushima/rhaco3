@@ -209,6 +209,13 @@ class Http{
 		}
 		return $this;
 	}
+	// TODO
+	public function add_head($v){
+		$this->head .= $v;
+	}
+	public function add_body($v){
+		$this->body .= $v;
+	}
 	private function request($method,$url,$download_path=null){
 		$url_info = parse_url($url);
 		$cookie_base_domain = (isset($url_info['host']) ? $url_info['host'] : '').(isset($url_info['path']) ? $url_info['path'] : '');
@@ -302,13 +309,16 @@ class Http{
 				,$this->request_header
 			)
 		);
-		curl_setopt($this->resource,CURLOPT_HEADERFUNCTION,function($c,$data){
-			$this->head .= $data;
+		
+		// TODO
+		$http = $this;
+		curl_setopt($this->resource,CURLOPT_HEADERFUNCTION,function($c,$data) use($http){
+			$http->add_head($data);
 			return strlen($data);
 		});
 		if(empty($download_path)){
-			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,function($c,$data){
-				$this->body .= $data;
+			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,function($c,$data) use($http){
+				$http->add_body($data);
 				return strlen($data);
 			});
 		}else{
