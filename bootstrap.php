@@ -23,9 +23,6 @@ if(($al = spl_autoload_functions()) === false || empty($al)){
 		return false;
 	},true,false);
 }
-ini_set('display_errors','On');
-ini_set('html_errors','Off');
-ini_set('error_reporting',E_ALL);
 set_error_handler(function($n,$s,$f,$l){
 	throw new \ErrorException($s,0,$n,$f,$l);
 });
