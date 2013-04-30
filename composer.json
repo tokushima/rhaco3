@@ -15,7 +15,7 @@
         	"org\\rhaco\\": "lib/"
 	    },
 	    "files": [
-	    	"bootstap.php"
+	    	"bootstrap.php"
 	   	]
 	}
 }
