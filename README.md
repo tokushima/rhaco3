@@ -42,11 +42,11 @@
 		)
 	));
 
-### cmdman install
-	curl -O https://raw.github.com/tokushima/cmdman/master/cmdman.php
+### kate install
+	curl -LO https://raw.github.com/tokushima/kate/master/kate.php
 
 ### create .htaccess
-	php cmdman.php org.rhaco.Dt::htaccess
+	php kate.php org.rhaco.Dt::htaccess
 
 ### view
 	http://〜/〜/dev
