@@ -10,3 +10,9 @@ $head = $http->head();
 eq(true,!empty($head));
 eq(true,is_string($head));
 
+
+
+$http->cp(array('a'=>1,'b'=>2,'c'=>3));
+$http->do_get('http://localhost/rhaco3/testweb/abc.php');
+eq('a=>1'.PHP_EOL.'b=>2'.PHP_EOL.'c=>3'.PHP_EOL,$http->body());
+

@@ -197,12 +197,12 @@ class Http{
 	 */
 	public function cp($vars){
 		if(is_array($vars)){
-			foreach($vars as $k => $v) $this->vars[$k] = $v;
+			foreach($vars as $k => $v) $this->request_vars[$k] = $v;
 		}else if(is_object($vars)){
 			if(in_array('Traversable',class_implements($vars))){
-				foreach($vars as $k => $v) $this->vars[$k] = $v;
+				foreach($vars as $k => $v) $this->request_vars[$k] = $v;
 			}else{
-				foreach(get_object_vars($vars) as $k => $v) $this->vars[$k] = $v;
+				foreach(get_object_vars($vars) as $k => $v) $this->request_vars[$k] = $v;
 			}
 		}else{
 			throw new \InvalidArgumentException('must be an of array');
