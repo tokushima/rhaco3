@@ -13,6 +13,7 @@ class Dbc implements \Iterator{
 	private $port;
 	private $sock;
 	private $encode;
+	private $timezone;
 
 	private $connection;
 	private $statement;
@@ -25,7 +26,7 @@ class Dbc implements \Iterator{
 	 * @param string{} $def 接続情報の配列
 	 */
 	public function __construct(array $def=array()){
-		foreach(array('type','host','dbname','user','password','port','sock','encode') as $k){
+		foreach(array('type','host','dbname','user','password','port','sock','encode','timezone') as $k){
 			if(isset($def[$k])) $this->{$k} = $def[$k];
 		}
 		if(empty($this->type)) $this->type = 'org.rhaco.store.db.module.Mysql';
@@ -38,7 +39,7 @@ class Dbc implements \Iterator{
 		if($this->type[0] !== '\\') $this->type = '\\'.$this->type;
 		if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('could not find module `'.((substr($s=str_replace("\\",'.',$this->type),0,1) == '.') ? substr($s,1) : $s).'`');
 		$r = new \ReflectionClass($this->type);
-		$this->connection_module = $r->newInstanceArgs(array($this->encode));
+		$this->connection_module = $r->newInstanceArgs(array($this->encode,$this->timezone));
 		if($this->connection_module instanceof \org\rhaco\store\db\module\Base){
 			$this->connection = $this->connection_module->connect($this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
 		}

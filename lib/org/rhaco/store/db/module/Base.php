@@ -12,11 +12,13 @@ use \org\rhaco\store\db\Column;
  */
 abstract class Base{
 	protected $encode;
+	protected $timezone;
 	protected $order_random_str = 'rand()';
 	protected $quotation = '`';
 
-	public function __construct($encode=null){
+	public function __construct($encode=null,$timezone=null){
 		$this->encode = $encode;
+		$this->timezone = $timezone;
 	}
 	/**
 	 * DBに接続する
