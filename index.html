@@ -1,99 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
-	
-	<title>rhaco3</title>
+	<meta charset="utf-8">
+	<title>rhaco.org</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
 
-	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-	<!--[if lt IE 9]>
-		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
-
-	<!-- Le styles -->
-	<link href="media/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-	<link href="media/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
-	<link href="media/google-code-prettify/prettify.css" rel="stylesheet" />
-
-    <script type="text/javascript" src="media/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="media/bootstrap/js/bootstrap.min.js"></script>
-    
-	<link href="media/bootstrap/css/spacelab.css" rel="stylesheet" />
-
-    <style type="text/css">
-		.hero-unit{ padding: 45px 30px 40px 30px; }
-		
-		.btn-info{
-			margin: 3px;
-		}
-		.container{
-			margin-left:80px;
-			width:85%;
-		}
-		.page_title{
-			margin-bottom:0;
-			font-size:60px;
-			line-height:1;
-			letter-spacing:-1px;
-		}
-    </style>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+	<style>
+		body{ padding-top: 60px; }
+	</style>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
 </head>
-
 <body>
-	<div class="navbar">
+	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
 			<div class="container">
-				<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
-				</a>
-				<a class="brand" href="#">rhaco3</a>
-				<div class="nav-collapse">
+				</button>
+				<a class="brand" href="#">rhaco.org</a>
+				<div class="nav-collapse collapse">
 					<ul class="nav">
 					</ul>
 				</div>
 			</div>
 		</div>
 	</div>
- 
-	<div class="container" style="margin-top: 50px;">
-		<div class="row">
-			<p>
-				<span class="label">PHP 5 >= 5.3</span>
-				<span class="label label-info">2010-11-11</span>
-			</p>
 
-			<table class="table table-striped">
-				<tr><td><a href="./first.html">はじめに</a></td>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/startup.html">スタートアップ</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/appdir.html">アプリケーションのファイル構成</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/package.html">namespaceとファイルパス</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/entry.html">エントリーポイント</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/api.html">APIフレームワーク</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/cmd.html">コマンドラインフレームワーク</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/template.html">テンプレートエンジン</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/object.html">オブジェクト</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/lib.html">外部ライブラリ</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/org_rhaco_conf.html">各種設定を行うクラス</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/org_rhaco_store_db_dao.html">O/Rマッパー</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/document/org_rhaco_Dt.html">開発支援ツール</a></td></tr>
-	
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/1.html">htmlを表示する</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/2.html">継承したhtmlを表示する</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/3.html">PEARを利用してQRコードを表示する</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/4.html">SQLiteを操作する</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/5.html">O/Rマッパーを利用する</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/6.html">O/Rマッパーにバリデーションを加える</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/7.html">formを処理する</a></td></tr>
-				<tr><td><a href="http://rhaco.org/rhaco3/tutorial/8.html">formに初期値を指定する</a></td></tr>
-			</table>
-			<footer>
-			</footer>
-		</div>
+	<div class="container">
+		<table class="table table-condensed">
+		<thead>
+		<tr>
+			<th>Product</th>
+			<th>PHP version</th>
+			<th>License</th>
+			<th>Start date</th>
+			<th>Download </th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>rhaco3</td>
+			<td>PHP 5 &gt;= 5.3</td>
+			<td>BSD</td>
+			<td>2010-11-11</td>
+			<td><a href="https://github.com/tokushima/rhaco3">github</a></td>
+		</tr>
+		<tr>
+			<td>rhaco2</td>
+			<td>PHP 5 &gt;= 5.2.5</td>
+			<td>BSD</td>
+			<td>2008-08-08</td>
+			<td><a href="https://github.com/tokushima/rhaco2">github</a></td>
+		</tr>
+		<tr>
+			<td>rhaco1</td>
+			<td>PHP 4 &gt;= 4.3.0, PHP 5 &lt;= 5.3</td>
+			<td>BSD</td>
+			<td>2005-09-01</td>
+			<td><a href="https://github.com/tokushima/rhaco1">github</a></td>
+		</tr>
+		<tr>
+			<td>rhaco simple</td>
+			<td>PHP 5 &gt;= 5.2.5</td>
+			<td>BSD</td>
+			<td>2012-09-03</td>
+			<td><a href="https://github.com/tokushima/simple">github</a></td>
+		</tr>
+		</tbody>
+		</table>
 	</div>
-	<script type="text/javascript" src="media/google-code-prettify/prettify.js"></script>
-	<script type="text/javascript">prettyPrint();</script>	
 </body>
 </html>
+
