@@ -37,7 +37,7 @@ class Log extends \org\rhaco\Object{
 					$file = $d['file'];
 					$line = $d['line'];
 					$class = isset($d['class']) ? $d['class'] : null;
-					if($i++ >= 2) break;
+					if($i++ >= 1) break;
 				}
 			}
 		}
