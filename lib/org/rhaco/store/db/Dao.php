@@ -777,11 +777,12 @@ abstract class Dao extends \org\rhaco\Object{
 	/**
 	 * 指定のプロパティにユニークコードをセットする
 	 * @param string $prop_name
+	 * @param integer $size
 	 * @return string 生成されたユニークコード
 	 */
-	final public function set_unique_code($prop_name){
+	final public function set_unique_code($prop_name,$size=null){
 		$code = '';
-		$max = $this->prop_anon($prop_name,'max',32);
+		$max = (!empty($size)) ? $size : $this->prop_anon($prop_name,'max',32);
 		$ctype = $this->prop_anon($prop_name,'ctype','alnum');
 		if($ctype != 'alnum' && $ctype != 'alpha' && $ctype != 'digit') throw new \LogicException('unexpected ctype');
 		$char = '';
