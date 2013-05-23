@@ -30,14 +30,13 @@ class Log extends \org\rhaco\Object{
 		$class = null;
 			if($file === null){
 			$debugs = debug_backtrace(false);
-			$i = 0;
 			rsort($debugs);
 			foreach($debugs as $d){
 				if(isset($d['file'])){
 					$file = $d['file'];
 					$line = $d['line'];
 					$class = isset($d['class']) ? $d['class'] : null;
-					if($i++ >= 1) break;
+					break;
 				}
 			}
 		}
