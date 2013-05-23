@@ -1,3 +1,8 @@
 /.settings
 /.buildpath
 /.project
+/composer.lock
+/.htaccess
+/vendor
+/composer.phar
+/kate.php
