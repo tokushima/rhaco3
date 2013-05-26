@@ -257,7 +257,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @param string $newname
 	 */
 	public function move_file($file_info,$newname){
-		return $this->req->move_file($file_info,$newname);
+		$this->req->move_file($file_info,$newname);
 	}
 	/**
 	 * クッキーへの書き出し
