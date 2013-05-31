@@ -1,7 +1,10 @@
 <?php
 if(($al = spl_autoload_functions()) === false || empty($al)){
-	if(is_dir($libdir=getcwd().'/lib') && strpos(get_include_path(),$libdir) === false){
+	if(is_dir($libdir=__DIR__.'/lib') && strpos(get_include_path(),$libdir) === false){
 		set_include_path($libdir.PATH_SEPARATOR.get_include_path());
+	}
+	if(is_dir($libdir=dirname(dirname(dirname(__DIR__))).'/pear') && strpos(get_include_path(),$libdir) === false){
+		set_include_path(get_include_path().PATH_SEPARATOR.$libdir);
 	}
 	spl_autoload_register(function($c){
 		$cp = str_replace('\\','/',(($c[0] == '\\') ? substr($c,1) : $c));

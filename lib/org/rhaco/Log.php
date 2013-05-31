@@ -28,17 +28,21 @@ class Log extends \org\rhaco\Object{
 	
 	final protected function __new__($level,$value,$file=null,$line=null,$time=null){
 		$class = null;
-			if($file === null){
+		if($file === null){
 			$debugs = debug_backtrace(false);
-			rsort($debugs);
+			$i = 0;
 			foreach($debugs as $d){
 				if(isset($d['file'])){
 					$file = $d['file'];
 					$line = $d['line'];
 					$class = isset($d['class']) ? $d['class'] : null;
-					break;
+					if($i++ > 1) break;
 				}
 			}
+			$file = (isset($debug['file']) ? $debug['file'] : $dumy['file']);
+			$line = (isset($debug['line']) ? $debug['line'] : $dumy['line']);
+			$class = (isset($op['class']) ? $op['class'] : $dumy['class']);			
+			
 		}
 		$this->level = $level;
 		$this->file = $file;
