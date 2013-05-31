@@ -38,11 +38,7 @@ class Log extends \org\rhaco\Object{
 					$class = isset($d['class']) ? $d['class'] : null;
 					if($i++ > 1) break;
 				}
-			}
-			$file = (isset($debug['file']) ? $debug['file'] : $dumy['file']);
-			$line = (isset($debug['line']) ? $debug['line'] : $dumy['line']);
-			$class = (isset($op['class']) ? $op['class'] : $dumy['class']);			
-			
+			}			
 		}
 		$this->level = $level;
 		$this->file = $file;
