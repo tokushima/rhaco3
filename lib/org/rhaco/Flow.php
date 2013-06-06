@@ -353,7 +353,7 @@ class Flow{
 						}
 						exit;
 					}catch(\Exception $e){
-						if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e,$e);
+						if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
 						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
 							\org\rhaco\Log::$level(\org\rhaco\Exceptions::trace());
 						}
