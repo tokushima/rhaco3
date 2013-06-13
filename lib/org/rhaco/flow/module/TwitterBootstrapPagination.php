@@ -28,7 +28,7 @@ class TwitterBootstrapPagination{
 				$navi = array_change_key_case(array_flip(explode(',',$tag->in_attr('navi','prev,next,first,last,counter'))));
 				$counter = $tag->in_attr('counter',10);
 				$total = '$__pagertotal__'.$uniq;
-				if(isset($navi['prev'])) $func .= sprintf('<?php if(%s->is_prev()){ ?><li class="prev"><a href="%s{%s.query_prev()}"><?php }else{ ?><li class="prev disabled"><a><?php } ?>%s</a></li>',$param,$href,$param,'&larr; Previous');
+				if(isset($navi['prev'])) $func .= sprintf('<?php if(%s->is_prev()){ ?><li class="prev"><a href="%s{%s.query_prev()}" rel="prev"><?php }else{ ?><li class="prev disabled"><a><?php } ?>%s</a></li>',$param,$href,$param,'&larr; Previous');
 				if(isset($navi['first'])) $func .= sprintf('<?php if(!%s->is_dynamic() && %s->is_first(%d)){ ?><li><a href="%s{%s.query(%s.first())}">{%s.first()}</a></li><li class="disabled"><a>...</a></li><?php } ?>',$param,$param,$counter,$href,$param,$param,$param);
 				if(isset($navi['counter'])){
 					$func .= sprintf('<?php if(!%s->is_dynamic()){ ?>',$param);
@@ -44,7 +44,7 @@ class TwitterBootstrapPagination{
 					$func .= '<?php } ?>';
 				}
 				if(isset($navi['last'])) $func .= sprintf('<?php if(!%s->is_dynamic() && %s->is_last(%d)){ ?><li class="disabled"><a>...</a></li><li><a href="%s{%s.query(%s.last())}">{%s.last()}</a></li><?php } ?>',$param,$param,$counter,$href,$param,$param,$param);
-				if(isset($navi['next'])) $func .= sprintf('<?php if(%s->is_next()){ ?><li class="next"><a href="%s{%s.query_next()}"><?php }else{ ?><li class="next disabled"><a><?php } ?>%s</a></li>',$param,$href,$param,'Next &rarr;',$etag);
+				if(isset($navi['next'])) $func .= sprintf('<?php if(%s->is_next()){ ?><li class="next"><a href="%s{%s.query_next()}" rel="next"><?php }else{ ?><li class="next disabled"><a><?php } ?>%s</a></li>',$param,$href,$param,'Next &rarr;',$etag);
 
 				$func .= "<?php } ?><?php }catch(\\Exception \$e){} ?>";
 				$func .= '</ul></div>';
