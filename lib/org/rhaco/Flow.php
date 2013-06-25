@@ -353,10 +353,6 @@ class Flow{
 						}
 						exit;
 					}catch(\Exception $e){
-						if(!($e instanceof \org\rhaco\Exceptions)) \org\rhaco\Exceptions::add($e);
-						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
-							\org\rhaco\Log::$level(\org\rhaco\Exceptions::trace());
-						}
 						if($this->has_object_module('flow_handle_exception')){
 							/**
 							 * 例外発生
@@ -364,7 +360,17 @@ class Flow{
 							 */
 							$this->object_module('flow_handle_exception',$e);
 						}
-						if(isset($map['error_status'])) \org\rhaco\net\http\Header::send_status($map['error_status']);
+						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null 
+							&& ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')
+						){
+							\org\rhaco\Log::$level($e);
+						}
+						if(!($e instanceof \org\rhaco\Exceptions)){
+							\org\rhaco\Exceptions::add($e);
+						}
+						if(isset($map['error_status'])){
+							\org\rhaco\net\http\Header::send_status($map['error_status']);
+						}
 						if($this->has_object_module('flow_exception_output')){
 							/**
 							 * 例外発生時の出力
@@ -379,23 +385,20 @@ class Flow{
 								if(isset($m['name']) && $m['name'] == $map['error_redirect'] && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
 							}
 							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
-						}else{
-							if(isset($apps[$k]['error_template'])){
-								$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
-								exit;
-							}else if(isset($map['error_template'])){
-								$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
-								exit;
-							}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html')){
-								$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
-								exit;
-							}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
-								if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
-								exit;
-							}
-							$this->handle_exception_xml();
+						}else if(isset($apps[$k]['error_template'])){
+							$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
+							exit;
+						}else if(isset($map['error_template'])){
+							$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
+							exit;
+						}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html')){
+							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
+							exit;
+						}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
+							if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
+							exit;
 						}
-						throw $e;
+						$this->handle_exception_xml();
 					}
 				}
 				$idx++;
