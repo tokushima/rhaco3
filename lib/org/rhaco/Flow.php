@@ -353,17 +353,18 @@ class Flow{
 						}
 						exit;
 					}catch(\Exception $e){
+						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null && in_array($level,array('error','warn','info','debug'))){
+							$es = ($e instanceof \org\rhaco\Exceptions) ? \org\rhaco\Exceptions::gets() : array($e);
+							foreach($es as $v){
+								\org\rhaco\Log::$level($v);
+							}
+						}
 						if($this->has_object_module('flow_handle_exception')){
 							/**
 							 * 例外発生
 							 * @param Exception $e
 							 */
 							$this->object_module('flow_handle_exception',$e);
-						}
-						if(($level = \org\rhaco\Conf::get('exception_log_level')) !== null 
-							&& ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')
-						){
-							\org\rhaco\Log::$level($e);
 						}
 						if(!($e instanceof \org\rhaco\Exceptions)){
 							\org\rhaco\Exceptions::add($e);
