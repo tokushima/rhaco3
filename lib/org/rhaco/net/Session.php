@@ -114,6 +114,12 @@ class Session extends \org\rhaco\Object{
 		return isset($_SESSION[$this->ses_n][$n]) ? $_SESSION[$this->ses_n][$n] : $d;
 	}
 	/**
+	 * すべてのセッションの取得
+	 */
+	public function ar_vars(){
+		return isset($_SESSION[$this->ses_n]) ? $_SESSION[$this->ses_n] : array();
+	}
+	/**
 	 * キーが存在するか
 	 * @param string $n
 	 * @return boolean
