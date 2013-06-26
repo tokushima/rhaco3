@@ -415,7 +415,7 @@ class Flow{
 			}
 			\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['nomatch_redirect'],0,1) == '/') ? substr($map['nomatch_redirect'],1) : $map['nomatch_redirect']));
 		}
-		if(($level = \org\rhaco\Conf::get('notfound_log_level')) !== null && ($level == 'error' || $level == 'warn' || $level == 'info' || $level == 'debug')){
+		if(($level = \org\rhaco\Conf::get('notfound_log_level')) !== null && in_array($level,array('error','warn','info','debug'))){
 			\org\rhaco\Log::$level(\org\rhaco\Request::current_url().' (`'.$pathinfo.'`) bad request');
 		}
 		\org\rhaco\net\http\Header::send_status(404);
