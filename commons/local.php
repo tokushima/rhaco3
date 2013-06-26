@@ -10,7 +10,12 @@ date_default_timezone_set('Asia/Tokyo');
 			,'test'=>array('dbname'=>'app')
 		)
 	),
-	'org.rhaco.Flow'=>array('exception_log_level'=>'warn'),
+	'org.rhaco.Flow'=>array(
+		'exception_log_level'=>'warn',
+		'exception_log_ignore'=>array(
+			'Unauthorized.+RequestFlow'
+		)
+	),
 	'org.rhaco.Template'=>array('display_exception'=>true),
 	'org.rhaco.flow.module.SimpleAuth'=>array('auth'=>array('user_name'=>md5(sha1('password')))),
 	'org.rhaco.Log'=>array(
