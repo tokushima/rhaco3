@@ -21,7 +21,26 @@ class Request implements \IteratorAggregate{
 					foreach($_POST as $k => $v) $this->vars[$k] = (get_magic_quotes_gpc() && is_string($v)) ? stripslashes($v) : $v;
 				}
 				if(isset($_FILES) && is_array($_FILES)){
-					foreach($_FILES as $k => $v) $this->files[$k] = $v;
+					$marge_func = function($arr,$pk,$files,&$map) use(&$marge_func){
+						if(is_array($arr)){
+							foreach($arr as $k => $v){
+								$marge_func($v,array_merge($pk,array($k)),$files,$map);
+							}
+						}else{
+							$ks = implode('',array_map(function($v){ return '[\''.$v.'\']';},$pk));
+							foreach(array('name','type','tmp_name','tmp_name','size') as $k){
+								eval('$map'.$ks.'[\''.$k.'\']=$files[\''.$k.'\']'.$ks.';');
+							}
+						}
+					};
+					foreach($_FILES as $k => $v){
+						if(is_array($v['name'])){
+							$this->files[$k] = array();
+							$marge_func($v['name'],array(),$v,$this->files[$k]);
+						}else{
+							$this->files[$k] = $v;
+						}
+					}
 				}
 			}else if(isset($_GET) && is_array($_GET)){
 				foreach($_GET as $k => $v) $this->vars[$k] = (get_magic_quotes_gpc() && is_string($v)) ? stripslashes($v) : $v;
@@ -217,6 +236,9 @@ class Request implements \IteratorAggregate{
 	 */
 	public function ar_vars(){
 		return $this->vars;
+	}
+	public function ar_files(){
+		return $this->files;
 	}
 	/**
 	 * 添付ファイル情報の取得
