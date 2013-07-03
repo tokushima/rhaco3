@@ -24,11 +24,14 @@ $obj = new NewDao();
 $obj->save();
 
 $obj = new NewDao();
+$obj->save();
+
+$obj = new NewDao();
 $obj->value('');
 $obj->save();
 
 
 eq(1,NewDao::find_count(Q::eq('value','')));
-eq(1,NewDao::find_count(Q::eq('value',null)));
-eq(2,NewDao::find_count());
+eq(2,NewDao::find_count(Q::eq('value',null)));
+eq(3,NewDao::find_count());
 
