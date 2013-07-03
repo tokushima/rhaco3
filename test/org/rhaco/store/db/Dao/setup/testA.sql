@@ -288,3 +288,11 @@ CREATE TABLE `update_model` (
   `value` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
+
+
+CREATE TABLE `new_dao` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
