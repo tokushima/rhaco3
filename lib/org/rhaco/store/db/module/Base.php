@@ -325,8 +325,7 @@ abstract class Base{
 			return $this->where_sql($dao,$from,$query,$self_columns,null,$alias);
 		}
 		$and = $vars = array();
-		$arg2 = $q->is_arg2() ? $q->ar_arg2() : array(null);
-		foreach($arg2 as $base_value){
+		foreach($q->ar_arg2() as $base_value){
 			$or = array();
 			foreach($q->ar_arg1() as $column_str){
 				$value = $base_value;
