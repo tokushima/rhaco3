@@ -58,9 +58,6 @@ class Q{
 	private function ar_value($v){
 		return is_array($v) ? $v : (($v === null) ? array() : array($v));
 	}
-	public function is_arg1(){
-		return (isset($this->arg1) && $this->arg1 !== '');
-	}
 	public function ar_arg1(){
 		if(empty($this->arg1)) return array();
 		if(is_string($this->arg1)){
@@ -75,10 +72,7 @@ class Q{
 		throw new \InvalidArgumentException('invalid arg1');
 	}
 	public function ar_arg2(){
-		return $this->ar_value($this->arg2);
-	}
-	public function is_arg2(){
-		return isset($this->arg2);
+		return isset($this->arg2) ?$this->ar_value($this->arg2) : array(null);
 	}
 	public function type(){
 		return $this->type;
