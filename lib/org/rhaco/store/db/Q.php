@@ -78,7 +78,7 @@ class Q{
 		return $this->ar_value($this->arg2);
 	}
 	public function is_arg2(){
-		return (isset($this->arg2) && $this->arg2 !== '');
+		return isset($this->arg2);
 	}
 	public function type(){
 		return $this->type;
