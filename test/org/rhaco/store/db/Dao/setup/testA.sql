@@ -296,3 +296,19 @@ CREATE TABLE `new_dao` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
+
+CREATE TABLE `composite_primary_keys` (
+  `id1` int(11) DEFAULT NULL,
+  `id2` int(11) DEFAULT NULL,
+  `value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id1`,`id2`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `composite_primary_keys_ref` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ref_id` int(11) DEFAULT NULL,
+  `type_id` int(11) DEFAULT NULL,
+  `value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
