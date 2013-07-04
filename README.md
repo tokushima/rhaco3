@@ -71,26 +71,16 @@ MAMP( http://www.mamp.info/ )上で確認し PDT( http://www.eclipse.org/pdt/dow
 xampp( http://www.apachefriends.org/ ) や nginx + php-fpm 、OSXに入っているApache等でも動作しますが個々の設定によるので、それぞれ環境にあわせて適宜読み替えてください。
 
 
-## 開発環境 Eclispe
- <http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops4/R-4.2-201206081400/eclipse-SDK-4.2-macosx-cocoa-x86_64.tar.gz>
+## 開発環境
+Eclispe: http://www.eclipse.org
 
 ### (Eclipse) - Help - Install new Software
- <http://download.eclipse.org/releases/juno>
- 
-     Collaboration - Eclipse EGit
-     Web,XML,Java EE and OSGi Enterprise Development - PHP Development Tools
- 
-<http://subclipse.tigris.org/update_1.8.x>
+PDT: http://download.eclipse.org/tools/pdt/updates/release
+( http://www.eclipse.org/pdt/downloads/ ) 
 
+EGIT: http://download.eclipse.org/egit/updates-3.0 
+( http://marketplace.eclipse.org/content/egit-git-team-provider#.UdTS1hbuSJQ )
 
-    Subclipse - Subclipse (Required)
-              - Subversion Client Adapter (Required) 
-    
-    SVNKit - JNA Library
-           - SVNKit Client Adapter (Not required)
-           - SVNKit Library
-
-
-
-
+Subclipse: http://subclipse.tigris.org/update_1.8.x
+( http://marketplace.eclipse.org/node/979#.UdTUCRbuSJQ )
 
