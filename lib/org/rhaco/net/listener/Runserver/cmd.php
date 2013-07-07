@@ -1,12 +1,14 @@
 <?php
 /**
  * 簡易なHTTPサーバを起動する
+ * @param string $address アドレス
+ * @param integer $port ポート
  */
-$__settings__ = \org\rhaco\io\File::read(getcwd().'/__settings__.php');
+$address = $in_value('address','localhost');
+$port = $in_value('port',8080);
 $self = new \org\rhaco\net\listener\Runserver();
-$req = new \org\rhaco\Request();
 $server = new \org\rhaco\net\listener\SocketListener();
 $server->set_object_module($self);
-$server->start($req->in_vars('address','localhost'),$req->in_vars('port',8080));
+$server->start($address,$port);
 
 

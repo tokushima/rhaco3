@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Tokyo');
 \org\rhaco\Conf::set(array(
 	'org.rhaco.store.db.Dao'=>array(
 		'connection'=>array(
-			'org.rhaco'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app')
+			'org.rhaco'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'app')
 			,'org.rhaco.store.db.Dao'=>array('dbname'=>'testA')
 			,'org.rhaco.store.db.Dao.CrossChild'=>array('dbname'=>'testB')
 			,'test'=>array('dbname'=>'app')
