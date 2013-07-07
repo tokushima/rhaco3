@@ -1,5 +1,6 @@
 <?php
 include_once('bootstrap.php');
+
 /**
  * @name rhaco.org
  * @summary site

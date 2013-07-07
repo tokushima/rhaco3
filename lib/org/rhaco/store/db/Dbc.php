@@ -29,12 +29,11 @@ class Dbc implements \Iterator{
 		foreach(array('type','host','dbname','user','password','port','sock','encode','timezone') as $k){
 			if(isset($def[$k])) $this->{$k} = $def[$k];
 		}
-		if(empty($this->type)) $this->type = 'org.rhaco.store.db.module.Mysql';
-		if(empty($this->encode)) $this->encode = 'utf8';
-		if(empty($this->user)){
-			$this->user = 'root';
-			$this->password = 'root';
+		if(empty($this->type)){
+			$this->type = 'org.rhaco.store.db.module.Sqlite';
+			if(empty($this->host)) $this->host = ':memory:';
 		}
+		if(empty($this->encode)) $this->encode = 'utf8';
 		$this->type = str_replace('.','\\',$this->type);
 		if($this->type[0] !== '\\') $this->type = '\\'.$this->type;
 		if(empty($this->type) || !class_exists($this->type)) throw new \RuntimeException('could not find module `'.((substr($s=str_replace("\\",'.',$this->type),0,1) == '.') ? substr($s,1) : $s).'`');

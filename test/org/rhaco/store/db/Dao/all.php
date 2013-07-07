@@ -16,6 +16,7 @@ class InitHasParent extends Dao{
 	protected $id;
 	protected $value;
 }
+InitHasParent::create_table();
 
 $obj = new InitHasParent();
 $columns = $obj->columns();
@@ -30,6 +31,8 @@ foreach($columns as $column){
 class ExtraInitHasParent extends InitHasParent{
 	protected $extra_value;
 }
+ExtraInitHasParent::create_table();
+
 try{
 	$result = ExtraInitHasParent::find_all();
 	success();
@@ -49,6 +52,7 @@ class DateTime extends Dao{
 	protected $date;
 	protected $idate;
 }
+DateTime::create_table();
 
 DateTime::find_delete();
 $obj = new DateTime();
@@ -70,6 +74,7 @@ foreach(DateTime::find() as $o){
  */
 class AddNowDateTime extends DateTime{
 }
+AddNowDateTime::create_table();
 AddNowDateTime::find_delete();
 
 $obj = new AddNowDateTime();
@@ -91,6 +96,7 @@ foreach(AddNowDateTime::find() as $o){
  */
 class AddDateTime extends DateTime{
 }
+AddDateTime::create_table();
 AddDateTime::find_delete();
 
 $obj = new AddDateTime();
@@ -117,6 +123,7 @@ class UniqueCode extends Dao{
 	protected $code2;
 	protected $code3;
 }
+UniqueCode::create_table();
 UniqueCode::find_delete();
 $obj = new UniqueCode();
 eq(null,$obj->code1());
@@ -146,6 +153,7 @@ class UniqueCodeDigit extends UniqueCode{
 	protected $code2;
 	protected $code3;
 }
+UniqueCodeDigit::create_table();
 UniqueCodeDigit::find_delete();
 $obj = new UniqueCodeDigit();
 eq(null,$obj->code1());
@@ -181,6 +189,7 @@ class UniqueCodeAlpha extends UniqueCode{
 	protected $code2;
 	protected $code3;
 }
+UniqueCodeAlpha::create_table();
 UniqueCodeAlpha::find_delete();
 $obj = new UniqueCodeAlpha();
 eq(null,$obj->code1());
@@ -208,6 +217,7 @@ class UniqueCodeIgnore extends UniqueCode{
 	protected $id;
 	protected $code1;
 }
+UniqueCodeIgnore::create_table();
 UniqueCodeIgnore::find_delete();
 $obj = new UniqueCodeIgnore();
 eq(null,$obj->code1());
@@ -231,6 +241,7 @@ class DoublePrimary extends Dao{
 	protected $id2;
 	protected $value;
 }
+DoublePrimary::create_table();
 DoublePrimary::find_delete();
 try{
 	$obj = new DoublePrimary();
@@ -251,6 +262,7 @@ class LimitVerify extends Dao{
 	protected $value1;
 	protected $value2;
 }
+LimitVerify::create_table();
 LimitVerify::find_delete();
 
 $obj = new LimitVerify();
@@ -304,6 +316,7 @@ class UniqueVerify extends Dao{
 	protected $u1;
 	protected $u2;
 }
+UniqueVerify::create_table();
 UniqueVerify::find_delete();
 
 $obj = new UniqueVerify();
@@ -351,6 +364,7 @@ class UniqueTripleVerify extends Dao{
 	protected $u2;
 	protected $u3;
 }
+UniqueTripleVerify::create_table();
 UniqueTripleVerify::find_delete();
 
 
@@ -401,6 +415,7 @@ class Calc extends Dao{
 	protected $type;
 	protected $name;
 }
+Calc:: create_table();
 Calc::find_delete();
 
 r(new Calc())->price(30)->type("B")->name("AAA")->save();
@@ -434,7 +449,7 @@ eq(15,Calc::find_avg("price",Q::eq("type","A")));
 eq(array("A"=>15,"B"=>25),Calc::find_avg_by("price","type"));
 eq(array("A"=>15),Calc::find_avg_by("price","type",Q::eq("type","A")));
 
-eq(array("B","A"),Calc::find_distinct("type"));
+eq(array("A","B"),Calc::find_distinct("type",Q::order('type')));
 $result = Calc::find_distinct("name",Q::eq("type","A"));
 eq(array("AAA","BBB"),$result);
 
@@ -443,93 +458,6 @@ eq(array("A"=>2,"B"=>2),Calc::find_count_by("id","type"));
 eq(array("AAA"=>2,"BBB"=>1,"ccc"=>1),Calc::find_count_by("type","name"));
 
 
-/**
- * @var serial $id
- * @var number $order
- * @var timestamp $updated
- * @var string $value
- * @var string $value2
- */
-class Find extends Dao{
-	protected $id;
-	protected $order;
-	protected $value1;
-	protected $value2;
-	protected $updated;	
-}
-class AbcFind extends Find{
-	protected function __find_conds__(){
-		return Q::b(Q::eq("value1","abc"));
-	}
-}
-/**
- * @var serial $id
- * @var integer $parent_id
- * @var string $value @['cond'=>'parent_id(find.id)','column'=>'value1']
- */
-class RefFind extends Dao{
-	protected $id;
-	protected $parent_id;
-	protected $value;
-}
-/**
- * @var serial $id
- * @var integer $parent_id
- * @var string $value @['cond'=>'parent_id(ref_find.id.parent_id,find.id)','column'=>'value1']
- */
-class RefRefFind extends Dao{
-	protected $id;
-	protected $parent_id;
-	protected $value;
-}
-/**
- * @class @['table'=>'ref_find']
- * @var serial $id
- * @var integer $parent_id
- * @var Find $parent @['cond'=>'parent_id()id']
- */
-class HasFind extends Dao{
-	protected $id;
-	protected $parent_id;
-	protected $parent;
-}
-/**
- * @var serial $id
- * @var string $value
- * @var integer $order;
- */
-class SubFind extends Dao{
-	protected $id;
-	protected $value;
-	protected $order;
-}
-
-RefRefFind::find_delete();
-RefFind::find_delete();
-Find::find_delete();
-SubFind::find_delete();
-
-$abc = r(new Find())->order(4)->value1("abc")->value2("ABC")->save();
-$def = r(new Find())->order(3)->value1("def")->value2("DEF")->save();
-$ghi = r(new Find())->order(1)->value1("ghi")->value2("GHI")->updated("2008/12/24 10:00:00")->save();
-$jkl = r(new Find())->order(2)->value1("jkl")->value2("EDC")->save();
-$aaa = r(new Find())->order(2)->value1("aaa")->value2("AAA")->updated("2008/12/24 10:00:00")->save();
-$bbb = r(new Find())->order(2)->value1("bbb")->value2("Aaa")->save();
-$ccc = r(new Find())->order(2)->value1("ccc")->value2("aaa")->save();
-$mno = r(new Find())->order(2)->value1("mno")->value2(null)->save();
-
-
-$ref1 = r(new RefFind())->parent_id($jkl->id())->save();
-$ref2 = r(new RefFind())->parent_id($ccc->id())->save();
-
-$refref1 = r(new RefRefFind())->parent_id($ref1->id())->save();
-
-$sub1 = r(new SubFind())->value("abc")->order(4)->save();
-$sub2 = r(new SubFind())->value("def")->order(3)->save();
-$sub3 = r(new SubFind())->value("ghi")->order(1)->save();
-$sub4 = r(new SubFind())->value("jkl")->order(2)->save();
-
-eq(8,sizeof(Find::find_all()));
 
 /**
  * @var serial $id
@@ -541,6 +469,7 @@ class ManyChild extends Dao{
 	protected $parent_id;
 	protected $value;
 }
+ManyChild::create_table();
 /**
  * @var serial $id
  * @var string $value
@@ -551,6 +480,8 @@ class ManyParent extends Dao{
 	protected $value;
 	protected $children;
 }
+ManyParent::create_table();
+
 ManyChild::find_delete();
 ManyParent::find_delete();
 
@@ -585,6 +516,8 @@ foreach(ManyParent::find_all() as $r){
 class JoinA extends Dao{
 	protected $id;
 }
+JoinA::create_table();
+
 /**
  * @var serial $id
  * @var string $name
@@ -593,6 +526,8 @@ class JoinB extends Dao{
 	protected $id;
 	protected $name;
 }
+JoinB::create_table();
+
 /**
  * @var serial $id
  * @var integer $a_id
@@ -603,6 +538,8 @@ class JoinC extends Dao{
 	protected $a_id;
 	protected $b_id;
 }
+JoinC::create_table();
+
 JoinA::find_delete();
 JoinB::find_delete();
 JoinC::find_delete();
@@ -617,6 +554,7 @@ class JoinABC extends Dao{
 	protected $id;
 	protected $name;
 }
+JoinABC::create_table();
 
 $a1 = r(new JoinA())->save();
 $a2 = r(new JoinA())->save();
@@ -646,208 +584,6 @@ $re = JoinABC::find_all(Q::eq("name","bbb"));
 eq(2,sizeof($re));
 
 
-foreach(Find::find(Q::eq("value1","abc")) as $obj){
-	eq("abc",$obj->value1());
-}
-foreach(AbcFind::find() as $obj){
-	eq("abc",$obj->value1());
-}
-
-eq(8,Find::find_count());
-eq(8,Find::find_count("value1"));
-eq(7,Find::find_count("value2"));
-eq(5,Find::find_count(Q::eq("order",2)));
-eq(4,Find::find_count(
-	Q::neq("value1","abc"),
-	Q::ob(
-		Q::b(Q::eq("order",2)),
-		Q::b(Q::eq("order",4))
-	),
-	Q::neq("value1","aaa")
-));
-$q = new Q();
-$q->add(Q::neq("value1","abc"));
-$q->add(Q::ob(
-		Q::b(Q::eq("order",2)),
-		Q::b(Q::eq("order",4))
-	));
-$q->add(Q::neq("value1","aaa"));
-eq(4,Find::find_count($q));
-
-$q = new Q();
-$q->add(Q::ob(
-		Q::b(Q::eq("order",2),Q::ob(Q::b(Q::eq("value1",'ccc')),Q::b(Q::eq("value2",'AAA')))),
-		Q::b(Q::eq("order",4))
-	));
-eq(4,Find::find_count($q));
-
-
-$paginator = new \org\rhaco\Paginator(1,2);
-eq(1,sizeof($result = Find::find_all(Q::neq("value1","abc"),$paginator)));
-eq("ghi",$result[0]->value1());
-eq(7,$paginator->total());
-
-$i = 0;
-foreach(Find::find(
-	Q::neq("value1","abc"),
-	Q::ob(
-		Q::b(Q::eq("order",2)),
-		Q::b(Q::eq("order",4))
-	),
-	Q::neq("value1","aaa")
-) as $obj){
-	$i++;
-}
-eq(4,$i);
-
-$list = array("abc","def","ghi","jkl","aaa","bbb","ccc","mno");
-$i = 0;
-foreach(Find::find() as $obj){
-	eq($list[$i],$obj->value1());
-	$i++;
-}
-foreach(Find::find(Q::eq("value1","AbC",Q::IGNORE)) as $obj){
-	eq("abc",$obj->value1());
-}
-foreach(Find::find(Q::neq("value1","abc")) as $obj){
-	neq("abc",$obj->value1());
-}
-try{
-	Find::find(Q::eq("value_error","abc"));
-	fail();
-}catch(\Exception $e){
-	success();
-}
-
-$i = 0;
-$r = array("aaa","bbb","ccc");
-foreach(Find::find(Q::startswith("value1,value2",array("aa"),Q::IGNORE)) as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value1());
-	$i++;
-}
-eq(3,$i);
-
-$i = 0;
-$r = array("abc","jkl","ccc");
-foreach(Find::find(Q::endswith("value1,value2",array("c"),Q::IGNORE)) as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value1());
-	$i++;
-}
-eq(3,$i);
-
-$i = 0;
-$r = array("abc","bbb");
-foreach(Find::find(Q::contains("value1,value2",array("b"))) as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value1());
-	$i++;
-}
-eq(2,$i);
-
-$i = 0;
-$r = array("abc","jkl","ccc");
-foreach(Find::find(Q::endswith("value1,value2",array("C"),Q::IGNORE)) as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value1());
-	$i++;
-	$t[] = $obj->value1();
-}
-eq(3,$i);
-
-$i = 0;
-foreach(Find::find(Q::in("value1",array("abc"))) as $obj){
-	eq("abc",$obj->value1());
-	$i++;
-}
-eq(1,$i);
-
-foreach(Find::find(Q::match("value1=abc")) as $obj){
-	eq("abc",$obj->value1());
-}
-foreach(Find::find(Q::match("value1=!abc")) as $obj){
-	neq("abc",$obj->value1());
-}
-foreach(Find::find(Q::match("abc")) as $obj){
-	eq("abc",$obj->value1());
-}
-$i = 0;
-$r = array("aaa","bbb","mno");
-foreach(Find::find(Q::neq("value1","ccc"),new \org\rhaco\Paginator(1,3),Q::order("-id")) as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value1());
-	$i++;
-}
-foreach(Find::find(Q::neq("value1","abc"),new \org\rhaco\Paginator(1,3),Q::order("id")) as $obj){
-	eq("jkl",$obj->value1());
-}
-$i = 0;
-$r = array("mno","aaa");
-foreach(Find::find(Q::neq("value1","ccc"),new \org\rhaco\Paginator(1,2),Q::order("order,-id")) as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value1());
-	$i++;
-}
-$result = Find::find_all(Q::match("AAA",Q::IGNORE));
-eq(3,sizeof($result));
-
-$result = Find::find_all(Q::match("AA",Q::IGNORE));
-eq(3,sizeof($result));
-
-$result = Find::find_all(Q::eq("value2",null));
-eq(1,sizeof($result));
-$result = Find::find_all(Q::neq("value2",null));
-eq(7,sizeof($result));
-
-$result = Find::find_all(Q::eq("updated",null));
-eq(6,sizeof($result));
-$result = Find::find_all(Q::neq("updated",null));
-eq(2,sizeof($result));
-eq("2008/12/24 10:00:00",$result[0]->fm_updated());
-
-$c = 0;
-for($i=0;$i<10;$i++){
-	$a = $b = array();
-	foreach(Find::find_all(Q::random_order()) as $o) $a[] = $o->id();
-	foreach(Find::find_all(Q::random_order()) as $o) $b[] = $o->id();
-	if($a === $b) $c++;
-}
-neq(10,$c);
-
-
-$result = Find::find_all(Q::ob(
-						Q::b(Q::eq("value1","abc"))
-						,Q::b(Q::eq("value2","EDC"))
-					));
-eq(2,sizeof($result));
-
-eq("EDC",Find::find_get(Q::eq("value1","jkl"))->value2());
-
-$i = 0;
-$r = array("jkl","ccc");
-foreach(RefFind::find() as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value());
-	$i++;
-}
-eq(2,$i);
-
-$i = 0;
-$r = array("jkl");
-foreach(RefRefFind::find() as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->value());
-	$i++;
-}
-eq(1,$i);
-
-
-$i = 0;
-$r = array("jkl","ccc");
-foreach(HasFind::find() as $obj){
-	eq(isset($r[$i]) ? $r[$i] : null,$obj->parent()->value1());
-	$i++;
-}
-eq(2,$i);
-
-
-$result = Find::find_all(Q::in("value1",SubFind::find_sub("value")));
-eq(4,sizeof($result));
-$result = Find::find_all(Q::in("value1",SubFind::find_sub("value",Q::lt("order",3))));
-eq(2,sizeof($result));
 
 
 /**
@@ -858,6 +594,7 @@ class UpdateModel extends Dao{
 	protected $id;
 	protected $value;
 }
+UpdateModel::create_table();
 UpdateModel::find_delete();
 
 r(new UpdateModel())->value("abc")->save();
@@ -932,6 +669,8 @@ class CrossParent extends Dao{
 	protected $id;
 	protected $value;	
 }
+CrossParent::create_table();
+
 /**
  * @var serial $id
  * @var integer $parent_id
@@ -942,6 +681,7 @@ class CrossChild extends Dao{
 	protected $parent_id;
 	protected $parent;
 }
+CrossChild::create_table();
 
 CrossParent::find_delete();
 CrossChild::find_delete();
@@ -966,6 +706,7 @@ class Replication extends Dao{
 	protected $id;
 	protected $value;
 }
+Replication::create_table();
 Replication::find_delete();
 Replication::commit();
 
@@ -978,6 +719,7 @@ class ReplicationSlave extends Dao{
 	protected $id;
 	protected $value;
 }
+ReplicationSlave::create_table();
 
 $result = ReplicationSlave::find_all();
 eq(0,sizeof($result));
@@ -1030,6 +772,7 @@ class CompositePrimaryKeys extends Dao{
 	protected $id2;
 	protected $value;
 }
+CompositePrimaryKeys::create_table();
 /**
  * @var serial $id
  * @var integer $ref_id
@@ -1040,6 +783,7 @@ class CompositePrimaryKeysRef extends Dao{
 	protected $ref_id;
 	protected $type_id;
 }
+CompositePrimaryKeysRef::create_table();
 /**
  * @var string $value @['cond'=>'type_id(composite_primary_keys.id2.id1,ref_id)']
  */

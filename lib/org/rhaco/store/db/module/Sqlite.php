@@ -22,8 +22,10 @@ class Sqlite extends Base{
 		if(empty($host) && empty($name)) throw new \InvalidArgumentException('undef connection name');
 		$con = null;
 		if(empty($host)) $host = getcwd();
-		$host = str_replace('\\','/',$host);
-		if(substr($host,-1) != '/') $host = $host.'/';
+		if($host != ':memory:'){
+			$host = str_replace('\\','/',$host);
+			if(substr($host,-1) != '/') $host = $host.'/';
+		}
 		try{
 			$con = new \PDO(sprintf('sqlite:%s',($host == ':memory:') ? ':memory:' : $host.$name));
 		}catch(\PDOException $e){
@@ -84,5 +86,11 @@ class Sqlite extends Base{
 		$sql .= implode(','.PHP_EOL,$columndef).PHP_EOL;
 		$sql .= ' );'.PHP_EOL;
 		return $sql;
+	}
+	public function exists_table_sql(\org\rhaco\store\db\Dao $dao){
+		return sprintf('select count(*) from sqlite_master where type=\'table\' and name=\'%s\'',$dao->table());
+	}
+	protected function create_table_prop_cond(\org\rhaco\store\db\Dao $dao,$prop_name){
+		return ($dao->prop_anon($prop_name,'extra') !== true && $dao->prop_anon($prop_name,'cond') === null);
 	}
 }

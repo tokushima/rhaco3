@@ -95,5 +95,8 @@ class Mysql extends Base{
 		if(!empty($primary)) $sql .= ' ,primary key ( '.implode(',',$primary).' ) '.PHP_EOL;
 		$sql .= ' ) engine = InnoDB character set utf8 collate utf8_general_ci;'.PHP_EOL;
 		return $sql;
-	}	
+	}
+	public function exists_table_sql(\org\rhaco\store\db\Dao  $dao){
+		return sprintf('select count(*) from information_schema.tables where table_name = \'%s\'',$dao->table());
+	}
 }
