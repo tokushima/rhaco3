@@ -10,6 +10,8 @@ class NewDao extends \org\rhaco\store\db\Dao{
 	protected $id;
 	protected $value;
 }
+NewDao::create_table();
+
 
 $obj = new NewDao();
 neq(null,$obj);

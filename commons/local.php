@@ -4,10 +4,10 @@ date_default_timezone_set('Asia/Tokyo');
 \org\rhaco\Conf::set(array(
 	'org.rhaco.store.db.Dao'=>array(
 		'connection'=>array(
-			'org.rhaco'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'app')
-			,'org.rhaco.store.db.Dao'=>array('dbname'=>'testA')
-			,'org.rhaco.store.db.Dao.CrossChild'=>array('dbname'=>'testB')
-			,'test'=>array('dbname'=>'app')
+			'org.rhaco.store.db.Dao.CrossChild'=>array()
+			,'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root')
+			,'test.model.TestModel'=>array('con'=>'org.rhaco.flow.module.SessionDao')
+			,'*'=>array()
 		)
 	),
 	'org.rhaco.Flow'=>array(
@@ -29,3 +29,8 @@ date_default_timezone_set('Asia/Tokyo');
 \org\rhaco\Object::set_module(array(
 	'org.rhaco.net.Session'=>array('org.rhaco.flow.module.SessionDao')
 ));
+
+// test session dao
+\org\rhaco\flow\module\SessionDao::create_table();
+\test\model\TestModel::create_table();
+

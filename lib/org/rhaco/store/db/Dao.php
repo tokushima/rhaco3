@@ -955,4 +955,17 @@ abstract class Dao extends \org\rhaco\Object{
 	protected function ___verify___(){
 		return true;
 	}
+	/**
+	 * テーブルの作成
+	 * @throws RuntimeException
+	 */
+	static public function create_table(){
+		$dao = new static();
+		$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
+		$count = current($dao->func_query($daq));
+		if($count == 0){
+			$daq = new \org\rhaco\store\db\Daq(static::module('create_table_sql',$dao));
+			$dao->func_query($daq);
+		}
+	}
 }
