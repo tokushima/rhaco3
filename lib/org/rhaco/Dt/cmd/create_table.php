@@ -1,19 +1,29 @@
 <?php
+\org\rhaco\Dt\Man::classes();
+
 /**
- * Developer tool
+ * create table 
+ * @param mixed $all
+ * @param string $model
  */
-if(isset($params['create_table'])){
-	$package = $params['create_table'];
-	$r = new \ReflectionClass('\\'.str_replace('.','\\',$package));
-	$dao = $r->newInstance();
-	
-	$con = \org\rhaco\Dt::get_dao_connection($dao);
-	$sql = $con->connection_module()->create_table_sql($dao);
-	print($sql.PHP_EOL);
-			
-	if(isset($params['commit'])){
-		print('commit'.PHP_EOL);
-		$con->query($sql);
+if($has('all')){
+	foreach(get_declared_classes() as $class){
+		$r = new \ReflectionClass($class);
+		if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')){
+			if(call_user_func(array($r->getName(),'create_table'))){
+				print('created '.$r->getName().PHP_EOL);
+			}
+		}
+	}
+}else if($has('model')){
+	$model = str_replace('.','\\',$in_value('model'));
+	if(empty($model)){
+		throw new LogicException('model required');
+	}
+	if(substr($model,0,1) !== '\\') $model = '\\'.$model;
+	if(call_user_func(array($model,'create_table'))){
+		print('created: '.$model.PHP_EOL);
+	}else{
+		print('exists: '.$model.PHP_EOL);		
 	}
 }
-	
