@@ -46,6 +46,12 @@ class Dbc implements \Iterator{
 		$this->connection->beginTransaction();
 	}
 	/**
+	 * 接続DB名
+	 */
+	public function name(){
+		return $this->dbname;
+	}
+	/**
 	 * 接続モジュール
 	 */
 	public function connection_module(){

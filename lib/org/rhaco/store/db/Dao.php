@@ -41,7 +41,7 @@ abstract class Dao extends \org\rhaco\Object{
 		}
 		return $connections;
 	}
-	final static private function connection($class){
+	final static public function connection($class){
 		if(!isset(self::$_connections_[self::$_co_anon_[$class][0]])){
 			throw new DaoException('unable to connect to '.$class);
 		}
@@ -963,6 +963,7 @@ abstract class Dao extends \org\rhaco\Object{
 		$dao = new static();
 		$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
 		$count = current($dao->func_query($daq));
+		
 		if($count == 0){
 			$daq = new \org\rhaco\store\db\Daq(static::module('create_table_sql',$dao));
 			$dao->func_query($daq);
