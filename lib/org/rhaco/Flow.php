@@ -29,7 +29,7 @@ class Flow{
 	}
 	public function __construct($app_url=null){
 		$f = str_replace("\\",'/',self::entry_file());
-		$this->app_url = Conf::get('app_url',$app_url);
+		$this->app_url = Conf::get('app_url',(isset($app_url) ? $app_url : (isset($_ENV['APP_URL']) ? $_ENV['APP_URL'] : null)));
 
 		if(empty($this->app_url)) $this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
 		if(substr($this->app_url,-1) != '/') $this->app_url .= '/';
