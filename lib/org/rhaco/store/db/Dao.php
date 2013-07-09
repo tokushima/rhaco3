@@ -967,6 +967,7 @@ abstract class Dao extends \org\rhaco\Object{
 		if($count == 0){
 			$daq = new \org\rhaco\store\db\Daq(static::module('create_table_sql',$dao));
 			$dao->func_query($daq);
+			$dao->commit();
 			return true;
 		}
 		return false;
