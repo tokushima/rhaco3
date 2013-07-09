@@ -28,7 +28,6 @@ class Http{
 		$this->agent = $agent;
 		$this->timeout = (int)$timeout;
 		$this->redirect_max = (int)$redirect_max;
-		$this->resource = curl_init();
 	}
 	/**
 	 * 最大リダイレクト回数を設定
@@ -97,6 +96,7 @@ class Http{
 	 * @param mixed $value
 	 */
 	public function setopt($key,$value){
+		if(!isset($this->resource)) $this->resource = curl_init();
 		curl_setopt($this->resource,$key,$value);
 	}
 	/**
@@ -230,6 +230,7 @@ class Http{
 		return strlen($data);
 	}
 	private function request($method,$url,$download_path=null){
+		if(!isset($this->resource)) $this->resource = curl_init();
 		$url_info = parse_url($url);
 		$cookie_base_domain = (isset($url_info['host']) ? $url_info['host'] : '').(isset($url_info['path']) ? $url_info['path'] : '');
 		if(isset($url_info['query'])){
@@ -383,6 +384,9 @@ class Http{
 				}
 			}
 		}
+		curl_close($this->resource);
+		unset($this->resource);
+		
 		if($this->redirect_count++ < $this->redirect_max){
 			switch($this->status){
 				case 300:
@@ -395,13 +399,10 @@ class Http{
 					}
 			}
 		}
-		$this->redirect_count = 1;
+		$this->redirect_count = 1;				
 		return $this;
 	}
 	public function __destruct(){
-		curl_close($this->resource);
-	}
-	private function info(){
-		return curl_getinfo($this->resource);
+		if(isset($this->resource)) curl_close($this->resource);
 	}
 }
