@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>rhaco.org</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+	<style>
+		body{ padding-top: 60px; }
+	</style>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
+</head>
+<body>
+	<!-- github -->
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="brand" href="../../index.html">rhaco.org</a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		
+	<h2>テンプレートエンジン</h2>
+	<pre class="prettyprint" style="margin-top: 20px; ">テンプレートエンジンで出来る事は、テンプレートのXML拡張による操作と変数の展開です。</pre>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">変数の書式</div><pre class="prettyprint">{$abc}
+{$t.html($abc)}</pre>
+
+	<h3>作成例</h3>
+	<pre class="prettyprint" style="margin-top: 20px; ">&lt;?php&gt
+include_once(&#039;bootstrap.php&#039;);
+
+$template = new \org\rhaco\Template();
+$template->vars(&#039;name&#039;,&#039;Sample&#039;);
+$template->vars(&#039;data_array&#039;,array(&#039;ABC&#039;,&#039;DEF&#039;,&#039;GHI&#039;));
+$template->output(__FILE__);
+&lt;/php&gt
+&lt;rt:template&gt;
+&lt;html&gt;
+&lt;body&gt;
+ &lt;h1&gt;{$name}&lt;/h1&gt;
+ &lt;rt:loop param=&quot;data_array&quot; var=&quot;data&quot;&gt;
+ &nbsp;&nbsp;&lt;p&gt;{$data}&lt;/p&gt;
+ loop&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;/rt:template&gt;</pre>
+	
+	<h4>実行結果</h4>
+	<pre class="prettyprint" style="margin-top: 20px; ">&lt;html&gt;
+&lt;body&gt;
+ &lt;h1&gt;Sample&lt;/h1&gt;
+  &nbsp;&nbsp;&lt;p&gt;ABC&lt;/p&gt;
+  &nbsp;&nbsp;&lt;p&gt;DEF&lt;/p&gt;
+  &nbsp;&nbsp;&lt;p&gt;GHI&lt;/p&gt;
+ &lt;/body&gt;
+&lt;/html&gt;</pre>
+
+
+	<h3>デフォルトで埋め込まれている変数</h3>
+	<table class="table table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th>変数名</th>
+			<th>内容</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>$t</td>
+			<td><classdoc map="rhaco3_document" class="org.rhaco.flow.module.Helper" /> (<classdoc map="rhaco3_document" class="org.rhaco.Flow" /> を利用した場合)</td>
+		</tr>
+		</tbody>
+	</table>
+
+
+	<h3>拡張されたXML</h3>
+	
+	<div>
+		<a name="template_rt_template"></a>
+		<h4>&lt;rt:template&gt;</h4>
+		<p>
+			<a href="#template_rt_template">&lt;rt:template&gt;</a>で囲まれた部分がテンプレートとして使用されます。
+			ひとつも<a href="#template_rt_template">&lt;rt:template&gt;</a>がない場合は全体をテンプレートとして使用します。
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>name</td>
+				<td>テンプレート名</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div>
+		<a name="template_rt_extends"></a>
+		<h4>&lt;rt:extends&gt;</h4>
+		<p>
+			継承するテンプレートを指定する
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>href</td>
+				<td>継承するテンプレートの相対パス</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div>
+		<a name="template_rt_block"></a>
+		<h4>&lt;rt:block&gt;</h4>
+		<p>
+			上書き可能ブロックの定義、上書きを行う。
+			同名のブロックが<a href="#template_rt_block">&lt;rt:block&gt;</a>で囲まれた部分に上書きされる
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>name</td>
+				<td>ブロック名</td>
+			</tr>
+			</tbody>
+		</table>
+		<pre class="prettyprint" style="margin-top: 20px; ">&lt;rt:extends href=&quot;index.html&quot; /&gt;
+&lt;rt:block name=&quot;abc&quot;&gt;
+&nbsp;&nbsp;ABC
+&lt;/rt:block&gt;
+&lt;rt:block name=&quot;def&quot;&gt;
+&nbsp;&nbsp;DEF
+&lt;/rt:block&gt;</pre>
+	</div>
+	
+	<div>
+		<a name="template_rt_comment"></a>
+		<h4>&lt;rt:comment&gt;</h4>
+		<p>
+			<a href="#template_rt_comment">&lt;rt:comment&gt;</a>で囲まれた部分が実行時に削除されるコメントブロックとなる
+		</p>
+		<pre class="prettyprint" style="margin-top: 20px; ">abc
+&lt;rt:comment&gt;
+&nbsp;&nbsp;この部分は表示されない
+&lt;/rt:comment&gt;
+def</pre>
+	</div>
+	
+	<div>
+		<a name="template_rt_loop"></a>
+		<h4>&lt;rt:loop&gt;</h4>
+		<p>
+			<a href="#template_rt_loop">&lt;rt:loop&gt;</a>で囲まれた部分を繰り返し処理する。
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>param</td>
+				<td>対象の変数名</td>
+			</tr>
+			<tr>
+				<td>var</td>
+				<td>paramからとりだされた現在の値を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>key</td>
+				<td>paramからとりだされた現在のキーを格納する変数名</td>
+			</tr>
+			<tr>
+				<td>counter</td>
+				<td>offsetからの現在のカウント数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>loop_counter</td>
+				<td>現在のカウント数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>total</td>
+				<td>paramに含まれる要素の合計を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>offset</td>
+				<td>開始値</td>
+			</tr>
+			<tr>
+				<td>limit</td>
+				<td>処理する最大数</td>
+			</tr>
+			<tr>
+				<td>range</td>
+				<td>
+					処理する値の範囲 range="開始値,終了値"
+					paramが指定されていた場合は無視される
+				</td>
+			</tr>
+			<tr>
+				<td>range_step</td>
+				<td>
+					rangeのステップ数
+				</td>
+			</tr>
+			<tr>
+				<td>evenodd</td>
+				<td>偶数か奇数かを表す文字列を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>even_value</td>
+				<td>偶数を表す文字列</td>
+			</tr>
+			<tr>
+				<td>odd_value</td>
+				<td>奇数を表す文字列</td>
+			</tr>
+			<tr>
+				<td>first</td>
+				<td>初回を表す文字列を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>first_value</td>
+				<td>初回を表す文字列</td>
+			</tr>
+			<tr>
+				<td>last</td>
+				<td>最後を表す文字列を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>last_value</td>
+				<td>最後を表す文字列</td>
+			</tr>
+			<tr>
+				<td>shortfall</td>
+				<td>処理が最大数に満たなかった場合に不足数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>reverse</td>
+				<td>paramを逆順にする(true, false)</td>
+			</tr>
+			</tbody>
+		</table>
+		<h5>要素</h5>
+		<div>
+			<a href="#template_rt_first">&lt;rt:first&gt;</a>
+			<a href="#template_rt_middle">&lt;rt:middle&gt;</a>
+			<a href="#template_rt_last">&lt;rt:last&gt;</a>
+			<a href="#template_rt_fill">&lt;rt:fill&gt;</a>
+			<a href="#template_rt_else">&lt;rt:else&gt;</a>
+		</div>
+
+		<pre class="prettyprint" style="margin-top: 20px; ">&lt;rt:loop param=&quot;object_list&quot; var=&quot;obj&quot;&gt;
+&nbsp;&nbsp;{$obj.fm_value()}
+&lt;/rt:loop&gt;
+
+&lt;rt:loop range=&quot;5,30&quot; range_step=&quot;5&quot; var=&quot;i&quot;&gt;
+&nbsp;&nbsp;{$i}
+&lt;/rt:loop&gt;</pre>
+	</div>
+
+	<div>
+		<a name="template_rt_first"></a>
+		<h4>&lt;rt:first&gt;</h4>
+		<p>
+			親要素の処理が最初の場合にのみ<a href="#template_rt_first">&lt;rt:first&gt;</a>で囲まれたブロックを処理する
+		</p>
+	</div>
+	<div>
+		<a name="template_rt_middle"></a>
+		<h4>&lt;rt:middle&gt;</h4>
+		<p>
+			親要素の処理が最初または最後`ではない`場合にのみ<a href="#template_rt_middle">&lt;rt:middle&gt;</a>で囲まれたブロックを処理する
+		</p>
+	</div>
+	<div>
+		<a name="template_rt_last"></a>
+		<h4>&lt;rt:last&gt;</h4>
+		<p>
+			親要素の処理が最後の場合にのみ<a href="#template_rt_last">&lt;rt:last&gt;</a>で囲まれたブロックを処理する
+		</p>
+	</div>	
+	<div>
+		<a name="template_rt_fill"></a>
+		<h4>&lt;rt:fill&gt;</h4>
+		<p>
+			親要素の条件が指定数に満たなかった場合に指定数になるまで<a href="#template_rt_fill">&lt;rt:fill&gt;</a>で囲まれたブロックを繰り返す
+		</p>
+	</div>
+	<div>
+		<a name="template_rt_else"></a>
+		<h4>&lt;rt:else&gt;</h4>
+		<p>
+			親要素の条件が偽の場合に親要素の<a href="#template_rt_else">&lt;rt:else&nbsp;/&gt;</a>の`下のブロック`を処理する
+		</p>
+	</div>
+	
+	<div>
+		<a name="template_rt_unit"></a>
+		<h4>&lt;rt:unit&gt;</h4>
+		<p>
+			指定数で分割して配列にし処理する。varを<a href="#template_rt_loop">&lt;rt:loop&gt;</a>に渡す事ができる
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>param</td>
+				<td>対象の変数名</td>
+			</tr>
+			<tr>
+				<td>var</td>
+				<td>paramからとりだされた値１行分を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>offset</td>
+				<td>開始値を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>total</td>
+				<td>トータル数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>cols</td>
+				<td>最大列数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rows</td>
+				<td>最大行数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>cols_total</td>
+				<td>現在の行の値の数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rows_total</td>
+				<td>結果の行数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>counter</td>
+				<td>現在の値の数を格納する変数名</td>
+			</tr>
+			</tbody>
+		</table>
+		
+		<p></p>
+		<pre class="prettyprint" style="margin-top: 20px; ">&lt;rt:unit param=&quot;abc&quot; var=&quot;unit_list&quot; cols=&quot;3&quot;&gt;
+&nbsp;&nbsp;&lt;rt:loop param=&quot;unit_list&quot; var=&quot;a&quot;&gt;{$a}&lt;/rt:loop&gt;
+&nbsp;&nbsp;&lt;br /&gt;
+&lt;/rt:unit&gt;</pre>
+	</div>
+	
+	<div>
+		<a name="template_rt_if"></a>
+		<h4>&lt;rt:if&gt;</h4>
+		<p>
+			条件が真の場合に<a href="#template_rt_if">&lt;rt:if&gt;</a>で囲まれたブロックを処理する。
+			valueが指定されてない場合はparam値で判断する。
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>param</td>
+				<td>対象の変数名</td>
+			</tr>
+			<tr>
+				<td>value</td>
+				<td>paramと比較する値</td>
+			</tr>
+			</tbody>
+		</table>
+		<h4>要素</h4>
+		<div>
+			<a href="#template_rt_else">&lt;rt:else&gt;</a>
+		</div>
+		
+		<p></p>
+		<pre class="prettyprint" style="margin-top: 20px; ">&lt;rt:if param=&quot;abc&quot; value=&quot;1&quot;&gt;
+&nbsp;&nbsp;One
+&lt;rt:else /&gt;
+&nbsp;&nbsp;Other
+&lt;/rt:if&gt;</pre>
+	</div>
+	
+	<div>
+		<a name="template_form"></a>
+		<h4>&lt;form&gt;</h4>
+		<p>
+			formの拡張
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>rt:ref</td>
+				<td>formの要素にrt:refを適用する</td>
+			</tr>
+			<tr>
+				<td>rt:aref</td>
+				<td>結果（変数,タグの展開済）を処理する (true, false)</td>
+			</tr>
+			</tbody>
+		</table>
+		<h4>要素</h4>
+		<div>
+			<a href="#template_form_input">&lt;input&gt;</a>
+			<a href="#template_form_input">&lt;textarea&gt;</a>
+			<a href="#template_form_select">&lt;select&gt;</a>
+		</div>
+	</div>
+	
+	<div>
+		<a name="template_form_input"></a>
+		<h4>&lt;input&gt;</h4>
+		<h4>&lt;textarea&gt;</h4>		
+		<p>
+			Templateにセットされた値とname属性(またはid属性)を元にformを処理する。			
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>rt:ref</td>
+				<td>変数を参照し処理する (true, false)</td>
+			</tr>
+			<tr>
+				<td>rt:multiple</td>
+				<td>type=checkbox もしくは multiple=multiple の 要素のname属性を配列形式にするか name=hoge[] (true, false)</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div>
+		<a name="template_form_select"></a>
+		<h4>&lt;select&gt;</h4>
+		<p>
+			Templateにセットされた値と<span style="color:#f00">name</span>属性(またはid属性)を元にformを処理する。
+			rt:paramから&lt;option&gt;を生成される。 rt:paramが未指定の場合はselect内要素が利用される。
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>rt:ref</td>
+				<td>変数を参照し処理する (true, false)</td>
+			</tr>
+			
+			<tr>
+				<td>rt:param</td>
+				<td>対象の変数名</td>
+			</tr>
+			<tr>
+				<td>rt:var</td>
+				<td>paramからとりだされた現在の値を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:key</td>
+				<td>paramからとりだされた現在のキーを格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:counter</td>
+				<td>offsetからの現在のカウント数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:offset</td>
+				<td>開始値</td>
+			</tr>
+			<tr>
+				<td>rt:limit</td>
+				<td>処理する最大数</td>
+			</tr>
+			<tr>
+				<td>rt:range</td>
+				<td>
+					処理する値の範囲 rt:range="開始値,終了値"
+					paramが指定されていた場合は無視される
+				</td>
+			</tr>
+			<tr>
+				<td>rt:range_step</td>
+				<td>
+					rangeのステップ数
+				</td>
+			</tr>
+			<tr>
+				<td>rt:evenodd</td>
+				<td>偶数か奇数かを表す文字列を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:even_value</td>
+				<td>偶数を表す文字列(未指定の場合は"even")</td>
+			</tr>
+			<tr>
+				<td>rt:odd_value</td>
+				<td>奇数を表す文字列(未指定の場合は"odd")</td>
+			</tr>
+			<tr>
+				<td>rt:reverse</td>
+				<td>paramを逆順にする(true, false)</td>
+			</tr>
+			<tr>
+				<td>rt:null</td>
+				<td>空の値をもつ&lt;option&gt;を作成する、指定した文字列がラベルとなる</td>
+			</tr>			
+			</tbody>
+		</table>
+	</div>
+	
+	<div>
+		<a name="template_list"></a>
+		<h4>&lt;table&gt;</h4>
+		<h4>&lt;ul&gt;</h4>
+		<h4>&lt;ol&gt;</h4>
+		<p>
+			繰り返し処理の拡張を処理する(<a href="#template_rt_loop">&lt;rt:loop&gt;</a>の拡張)
+		</p>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>rt:ref</td>
+				<td>変数を参照し処理する (true, false)</td>
+			</tr>
+			
+			<tr>
+				<td>rt:param</td>
+				<td>対象の変数名</td>
+			</tr>
+			<tr>
+				<td>rt:var</td>
+				<td>paramからとりだされた現在の値を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:key</td>
+				<td>paramからとりだされた現在のキーを格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:counter</td>
+				<td>offsetからの現在のカウント数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:offset</td>
+				<td>開始値</td>
+			</tr>
+			<tr>
+				<td>rt:limit</td>
+				<td>処理する最大数</td>
+			</tr>
+			<tr>
+				<td>rt:range</td>
+				<td>
+					処理する値の範囲 rt:range="開始値,終了値"
+					paramが指定されていた場合は無視される
+				</td>
+			</tr>
+			<tr>
+				<td>rt:range_step</td>
+				<td>
+					rangeのステップ数
+				</td>
+			</tr>
+			<tr>
+				<td>rt:evenodd</td>
+				<td>偶数か奇数かを表す文字列を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:even_value</td>
+				<td>偶数を表す文字列(未指定の場合は"even")</td>
+			</tr>
+			<tr>
+				<td>rt:odd_value</td>
+				<td>奇数を表す文字列(未指定の場合は"odd")</td>
+			</tr>
+			<tr>
+				<td>rt:shortfall</td>
+				<td>処理が最大数に満たなかった場合に不足数を格納する変数名</td>
+			</tr>
+			<tr>
+				<td>rt:reverse</td>
+				<td>paramを逆順にする(true, false)</td>
+			</tr>
+			<tr>
+				<td>rt:null</td>
+				<td>空の値をもつ&lt;option&gt;を作成する、指定した文字列がラベルとなる</td>
+			</tr>			
+			</tbody>
+		</table>
+		
+		<p></p>
+		<pre class="prettyprint" style="margin-top: 20px; ">&lt;table rt:param=&quot;object_list&quot; rt:var=&quot;obj&quot; rt:evenodd=&quot;eo&quot;&gt;
+&lt;thead&gt;
+&nbsp;&nbsp;&lt;th&gt;name&lt;/th&gt;
+&nbsp;&nbsp;&lt;th&gt;value&lt;/th&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&nbsp;&nbsp;&lt;td&gt;{$obj.name()}&lt;/td&gt;
+&nbsp;&nbsp;&lt;td&gt;{$obj.fm_value()}&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;</pre>
+	</div>
+	
+
+	</div>
+</body>
+</html>
+
