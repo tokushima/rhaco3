@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>rhaco.org</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+	<style>
+		body{ padding-top: 60px; }
+	</style>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
+</head>
+<body>
+	<!-- github -->
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="brand" href="../../index.html">rhaco.org</a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		
+	<h2>オブジェクト</h2>	
+	<classdoc map="rhaco3_document" class="org.rhaco.Object" />
+
+	<pre class="prettyprint" style="margin-top: 20px; ">org.rhaco.Objectを基底クラスにすることでプロパティやアクセサの挙動を容易に変更できます。</pre>	
+	
+	<h3 style="margin-top: 50px;">特殊メソッド ( protected )</h3>
+	<p class="alert alert-info">
+		特殊な名前をもったメソッドを定義することで独自の振る舞いをすることができます。
+	</p>
+	<table class="table table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th>メソッド名</th>
+			<th>説明</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>__new__</td>
+			<td>コンストラクタを拡張する</td>
+		</tr>
+		<tr>
+			<td>__init__</td>
+			<td>コンストラクタで初期処理を行う</td>
+		</tr>
+		<tr>
+			<td>__anon__</td>
+			<td>コンストラクタでアノテーションを処理する</td>
+		</tr>
+		<tr>
+			<td>__del__</td>
+			<td>デストラクタを拡張する</td>
+		</tr>
+		<tr>
+			<td>__str__</td>
+			<td>オブジェクトの文字列表現を拡張する</td>
+		</tr>
+		<tr>
+			<td>__hash__</td>
+			<td>オブジェクトの連想配列表現を拡張する</td>
+		</tr>
+		</tbody>
+	</table>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">作成例</div><pre class="prettyprint">&lt;?php
+namespace org\rhaco;
+/**
+ * @var integer $abc 数値
+ */
+class Hoge extends \org\rhaco\Object{
+&nbsp;&nbsp;protected $abc;
+&nbsp;&nbsp;
+&nbsp;&nbsp;protected function __new__($i){
+&nbsp;&nbsp;&nbsp;&nbsp;$this->abc = $i;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;protected function __init__(){
+&nbsp;&nbsp;&nbsp;&nbsp;$this->abc = $this->abc + 10;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;protected function __str__(){
+&nbsp;&nbsp;&nbsp;&nbsp;return &#039;[&#039;.$this->abc.&#039;]&#039;;
+&nbsp;&nbsp;}
+}</pre>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">使用例</div><pre class="prettyprint">&lt;?php
+include(&#039;rhaco3.php&#039;);
+
+$obj = new \org\rhaco\Hoge(10);
+var_dump($obj->abc());
+var_dump((string)$obj);</pre>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">結果</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">int(20)
+string(4) &quot;[20]&quot;</pre>
+
+	
+	<h3 style="margin-top: 50px;">プロパティのアクセサをカスタマイズする</h3>
+	<p class="alert alert-info">
+		protectedまたはpublicで定義されたプロパティは自動的に同名のメソッドをGetter,Setterとして扱う事ができます。
+	</p>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">作成例</div><pre class="prettyprint">&lt;?php
+namespace org\rhaco;
+/**
+ * @var integer $abc 数値
+ * @var string $def 文字列
+ */
+class Hoge extends \org\rhaco\Object{
+&nbsp;&nbsp;protected $abc;
+&nbsp;&nbsp;protected $def;
+&nbsp;&nbsp;
+&nbsp;&nbsp;protected function __get_abc__(){
+&nbsp;&nbsp;&nbsp;&nbsp;return $this->abc + 10;
+&nbsp;&nbsp;}
+}</pre>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">使用例</div><pre class="prettyprint">&lt;?php
+$obj = new \org\rhaco\Hoge();
+$obj->abc(&#039;warn&#039;);
+var_dump($obj->abc());</pre>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">結果</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">int(123)</pre>
+	
+	<p class="alert alert-info">
+		クラスコメントに@varで宣言することでプロパティの型を定義する事ができます。
+	</p>
+	<table class="table table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th>型</th>
+			<th>説明</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>number</td>
+			<td>アノテーションdecimal_placesでサイズを指定します</td>
+		</tr>
+		<tr>
+			<td>serial</td>
+			<td>シリアル型 数値</td>
+		</tr>
+		<tr>
+			<td>boolean</td>
+			<td>真偽値型 true/false/null</td>
+		</tr>
+		<tr>
+			<td>timestamp</td>
+			<td>タイムスタンプ型 YYYY/MM/DD HH:ii:ss</td>
+		</tr>
+		<tr>
+			<td>date</td>
+			<td>日付型 YYYY/MM/DD</td>
+		</tr>
+		<tr>
+			<td>time</td>
+			<td>時間型 HH:ii:ss</td>
+		</tr>
+		<tr>
+			<td>intdate</td>
+			<td>数値形式の日付型 YYYYMMDD</td>
+		</tr>
+		<tr>
+			<td>email</td>
+			<td>email型</td>
+		</tr>
+		<tr>
+			<td>alnum</td>
+			<td>英数値型 0-9,A-Z,a-z,_</td>
+		</tr>
+		<tr>
+			<td>choice</td>
+			<td>選択型 アノテーションchoicesで定義します</td>
+		</tr>
+		<tr>
+			<td>mixed</td>
+			<td>未指定と同様</td>
+		</tr>
+		</tbody>
+	</table>
+	
+	<p class="alert alert-info">
+		特殊なprefixをもったprotectedメソッドを定義することでアクセサを拡張します。
+	</p>
+	<p>プロパティ名abcの場合</p>
+	<table class="table table-striped table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th>メソッド名</th>
+			<th>説明</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>__get_abc__</td>
+			<td>Getter を拡張します</td>
+		</tr>
+		<tr>
+			<td>__set_abc__</td>
+			<td>Setter を拡張します</td>
+		</tr>
+		<tr>
+			<td>__in_abc__</td>
+			<td>inを拡張します</td>
+		</tr>
+		<tr>
+			<td>__is_abc__</td>
+			<td>isを拡張します</td>
+		</tr>
+		<tr>
+			<td>__ar_abc__</td>
+			<td>arを拡張します</td>
+		</tr>
+		<tr>
+			<td>__fm_abc__</td>
+			<td>fmを拡張します</td>
+		</tr>
+		<tr>
+			<td>__rm_abc__</td>
+			<td>rmを拡張します</td>
+		</tr>
+		<tr>
+			<td>__choices_abc__</td>
+			<td>choices型を拡張します</td>
+		</tr>
+		</tbody>
+	</table>
+
+
+	</div>
+</body>
+</html>
+

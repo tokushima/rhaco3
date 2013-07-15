@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>rhaco.org</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+	<style>
+		body{ padding-top: 60px; }
+	</style>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
+</head>
+<body>
+	<!-- github -->
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="brand" href="../../index.html">rhaco.org</a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		
+	<h2>MAMPへExtensionのインストール</h2>
+
+	<h3>準備</h3>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">make等のCommand Line Toolsをインストール</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">App StoreでXcodeをインストール
+Xcodeを起動しメニューの[Xcode] - [Preferences...]からDownloadsを開きます
+ComponentsタブからCommand Line Toolsのinstallボタンをからインストールする</pre>	
+	
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">autoconfをインストール</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">curl -O http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+tar xvf autoconf-2.69.tar.gz
+cd autoconf-2.69
+./configure 
+make
+sudo make install</pre>
+
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">PHPのソースを配置</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">mkdir /Applications/MAMP/bin/php/php5.3.6/include/
+curl -O  http://museum.php.net/php5/php-5.3.6.tar.gz
+tar xvf php-5.3.6.tar.gz
+mv php-5.3.6 /Applications/MAMP/bin/php/php5.3.6/include/php</pre>
+
+
+	<h3>モジュールのインストール</h3>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">pcntlモジュールのインストール</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">cd /Applications/MAMP/bin/php/php5.3.6/include/php/ext/pcntl
+/Applications/MAMP/bin/php/php5.3.6/bin/phpize
+
+MACOSX_DEPLOYMENT_TARGET=10.7
+
+CFLAGS=&quot;-arch i386 -arch x86_64 -g -Os -pipe -no-cpp-precomp&quot;
+CCFLAGS=&quot;-arch i386 -arch x86_64 -g -Os -pipe&quot;
+CXXFLAGS=&quot;-arch i386 -arch x86_64 -g -Os -pipe&quot;
+LDFLAGS=&quot;-arch i386 -arch x86_64 -bind_at_load&quot;
+
+export CFLAGS CXXFLAGS LDFLAGS CCFLAGS MACOSX_DEPLOYMENT_TARGET
+
+./configure
+make
+
+cp modules/pcntl.so /Applications/MAMP/bin/php/php5.3.6/lib/php/extensions/no-debug-non-zts-20090626/
+echo &quot;extension=pcntl.so&quot; &gt;&gt; /Applications/MAMP/bin/php/php5.3.6/conf/php.ini
+/Applications/MAMP/bin/php/php5.3.6/bin/php --ri pcntl</pre>
+
+	</div>
+</body>
+</html>
+

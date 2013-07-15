@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>rhaco.org</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+	<style>
+		body{ padding-top: 60px; }
+	</style>
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
+</head>
+<body>
+	<!-- github -->
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="brand" href="../../index.html">rhaco.org</a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		
+	<h2>O/Rマッパー</h2>
+	<p>
+		<classdoc map="rhaco3_document" class="org.rhaco.store.db.Dao" />
+	</p>
+	<div>
+		<h3>クラスのアノテーション</h3>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>アノテーション</th>
+				<th>説明</th>
+				<th>型</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>database</td>
+				<td>接続するデータベース名</td>
+				<td>string</td>
+			</tr>
+			<tr>
+				<td>table</td>
+				<td>リンクするテーブル名</td>
+				<td>string</td>
+			</tr>
+			<tr>
+				<td>create</td>
+				<td>新規追加を実行可能である</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>update</td>
+				<td>更新を実行可能である</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>delete</td>
+				<td>削除を実行可能である</td>
+				<td>boolean</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div>
+		<h3>プラパティのアノテーション</h3>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>アノテーション</th>
+				<th>説明</th>
+				<th>型</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>extra</td>
+				<td>テーブルのカラムとリンクしないプロパティとする</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>cond</td>
+				<td>テーブルのカラムとリンクする際の追加の条件</td>
+				<td>string</td>
+			</tr>
+			<tr>
+				<td>primary</td>
+				<td>主キーとする</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>label</td>
+				<td>ラベル</td>
+				<td>string</td>
+			</tr>
+			<tr>
+				<td>require</td>
+				<td>必須とする</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>unique</td>
+				<td>ユニークとする</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>unique_together</td>
+				<td>指定のプロパティとあわせてユニークとする</td>
+				<td>string[]</td>
+			</tr>
+			<tr>
+				<td>master</td>
+				<td>指定のDaoの主キーにプロパティの値が存在することを確認する</td>
+				<td>string</td>
+			</tr>
+			<tr>
+				<td>min</td>
+				<td>最低値</td>
+				<td>integer</td>
+			</tr>
+			<tr>
+				<td>max</td>
+				<td>最大値</td>
+				<td>integer</td>
+			</tr>
+			<tr>
+				<td>auto_now_add</td>
+				<td>新規登録時のみ現在日時をセットする</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>auto_now</td>
+				<td>更新時に現在日時をセットする</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>auto_future_add</td>
+				<td>新規登録時のみ未来日時をセットする、@conf: future_date で指定された日付がセットされる(デフォルトでは'2038/01/01 00:00:00')</td>
+				<td>boolean</td>
+			</tr>
+			<tr>
+				<td>auto_code_add</td>
+				<td>
+					<div>新規登録時のみユニークなコードをセットする</div>
+					<div>コードの桁数は max で指定する</div>
+					<div>コードの種類は ctype で指定する(alnum,alpha,digit)</div>
+					<div>コードを大文字にしたい場合は upper=>true を小文字にしたい場合は lower=>trueを指定する</div>
+					<div>生成したくないパターンがある場合は ignore_auto_code=>'00.+00' と正規表現で指定する</div>
+				</td>
+				<td>boolean</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div>
+		<h3>拡張メソッド</h3>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>メソッド名</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>__find_conds__</td>
+				<td>select時の追加条件</td>
+			</tr>
+			<tr>
+				<td>__create_verify__</td>
+				<td>新規追加時に行う検証</td>
+			</tr>
+			<tr>
+				<td>__update_verify__</td>
+				<td>更新時に行う検証</td>
+			</tr>
+			<tr>
+				<td>__delete_verify__</td>
+				<td>削除時に行う検証</td>
+			</tr>
+			<tr>
+				<td>__before_save__</td>
+				<td>追加/更新の前に行う処理</td>
+			</tr>
+			<tr>
+				<td>__after_save__</td>
+				<td>追加/更新の後に行う処理</td>
+			</tr>
+			<tr>
+				<td>__before_create__</td>
+				<td>追加の前に行う処理</td>
+			</tr>
+			<tr>
+				<td>__after_create__</td>
+				<td>追加の後に行う処理</td>
+			</tr>
+			<tr>
+				<td>__before_update__</td>
+				<td>更新の前に行う処理</td>
+			</tr>
+			<tr>
+				<td>__after_update__</td>
+				<td>更新の後に行う処理</td>
+			</tr>
+			<tr>
+				<td>__before_delete__</td>
+				<td>削除の前に行う処理</td>
+			</tr>
+			<tr>
+				<td>__after_delete__</td>
+				<td>削除の後に行う処理</td>
+			</tr>			
+			</tbody>
+		</table>
+	</div>
+	
+	<div>
+		<h3>拡張アクセサ</h3>
+		<table class="table table-striped table-bordered table-condensed">
+			<thead>
+			<tr>
+				<th>アクセサ名</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>verify</td>
+				<td>追加の検証処理、失敗時にfalseを返すようにする</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	
+	<h3>作成例</h3>
+	
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">テーブルの作成</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">$ sqlite3 sample.db
+SQLite version 3.7.7 2011-06-25 16:35:41
+Enter &quot;.help&quot; for instructions
+Enter SQL statements terminated with a &quot;;&quot;
+sqlite&gt; create table `entry`(
+   &nbsp;&nbsp;&nbsp;&nbsp;`id` INTEGER PRIMARY KEY AUTOINCREMENT null ,
+   &nbsp;&nbsp;&nbsp;&nbsp;`name` TEXT null ,
+   &nbsp;&nbsp;&nbsp;&nbsp;`title` TEXT null ,
+   &nbsp;&nbsp;&nbsp;&nbsp;`description` TEXT null ,
+   &nbsp;&nbsp;&nbsp;&nbsp;`create_date` INTEGER null ,
+   &nbsp;&nbsp;&nbsp;&nbsp;`update_date` INTEGER null 
+   &nbsp;&nbsp;&nbsp;&nbsp;);
+sqlite&gt; .exit</pre>
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">sample.php</div><pre class="prettyprint">&lt;?php
+require(&#039;rhaco3.php&#039;);
+use \org\rhaco\store\db\Q;
+
+// 接続情報の記述
+\org\rhaco\Conf::set(&#039;org.rhaco.store.db.Dao&#039;,&#039;connection&#039;,array(
+&#039;Entry&#039;=&gt;array(
+&#039;type&#039;=&gt;&#039;org.rhaco.store.db.module.Sqlite&#039;,&#039;host&#039;=&gt;__DIR__,&#039;dbname&#039;=&gt;&#039;sample.db&#039;,&#039;user&#039;=&gt;&#039;&#039;,&#039;password&#039;=&gt;&#039;&#039;,&#039;port&#039;=&gt;&#039;&#039;,&#039;encode&#039;=&gt;&#039;utf8&#039;
+)));
+
+/**
+ * @var serial $id
+ * @var alnum $name @[&#039;max&#039;=&gt;50,&#039;unique&#039;=&gt;true]
+ * @var string $title @[&#039;max&#039;=&gt;100,&#039;require&#039;=&gt;true]
+ * @var text $description @[&#039;require&#039;=&gt;true]
+ * @var timestamp $create_date @[&#039;auto_now_add&#039;=&gt;true]
+ * @var timestamp $update_date @[&#039;auto_now&#039;=&gt;true]
+ * @class @[&#039;create&#039;=&gt;true,&#039;update&#039;=&gt;true,&#039;delete&#039;=&gt;true]
+ */
+class Entry extends \org\rhaco\store\db\Dao{
+&nbsp;&nbsp;protected $id;
+&nbsp;&nbsp;protected $name;
+&nbsp;&nbsp;protected $title;
+&nbsp;&nbsp;protected $description;
+&nbsp;&nbsp;protected $create_date;
+&nbsp;&nbsp;protected $update_date;
+}
+
+$println = function($s){
+&nbsp;&nbsp;print($s.PHP_EOL);
+};
+
+$obj = new \Entry();
+$props = array_keys($obj->props());
+
+$str = &#039;ABCDEFGH&#039;;
+for($i=0;$i&lt;strlen($str);$i++){
+&nbsp;&nbsp;$v = substr($str,$i,1);
+
+&nbsp;&nbsp;$entry = new \Entry();
+&nbsp;&nbsp;$entry->name($i+1);
+&nbsp;&nbsp;$entry->title(strtolower($v));
+&nbsp;&nbsp;$entry->description($v);
+&nbsp;&nbsp;$entry->save();
+}
+
+$println(&#039;# 一覧&#039;);
+$println(implode(&#039;,&#039;,$props));
+foreach(\Entry::find() as $obj){
+  $println(implode(&#039;,&#039;,$obj->hash()));
+}
+
+$entry = \Entry::find_get(Q::eq(&#039;title&#039;,&#039;a&#039;));
+$entry->title(&#039;x&#039;);
+$entry->save();
+
+$println(&#039;# aがxに更新されている&#039;);
+$println(implode(&#039;,&#039;,$props));
+foreach(\Entry::find(Q::eq(&#039;title&#039;,&#039;X&#039;)) as $obj){
+  $println(implode(&#039;,&#039;,$obj->hash()));
+}
+
+$entry = \Entry::find_get(Q::eq(&#039;title&#039;,&#039;x&#039;));
+$entry->delete();
+
+$println(&#039;# xが削除されている&#039;);
+$println(implode(&#039;,&#039;,$props));
+foreach(\Entry::find() as $obj){
+  $println(implode(&#039;,&#039;,$obj->hash()));
+}
+
+$println(&#039;# 1ページ&#039;);
+$println(implode(&#039;,&#039;,$props));
+foreach(\Entry::find(new \org\rhaco\Paginator(3,1),Q::order(&#039;id&#039;)) as $obj){
+  $println(implode(&#039;,&#039;,$obj->hash()));
+}
+
+$println(&#039;# 2ページ&#039;);
+$println(implode(&#039;,&#039;,$props));
+foreach(\Entry::find(new \org\rhaco\Paginator(3,2),Q::order(&#039;id&#039;)) as $obj){
+  $println(implode(&#039;,&#039;,$obj->hash()));
+}
+
+$println(&#039;# 3ページ&#039;);
+$println(implode(&#039;,&#039;,$props));
+foreach(\Entry::find(new \org\rhaco\Paginator(3,3),Q::order(&#039;id&#039;)) as $obj){
+  $println(implode(&#039;,&#039;,$obj->hash()));
+}</pre>
+
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">結果</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;"># 一覧
+id,name,title,description,create_date,update_date
+1,1,a,A,2011/07/03 14:04:05,2011/07/03 14:04:05
+2,2,b,B,2011/07/03 14:04:05,2011/07/03 14:04:05
+3,3,c,C,2011/07/03 14:04:05,2011/07/03 14:04:05
+4,4,d,D,2011/07/03 14:04:05,2011/07/03 14:04:05
+5,5,e,E,2011/07/03 14:04:05,2011/07/03 14:04:05
+6,6,f,F,2011/07/03 14:04:05,2011/07/03 14:04:05
+7,7,g,G,2011/07/03 14:04:05,2011/07/03 14:04:05
+8,8,h,H,2011/07/03 14:04:05,2011/07/03 14:04:05
+# aがxに更新されている
+id,name,title,description,create_date,update_date
+1,1,x,A,2011/07/03 14:04:05,2011/07/03 14:04:05
+# xが削除されている
+id,name,title,description,create_date,update_date
+2,2,b,B,2011/07/03 14:04:05,2011/07/03 14:04:05
+3,3,c,C,2011/07/03 14:04:05,2011/07/03 14:04:05
+4,4,d,D,2011/07/03 14:04:05,2011/07/03 14:04:05
+5,5,e,E,2011/07/03 14:04:05,2011/07/03 14:04:05
+6,6,f,F,2011/07/03 14:04:05,2011/07/03 14:04:05
+7,7,g,G,2011/07/03 14:04:05,2011/07/03 14:04:05
+8,8,h,H,2011/07/03 14:04:05,2011/07/03 14:04:05
+# 1ページ
+id,name,title,description,create_date,update_date
+2,2,b,B,2011/07/03 14:04:05,2011/07/03 14:04:05
+3,3,c,C,2011/07/03 14:04:05,2011/07/03 14:04:05
+4,4,d,D,2011/07/03 14:04:05,2011/07/03 14:04:05
+# 2ページ
+id,name,title,description,create_date,update_date
+5,5,e,E,2011/07/03 14:04:05,2011/07/03 14:04:05
+6,6,f,F,2011/07/03 14:04:05,2011/07/03 14:04:05
+7,7,g,G,2011/07/03 14:04:05,2011/07/03 14:04:05
+# 3ページ
+id,name,title,description,create_date,update_date
+8,8,h,H,2011/07/03 14:04:05,2011/07/03 14:04:05</pre>
+	<p>&nbsp;</p>
+
+	</div>
+</body>
+</html>
+
