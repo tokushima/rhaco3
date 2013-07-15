@@ -1,6 +1,6 @@
 <?php
 /**
- * github-pagesを独自ドメインで表示する
+ * GitHub Pagesを独自ドメインで表示する為のファイルを書き出す
  * @param string $name ドメイン名
  */
 $domain = $in_value('name');

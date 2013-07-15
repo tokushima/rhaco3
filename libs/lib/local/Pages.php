@@ -8,7 +8,7 @@ class Pages{
 		return [
 			'sandra.flow.plugin.TwitterBootstrapHelper'
 			,'sandra.Exceptions'
-			,'local.Pages.Filter'
+			,new Pages\Filter()
 		];
 	}
 	
@@ -25,9 +25,13 @@ class Pages{
 		return ['f'=>new \local\Pages\Filter()];
 	}
 	
-	static public function export($output_path){
-		$files = self::files();
-		foreach($files as $path => $filename){
+	static public function publish($output_path){
+		$template_path = getcwd().'/template/';
+		
+		foreach(\sandra\Util::ls($template_path,true) as $f){
+			$path = str_replace($template_path,'',$f->getPathname());
+			$filename = $f->getPathname();
+			
 			if($path == 'index.html'){
 				$filepath = getcwd().'/index.html';
 			}else{
@@ -38,20 +42,9 @@ class Pages{
 			
 			$template = new \sandra\Template();
 			$template->set_object_plugin(new \sandra\flow\plugin\TwitterBootstrapHelper());
-			$template->set_object_plugin(new \local\Pages\Filter($dir,$files));
-			$template->vars('f',new \local\Pages\Filter(true,$path));
+			$template->vars('f',new Pages\Filter($path));
 			
 			file_put_contents($filepath,$template->read($filename));
 		}
-	}
-	static private function files(){
-		$list = [];
-		$template_path = getcwd().'/template/';
-		
-		foreach(\sandra\Util::ls($template_path,true) as $f){
-			$path = str_replace($template_path,'',$f->getPathname());
-			$list[$path] = $f->getPathname();
-		}
-		return $list;
 	}
 }
