@@ -1,0 +1,69 @@
+<rt:extends href="../index.html" />
+<rt:block name="content">
+	<h2>MAMPでSSLを有効化する</h2>
+	<p>@see http://blog-en.mamp.info/2009/10/getting-mamp-working-with-ssl-on-os-x.html</p>
+
+	<h3>SSLの準備</h3>
+	<cli caption="作業フォルダの作成">
+		mkdir ~/ssl-keygen
+		cd ~/ssl-keygen
+	</cli>
+	<cli caption="private key">
+		openssl genrsa -des3 -out server.key 1024
+	</cli>
+	<cli caption="Certificate Signing Request (CSR)">
+		openssl req -new -key server.key -out server.csr
+	</cli>
+	<pre>
+		 Country Name: JP
+		 ..
+		 Common Name: 127.0.0.1
+		 ..
+	</pre>
+	
+	<cli caption="Certificate">
+		openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+	</cli>
+	
+	<cli caption="server key">
+		cp server.key server.tmp
+		openssl rsa -in server.tmp -out server.key
+	</cli>
+
+	<cli caption="MAMPへコピー">
+		mkdir /Applications/MAMP/conf/ssl
+		cp server.crt /Applications/MAMP/conf/ssl
+		cp server.key /Applications/MAMP/conf/ssl
+	</cli>	
+	
+	<cli caption="作業フォルダの削除">
+		cd ~/
+		rm -Rf ~/ssl-keygen
+	</cli>	
+	
+	<h3>MAMPの設定</h3>	
+	<pre caption="/Applications/MAMP/conf/apache/extra/httpd-ssl.conf">
+		DocumentRoot "/Applications/MAMP/Library/htdocs"
+		...
+		#ServerName www.example.com:443
+		ServerName 127.0.0.1:443
+		...		
+		#SSLCertificateFile "/Applications/MAMP/conf/apache/server.crt"
+		SSLCertificateFile "/Applications/MAMP/conf/ssl/server.crt"
+		...	
+		#SSLCertificateKeyFile "/Applications/MAMP/conf/apache/server.key"
+		SSLCertificateKeyFile "/Applications/MAMP/conf/ssl/server.key"
+	</pre>
+
+	<pre caption="/Applications/MAMP/conf/apache/httpd.conf">
+		...
+		#Include /Applications/MAMP/conf/apache/extra/httpd-ssl.conf
+		Include /Applications/MAMP/conf/apache/extra/httpd-ssl.conf
+		...
+	</pre>
+	
+	<cli caption="作業フォルダの削除">
+		cd ~/ssl-keygen
+		rm -Rf ~/ssl-keygen
+	</cli>
+</rt:block>

@@ -1,0 +1,150 @@
+<rt:extends href="../index.html" />
+<rt:block name="content">
+	<h2>エントリーポイント</h2>
+	<pre>
+		アプリケーションの入り口がエントリポイントです。
+		エントリポイントにはどのURLからどのアクションがよばれ、どのテンプレートで出力するかを定義します。
+	</pre>
+	<pre caption="基本的な例">
+		<php>
+		include_once('rhaco3.php');
+		
+		\org\rhaco\Flow::out(array(
+			'modules'=>array('org.rhaco.flow.module.Exceptions')
+			,'patterns'=>array(
+				''=>array('name'=>'index','template'=>'index.html')
+				,'abc'=>array('name'=>'a','template'=>'abc.html')
+				,'def'=>array('name'=>'b','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop')
+
+				,'dev'=>array('class'=>'org.rhaco.Dt','mode'=>'local')
+		)));
+	</pre>
+	
+	<table>
+	<thead>
+		<tr>
+			<th>定義名</th>
+			<th></th>
+			<th>説明</th>
+		</tr>
+	</thead>
+	<tbody>
+	
+		<tr>
+			<td>nomatch_redirect</td>
+			<td></td>
+			<td>URLがpatternsにマッチしなかった場合にリダイレクトするURLを指定します</td>
+		</tr>
+		<tr>
+			<td>error_redirect</td>
+			<td></td>
+			<td>キャッチされない例外が発生した場合にリダイレクトするURLを指定します</td>
+		</tr>
+		<tr>
+			<td>error_template</td>
+			<td></td>
+			<td>キャッチされない例外が発生した場合に出力するテンプレートを指定します</td>
+		</tr>
+		<tr>
+			<td>error_status</td>
+			<td></td>
+			<td>キャッチされない例外が発生した場合のHTTPステータスを指定します</td>
+		</tr>		
+		<tr>
+			<td>media_path</td>
+			<td></td>
+			<td>画像ファイルやCSSファイル等のパスを指定します Confのmedia_urlからの相対パスとなります</td>
+		</tr>
+		<tr>
+			<td>template_path</td>
+			<td></td>
+			<td>テンプレートのパスを指定します Confのtemplate_pathからの相対パスとなります</td>
+		</tr>
+		<tr>
+			<td>modules</td>
+			<td></td>
+			<td>actionに差し込むモジュールを配列形式で指定します</td>
+		</tr>
+		<tr>
+			<td>secure</td>
+			<td></td>
+			<td>URLをhttpsにする場合は(boolean)trueを指定します</td>
+		</tr>
+		<tr>
+			<td>patterns</td>
+			<td></td>
+			<td>URLマッピング、array(URLパターン(正規表現)=>テンプレート等の指定) の配列形式で定義します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>name</td>
+			<td>マッピングに名前をつけます URLの生成やテスト等で利用します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>template</td>
+			<td>出力するテンプレートを指定します テンプレートが指定されず、かつモジュールメソッドflow_outputがない場合はXMLが出力されます</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>action</td>
+			<td>実行するアクションを指定します クラス名::メソッド名の形で定義します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>class</td>
+			<td>展開するクラスを指定します クラス内のメソッドが展開されマッピングされます</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>vars</td>
+			<td>actionの実行結果に追加する値をarray(key=>value)の配列形式で定義します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>args</td>
+			<td>actionに渡す値をarray(key=>value)の配列形式で定義します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>error_template</td>
+			<td>キャッチされない例外が発生した場合に出力するテンプレートを指定します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>media_path</td>
+			<td>画像ファイルやCSSファイル等のパスを指定します Confのmedia_urlからの相対パスとなります</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>template_path</td>
+			<td>テンプレートのパスを指定します Confのtemplate_pathからの相対パスとなります</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>modules</td>
+			<td>actionに差し込むモジュールを配列形式で指定します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>secure</td>
+			<td>URLをhttpsにする場合は(boolean)trueを指定します</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>theme_path</td>
+			<td>テーマテンプレートのパスを指定します Confのtemplate_pathからの相対パスとなります</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>template_super</td>
+			<td>上書きする親テンプレートのパスを指定します　Confのtemplate_pathからの相対パスとなります</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>suffix</td>
+			<td>actionの指定がクラス名のみの場合にメソッド展開されるURLへの接尾語</td>
+		</tr>
+	</tbody>
+	</table>	
+</rt:block>
