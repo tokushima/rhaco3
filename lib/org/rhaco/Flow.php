@@ -268,11 +268,18 @@ class Flow{
 				if(preg_match("/^".(empty($k) ? '' : "\/").str_replace(array("\/",'/','@#S'),array('@#S',"\/","\/"),$k).'[\/]{0,1}$/',$pathinfo,$p)){
 					if(isset($apps[$k]['mode']) && !empty($apps[$k]['mode'])){
 						$mode = \org\rhaco\Conf::appmode();
+						$mode_alias = \org\rhaco\Conf::get('mode');
 						$bool = false;
 						foreach(explode(',',$apps[$k]['mode']) as $m){
-							if($mode == trim($m)){
-								$bool = true;
-								break;
+							foreach((
+								(substr(trim($m),0,1) == '@' && isset($mode_alias[substr(trim($m),1)])) ? 
+									explode(',',$mode_alias[substr(trim($m),1)]) : 
+									array($m)
+							) as $me){
+								if($mode == trim($me)){
+									$bool = true;
+									break;
+								}
 							}
 						}
 						if(!$bool) break;
