@@ -546,7 +546,6 @@ class Template extends \org\rhaco\Object{
 												." if(%s > 0 && %s >= %s){ break; }"
 											." }"
 											." if(!%s){ ?>%s<?php } "
-											." unset(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
 										." }"
 									." ?>"
 									."<?php }catch(\\Exception \$e){ if(!isset(\$_nes_) && \$_display_exception_){print(\$e->getMessage());} } ?>"
@@ -568,7 +567,6 @@ class Template extends \org\rhaco\Object{
 											,$lcountname
 											,$limitname,$lcountname,$limitname
 									,$first_flg,$empty_value
-									,$var,$counter,$key,$countname,$lcountname,$offsetname,$limitname,$varname,$first,$first_flg,$last,$last_flg
 							)
 							,$src
 						);
