@@ -429,4 +429,11 @@ abstract class Base{
 	protected function create_table_prop_cond(\org\rhaco\store\db\Dao $dao,$prop_name){
 		return ($dao->prop_anon($prop_name,'extra') !== true && $dao->prop_anon($prop_name,'cond') === null);
 	}
+	public function drop_table_sql(\org\rhaco\store\db\Dao $dao){
+		$quote = function($name){
+			return '`'.$name.'`';
+		};
+		$sql = 'drop table '.$quote($dao->table());
+		return $sql;
+	}
 }
