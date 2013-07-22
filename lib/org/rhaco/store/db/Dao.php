@@ -972,4 +972,21 @@ abstract class Dao extends \org\rhaco\Object{
 		}
 		return false;
 	}
+	/**
+	 * テーブルの削除
+	 * @throws RuntimeException
+	 */
+	static public function drop_table(){
+		$dao = new static();
+		$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
+		$count = current($dao->func_query($daq));
+	
+		if($count == 1){
+			$daq = new \org\rhaco\store\db\Daq(static::module('drop_table_sql',$dao));
+			$dao->func_query($daq);
+			$dao->commit();
+			return true;
+		}
+		return false;
+	}
 }
