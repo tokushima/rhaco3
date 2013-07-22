@@ -14,7 +14,7 @@ if($has('model')){
 	
 	if($has('drop')){
 		if(call_user_func(array($model,'drop_table'))){
-			print('dropped '.$r->getName().PHP_EOL);
+			print('dropped '.$model.PHP_EOL);
 		}
 	}
 	if(call_user_func(array($model,'create_table'))){
