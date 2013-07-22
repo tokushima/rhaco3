@@ -25,8 +25,12 @@ if($has('model')){
 }else{
 	foreach(get_declared_classes() as $class){
 		$r = new \ReflectionClass($class);
-	
-		if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')){
+		
+		if((!$r->isInterface() 
+			&& !$r->isAbstract()) 
+			&& is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')
+			&& $r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'
+		){
 			if($has('drop')){
 				if(call_user_func(array($r->getName(),'drop_table'))){
 					print('dropped '.$r->getName().PHP_EOL);
