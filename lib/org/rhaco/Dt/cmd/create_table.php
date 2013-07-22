@@ -18,9 +18,9 @@ if($has('model')){
 		}
 	}
 	if(call_user_func(array($model,'create_table'))){
-		print('created: '.$model.PHP_EOL);
+		print('created '.$model.PHP_EOL);
 	}else{
-		print('exists: '.$model.PHP_EOL);		
+		print('exists '.$model.PHP_EOL);		
 	}
 }else{
 	foreach(get_declared_classes() as $class){
