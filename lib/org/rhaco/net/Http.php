@@ -259,7 +259,10 @@ class Http{
 					}
 					foreach(explode('&',http_build_query($this->request_file_vars)) as $q){
 						$s = explode('=',$q,2);
-						$vars[urldecode($s[0])] = isset($s[1]) ? '@'.urldecode($s[1]) : null;
+						if(isset($s[1])){
+							if(!is_file($f=urldecode($s[1]))) throw new \RuntimeException($f.' not found');
+							$vars[urldecode($s[0])] = '@'.$f;
+						}
 					}
 					curl_setopt($this->resource,CURLOPT_POSTFIELDS,$vars);
 				}else{
