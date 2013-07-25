@@ -455,10 +455,10 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 * @param self $this
 			 */
 			$this->object_module('after_do_login',$this);
-			if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
 			if($this->map_arg('login_redirect') !== null){
 				$this->redirect_by_map($this->map_arg('login_redirect'));
 			}
+			if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
 			foreach($this->package_maps as $k => $m){
 				if($m['method'] == 'index' && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
 			}
