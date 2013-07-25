@@ -10,7 +10,7 @@ use \org\rhaco\io\File;
  * @var string{} $cc
  * @var string{} $bcc
  * @var org.rhaco.io.File{} $attach
- * @var org.rhaco.io.File{} $image
+ * @var org.rhaco.io.File{} $media
  * @var choice $encode @['choices'=>['jis','utf8','sjis']]
  */
 class Mail extends \org\rhaco\Object{
@@ -19,7 +19,7 @@ class Mail extends \org\rhaco\Object{
 	protected $cc;
 	protected $bcc;
 	protected $attach;
-	protected $image;
+	protected $media;
 	protected $message;
 	protected $html;
 	protected $from;
@@ -103,8 +103,8 @@ class Mail extends \org\rhaco\Object{
 	protected function __set_attach__($filename,$src,$type="application/octet-stream"){
 		$this->attach[] = array(new File($filename,$src),$type);
 	}
-	protected function __set_image__($filename,$src,$type="application/octet-stream"){
-		$this->image[$filename] = array(new File($filename,$src),$type);
+	protected function __set_media__($filename,$src,$type="application/octet-stream"){
+		$this->media[$filename] = array(new File($filename,$src),$type);
 	}
 	protected function __set_message__($message){
 		$this->message = $this->encode($message);
@@ -181,15 +181,15 @@ class Mail extends \org\rhaco\Object{
 		$send .= $this->line();
 		$send .= $this->line($this->encode($this->message));
 		$send .= $this->line("--".$this->boundary["alternative"]);
-		if(empty($this->image)) $send .= $this->meta("html");
-		$send .= $this->line($this->encode((empty($this->image)) ? $this->line().$this->html : $this->related()));
+		if(empty($this->media)) $send .= $this->meta("html");
+		$send .= $this->line($this->encode((empty($this->media)) ? $this->line().$this->html : $this->related()));
 		$send .= $this->line("--".$this->boundary["alternative"]."--");
 		return $send;
 	}
 	private function related(){
 		$send = $this->line().$this->html;
 		$html = $this->html;
-		foreach(array_keys($this->image) as $name){
+		foreach(array_keys($this->media) as $name){
 			// tags
 			$preg = '/(\s)(src|href)\s*=\s*(["\']?)' . preg_quote($name) . '\3/';
 			$replace = sprintf('\1\2=\3cid:%s\3', $name);
@@ -208,9 +208,9 @@ class Mail extends \org\rhaco\Object{
 			$send .= $this->line();
 			$send .= $this->line($this->encode($html));
 
-			foreach($this->image as $image){
+			foreach($this->media as $media){
 				$send .= $this->line("--".$this->boundary["related"]);
-				$send .= $this->attach_string($image,true);
+				$send .= $this->attach_string($media,true);
 			}
 			$send .= $this->line("--".$this->boundary["related"]."--");
 		}
