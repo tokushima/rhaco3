@@ -243,7 +243,7 @@ class Man{
 	 * ライブラリ一覧
 	 * @return array
 	 */
-	static public function classes(){
+	static public function classes($include_test=false){
 		$result = array();
 		$include_path = array();
 		if(is_dir(getcwd().'/lib')){
@@ -277,7 +277,7 @@ class Man{
 				) as $e){
 					if(strpos($e->getPathname(),'/.') === false 
 							&& strpos($e->getPathname(),'/_') === false 
-							&& strpos(strtolower($e->getPathname()),'/test') === false							
+							&& ($include_test || strpos(strtolower($e->getPathname()),'/test') === false)						
 							&& ctype_upper(substr($e->getFilename(),0,1)) 
 							&& substr($e->getFilename(),-4) == '.php'
 					){

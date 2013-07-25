@@ -23,6 +23,7 @@ if($has('model')){
 		print('exists '.$model.PHP_EOL);		
 	}
 }else{
+	\org\rhaco\Dt\Man::classes($has('test'));
 	foreach(get_declared_classes() as $class){
 		$r = new \ReflectionClass($class);
 		
