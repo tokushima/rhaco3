@@ -1,6 +1,4 @@
 <?php
-\org\rhaco\Dt\Man::classes();
-
 /**
  * create table 
  * @param string $model
