@@ -25,6 +25,7 @@ class Mail extends \org\rhaco\Object{
 	protected $from;
 	protected $name;
 	protected $return_path;
+	protected $notification;
 	protected $encode = "jis";
 
 	private $eol = "\n";
@@ -136,6 +137,8 @@ class Mail extends \org\rhaco\Object{
 		if(!empty($this->cc)) $send .= $this->line("Cc: ".$this->implode_address($this->cc));
 		if(!empty($this->bcc)) $send .= $this->line("Bcc: ".$this->implode_address($this->bcc));
 		if(!empty($this->return_path)) $send .= $this->line("Return-Path: ".$this->return_path);
+		if(!empty($this->notification)) $send .= $this->line("Disposition-Notification-To: ".$this->notification);
+		
 		$send .= $this->line("Date: ".date("D, d M Y H:i:s O",time()));
 		$send .= $this->line("Subject: ".$this->subject());
 
