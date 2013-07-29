@@ -823,7 +823,7 @@ class Template extends \org\rhaco\Object{
 
 				if($tag->is_attr('value')){
 					$arg2 = $this->parse_plain_variable($tag->in_attr('value'));
-					if($arg2 == 'true' || $arg2 == 'false' || ctype_digit((string)$arg2)){
+					if($arg2 == 'true' || $arg2 == 'false' || preg_match('/^-?[0-9]+$/',(string)$arg2)){
 						$cond = sprintf('<?php if(%s === %s || %s === "%s"){ ?>',$arg1,$arg2,$arg1,$arg2);
 					}else{
 						if($arg2 === '' || $arg2[0] != '$') $arg2 = '"'.$arg2.'"';
@@ -857,7 +857,7 @@ class Template extends \org\rhaco\Object{
 			$t = new self();
 			$t->vars("abc","xyz");
 			eq($result,$t->get($src));
-
+			
 			$src = pre('<rt:if param="abc" value="1">hoge</rt:if>');
 			$result = pre('hoge');
 			$t = new self();
@@ -924,6 +924,18 @@ class Template extends \org\rhaco\Object{
 			$result = pre('bb');
 			$t = new self();
 			$t->vars("abc","");
+			eq($result,$t->get($src));
+			
+			$src = pre('<rt:if param="abc" value="-1">hoge</rt:if>');
+			$result = pre('hoge');
+			$t = new self();
+			$t->vars("abc",-1);
+			eq($result,$t->get($src));
+			
+			$src = pre('<rt:if param="abc" value="0">hoge</rt:if>');
+			$result = pre('hoge');
+			$t = new self();
+			$t->vars("abc",0);
 			eq($result,$t->get($src));
 		*/
 	}
