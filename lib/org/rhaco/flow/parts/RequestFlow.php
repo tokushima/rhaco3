@@ -7,7 +7,7 @@ namespace org\rhaco\flow\parts;
  */
 class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\rhaco\flow\FlowInterface{
 	private $put_block;
-	private $map_args;
+	private $map_args = array();
 	private $package_maps = array();
 	private $maps = array();
 	private $select_map_name;
