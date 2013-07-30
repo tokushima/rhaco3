@@ -109,6 +109,20 @@ array(''
 		)
 	)
 
+	,'after'=>array('name'=>'after','action'=>'test.Sample::after_redirect','after'=>'after_to')
+	,'after/to'=>array('name'=>'after_to','action'=>'test.Sample::after_to')
+	,'after/to/arg1'=>array('name'=>'after_arg1','action'=>'test.Sample::after_redirect','after'=>array('after_to_arg1','next_var_A'))
+	,'after/to/(.+)'=>array('name'=>'after_to_arg1','action'=>'test.Sample::after_to')	
+	,'after/to/arg2'=>array('name'=>'after_arg2','action'=>'test.Sample::after_redirect','after'=>array('after_to_arg2','next_var_A','next_var_B'))
+	,'after/to/(.+)/(.+)'=>array('name'=>'after_to_arg2','action'=>'test.Sample::after_to')
+	
+	,'post_after'=>array('name'=>'post_after','action'=>'test.Sample::after_redirect','post_after'=>'post_after_to')
+	,'post_after/to'=>array('name'=>'post_after_to','action'=>'test.Sample::after_to')
+	,'post_after/to/arg1'=>array('name'=>'post_after_arg1','action'=>'test.Sample::after_redirect','after'=>array('post_after_to_arg1','next_var_A'))
+	,'post_after/to/(.+)'=>array('name'=>'post_after_to_arg1','action'=>'test.Sample::after_to')
+	,'post_after/to/arg2'=>array('name'=>'post_after_arg2','action'=>'test.Sample::after_redirect','after'=>array('post_after_to_arg2','next_var_A','next_var_B'))
+	,'post_after/to/(.+)/(.+)'=>array('name'=>'post_after_to_arg2','action'=>'test.Sample::after_to')
+	
 	
 	,'dt'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
 )));
