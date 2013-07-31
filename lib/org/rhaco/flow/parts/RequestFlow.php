@@ -81,9 +81,9 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 				break;
 			}
 		}
-		if(isset($this->select_map['='])){
+		if(isset($this->select_map['@'])){
 			foreach($maps as $u => $m){
-				if(isset($m['=']) && $m['pkg_id'] == $this->select_map['pkg_id']) $this->package_maps[$u] = $maps[$u];
+				if(isset($m['@']) && $m['pkg_id'] == $this->select_map['pkg_id']) $this->package_maps[$u] = $maps[$u];
 			}
 		}
 	}
@@ -162,19 +162,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 * @param self $this
 			 */
 			$this->object_module('after_flow_handle',$this);
-		}
-	}
-	/**
-	 * (non-PHPdoc)
-	 * @see lib/org/rhaco/flow/org\rhaco\flow.FlowInterface::exception()
-	 */
-	public function exception(){
-		if($this->has_object_module('exception_flow_handle')){
-			/**
-			 * 例外発生時の処理
-			 * @param self $this
-			 */
-			$this->object_module('exception_flow_handle',$this);
 		}
 	}
 	/**

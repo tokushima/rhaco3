@@ -311,22 +311,14 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 更新
 	 * @param string $package モデル名
-	 * @automap
+	 * @automap @['post_after'=>['save_and_add_another'=>['do_create','package'],'save'=>['do_find','package']]]
 	 */
 	public function do_update($package){
 		if($this->is_post()){
 			try{
-				try{
-					$obj = $this->get_model($package,false);
-					$obj->set_props($this);
-					$obj->save();
-				}catch(\org\rhaco\store\db\exception\DaoBadMethodCallException $e){}
-
-				if($this->is_vars('save_and_add_another')){
-					$this->redirect_by_method('do_create',$package);
-				}else{
-					$this->redirect_by_method('do_find',$package);
-				}				
+				$obj = $this->get_model($package,false);
+				$obj->set_props($this);
+				$obj->save();
 			}catch(\Exception $e){
 				\org\rhaco\Log::error($e);
 			}
@@ -343,7 +335,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 作成
 	 * @param string $package モデル名
-	 * @automap
+	 * @automap @['post_after'=>['save_and_add_another'=>['do_create','package'],'save'=>['do_find','package']]]
 	 */
 	public function do_create($package){
 		if($this->is_post()){
@@ -351,12 +343,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 				$obj = $this->get_model($package,false);
 				$obj->set_props($this);
 				$obj->save();
-				
-				if($this->is_vars('save_and_add_another')){
-					$this->redirect_by_method('do_create',$package);
-				}else{
-					$this->redirect_by_method('do_find',$package);
-				}
 			}catch(\Exception $e){
 				\org\rhaco\Log::error($e);
 			}

@@ -8,10 +8,6 @@ class CoreTestModule extends \org\rhaco\flow\parts\RequestFlow{
 	public function after_flow_handle(\org\rhaco\flow\FlowInterface $flow){
 		$flow->vars('after_flow_handle','AFTER_FLOW_HANDLE');	
 	}	
-	public function exception_flow_handle(\org\rhaco\flow\FlowInterface $flow){
-		$flow->vars('exception_flow_handle','EXCEPTION_FLOW_HANDLE');
-	}
-	
 	public function init_template(\org\rhaco\lang\String $obj){
 		$obj->set($obj->get().'INIT_TEMPLATE'.PHP_EOL);
 	}
