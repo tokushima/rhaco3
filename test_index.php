@@ -474,8 +474,8 @@ meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 # module_add_exceptions
 $b = b();
 $b->do_get(test_map_url('module_add_exceptions'));
-eq(403,$b->status());
-nmeq('INDEX',$b->body());
+eq(200,$b->status());
+meq('INDEX',$b->body());
 meq('BEFORE_FLOW',$b->body());
 meq('AFTER_FLOW',$b->body());
 meq('INIT_TEMPLATE',$b->body());
