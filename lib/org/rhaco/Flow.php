@@ -203,13 +203,24 @@ class Flow{
 						$automaps = $methodmaps = array();
 						foreach($r->getMethods() as $m){
 							if($m->isPublic() && !$m->isStatic() && substr($m->getName(),0,1) != '_'){
-								$automap = (boolean)preg_match('/@automap[\s]*/',$m->getDocComment());								
+								$automap = (boolean)preg_match('/@automap[\s]*/',$m->getDocComment());
 								if(empty($automaps) || $automap){
 									$url = $k.(($m->getName() == 'index') ? '' : (($k == '') ? '' : '/').$m->getName()).str_repeat('/(.+)',$m->getNumberOfRequiredParameters());
+									$auto_anon = array();
+									if($automap){
+										if(preg_match('/@automap\s.*@(\[.*\])/',$m->getDocComment(),$a)){
+											if(preg_match_all('/([\"\']).+?\\1/',$a[1],$dm)){
+												foreach($dm[0] as $dv) $a[1] = str_replace($dv,str_replace(array('[',']'),array('#{#','#}#'),$dv),$a[1]);
+											}
+											$auto_anon = @eval('return '.str_replace(array('[',']','#{#','#}#'),array('array(',')','[',']'),$a[1]).';');
+											if(!is_array($auto_anon)) throw new \InvalidArgumentException($r->getName().'::'.$m->getName().' automap annotation error');
+										}
+									}
 									for($i=0;$i<=$m->getNumberOfParameters()-$m->getNumberOfRequiredParameters();$i++){
 										$p = is_dir(substr($r->getFilename(),0,-4)) ? substr($r->getFilename(),0,-4) : dirname($r->getFilename());
-										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'='=>$p,'pkg_id'=>$pkg_id));
+										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'@'=>$p,'pkg_id'=>$pkg_id));										
 										if($automap){
+											if(!empty($auto_anon)) $mapvar = array_merge($mapvar,$auto_anon);
 											$automaps[$url.$suffix] = $mapvar;
 										}else{
 											$methodmaps[$url.$suffix] = $mapvar;
@@ -260,7 +271,7 @@ class Flow{
 			if(preg_match("/^\/".str_replace("/","\\/",$this->package_media_url)."\/(\d+)\/(.+)$/",$pathinfo,$m) && sizeof($urls) >= $m[1]){
 				for(reset($urls),$i=0;$i<$m[1];$i++) next($urls);
 				$v = $apps[key($urls)];
-				if(isset($v['='])) \org\rhaco\net\http\File::attach($v['='].'/resources/media/'.$m[2]);
+				if(isset($v['@'])) \org\rhaco\net\http\File::attach($v['@'].'/resources/media/'.$m[2]);
 				\org\rhaco\net\http\Header::send_status(404);
 				exit;
 			}
@@ -337,19 +348,20 @@ class Flow{
 							}						
 							if($obj instanceof \org\rhaco\flow\FlowInterface){
 								$obj->after();
-								if(\org\rhaco\Exceptions::has()) $obj->exception();
 								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
 							}
 							if($func_exception instanceof \Exception) throw $func_exception;
 						}
+						\org\rhaco\Exceptions::throw_over();
+						
 						if(isset($apps[$k]['post_after']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST'){
 							$this->after_redirect($apps[$k]['post_after'],$apps[$k],$apps,$obj,$apps[$k]['name']);
 						}else if(isset($apps[$k]['after'])){
 							$this->after_redirect($apps[$k]['after'],$apps[$k],$apps,$obj,$apps[$k]['name']);
 						}else if(isset($apps[$k]['template'])){
 							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
-						}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html')){
+						}else if(isset($apps[$k]['@']) && is_file($t = $apps[$k]['@'].'/resources/templates/'.$apps[$k]['method'].'.html')){
 							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 						}else if($this->has_object_module('flow_output')){
 							/**
@@ -358,7 +370,6 @@ class Flow{
 							 */
 							$this->object_module('flow_output',$obj);
 						}else{
-							\org\rhaco\Exceptions::throw_over();
 							$xml = new \org\rhaco\Xml('result',$obj);
 							$xml->output();
 						}
@@ -406,10 +417,10 @@ class Flow{
 						}else if(isset($map['error_template'])){
 							$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 							exit;
-						}else if(isset($apps[$k]['=']) && is_file($t = $apps[$k]['='].'/resources/templates/error.html')){
+						}else if(isset($apps[$k]['@']) && is_file($t = $apps[$k]['@'].'/resources/templates/error.html')){
 							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
 							exit;
-						}else if(isset($apps[$k]['template']) || (isset($apps[$k]['=']) && is_file($apps[$k]['='].'/resources/templates/'.$apps[$k]['method'].'.html'))){
+						}else if(isset($apps[$k]['template']) || (isset($apps[$k]['@']) && is_file($apps[$k]['@'].'/resources/templates/'.$apps[$k]['method'].'.html'))){
 							if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
 							exit;
 						}
@@ -433,24 +444,41 @@ class Flow{
 		exit;
 	}
 	private function after_redirect($after,$pattern,$apps,$obj,$current){
+		$vars = array();
+		foreach($obj as $k => $v) $vars[$k] = $v;
+		if(isset($pattern['vars'])){
+			foreach($pattern['vars'] as $k => $v) $vars[$k] = $v;
+		}		
+		if(is_array($after) && !isset($after[0])){
+			foreach($after as $k => $a){
+				if(array_key_exists($k,$vars)){
+					$after = $a;
+					break;
+				}
+			}
+		}
 		$name = is_string($after) ? $after : (is_array($after) ? array_shift($after) : null);
-		if(empty($name)) $name = $current;
 		$var_names = (!empty($after) && is_array($after)) ? $after : array();
 		$args = array();
 		if(!empty($var_names)){
-			foreach($obj as $k => $v) $vars[$k] = $v;
-			if(isset($pattern['vars'])){
-				foreach($pattern['vars'] as $k => $v) $vars[$k] = $v;
-			}
 			foreach($var_names as $n){
-				if(!isset($vars[$n])) throw new \InvalidArgumentException('variable '.$name.' not found');
+				if(!isset($vars[$n])) throw new \InvalidArgumentException('variable '.$n.' not found');
 				$args[$n] = $vars[$n];
-			}	
+			}
+		}
+		if(isset($pattern['@'])){
+			foreach($apps as $u => $m){
+				if(isset($m['@']) && $m['pkg_id'] == $pattern['pkg_id'] && $name == $m['method'] && sizeof($args) == $m['num']){
+					$name = $m['name'];
+					break;
+				}
+			}
 		}		
+		if(empty($name)) $name = $current;
 		foreach($apps as $m){
 			if($m['name'] == $name) \org\rhaco\net\http\Header::redirect(vsprintf($m['format'],$args));
 		}
-		throw new \InvalidArgumentException($name.' not found');	
+		throw new \InvalidArgumentException('map `'.$name.'` not found');	
 	}
 	private function print_template($template_path,$template,$media_url,$theme,$put_block,$obj,$apps,$index,$path_replace=true){
 		if($path_replace){

@@ -40,10 +40,6 @@ interface FlowInterface{
 	 */
 	public function after();
 	/**
-	 * 例外処理
-	 */
-	public function exception();
-	/**
 	 * テンプレートにセットするモジュールの取得
 	 */
 	public function get_template_modules();
