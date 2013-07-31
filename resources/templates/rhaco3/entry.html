@@ -15,6 +15,8 @@
 				''=>array('name'=>'index','template'=>'index.html')
 				,'abc'=>array('name'=>'a','template'=>'abc.html')
 				,'def'=>array('name'=>'b','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop')
+				,'ghi'=>array('name'=>'c','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','after'=>'b')
+				,'jkl'=>array('name'=>'d','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','post_after'=>'b')
 
 				,'dev'=>array('class'=>'org.rhaco.Dt','mode'=>'local')
 		)));
@@ -144,6 +146,16 @@
 			<td></td>
 			<td>suffix</td>
 			<td>actionの指定がクラス名のみの場合にメソッド展開されるURLへの接尾語</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>after</td>
+			<td>正常実行完了後のリダイレクト先のマップ名</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>post_after</td>
+			<td>HTTP methodがPOSTで正常実行完了後のリダイレクト先のマップ名</td>
 		</tr>
 	</tbody>
 	</table>	
