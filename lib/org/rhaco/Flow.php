@@ -353,11 +353,9 @@ class Flow{
 							}
 							if($func_exception instanceof \Exception) throw $func_exception;
 						}
-						\org\rhaco\Exceptions::throw_over();
-						
-						if(isset($apps[$k]['post_after']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST'){
+						if(isset($apps[$k]['post_after']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST' && !\org\rhaco\Exceptions::has()){
 							$this->after_redirect($apps[$k]['post_after'],$apps[$k],$apps,$obj,$apps[$k]['name']);
-						}else if(isset($apps[$k]['after'])){
+						}else if(isset($apps[$k]['after']) && !\org\rhaco\Exceptions::has()){
 							$this->after_redirect($apps[$k]['after'],$apps[$k],$apps,$obj,$apps[$k]['name']);
 						}else if(isset($apps[$k]['template'])){
 							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
@@ -370,6 +368,7 @@ class Flow{
 							 */
 							$this->object_module('flow_output',$obj);
 						}else{
+							\org\rhaco\Exceptions::throw_over();
 							$xml = new \org\rhaco\Xml('result',$obj);
 							$xml->output();
 						}
