@@ -300,12 +300,11 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	/**
 	 * 削除
 	 * @param string $package モデル名
-	 * @automap
+	 * @automap @['post_after'=>'']
 	 */
 	public function do_drop($package){
 		if($this->is_post()){
 			$this->get_model($package)->delete();
-			\org\rhaco\net\http\Header::redirect_referer();
 		}
 	}
 	/**

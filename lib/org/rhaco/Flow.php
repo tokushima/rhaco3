@@ -354,9 +354,9 @@ class Flow{
 							if($func_exception instanceof \Exception) throw $func_exception;
 						}
 						if(isset($apps[$k]['post_after']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST' && !\org\rhaco\Exceptions::has()){
-							$this->after_redirect($apps[$k]['post_after'],$apps[$k],$apps,$obj,$apps[$k]['name']);
+							$this->after_redirect($apps[$k]['post_after'],$apps[$k],$apps,$obj);
 						}else if(isset($apps[$k]['after']) && !\org\rhaco\Exceptions::has()){
-							$this->after_redirect($apps[$k]['after'],$apps[$k],$apps,$obj,$apps[$k]['name']);
+							$this->after_redirect($apps[$k]['after'],$apps[$k],$apps,$obj);
 						}else if(isset($apps[$k]['template'])){
 							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 						}else if(isset($apps[$k]['@']) && is_file($t = $apps[$k]['@'].'/resources/templates/'.$apps[$k]['method'].'.html')){
@@ -442,7 +442,7 @@ class Flow{
 		\org\rhaco\net\http\Header::send_status(404);
 		exit;
 	}
-	private function after_redirect($after,$pattern,$apps,$obj,$current){
+	private function after_redirect($after,$pattern,$apps,$obj){
 		$vars = array();
 		foreach($obj as $k => $v) $vars[$k] = $v;
 		if(isset($pattern['vars'])){
@@ -473,7 +473,7 @@ class Flow{
 				}
 			}
 		}		
-		if(empty($name)) $name = $current;
+		if(empty($name)) \org\rhaco\net\http\Header::redirect_referer();
 		foreach($apps as $m){
 			if($m['name'] == $name) \org\rhaco\net\http\Header::redirect(vsprintf($m['format'],$args));
 		}
