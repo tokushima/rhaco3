@@ -46,6 +46,8 @@ include_once(&#039;rhaco3.php&#039;);
 &nbsp;&nbsp;&nbsp;&nbsp;&#039;&#039;=&gt;array(&#039;name&#039;=&gt;&#039;index&#039;,&#039;template&#039;=&gt;&#039;index.html&#039;)
 &nbsp;&nbsp;&nbsp;&nbsp;,&#039;abc&#039;=&gt;array(&#039;name&#039;=&gt;&#039;a&#039;,&#039;template&#039;=&gt;&#039;abc.html&#039;)
 &nbsp;&nbsp;&nbsp;&nbsp;,&#039;def&#039;=&gt;array(&#039;name&#039;=&gt;&#039;b&#039;,&#039;template&#039;=&gt;&#039;def.html&#039;,&#039;action&#039;=&gt;&#039;org.rhaco.flow.parts.RequestFlow::noop&#039;)
+&nbsp;&nbsp;&nbsp;&nbsp;,&#039;ghi&#039;=&gt;array(&#039;name&#039;=&gt;&#039;c&#039;,&#039;template&#039;=&gt;&#039;def.html&#039;,&#039;action&#039;=&gt;&#039;org.rhaco.flow.parts.RequestFlow::noop&#039;,&#039;after&#039;=&gt;&#039;b&#039;)
+&nbsp;&nbsp;&nbsp;&nbsp;,&#039;jkl&#039;=&gt;array(&#039;name&#039;=&gt;&#039;d&#039;,&#039;template&#039;=&gt;&#039;def.html&#039;,&#039;action&#039;=&gt;&#039;org.rhaco.flow.parts.RequestFlow::noop&#039;,&#039;post_after&#039;=&gt;&#039;b&#039;)
 
 &nbsp;&nbsp;&nbsp;&nbsp;,&#039;dev&#039;=&gt;array(&#039;class&#039;=&gt;&#039;org.rhaco.Dt&#039;,&#039;mode&#039;=&gt;&#039;local&#039;)
 )));</pre>
@@ -174,6 +176,16 @@ include_once(&#039;rhaco3.php&#039;);
 			<td></td>
 			<td>suffix</td>
 			<td>actionの指定がクラス名のみの場合にメソッド展開されるURLへの接尾語</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>after</td>
+			<td>正常実行完了後のリダイレクト先のマップ名</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>post_after</td>
+			<td>HTTP methodがPOSTで正常実行完了後のリダイレクト先のマップ名</td>
 		</tr>
 	</tbody>
 	</table>	
