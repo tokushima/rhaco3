@@ -403,6 +403,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	/**
 	 * 自身のメソッドにマッピングされたURLへリダイレクトする(パッケージのみ)
 	 * @param string $method
+	 * @deprecated
 	 */
 	protected function redirect_by_method($method){
 		$args = func_get_args();
