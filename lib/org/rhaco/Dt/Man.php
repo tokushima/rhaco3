@@ -187,7 +187,7 @@ class Man{
 					$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 				}
 			}
-			if(preg_match_all('/\$this->(map_arg|redirect_by_map)\((["\'])(.+?)\\2/',$src,$match)){
+			if(preg_match_all('/\$this->(map_arg)\((["\'])(.+?)\\2/',$src,$match)){
 				foreach($match[3] as $n) $args[$n] = "";
 			}
 			if(preg_match_all("/@arg\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){

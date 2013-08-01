@@ -378,27 +378,20 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		return $this->sess->is_vars($n);
 	}
 	/**
-	 * 指定されたマップ名のURLを返す
+	 * 指定されたマップ名のURLへリダイレクトする
 	 * @param string $name
-	 * @throws \LogicException
+	 * @deprecated
 	 */
-	protected function map_url($name){
+	protected function redirect_by_map($name){
 		$args = func_get_args();
 		$name = array_shift($args);
 		$arg = $this->map_arg($name,null);
 		if($arg === null) $arg = $name;
+		
 		foreach($this->maps as $k => $m){
-			if($m['name'] == $arg) return vsprintf($m['format'],$args);
+			if($m['name'] == $arg) \org\rhaco\net\http\Header::redirect(vsprintf($m['format'],$args));
 		}
 		throw new \LogicException('map `'.$arg.'` not found');
-	}
-	/**
-	 * 指定されたマップ名のURLへリダイレクトする
-	 * @param string $name
-	 */
-	protected function redirect_by_map($name){
-		$args = func_get_args();
-		\org\rhaco\net\http\Header::redirect(call_user_func_array(array($this,'map_url'),$args));
 	}
 	/**
 	 * 自身のメソッドにマッピングされたURLへリダイレクトする(パッケージのみ)
@@ -444,7 +437,10 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 */
 			$this->object_module('after_do_login',$this);
 			if($this->map_arg('login_redirect') !== null){
-				$this->redirect_by_map($this->map_arg('login_redirect'));
+				$redirect = $this->map_arg('login_redirect');
+				foreach($this->maps as $m){
+					if($m['name'] == $redirect) \org\rhaco\net\http\Header::redirect($m['format']);
+				}
 			}
 			if(!empty($redirect_to)) \org\rhaco\net\http\Header::redirect($redirect_to);
 			foreach($this->package_maps as $k => $m){
@@ -470,7 +466,10 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$this->rm_sessions('logined_redirect_to');
 		$this->logout();
 		if($this->map_arg('logout_redirect') !== null){
-			$this->redirect_by_map($this->map_arg('logout_redirect'));
+			$redirect = $this->map_arg('logout_redirect');
+			foreach($this->maps as $m){
+				if($m['name'] == $redirect) \org\rhaco\net\http\Header::redirect($m['format']);
+			}
 		}
 		foreach($this->package_maps as $k => $m){
 			if($m['method'] == 'index' && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
