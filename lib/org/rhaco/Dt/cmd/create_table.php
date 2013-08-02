@@ -30,13 +30,17 @@ if($has('model')){
 			&& is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')
 			&& $r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'
 		){
-			if($has('drop')){
-				if(call_user_func(array($r->getName(),'drop_table'))){
-					print('dropped '.$r->getName().PHP_EOL);
+			try{
+				if($has('drop')){
+					if(call_user_func(array($r->getName(),'drop_table'))){
+						print('dropped '.$r->getName().PHP_EOL);
+					}
 				}
-			}
-			if(call_user_func(array($r->getName(),'create_table'))){
-				print('created '.$r->getName().PHP_EOL);
+				if(call_user_func(array($r->getName(),'create_table'))){
+					print('created '.$r->getName().PHP_EOL);
+				}
+			}catch(\Exception $e){
+				throw new \Exception($r->getName().' '.$e->getMessage());
 			}
 		}
 	}

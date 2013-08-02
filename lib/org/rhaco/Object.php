@@ -769,12 +769,13 @@ class Object{
 	}
 	/**
 	 * アクセス可能なプロパティを取得する
+	 * @param boolean $in_value
 	 * @return mixed{}
 	 */
-	final public function props(){
+	final public function props($in_value=true){
 		$r = array();
 		foreach(get_object_vars($this) as $n => $v){
-			if($n[0] != '_') $r[$n] = $this->{$n}();
+			if($n[0] != '_') $r[$n] = ($in_value) ? $this->{$n}() : null;
 		}
 		return $r;
 		/***
