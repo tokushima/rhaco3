@@ -82,7 +82,7 @@ class Mysql extends Base{
 		};
 		$columndef = $primary = array();
 		$sql = 'create table '.$quote($dao->table()).'('.PHP_EOL;
-		foreach($dao->props() as $prop_name => $v){
+		foreach($dao->props(false) as $prop_name => $v){
 			if($this->create_table_prop_cond($dao,$prop_name)){
 				$column_str = '  '.$to_column_type($dao,$dao->prop_anon($prop_name,'type'),$prop_name).' null ';
 				$columndef[] = $column_str;
