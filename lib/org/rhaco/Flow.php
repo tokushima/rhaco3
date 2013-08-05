@@ -449,12 +449,15 @@ class Flow{
 			foreach($pattern['vars'] as $k => $v) $vars[$k] = $v;
 		}		
 		if(is_array($after) && !isset($after[0])){
+			$bool = false;
 			foreach($after as $k => $a){
 				if(array_key_exists($k,$vars)){
 					$after = $a;
+					$bool = true;
 					break;
 				}
 			}
+			if(!$bool) throw new \InvalidArgumentException('key not found');
 		}
 		$name = is_string($after) ? $after : (is_array($after) ? array_shift($after) : null);
 		$var_names = (!empty($after) && is_array($after)) ? $after : array();
