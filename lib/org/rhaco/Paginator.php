@@ -126,7 +126,7 @@ class Paginator implements \IteratorAggregate{
 	 * @return boolean
 	 */
 	public function is_first($page){
-		return ($this->which_first($page) !== $this->first);
+		return ((int)$this->which_first($page) !== (int)$this->first);
 	}
 	/**
 	 * 指定のページ番号が最後のページか
