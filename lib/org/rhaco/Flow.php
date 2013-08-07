@@ -541,19 +541,6 @@ class Flow{
 		return $r;		
 	}
 	/**
-	 * ローダーを指定してインスタンスを作成する
-	 * @param string $loader_module
-	 * @return $this
-	 */
-	static public function loader($loader_module=null){
-		$self = new self(dirname(self::entry_file()));
-		if(!empty($loader_module)){
-			if(!is_object($loader_module)) $loader_module = $self->str_reflection($loader_module);
-			$self->set_object_module($loader_module);
-		}
-		return $self;
-	}
-	/**
 	 * 出力する
 	 * @param array $maps
 	 */
