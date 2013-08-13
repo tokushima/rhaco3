@@ -6,8 +6,10 @@ date_default_timezone_set('Asia/Tokyo');
 		'connection'=>array(
 			'org.rhaco.store.db.Dao.CrossChild'=>array()
 //			,'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root')
+//			,'test.model.TestModel'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root')
 			,'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local_session.db','host'=>dirname(__DIR__))
 			,'test.model.TestModel'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local_test.db','host'=>dirname(__DIR__))
+				
 			,'*'=>array()
 		)
 	),
