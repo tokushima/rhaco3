@@ -6,15 +6,15 @@ namespace org\rhaco\net\http;
  */
 class Header{
 	static private $header = array();
-	static private $send_status = false;
+	static private $send_status;
 
 	/**
 	 * statusを出力する
 	 * @param integer $code
 	 */
 	static public function send_status($code){
-		if(!self::$send_status){
-			self::$send_status = true;
+		if(!isset(self::$send_status)){
+			self::$send_status = $code;
 			header('HTTP/1.1 '.self::status_string($code));
 		}
 	}
