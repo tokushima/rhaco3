@@ -424,12 +424,34 @@ abstract class Dao extends \org\rhaco\Object{
 		$err = array();
 		foreach($this->self_columns() as $name => $column){
 			$value = $this->{$name}();
-			$label = $this->prop_anon($name,'label',$name);
-			$e_require = false;
+ 			$e_require = false;
 
 			if($this->prop_anon($name,'require') === true && ($value === '' || $value === null)){
-				$err[] = new RequiredDaoException($label.' required',$name);
+				$err[] = new RequiredDaoException($name.' required',$name);
 				$e_require = true;
+			}
+			if(!$e_require && $value !== null){
+				switch($this->prop_anon($name,'type')){
+					case 'number':
+					case 'integer':
+						if($this->prop_anon($name,'min') !== null && (float)$this->prop_anon($name,'min') > $value){
+							$err[] = new LengthDaoException($name.' less than minimum',$name);
+						}
+						if($this->prop_anon($name,'max') !== null && (float)$this->prop_anon($name,'max') < $value){
+							$err[] = new LengthDaoException($name.' exceeds maximum',$name);
+						}
+						break;
+					case 'text':
+					case 'string':
+					case 'alnum':
+						if($this->prop_anon($name,'min') !== null && (int)$this->prop_anon($name,'min') > mb_strlen($value)){
+							$err[] = new LengthDaoException($name.' less than minimum',$name);
+						}
+						if($this->prop_anon($name,'max') !== null && (int)$this->prop_anon($name,'max') < mb_strlen($value)){
+							$err[] = new LengthDaoException($name.' exceeds maximum',$name);
+						}
+						break;
+				}
 			}
 			$unique_together = $this->prop_anon($name,'unique_together');
 			if($value !== '' && $value !== null && ($this->prop_anon($name,'unique') === true || !empty($unique_together))){
@@ -444,7 +466,7 @@ abstract class Dao extends \org\rhaco\Object{
 				foreach($this->primary_columns() as $column){
 					if(null !== ($pv = $this->{$column->name()})) $q[] = Q::neq($column->name(),$this->{$column->name()});
 				}
-				if(0 < call_user_func_array(array(get_class($this),'find_count'),$q)) $err[] = new UniqueDaoException($label.' unique',$name);
+				if(0 < call_user_func_array(array(get_class($this),'find_count'),$q)) $err[] = new UniqueDaoException($name.' unique',$name);
 			}
 			$master = $this->prop_anon($name,'master');
 			if(!empty($master)){
@@ -458,22 +480,7 @@ abstract class Dao extends \org\rhaco\Object{
 				}
 				$mo = $r->newInstanceArgs();
 				$primarys = $mo->primary_columns();
-				if(empty($primarys) || 0 === call_user_func_array(array($mo,'find_count'),array(Q::eq(key($primarys),$this->{$name})))) $err[] = new NotfoundDaoException($label.' master not found',$name);
-			}
-			if(!$e_require && $value !== null){
-				switch($this->prop_anon($name,'type')){
-					case 'number':
-					case 'integer':
-						if($this->prop_anon($name,'min') !== null && (float)$this->prop_anon($name,'min') > $value) $err[] = new LengthDaoException($label.' less than minimum',$name);
-						if($this->prop_anon($name,'max') !== null && (float)$this->prop_anon($name,'max') < $value) $err[] = new LengthDaoException($label.' exceeds maximum',$name);
-						break;
-					case 'text':
-					case 'string':
-					case 'alnum':
-						if($this->prop_anon($name,'min') !== null && (int)$this->prop_anon($name,'min') > mb_strlen($value)) $err[] = new LengthDaoException($label.' less than minimum',$name);
-						if($this->prop_anon($name,'max') !== null && (int)$this->prop_anon($name,'max') < mb_strlen($value)) $err[] = new LengthDaoException($label.' exceeds maximum',$name);
-						break;
-				}
+				if(empty($primarys) || 0 === call_user_func_array(array($mo,'find_count'),array(Q::eq(key($primarys),$this->{$name})))) $err[] = new NotfoundDaoException($name.' master not found',$name);
 			}
 			if($this->{'verify_'.$column->name()}() === false){
 				$err[] = new DaoException($this->prop_anon($column->name(),'label').' verify fail',$column->name());
