@@ -25,7 +25,7 @@ class Flow{
 		foreach(debug_backtrace(false) as $d){
 			if($d['file'] !== __FILE__) return $d['file'];
 		}
-		new \RuntimeException('no entry file');
+		throw new \RuntimeException('no entry file');
 	}
 	public function __construct($app_url=null){
 		$f = str_replace("\\",'/',self::entry_file());
