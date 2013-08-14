@@ -483,7 +483,7 @@ abstract class Dao extends \org\rhaco\Object{
 				if(empty($primarys) || 0 === call_user_func_array(array($mo,'find_count'),array(Q::eq(key($primarys),$this->{$name})))) $err[] = new NotfoundDaoException($name.' master not found',$name);
 			}
 			if($this->{'verify_'.$column->name()}() === false){
-				$err[] = new DaoException($this->prop_anon($column->name(),'label').' verify fail',$column->name());
+				$err[] = new DaoException($column->name().' verify fail',$column->name());
 			}
 		}
 		if(!empty($err)){
