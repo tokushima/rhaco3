@@ -129,50 +129,19 @@ class Helper{
 	 * @return string
 	 */
 	public function cond_switch($cond,$true='on',$false=''){
-		return ($cond === true) ? $true : $false;
+		return ($cond !== false && !empty($cond)) ? $true : $false;
 		/***
 			$t = new self();
 			eq('on',$t->cond_switch(true,'on','off'));
+			eq('off',$t->cond_switch(false,'on','off'));			
+			eq('off',$t->cond_switch('','on','off'));
+			eq('off',$t->cond_switch(0,'on','off'));
 			eq('off',$t->cond_switch(false,'on','off'));
-			eq('off',$t->cond_switch(1,'on','off'));
-		*/
-	}
-	/**
-	 * $condが空じゃなければ$true,空なら$falseを返す
-	 * @param mixed $cond 空または0またはfalseの場合に偽
-	 * @param string $true 真の場合に返す文字列
-	 * @param string $false 偽の場合に返す文字列
-	 * @return string
-	 */
-	public function has_switch($cond,$true='on',$false=''){
-		return empty($cond) ? $false : $true;
-		/***
-			$t = new self();
-			eq('off',$t->has_switch('','on','off'));
-			eq('off',$t->has_switch(0,'on','off'));
-			eq('off',$t->has_switch(false,'on','off'));
-			eq('off',$t->has_switch(array(),'on','off'));
-			eq('on',$t->has_switch('1','on','off'));
-			eq('on',$t->has_switch(1,'on','off'));
-			eq('on',$t->has_switch(true,'on','off'));
-			eq('on',$t->has_switch(array(1),'on','off'));
-		*/
-	}
-	/**
-	 * 指定のgroupのExceptionsがあれば$true,空なら$falseを返す
-	 * @param string $group Exceptionsグループ名
-	 * @param string $true 真の場合に返す文字列
-	 * @param string $false 偽の場合に返す文字列
-	 * @return string
-	 */
-	public function has_exceptions_switch($group=null,$true='error',$false=''){
-		return (\org\rhaco\Exceptions::has($group)) ? $true : $false;
-		/***
-			\org\rhaco\Exceptions::add(new \LogicException(),'abc');
-			$t = new self();
-			eq('on',$t->has_exceptions_switch('abc','on','off'));
-			eq('off',$t->has_exceptions_switch('def','on','off'));
-			\org\rhaco\Exceptions::clear();
+			eq('off',$t->cond_switch(array(),'on','off'));
+			eq('on',$t->cond_switch('1','on','off'));
+			eq('on',$t->cond_switch(1,'on','off'));
+			eq('on',$t->cond_switch(true,'on','off'));
+			eq('on',$t->cond_switch(array(1),'on','off'));
 		*/
 	}
 	/**
@@ -222,29 +191,17 @@ class Helper{
 	}
 	/**
 	 * フォーマットした日付を返す
-	 * @param integer $value 時間
 	 * @param string $format フォーマット文字列 ( http://jp2.php.net/manual/ja/function.date.php )
+	 * @param integer $value 時間
 	 * @return string
 	 */
-	public function df($value,$format="Y/m/d H:i:s"){
+	public function df($format="Y/m/d H:i:s",$value=null){
+		if(empty($value)) $value = time();
 		return date($format,$value);
 		/***
 			$t = new self();
 			$time = time();
-			eq(date("YmdHis",$time),$t->df($time,"YmdHis"));
-		 */
-	}
-	/**
-	 * 現在の日付を返す
-	 * @param string $format
-	 * @return string
-	 */
-	public function now($format="Y/m/d H:i:s"){
-		return date($format,time());
-		/***
-			$t = new self();
-			$time = time();
-			eq(date("YmdHis",$time),$t->now("YmdHis"));
+			eq(date("YmdHis",$time),$t->df("YmdHis",$time));
 		 */
 	}
 	/**
@@ -322,7 +279,7 @@ class Helper{
 	 * @return string
 	 */
 	public function html($value,$length=0,$lines=0,$postfix=null,$nl2br=true){
-		$value = self::cdata(str_replace(array("\r\n","\r"),"\n",$value));
+		$value = str_replace(array("\r\n","\r"),"\n",$value);
 		if($length > 0){
 			$det = mb_detect_encoding($value);
 			$value = mb_substr($value,0,$length,$det).((mb_strlen($value,$det) > $length) ? $postfix : null);
@@ -343,20 +300,6 @@ class Helper{
 	 */
 	public function nl2br($value){
 		return nl2br($value,true);
-	}
-	/**
-	 * CDATA形式から値を取り出す
-	 * @param string $value 対象の文字列
-	 * @return string
-	 */
-	static public function cdata($value){
-		if(preg_match_all("/<\!\[CDATA\[(.+?)\]\]>/ims",$value,$match)){
-			foreach($match[1] as $key => $v) $value = str_replace($match[0][$key],$v,$value);
-		}
-		return $value;
-		/***
-			eq("<abc />",self::cdata("<![CDATA[<abc />]]>"));
-		 */
 	}
 	/**
 	 * 全てのタグを削除した文字列を返す
