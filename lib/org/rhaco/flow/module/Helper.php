@@ -10,15 +10,17 @@ class Helper{
 	private $name;
 	private $map_name;
 	private $url_pattern = array();
+	private $current_entry;	
 	
 	private $is_login = false;
 	private $user;
 
-	public function __construct($app_url=null,$media_url=null,$name=null,$num=0,$map=array(),$obj=null){
+	public function __construct($app_url=null,$media_url=null,$name=null,$num=0,$current_entry=null,$map=array(),$obj=null){
 		$this->app_url = $app_url;
 		$this->media_url = $media_url;
 		$this->name = $name;
 		$this->map_name = $name.'#'.$num;
+		$this->current_entry = $current_entry;
 		$secure = false;
 
 		foreach($map as $p => $m){

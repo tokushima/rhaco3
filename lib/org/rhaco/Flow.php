@@ -21,14 +21,14 @@ class Flow{
 	static private $get_maps = false;
 	static private $output_maps = array();
 	
-	static private function entry_file(){
+	private function entry_file(){
 		foreach(debug_backtrace(false) as $d){
 			if($d['file'] !== __FILE__) return $d['file'];
 		}
 		throw new \RuntimeException('no entry file');
 	}
 	public function __construct($app_url=null){
-		$f = str_replace("\\",'/',self::entry_file());
+		$f = str_replace("\\",'/',$this->entry_file());
 		$this->app_url = Conf::get('app_url',(isset($app_url) ? $app_url : (isset($_ENV['APP_URL']) ? $_ENV['APP_URL'] : null)));
 
 		if(empty($this->app_url)) $this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
@@ -232,7 +232,7 @@ class Flow{
 								));
 			}
 			if(self::$get_maps){
-				self::$output_maps[basename(self::entry_file())] = $apps;
+				self::$output_maps[basename($this->entry_file())] = $apps;
 				self::$get_maps = false;
 				return;
 			}
@@ -476,7 +476,7 @@ class Flow{
 		$this->template->media_url($media_url);
 		$this->template->cp($obj);
 		if(isset($apps[$index]['vars'])) $this->template->cp($apps[$index]['vars']);
-		$this->template->vars('t',new \org\rhaco\flow\module\Helper($this->app_url,$media_url,$apps[$index]['name'],$apps[$index]['num'],$apps,$obj));
+		$this->template->vars('t',new \org\rhaco\flow\module\Helper($this->app_url,$media_url,$apps[$index]['name'],$apps[$index]['num'],$this->entry_file(),$apps,$obj));
 		$src = $this->template->read($template);
 		/**
 		 * テンプレートの出力
