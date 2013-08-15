@@ -10,6 +10,7 @@ use \org\rhaco\store\db\Q;
 class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	private $smtp_blackhole_dao;
 	private $dao;
+	private $flow_output_maps = array();
 
 	private function entry_desc($file){
 		$entry = substr(basename($file),0,-4);
@@ -47,6 +48,55 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					,new \org\rhaco\flow\module\Exceptions()
 					,new \org\rhaco\flow\module\Dao()
 				);
+	}
+	/**
+	 * アプリケーションのマップ一覧
+	 */
+	private function get_flow_output_maps(){
+		if(empty($this->flow_output_maps)){
+			$trace = debug_backtrace(false);
+			$entry = array_pop($trace);
+			$entry_list = array();
+			$self_name = str_replace("\\",'.',__CLASS__);
+			
+			foreach(new \DirectoryIterator(dirname($entry['file'])) as $f){
+				if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
+					$src = file_get_contents($f->getPathname());
+					$entry_name = substr($f->getFilename(),0,-4);				
+	
+					if(strpos($src,'Flow') !== false && (strpos($src,'->output(') !== false || strpos($src,'Flow::out(') !== false)){
+						foreach(\org\rhaco\Flow::get_maps($f->getFilename()) as $k => $m){
+							if(!isset($m['class']) || $m['class'] != $self_name){
+								$m['error'] = '';
+								$m['summary'] = isset($m['summary']) ? $m['summary'] : '';
+								$m['entry'] = $entry_name;
+								
+								if(isset($m['class']) && isset($m['method'])){
+									try{
+										$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
+										$mr = $cr->getMethod($m['method']);
+										$document = preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment()));
+										list($summary) = explode("\n",trim(preg_replace("/@.+/","",$document)));
+										$m['summary'] = $summary.(empty($m['summary']) ? '' : PHP_EOL).$m['summary'];
+										if(!isset($m['deprecated'])) $m['deprecated'] = (strpos($mr->getDocComment(),'@deprecated') !== false);
+									}catch(\ReflectionException $e){
+										$m['error'] = $e->getMessage();
+									}
+								}
+								$this->flow_output_maps[$entry_name.'::'.$k] = $m;
+							}
+						}
+					}
+				}
+			}
+		}
+		return $this->flow_output_maps;
+	}
+	/**
+	 * @automap
+	 */
+	public function index(){
+		$this->vars('maps',$this->get_flow_output_maps());
 	}
 	/**
 	 * Daoモデルの一覧
@@ -87,49 +137,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('dao_model_con',$con);
 		$this->vars('getcwd',getcwd());
 	}
-	/**
-	 * アプリケーションのマップ一覧
-	 * @automap
-	 */
-	public function index(){
-		$maps = array();
-		$self_name = str_replace("\\",'.',__CLASS__);
-		foreach($this->maps() as $k => $m){
-			if(!isset($m['class']) || $m['class'] != $self_name){
-				$m['error'] = '';
-				$m['summary'] = isset($m['summary']) ? $m['summary'] : '';
-				$m['see'] = array();
-				if(isset($m['class']) && isset($m['method'])){
-					try{
-						$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
-						$mr = $cr->getMethod($m['method']);
-						$document = preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment()));
-						list($summary) = explode("\n",trim(preg_replace("/@.+/","",$document)));
-						$m['summary'] = $summary.(empty($m['summary']) ? '' : PHP_EOL).$m['summary'];
-						if(!isset($m['deprecated'])) $m['deprecated'] = (strpos($mr->getDocComment(),'@deprecated') !== false);
-						if(preg_match_all("/@see\s+(\w+:\/\/.+)/",$document,$match)){
-							foreach($match[1] as $v) $m['see'][] = trim($v);
-						}
-					}catch(\ReflectionException $e){
-						$m['error'] = $e->getMessage();
-					}
-				}
-				$m['summary'] = preg_replace('/\{i:(.+?)}/','<i class="icon-\\1"></i>',$m['summary']);
-				if($this->search_str(
-					$m['name']
-					,(isset($m['class'])?$m['class']:'')
-					,(isset($m['method'])?$m['method']:'')
-					,(isset($m['template'])?$m['template']:'')
-					,(isset($m['deprecated'])?$m['deprecated']:false)
-					,(isset($m['debug'])?$m['debug']:false)
-					,(isset($m['em'])?$m['em']:false)
-					,$m['url']
-					,$m['summary']
-				)) $maps[$k] = $m;
-			}
-		}
-		$this->vars('maps',$maps);
-	}
+
 	private function search_str(){
 		$query = str_replace('　',' ',trim($this->in_vars('q')));
 		if(!empty($query)){
@@ -491,42 +499,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		ksort($list);
 		$this->vars('object_list',$list);
 	}
-	/**
-	 * エントリ一覧
-	 * @automap
-	 */
-	public function entry_list(){
-		$trace = debug_backtrace(false);
-		$entry = array_pop($trace);
-		$entry_list = array();
 
-		foreach(new \DirectoryIterator(dirname($entry['file'])) as $f){
-			if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
-				$src = file_get_contents($f->getPathname());
-				if(strpos($src,'Flow') !== false && (strpos($src,'->output(') !== false || strpos($src,'Flow::out(') !== false)){
-					$maps = \org\rhaco\Flow::get_maps($f->getFilename());
-					$dev_index = null;
-					foreach($maps as $m){
-						if(isset($m['class']) && isset($m['method']) 
-							&& $m['class'] == 'org.rhaco.Dt' && $m['method'] == 'index'
-						){
-							$dev_index = $m['format'];
-							break;
-						}
-					}
-					list($entry,$name,$summary,$description) = $this->entry_desc($f->getFilename());
-					$obj = new \org\rhaco\Object();
-					$obj->entry = $entry;
-					$obj->name = $name;
-					$obj->summary = $summary;
-					$obj->url = $dev_index;
-					
-					if($this->search_str($obj->entry,$obj->name,$obj->summary)) $entry_list[] = $obj;					
-				}
-			}
-		}
-		$this->vars('object_list',$entry_list);
-	}
 	/**
 	 * モジュールの一覧
 	 * @automap
@@ -550,24 +523,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function explorer(){
-		$maps = array();
-		$self_name = str_replace("\\",'.',__CLASS__);
-		foreach($this->maps() as $k => $m){
-			if(!isset($m['class']) || $m['class'] != $self_name){
-				$m['summary'] = $m['error'] = '';
-
-				if($this->search_str(
-					$m['name']
-					,(isset($m['class'])?$m['class']:'')
-					,(isset($m['method'])?$m['method']:'')
-					,(isset($m['template'])?$m['template']:'')
-					,(isset($m['deprecated'])?$m['deprecated']:false)
-					,$m['url']
-					,$m['summary']
-				)) $maps[$k] = $m;
-			}
-		}
-		$this->vars('maps',$maps);
+		$this->vars('maps',$this->get_flow_output_maps());
 	}
 	/**
 	 * @automap
