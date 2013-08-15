@@ -36,6 +36,7 @@ array(''
 			,'hoge'=>array('name'=>'sample_flow_theme_media_plain_hoge','action'=>'hoge','template'=>'sample_media.html')
 		)
 	)
+	,'map_url'=>array('template'=>'map_url.html')
 	,'plain_theme/template_path_theme_html'=>array('name'=>'template_path_theme_html','template_path'=>'template_path','theme_path'=>'theme_path','template'=>'index.html')
 	,'plain_theme/template_path_html'=>array('name'=>'template_path_html','template'=>'index.html','template_path'=>'template_path')
 	,'module'=>array('name'=>'module','template'=>'module_index.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','modules'=>'test.flow.module.CoreTestModule')
@@ -606,5 +607,11 @@ $b->do_get(test_map_url('get_session'));
 eq('<result><abc>hoge</abc></result>',$b->body());
 */
 
+/***
+$b = b();
+$b->do_get(test_map_url('map_url'));
+meq('test_index/noop',$b->body());
+meq('test_login/aaa',$b->body());
+*/
 
 

@@ -10,27 +10,54 @@ class Helper{
 	private $name;
 	private $map_name;
 	private $url_pattern = array();
-	private $current_entry;	
+	private $current_entry_dir;
+	private $current_entry;
 	
 	private $is_login = false;
 	private $user;
 
-	public function __construct($app_url=null,$media_url=null,$name=null,$num=0,$current_entry=null,$map=array(),$obj=null){
+	public function __construct($app_url=null,$media_url=null,$name=null,$num=0,$current_entry_file=null,$map=array(),$obj=null){
 		$this->app_url = $app_url;
 		$this->media_url = $media_url;
 		$this->name = $name;
 		$this->map_name = $name.'#'.$num;
-		$this->current_entry = $current_entry;
+		$this->current_entry_dir = dirname($current_entry_file);
+		$this->current_entry = substr(basename($current_entry_file),0,-4);
 		$secure = false;
 
 		foreach($map as $p => $m){
-			$this->url_pattern[$m['name'].'#'.$m['num']] = $m;
+			$this->url_pattern[$this->current_entry][$m['name'].'#'.$m['num']] = $m;
 			if($m['name'] === $this->name) $secure = $m['secure'];
 		}
 		if($secure) $this->app_url = str_replace('http://','https://',$this->app_url);
 		if($obj instanceof \org\rhaco\flow\parts\RequestFlow){
 			$this->is_login = $obj->is_login();
 			$this->user = $obj->user();
+		}
+	}
+	/**
+	 * handlerのマップ名を呼び出しているURLを生成する
+	 * 引数を与える事も可能
+	 * @param string $name マップ名
+	 * @return string
+	 */
+	public function map_url($name){
+		$args = func_get_args();
+		array_shift($args);
+		
+		if(strpos($name,'::') === false){
+			$entry = $this->current_entry;
+		}else{
+			list($entry,$name) = explode('::',$name,2);
+		}
+		if(!isset($this->url_pattern[$entry]) && is_file($f=($this->current_entry_dir.'/'.$entry.'.php'))){
+			foreach(\org\rhaco\Flow::get_maps($f) as $m){
+				$this->url_pattern[$entry][$m['name'].'#'.$m['num']] = $m;
+			}
+		}		
+		$n = $name.'#'.sizeof($args);
+		if(isset($this->url_pattern[$entry][$n])){
+			return vsprintf($this->url_pattern[$entry][$n]['pattern'],$args);
 		}
 	}
 	/**
@@ -55,18 +82,6 @@ class Helper{
 		return \org\rhaco\Request::current_url();
 	}
 	/**
-	 * handlerのマップ名を呼び出しているURLを生成する
-	 * 引数を与える事も可能
-	 * @param string $name マップ名
-	 * @return string
-	 */
-	public function map_url($name){
-		$args = func_get_args();
-		array_shift($args);
-		$n = $name.'#'.sizeof($args);
-		if(isset($this->url_pattern[$n])) return vsprintf($this->url_pattern[$n]['pattern'],$args);
-	}
-	/**
 	 * handlerでpackageを呼び出してる場合にメソッド名でURLを生成する
 	 * 引数を与える事も可能
 	 * @param string $name メソッド名
@@ -75,11 +90,11 @@ class Helper{
 	public function package_method_url($name){
 		$args = func_get_args();
 		array_shift($args);
-		if(isset($this->url_pattern[$this->map_name]) && isset($this->url_pattern[$this->map_name]['@'])){
-			$p = $this->url_pattern[$this->map_name];
+		if(isset($this->url_pattern[$this->current_entry][$this->map_name]) && isset($this->url_pattern[$this->current_entry][$this->map_name]['@'])){
+			$p = $this->url_pattern[$this->current_entry][$this->map_name];
 			$n = sizeof($args);
 			
-			foreach($this->url_pattern as $m){
+			foreach($this->url_pattern[$this->current_entry] as $m){
 				if(isset($m['@']) && $m['pkg_id'] == $p['pkg_id'] && $m['method'] == $name && $m['num'] == $n){
 					return call_user_func_array(array($this,'map_url'),array_merge(array($m['name']),$args));
 				}
