@@ -9,13 +9,16 @@
 	<table rt:param="{$maps}" rt:var="map" rt:key="url">
 	<thead>
 		<tr>
-			<th class="span3">name</th>
-			<th class="span3">url</th>
-			<th>summary</th>
+			<th>Entry</th>
+			<th>Url</th>			
+			<th>Name</th>
+			<th>Summary</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr class="even{$t.cond_switch($map['debug'],' muted','')}" style="{$t.cond_switch($map['deprecated'],'text-decoration: line-through;','')}{$t.cond_switch($map['em'],'color: #ffa07a; font-weight: bold','')}">
+			<td>{$map['entry']}</td>
+			<td>{$map['url']}</td>
 			<td nowrap>
 				<rt:if param="{$map['class']}">
 					<a href="{$t.package_method_url('method_doc',$map['class'],$map['method'])}">{$map['name']}</a>
@@ -23,13 +26,9 @@
 					{$map['name']}
 				</rt:if>
 			</td>
-			<td>{$map['url']}</td>
 			<td>
 				<span>{$map['summary']}</span>
 				<span style="color:#ff0000; font-weight: bold;">{$map['error']}</span>
-				<rt:loop param="{$map['see']}" var="see_url">
-					<a class="icon-bookmark" href="{$see_url}"></a>
-				</rt:loop>
 			</td>
 		</tr>
 	</tbody>
