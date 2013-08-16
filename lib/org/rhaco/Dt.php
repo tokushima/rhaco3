@@ -12,17 +12,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	private $dao;
 	private $flow_output_maps = array();
 
-	private function entry_desc($file){
-		$entry = substr(basename($file),0,-4);
-		if(preg_match('/\/\*\*[^\*].+?\*\//s',file_get_contents($file),$m)){
-			$doc = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$m[0])));
-			$name = (preg_match('/@name\s(.+)/',$doc,$m)) ? trim($m[1]) : null;
-			$summary = (preg_match('/@summary\s(.+)/',$doc,$m)) ? trim($m[1]) : null;
-			$description = trim(preg_replace('/@.+/','',$doc));
-			return array($entry,$name,$summary,$description);
-		}
-		return array($entry,$entry,'','');
-	}
 	protected function __init__(){
 		$name = $summary = $description = null;
 		$d = debug_backtrace(false);
@@ -30,11 +19,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->smtp_blackhole_dao = '\\'.implode('\\',array('org','rhaco','net','mail','module','SmtpBlackholeDao'));
 		$this->dao = '\\'.implode('\\',array('org','rhaco','store','db','Dao'));
 		
-		list($entry,$name,$summary,$description) = $this->entry_desc($d['file']);
-		$this->vars('app_name',(empty($name) ? 'App' : $name));
-		$this->vars('app_summary',$summary);
-		$this->vars('app_description',$description);
-		$this->vars('app_dirname',basename(dirname($d['file'])));
 		$this->vars('app_mode',\org\rhaco\Conf::appmode());
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
@@ -56,40 +40,45 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		if(empty($this->flow_output_maps)){
 			$trace = debug_backtrace(false);
 			$entry = array_pop($trace);
-			$entry_list = array();
-			$self_name = str_replace("\\",'.',__CLASS__);
-			
-			foreach(new \DirectoryIterator(dirname($entry['file'])) as $f){
-				if($f->isFile() && substr($f->getPathname(),-4) == '.php' && substr($f->getFilename(),0,1) != '_'){
-					$src = file_get_contents($f->getPathname());
-					$entry_name = substr($f->getFilename(),0,-4);				
-	
-					if(strpos($src,'Flow') !== false && (strpos($src,'->output(') !== false || strpos($src,'Flow::out(') !== false)){
-						foreach(\org\rhaco\Flow::get_maps($f->getFilename()) as $k => $m){
-							if(!isset($m['class']) || $m['class'] != $self_name){
+		
+			foreach(new \RecursiveDirectoryIterator(
+					dirname($entry['file']),
+					\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+			) as $e){
+				if(substr($e->getFilename(),-4) == '.php' &&
+				strpos($e->getPathname(),'/.') === false &&
+				strpos($e->getPathname(),'/_') === false
+				){
+					$src = file_get_contents($e->getFilename());
+		
+					if(strpos($src,'Flow') !== false){
+						$entry_name = substr($e->getFilename(),0,-4);
+						foreach(\org\rhaco\Flow::get_maps($e->getPathname()) as $k => $m){
+							if(!isset($m['class']) || $m['class'] != str_replace('\\','.',__CLASS__)){
 								$m['error'] = '';
-								$m['summary'] = isset($m['summary']) ? $m['summary'] : '';
-								$m['entry'] = $entry_name;
-								
-								if(isset($m['class']) && isset($m['method'])){
-									try{
-										$cr = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$m['class']));
-										$mr = $cr->getMethod($m['method']);
-										$document = preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$mr->getDocComment()));
-										list($summary) = explode("\n",trim(preg_replace("/@.+/","",$document)));
-										$m['summary'] = $summary.(empty($m['summary']) ? '' : PHP_EOL).$m['summary'];
-										if(!isset($m['deprecated'])) $m['deprecated'] = (strpos($mr->getDocComment(),'@deprecated') !== false);
-									}catch(\ReflectionException $e){
-										$m['error'] = $e->getMessage();
+								$m['url'] = $k;
+									
+								try{
+									if(!isset($m['summary'])){
+										$summary = '';
+										if(isset($m['method'])){
+											$info = \org\rhaco\Dt\Man::method_info($m['class'],$m['method']);
+											list($summary) = explode(PHP_EOL,$info['description']);
+										}
+										$m['summary'] = $summary;
+										$m['entry'] = $entry_name;
 									}
+								}catch(\Exception $e){
+									$m['error'] = $e->getMessage();
 								}
-								$this->flow_output_maps[$entry_name.'::'.$k] = $m;
+								$this->flow_output_maps[$entry_name.'::'.$m['name']] = $m;
 							}
 						}
 					}
 				}
 			}
 		}
+		
 		return $this->flow_output_maps;
 	}
 	/**

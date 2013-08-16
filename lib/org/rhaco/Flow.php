@@ -89,7 +89,7 @@ class Flow{
 			self::$output_maps[$key] = array();
 			try{
 				ob_start();
-					include_once($file);
+					include($file);
 				ob_end_clean();
 			}catch(\Exception $e){
 				\org\rhaco\Log::error($e);
