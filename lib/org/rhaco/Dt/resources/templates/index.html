@@ -2,10 +2,6 @@
 
 
 <rt:block name="content">
-	<rt:if param="{$app_description}">
-		<pre format="plain">{$app_description}</pre>
-	</rt:if>
-
 	<table rt:param="{$maps}" rt:var="map" rt:key="url">
 	<thead>
 		<tr>
@@ -16,7 +12,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr class="even{$t.cond_switch($map['debug'],' muted','')}" style="{$t.cond_switch($map['deprecated'],'text-decoration: line-through;','')}{$t.cond_switch($map['em'],'color: #ffa07a; font-weight: bold','')}">
+		<tr class="even" style="{$t.cond_switch($map['deprecated'],'text-decoration: line-through;','')}">
 			<td>{$map['entry']}</td>
 			<td>{$map['url']}</td>
 			<td nowrap>
