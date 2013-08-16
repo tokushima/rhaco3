@@ -185,7 +185,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 							if(isset($m['format']) && $current == $m['format']) $current = null;
 						}
 					}
-					if($current !== null) $this->sessions('logined_redirect_to',$current);
+					if($current !== null) $this->set_login_redirect($current);
 				}
 				$this->save_current_vars();
 				foreach($this->package_maps as $k => $m){
@@ -423,8 +423,14 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		return ($this->in_sessions($this->login_id) !== null);
 	}
 	/**
+	 * ログイン後のリダイレクト先設定
+	 * @param string $url
+	 */
+	public function set_login_redirect($url){
+		$this->sessions('logined_redirect_to',$url);
+	}
+	/**
 	 * ログイン
-	 * @arg string $login_redirect ログイン後にリダイレクトされるマップ名
 	 * @automap
 	 */
 	public function do_login(){
@@ -436,7 +442,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			 * @param self $this
 			 */
 			$this->object_module('after_do_login',$this);
-			if($this->map_arg('login_redirect') !== null){
+			if(empty($redirect_to) && $this->map_arg('login_redirect') !== null){
 				$redirect = $this->map_arg('login_redirect');
 				foreach($this->maps as $m){
 					if($m['name'] == $redirect) \org\rhaco\net\http\Header::redirect($m['format']);
