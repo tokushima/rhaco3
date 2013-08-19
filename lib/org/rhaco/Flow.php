@@ -378,7 +378,9 @@ class Flow{
 						}else if(isset($map['error_redirect'])){
 							if(strpos($map['error_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($map['error_redirect']);
 							foreach($apps as $m){
-								if(isset($m['name']) && $m['name'] == $map['error_redirect'] && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
+								if(isset($m['name']) && $m['name'] == $map['error_redirect'] && strpos($m['format'],'%s') === false){
+									\org\rhaco\net\http\Header::redirect($m['format']);
+								}
 							}
 							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
 						}else if(isset($apps[$k]['error_template'])){

@@ -29,12 +29,26 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$sess_name = ($group == '*') ? $dir : ($group == '' ? ($dir.'/'.$entry) : (($group[0] == '@') ? $group : $dir.'#'.$group));
 		$this->req = new \org\rhaco\Request();
 		$this->sess = new \org\rhaco\net\Session(md5($sess_name));
-		foreach($this->sess->in_vars('_saved_vars_',array()) as $k => $v) $this->req->vars($k,$v);
-		foreach($this->sess->in_vars('_saved_exceptions_',array()) as $e) \org\rhaco\Exceptions::add($e[0],$e[1]);
-		$this->sess->rm_vars('_saved_vars_');
-		$this->sess->rm_vars('_saved_exceptions_');
 		$this->login_id = $sess_name.'_LOGIN_';
+		
+		
+		foreach($this->sess->in_vars('_saved_exceptions_',array()) as $e){
+			\org\rhaco\Exceptions::add($e[0],$e[1]);
+		}
+		$this->sess->rm_vars('_saved_exceptions_');
 	}
+	/**
+	 * Exceptionを保存し、次回リクエスト時に展開する(org.rhaco.Exceptionsに格納される)
+	 * @param Exception $exception
+	 * @param string $name
+	 */
+	protected function save_exception(\Exception $exception,$name=null){
+		$exceptions = $this->in_sessions('_saved_exceptions_');
+		if(!is_array($exceptions)) $exceptions = array();
+		$exceptions[] = array($exception,$name);
+		$this->sessions('_saved_exceptions_',$exceptions);
+	}
+	
 	protected function __anon__($d){
 		$this->anon_login = self::anon_decode($d,'login');
 	}
@@ -187,7 +201,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 					}
 					if($current !== null) $this->set_login_redirect($current);
 				}
-				$this->save_current_vars();
 				foreach($this->package_maps as $k => $m){
 					if($m['method'] == 'do_login' && isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
 				}
@@ -279,32 +292,6 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 */
 	protected function args(){
 		return $this->req->args();
-	}
-	/**
-	 * Exceptionを保存し、次回リクエスト時に展開する(org.rhaco.Exceptionsに格納される)
-	 * @param Exception $exception
-	 * @param string $name
-	 */
-	protected function save_exception(\Exception $exception,$name=null){
-		$exceptions = $this->in_sessions('_saved_exceptions_');
-		if(!is_array($exceptions)) $exceptions = array();
-		$exceptions[] = array($exception,$name);
-		$this->sessions('_saved_exceptions_',$exceptions);
-	}
-	/**
-	 * 現在の変数を全て保存し、次回リクエスト時に展開する
-	 * @throws InvalidArgumentException
-	 */
-	protected function save_current_vars(){
-		foreach($this->req as $k => $v){
-			if(is_object($v)){
-				$ref = new \ReflectionClass(get_class($v));
-				if(substr($ref->getFileName(),-4) !== '.php') throw new \InvalidArgumentException($k.' is not permitted');
-			}
-		}
-		$vars = array();
-		foreach($this->req as $k => $v) $vars[$k] = $v;
-		$this->sessions('_saved_vars_',$vars);
 	}
 	/**
 	 * 値をセットする
