@@ -26,13 +26,11 @@ class OutputXml{
 		\org\rhaco\Log::disable_display();
 		$xml = new \org\rhaco\Xml('error');
 			if($exception instanceof \org\rhaco\Exceptions){
-				foreach(\org\rhaco\Exceptions::groups() as $g){
-					foreach(\org\rhaco\Exceptions::gets($g) as $e){
-						$message = new \org\rhaco\Xml('message',$e->getMessage());
-						$message->add('group',$g);
-						$message->add('type',basename(str_replace("\\",'/',get_class($e))));
-						$xml->add($message);
-					}
+				foreach(\org\rhaco\Exceptions::gets() as $g => $e){
+					$message = new \org\rhaco\Xml('message',$e->getMessage());
+					$message->add('group',$g);
+					$message->add('type',basename(str_replace("\\",'/',get_class($e))));
+					$xml->add($message);
 				}
 			}else{
 				$message = new \org\rhaco\Xml('message',$exception->getMessage());
@@ -40,7 +38,6 @@ class OutputXml{
 				$message->add('type',basename(str_replace("\\",'/',get_class($exception))));
 				$xml->add($message);
 			}
-		$xml->add('id',\org\rhaco\Exceptions::id());
 		$xml->output();
 	}
 }
