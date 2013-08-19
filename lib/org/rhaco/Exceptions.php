@@ -45,6 +45,7 @@ class Exceptions extends \org\rhaco\Exception implements \Iterator{
 		if(self::$self === null) self::$self = new self();
 		self::$self->messages[] = array('exception'=>$exception,'group'=>$group);
 		self::$self->message = (empty(self::$self->message) ? '' : PHP_EOL).$exception->getMessage();
+		return self::$self;
 	}
 	/**
 	 * 追加されたExceptionのクリア
