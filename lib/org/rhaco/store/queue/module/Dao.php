@@ -54,7 +54,6 @@ class Dao{
 	 * @module org.rhaco.store.queue.Queue
 	 * @param string $type
 	 * @param integer $priority
-	 * @throws \org\rhaco\store\db\exception\DaoException
 	 * @throws \org\rhaco\store\queue\exception\NotfoundException
 	 */
 	public function get($type,$priority){
@@ -83,7 +82,6 @@ class Dao{
 	 * @module org.rhaco.store.queue.Queue
 	 * @param string $type
 	 * @param integer $priority
-	 * @throws \org\rhaco\store\db\exception\DaoException
 	 * @throws \org\rhaco\store\queue\exception\NotfoundException
 	 */
 	public function reset($type,$lock_time){

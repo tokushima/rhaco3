@@ -5,7 +5,6 @@ use \org\rhaco\store\db\Dao;
 use \org\rhaco\store\db\Q;
 use \org\rhaco\store\db\Column;
 use \org\rhaco\Log;
-use \org\rhaco\store\db\exception\DaoExceptions;
 
 
 /**
@@ -246,7 +245,7 @@ DoublePrimary::find_delete();
 try{
 	$obj = new DoublePrimary();
 	$obj->id1(1)->id2(1)->value("hoge")->save();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	fail();
 }
 $p = new DoublePrimary();
@@ -271,7 +270,7 @@ $obj->value2(3);
 try{
 	$obj->save();
 	success();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	Exceptions::clear();
 	fail();
 }
@@ -281,26 +280,26 @@ $obj->value2(4);
 try{
 	$obj->save();
 	fail();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	Exceptions::clear();
 	success();
 }
+
 $obj = new LimitVerify();
 $obj->value1("1");
 $obj->value2(1);
 try{
 	$obj->save();
 	fail();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	Exceptions::clear();
 	success();
 }
-
 $obj = new LimitVerify();
 try{
 	$obj->save();
 	success();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	Exceptions::clear();
 	fail();
 }
@@ -325,7 +324,7 @@ $obj->u2(3);
 try{
 	$obj->save();
 	success();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	fail();
 	Exceptions::clear();
 }
@@ -336,7 +335,7 @@ $obj->u2(3);
 try{
 	$obj->save();
 	fail();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	success();
 	Exceptions::clear();
 }
@@ -346,7 +345,7 @@ $obj->u2(4);
 try{
 	$obj->save();
 	success();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	fail();
 	Exceptions::clear();
 }
@@ -375,7 +374,7 @@ $obj->u3(4);
 try{
 	$obj->save();
 	success();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	fail();
 	Exceptions::clear();
 }
@@ -387,7 +386,7 @@ $obj->u3(4);
 try{
 	$obj->save();
 	fail();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	success();
 	Exceptions::clear();
 }
@@ -398,7 +397,7 @@ $obj->u3(4);
 try{
 	$obj->save();
 	success();
-}catch(DaoExceptions $e){
+}catch(\Exception $e){
 	fail();
 	Exceptions::clear();
 }
