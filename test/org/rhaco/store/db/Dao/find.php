@@ -5,8 +5,6 @@ use \org\rhaco\store\db\Dao;
 use \org\rhaco\store\db\Q;
 use \org\rhaco\store\db\Column;
 use \org\rhaco\Log;
-use \org\rhaco\store\db\exception\DaoExceptions;
-
 
 /**
  * @var serial $id

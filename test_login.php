@@ -19,7 +19,7 @@ $b = b();
 $b->do_get(test_map_url('login'));
 eq(401,$b->status());
 eq(test_map_url('login'),$b->url());
-meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
+meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 */
 /***
 #aaa_to_login
@@ -27,14 +27,14 @@ $b = b();
 $b->do_get(test_map_url('aaa'));
 eq(401,$b->status());
 eq(test_map_url('login'),$b->url());
-meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
+meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 */
 /***
 #unauthorized
 $b = b();
 $b->do_post(test_map_url('login'));
 eq(401,$b->status());
-meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
+meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 */
 /***
 $b = b();
@@ -42,7 +42,7 @@ $b->vars('user_name','aaaa');
 $b->vars('password','bbbb');
 $b->do_get(test_map_url('login'));
 eq(401,$b->status());
-meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
+meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 */
 /***
 $b = b();
@@ -50,7 +50,7 @@ $b->vars('user_name','aaaa');
 $b->vars('password','bbbb');
 $b->do_post(test_map_url('login'));
 eq(401,$b->status());
-meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
+meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 */
 /***
 $b = b();
@@ -92,7 +92,7 @@ eq('<result><login>false</login></result>',$b->body());
 
 $b->do_post(test_map_url('aaa'));
 eq(401,$b->status());
-meq('<message group="do_login" class="LogicException" type="LogicException">Unauthorized</message>',$b->body());
+meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 
 */
 

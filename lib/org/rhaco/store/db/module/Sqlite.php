@@ -29,7 +29,7 @@ class Sqlite extends Base{
 		try{
 			$con = new \PDO(sprintf('sqlite:%s',($host == ':memory:') ? ':memory:' : $host.$name));
 		}catch(\PDOException $e){
-			throw new \org\rhaco\store\db\exception\DaoException($e->getMessage());
+			throw new \org\rhaco\store\db\exception\ConnectionException($e->getMessage());
 		}
 		return $con;
 	}

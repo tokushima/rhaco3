@@ -409,7 +409,7 @@ eq('<result><init_var>INIT</init_var></result>',$b->body());
 $b = b();
 $b->do_get(test_map_url('module_throw_exception'));
 eq(403,$b->status());
-meq('<message group="exceptions" class="LogicException" type="LogicException">flow handle begin exception</message>',$b->body());
+meq('<message group="" type="LogicException">flow handle begin exception</message>',$b->body());
 */
 
 
@@ -418,7 +418,7 @@ meq('<message group="exceptions" class="LogicException" type="LogicException">fl
 $b = b();
 $b->do_get(test_map_url('method_not_allowed'));
 eq(405,$b->status());
-meq('<message group="exceptions" class="LogicException" type="LogicException">Method Not Allowed</message>',$b->body());
+meq('<message group="" type="LogicException">Method Not Allowed</message>',$b->body());
 */
 
 /***
@@ -529,7 +529,7 @@ eq('<result><abc>ABC</abc><newtag><hoge>HOGE</hoge></newtag></result>',$b->body(
 $b = b();
 $b->do_get(test_map_url('sample_flow_exception_package_throw_xml'));
 eq(403,$b->status());
-meq('<message group="exceptions" class="test.exception.SampleException" type="SampleException">sample error</message>',$b->body());
+meq('<message group="" type="SampleException">sample error</message>',$b->body());
 */
 
 /***
@@ -537,7 +537,7 @@ meq('<message group="exceptions" class="test.exception.SampleException" type="Sa
 $b = b();
 $b->do_get(test_map_url('sample_flow_exception_throw_xml'));
 eq(403,$b->status());
-meq('<message group="exceptions" class="LogicException" type="LogicException">error</message></error>',$b->body());
+meq('<message group="" type="LogicException">error</message></error>',$b->body());
 */
 
 /***

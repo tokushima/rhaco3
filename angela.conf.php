@@ -22,6 +22,9 @@ foreach(new \RecursiveDirectoryIterator(
 }
 
 return array(
-	'urls'=>$urls
+	'urls'=>$urls,
+	'setup'=>function(){
+		\org\rhaco\Exceptions::clear();
+	}
 );
 

@@ -30,7 +30,7 @@ class Mysql extends Base{
 			if(!empty($this->encode)) $this->prepare_execute($con,'set names \''.$this->encode.'\'');
 			if(!empty($this->timezone)) $this->prepare_execute($con,'set time_zone=\''.$this->timezone.'\'');
 		}catch(\PDOException $e){
-			throw new \org\rhaco\store\db\exception\DaoException((strpos($e->getMessage(),'SQLSTATE[HY000]') === false) ? $e->getMessage() : 'not supported '.__CLASS__);
+			throw new \org\rhaco\store\db\exception\ConnectionException((strpos($e->getMessage(),'SQLSTATE[HY000]') === false) ? $e->getMessage() : 'not supported '.__CLASS__);
 		}
 		return $con;
 	}

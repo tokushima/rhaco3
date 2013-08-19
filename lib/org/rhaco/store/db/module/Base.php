@@ -1,6 +1,5 @@
 <?php
 namespace org\rhaco\store\db\module;
-use \org\rhaco\store\db\exception\DaoException;
 use \org\rhaco\store\db\Daq;
 use \org\rhaco\store\db\Dao;
 use \org\rhaco\Paginator;

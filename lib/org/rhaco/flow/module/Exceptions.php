@@ -12,7 +12,6 @@ class Exceptions{
 				$param = $tag->in_attr('param');
 				$id = $tag->in_attr('id','rtinvalid_id'.uniqid(''));
 				$var = $tag->in_attr('var','rtinvalid_var'.uniqid(''));
-				$messages = $tag->in_attr('messages','rtinvalid_mes'.uniqid(''));
 				if(!isset($param[0]) || $param[0] !== '$') $param = '"'.$param.'"';
 				$value = $tag->value();
 				$tagtype = $tag->in_attr('tag');
@@ -22,21 +21,17 @@ class Exceptions{
 				if(empty($value)){
 					$varnm = 'rtinvalid_varnm'.uniqid('');
 					$value = sprintf("<rt:loop param=\"%s\" var=\"%s\">\n"
-										."%s{\$%s}%s"
+										."%s{\$%s.getMessage()}%s"
 									."</rt:loop>\n",$messages,$varnm,sprintf($stag,$tag->in_attr('class','exception')),$varnm,$etag);
 				}
 				$src = str_replace(
 							$tag->plain(),
 							sprintf("<?php if(\\org\\rhaco\\Exceptions::has(%s)){ ?>"
 										."<?php \$%s = \\org\\rhaco\\Exceptions::gets(%s); ?>"
-										."<?php \$%s = \\org\\rhaco\\Exceptions::messages(%s); ?>"
-										."<?php \$%s = \\org\\rhaco\\Exceptions::id(); ?>"
 										.preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$value)
 									."<?php } ?>"
 									,$param
 									,$var,$param
-									,$messages,$param
-									,$id
 							),
 							$src);
 			}
