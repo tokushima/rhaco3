@@ -12,6 +12,7 @@ class Exceptions{
 				$param = $tag->in_attr('param');
 				$id = $tag->in_attr('id','rtinvalid_id'.uniqid(''));
 				$var = $tag->in_attr('var','rtinvalid_var'.uniqid(''));
+				$messages = $tag->in_attr('messages','rtinvalid_mes'.uniqid(''));
 				if(!isset($param[0]) || $param[0] !== '$') $param = '"'.$param.'"';
 				$value = $tag->value();
 				$tagtype = $tag->in_attr('tag');
@@ -22,7 +23,7 @@ class Exceptions{
 					$varnm = 'rtinvalid_varnm'.uniqid('');
 					$value = sprintf("<rt:loop param=\"%s\" var=\"%s\">\n"
 										."%s{\$%s.getMessage()}%s"
-									."</rt:loop>\n",$messages,$varnm,sprintf($stag,$tag->in_attr('class','exception')),$varnm,$etag);
+									."</rt:loop>\n",$var,$varnm,sprintf($stag,$tag->in_attr('class','exception')),$varnm,$etag);
 				}
 				$src = str_replace(
 							$tag->plain(),
