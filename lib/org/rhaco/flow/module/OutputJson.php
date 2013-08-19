@@ -33,13 +33,11 @@ class OutputJson{
 	public function flow_exception_output($obj,\Exception $exception){
 		\org\rhaco\Log::disable_display();
 		\org\rhaco\net\http\Header::send('Content-Type',(($this->mode == 'jsonp') ? 'text/javascript' : 'application/json'));
-		$error = array('error'=>array(),'id'=>\org\rhaco\Exceptions::id());
+		$error = array('error'=>array());
 		
 		if($exception instanceof \org\rhaco\Exceptions){
-			foreach(\org\rhaco\Exceptions::groups() as $g){
-				foreach(\org\rhaco\Exceptions::gets($g) as $e){
-					$error['error'][] = array('message'=>$e->getMessage(),'group'=>$g,'type'=>basename(str_replace("\\",'/',get_class($e))));
-				}
+			foreach(\org\rhaco\Exceptions::gets() as $g => $e){
+				$error['error'][] = array('message'=>$e->getMessage(),'group'=>$g,'type'=>basename(str_replace("\\",'/',get_class($e))));
 			}
 		}else{
 			$error['error'][] = array('message'=>$exception->getMessage(),'group'=>'exceptions','type'=>basename(str_replace("\\",'/',get_class($exception))));
