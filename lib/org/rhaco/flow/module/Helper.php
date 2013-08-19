@@ -61,6 +61,13 @@ class Helper{
 		}
 	}
 	/**
+	 * POSTされたか
+	 * @return boolean
+	 */
+	public function is_post(){
+		return  (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST');
+	}
+	/**
 	 * ログイン済みか
 	 * @return boolean
 	 */

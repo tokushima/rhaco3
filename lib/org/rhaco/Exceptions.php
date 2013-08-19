@@ -21,7 +21,7 @@ class Exceptions extends \org\rhaco\Exception implements \Iterator{
 		return $this->messages[$this->pos]['exception'];
 	}
 	public function key(){
-		return $this->messages[$this->pos]['group'];
+		return (string)$this->messages[$this->pos]['group'];
 	}
 	public function valid(){
 		while($this->pos < sizeof($this->messages)){
@@ -43,8 +43,16 @@ class Exceptions extends \org\rhaco\Exception implements \Iterator{
 	 */
 	static public function add(\Exception $exception,$group=''){
 		if(self::$self === null) self::$self = new self();
-		self::$self->messages[] = array('exception'=>$exception,'group'=>$group);
-		self::$self->message = (empty(self::$self->message) ? '' : PHP_EOL).$exception->getMessage();
+		
+		if($exception instanceof self){
+			foreach($exception->messages as $m){
+				self::$self->messages[] = $m;
+				self::$self->message = (empty(self::$self->message) ? '' : PHP_EOL).$m['exception']->getMessage();				
+			}
+		}else{
+			self::$self->messages[] = array('exception'=>$exception,'group'=>$group);
+			self::$self->message = (empty(self::$self->message) ? '' : PHP_EOL).$exception->getMessage();
+		}
 		return self::$self;
 	}
 	/**
@@ -79,7 +87,7 @@ class Exceptions extends \org\rhaco\Exception implements \Iterator{
 	 */
 	static public function gets($group=null){
 		if(!self::has($group)) return array();
-		self::$self->g = $group;
+		self::$self->g = (string)$group;
 		return self::$self;
 	}
 }
