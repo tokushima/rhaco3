@@ -1039,6 +1039,23 @@ class Template extends \org\rhaco\Object{
 		Xml::set($tag,'<:>'.$src.'</:>');
 		foreach($tag->in('form') as $obj){
 			if($this->is_reference($obj)){
+				if($obj->is_attr('rt:param')){
+					$uniq = uniqid('');
+					$k = '$__form_k__'.$uniq;
+					$v = '$__form_v__'.$uniq;
+					$param = $this->variable_string($this->parse_plain_variable($obj->in_attr('rt:param')));
+					$tag = sprintf('<?php if( isset(%s) && ( is_array(%s) || (is_object(%s) && %s instanceof \Traversable) ) ){ '
+							.'foreach(%s as %s => %s){ '
+								.'if(!isset($%s) && preg_match(\'/^[a-zA-Z0-9]+$/\',%s)){ $%s = %s; }'
+							.'}'
+							.'} ?>'.PHP_EOL
+							,$param,$param,$param,$param
+							,$param,$k,$v
+							,$k,$k,$k,$v
+					);
+					$obj->rm_attr('rt:param');
+					$obj->value($tag.$obj->value());
+				}
 				$obj->escape(false);
 				foreach($obj->in(array('input','select','textarea')) as $tag){
 					if(!$tag->is_attr('rt:ref') && ($tag->is_attr('name') || $tag->is_attr('id'))){
@@ -1176,6 +1193,21 @@ class Template extends \org\rhaco\Object{
 			}
 		}
 		return $src;
+		/***
+			 $src = pre('
+			 		<form rt:ref="true" rt:param="data">
+			 		<input type="text" name="aaa" />
+			 		</form>
+			 		');
+			$result = pre('
+					<form>
+					<input type="text" name="aaa" value="hogehoge" />
+					</form>
+					');
+			$t = new self();
+			$t->vars("data",array("aaa"=>"hogehoge"));
+			eq($result,$t->get($src));
+		*/
 		/***
 			#input
 			$src = pre('
