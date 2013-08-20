@@ -364,7 +364,9 @@ class Flow{
 						if(!($e instanceof \org\rhaco\Exceptions)){
 							\org\rhaco\Exceptions::add($e);
 						}
-						if(isset($map['error_status'])){
+						if(isset($apps[$k]['error_status'])){
+							\org\rhaco\net\http\Header::send_status($apps[$k]['error_status']);
+						}else if(isset($map['error_status'])){
 							\org\rhaco\net\http\Header::send_status($map['error_status']);
 						}
 						if($this->has_object_module('flow_exception_output')){
@@ -375,6 +377,14 @@ class Flow{
 							 */
 							$this->object_module('flow_exception_output',$obj,$e);
 							exit;
+						}else if(isset($apps[$k]['error_redirect'])){
+							if(strpos($apps[$k]['error_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($apps[$k]['error_redirect']);
+							foreach($apps as $m){
+								if(isset($m['name']) && $m['name'] == $apps[$k]['error_redirect'] && strpos($m['format'],'%s') === false){
+									\org\rhaco\net\http\Header::redirect($m['format']);
+								}
+							}
+							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($apps[$k]['error_redirect'],1) : $map['error_redirect']));									
 						}else if(isset($map['error_redirect'])){
 							if(strpos($map['error_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($map['error_redirect']);
 							foreach($apps as $m){
@@ -396,7 +406,15 @@ class Flow{
 							if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
 							exit;
 						}
-						$this->handle_exception_xml();
+						$xml = new \org\rhaco\Xml('error');
+						foreach(\org\rhaco\Exceptions::gets() as $g => $e){
+							$class_name = get_class($e);
+							$message = new \org\rhaco\Xml('message',$e->getMessage());
+							$message->add('group',$g);
+							$message->add('type',basename(str_replace("\\",'/',$class_name)));
+							$xml->add($message);
+						}
+						$xml->output();
 					}
 				}
 				$idx++;
@@ -486,17 +504,6 @@ class Flow{
 		 */
 		$this->object_module('before_flow_print_template',\org\rhaco\lang\String::ref($obj,$src));
 		print((string)$obj);
-	}
-	private function handle_exception_xml(){
-		$xml = new \org\rhaco\Xml('error');
-		foreach(\org\rhaco\Exceptions::gets() as $g => $e){
-			$class_name = get_class($e);
-			$message = new \org\rhaco\Xml('message',$e->getMessage());
-			$message->add('group',$g);
-			$message->add('type',basename(str_replace("\\",'/',$class_name)));
-			$xml->add($message);
-		}
-		$xml->output();
 	}
 	private function str_reflection($package){
 		if(is_object($package)) return $package;

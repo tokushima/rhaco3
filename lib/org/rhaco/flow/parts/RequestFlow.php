@@ -27,28 +27,10 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 		$session_group = \org\rhaco\Conf::get('session_group');
 		$group = (isset($session_group[$entry])) ? $session_group[$entry] : '';
 		$sess_name = ($group == '*') ? $dir : ($group == '' ? ($dir.'/'.$entry) : (($group[0] == '@') ? $group : $dir.'#'.$group));
+		$this->login_id = $sess_name.'_LOGIN_';
 		$this->req = new \org\rhaco\Request();
 		$this->sess = new \org\rhaco\net\Session(md5($sess_name));
-		$this->login_id = $sess_name.'_LOGIN_';
-		
-		
-		foreach($this->sess->in_vars('_saved_exceptions_',array()) as $e){
-			\org\rhaco\Exceptions::add($e[0],$e[1]);
-		}
-		$this->sess->rm_vars('_saved_exceptions_');
 	}
-	/**
-	 * Exceptionを保存し、次回リクエスト時に展開する(org.rhaco.Exceptionsに格納される)
-	 * @param Exception $exception
-	 * @param string $name
-	 */
-	protected function save_exception(\Exception $exception,$name=null){
-		$exceptions = $this->in_sessions('_saved_exceptions_');
-		if(!is_array($exceptions)) $exceptions = array();
-		$exceptions[] = array($exception,$name);
-		$this->sessions('_saved_exceptions_',$exceptions);
-	}
-	
 	protected function __anon__($d){
 		$this->anon_login = self::anon_decode($d,'login');
 	}
@@ -201,6 +183,9 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 					}
 					if($current !== null) $this->set_login_redirect($current);
 				}
+				$req = new \org\rhaco\Request();
+				$this->sess->vars(__CLASS__.'_login_vars',array(time(),$req->ar_vars()));
+				
 				foreach($this->package_maps as $k => $m){
 					if($m['method'] == 'do_login' && isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
 				}
@@ -421,6 +406,15 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 * @automap
 	 */
 	public function do_login(){
+		if($this->sess->is_vars(__CLASS__.'_login_vars')){
+			$data = $this->sess->in_vars(__CLASS__.'_login_vars');
+			if(($data[0] + 5) > time()){
+				foreach($data[1] as $k => $v){
+					if(!$this->is_vars($k)) $this->vars($k,$v);
+				}
+			}
+			$this->sess->rm_vars(__CLASS__.'_login_vars');
+		}
 		if($this->is_login() || $this->silent() || $this->login()){
 			$redirect_to = $this->in_sessions('logined_redirect_to');
 			$this->rm_sessions('logined_redirect_to');
