@@ -378,21 +378,9 @@ class Flow{
 							$this->object_module('flow_exception_output',$obj,$e);
 							exit;
 						}else if(isset($apps[$k]['error_redirect'])){
-							if(strpos($apps[$k]['error_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($apps[$k]['error_redirect']);
-							foreach($apps as $m){
-								if(isset($m['name']) && $m['name'] == $apps[$k]['error_redirect'] && strpos($m['format'],'%s') === false){
-									\org\rhaco\net\http\Header::redirect($m['format']);
-								}
-							}
-							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($apps[$k]['error_redirect'],1) : $map['error_redirect']));									
+							$this->redirect($apps,$apps[$k]['error_redirect']);
 						}else if(isset($map['error_redirect'])){
-							if(strpos($map['error_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($map['error_redirect']);
-							foreach($apps as $m){
-								if(isset($m['name']) && $m['name'] == $map['error_redirect'] && strpos($m['format'],'%s') === false){
-									\org\rhaco\net\http\Header::redirect($m['format']);
-								}
-							}
-							\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['error_redirect'],0,1) == '/') ? substr($map['error_redirect'],1) : $map['error_redirect']));
+							$this->redirect($apps,$map['error_redirect']);
 						}else if(isset($apps[$k]['error_template'])){
 							$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
 							exit;
@@ -421,17 +409,22 @@ class Flow{
 			}
 		}
 		if(isset($map['nomatch_redirect'])){
-			if(strpos($map['nomatch_redirect'],'://') !== false) \org\rhaco\net\http\Header::redirect($map['nomatch_redirect']);
-			foreach($apps as $m){
-				if(isset($m['name']) && $m['name'] == $map['nomatch_redirect'] && strpos($m['format'],'%s') === false) \org\rhaco\net\http\Header::redirect($m['format']);
-			}
-			\org\rhaco\net\http\Header::redirect($this->branch_url.((substr($map['nomatch_redirect'],0,1) == '/') ? substr($map['nomatch_redirect'],1) : $map['nomatch_redirect']));
+			$this->redirect($apps,$map['nomatch_redirect']);
 		}
 		if(($level = \org\rhaco\Conf::get('notfound_log_level')) !== null && in_array($level,array('error','warn','info','debug'))){
 			\org\rhaco\Log::$level(\org\rhaco\Request::current_url().' (`'.$pathinfo.'`) bad request');
 		}
 		\org\rhaco\net\http\Header::send_status(404);
 		exit;
+	}
+	private function redirect($apps,$url,$args=array()){
+		if(strpos($url,'://') !== false) \org\rhaco\net\http\Header::redirect($url);
+		foreach($apps as $m){
+			if(isset($m['name']) && $m['name'] == $url){
+				\org\rhaco\net\http\Header::redirect(empty($args) ? $m['format'] : vsprintf($m['format'],$args));
+			}
+		}
+		throw new \InvalidArgumentException('map `'.$url.'` not found');
 	}
 	private function after_redirect($after,$pattern,$apps,$obj){
 		$vars = array();
@@ -468,10 +461,7 @@ class Flow{
 			}
 		}		
 		if(empty($name)) \org\rhaco\net\http\Header::redirect_referer();
-		foreach($apps as $m){
-			if($m['name'] == $name) \org\rhaco\net\http\Header::redirect(vsprintf($m['format'],$args));
-		}
-		throw new \InvalidArgumentException('map `'.$name.'` not found');	
+		$this->redirect($apps,$name,$args);
 	}
 	private function print_template($template_path,$template,$media_url,$theme,$put_block,$obj,$apps,$index,$path_replace=true){
 		if($path_replace){
