@@ -124,6 +124,7 @@ array(''
 	,'post_after/to/arg2'=>array('name'=>'post_after_arg2','action'=>'test.Sample::after_redirect','after'=>array('post_after_to_arg2','next_var_A','next_var_B'))
 	,'post_after/to/(.+)/(.+)'=>array('name'=>'post_after_to_arg2','action'=>'test.Sample::after_to')
 	
+	,'rt/exceptions'=>array('name'=>'rt_exceptions','action'=>'test.CoreApp::raise','modules'=>array('org.rhaco.flow.module.Exceptions'),'template'=>'hoge.html','error_template'=>'exceptions.html')
 	
 	,'dt'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
 )));
@@ -612,6 +613,14 @@ $b = b();
 $b->do_get(test_map_url('map_url'));
 meq('test_index/noop',$b->body());
 meq('test_login/aaa',$b->body());
+*/
+
+/***
+# rt_exceptions
+
+$b = b();
+$b->do_get(test_map_url('rt_exceptions'));
+meq('hoge',$b->body());
 */
 
 
