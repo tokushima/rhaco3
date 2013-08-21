@@ -90,4 +90,17 @@ class Exceptions extends \org\rhaco\Exception implements \Iterator{
 		self::$self->g = (string)$group;
 		return self::$self;
 	}
+	/**
+	 * TODO 暫定機能
+	 * @deprecated
+	 * @param string $group
+	 * @return multitype:Ambigous <multitype:\org\rhaco\Exception , multitype:, NULL, \org\rhaco\Exceptions>
+	 */
+	static public function to_array($group=null){
+		$result = array();
+		foreach(self::gets($group) as $v){
+			$result[] = $v;
+		}
+		return $result;
+	}
 }
