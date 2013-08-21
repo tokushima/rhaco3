@@ -1015,7 +1015,7 @@ class Template extends \org\rhaco\Object{
 					$obj->attr('name',$originalName);
 					$change = true;
 				}
-				if($obj->is_attr('rt:param') || $obj->is_attr('rt:range')){
+				if($obj->is_attr('rt:param')){
 					switch($lname){
 						case 'select':
 							$value = sprintf('<rt:loop param="%s" var="%s" counter="%s" key="%s" evenodd="%s" even_value="%s" odd_value="%s">'
