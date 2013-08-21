@@ -1393,19 +1393,13 @@ class Template extends \org\rhaco\Object{
 				$obj->escape(false);
 				$name = strtolower($obj->name());
 				$param = $obj->in_attr('rt:param');
-				$null = strtolower($obj->in_attr('rt:null'));
 				$value = sprintf('<rt:loop param="%s" var="%s" counter="%s" '
-									.'key="%s" offset="%s" limit="%s" '
-									.'reverse="%s" '
+									.'key="%s" '
 									.'evenodd="%s" even_value="%s" odd_value="%s" '
-									.'range="%s" range_step="%s" '
-									.'shortfall="%s">'
+									.'>'
 								,$param,$obj->in_attr('rt:var','loop_var'),$obj->in_attr('rt:counter','loop_counter')
-								,$obj->in_attr('rt:key','loop_key'),$obj->in_attr('rt:offset','0'),$obj->in_attr('rt:limit','0')
-								,$obj->in_attr('rt:reverse','false')
+								,$obj->in_attr('rt:key','loop_key')
 								,$obj->in_attr('rt:evenodd','loop_evenodd'),$obj->in_attr('rt:even_value','even'),$obj->in_attr('rt:odd_value','odd')
-								,$obj->in_attr('rt:range'),$obj->in_attr('rt:range_step',1)
-								,$tag->in_attr('rt:shortfall','_DEFI_'.uniqid())
 							);
 				$rawvalue = $obj->value();
 				if($name == 'table' && Xml::set($t,$rawvalue,'tbody')){
@@ -1416,11 +1410,8 @@ class Template extends \org\rhaco\Object{
 					$value = $value.$this->table_tr_even_odd($rawvalue,(($name == 'table') ? 'tr' : 'li'),$obj->in_attr('rt:evenodd','loop_evenodd')).'</rt:loop>';
 				}
 				$obj->value($this->html_list($value));
-				$obj->rm_attr('rt:param','rt:key','rt:var','rt:counter','rt:offset','rt:limit','rt:null','rt:evenodd','rt:range'
-								,'rt:range_step','rt:even_value','rt:odd_value','rt:shortfall');
-				$src = str_replace($obj->plain(),
-						($null === 'true') ? $this->rtif(sprintf('<rt:if param="%s">',$param).$obj->get().'</rt:if>') : $obj->get(),
-						$src);
+				$obj->rm_attr('rt:param','rt:key','rt:var','rt:counter','rt:evenodd','rt:even_value','rt:odd_value');
+				$src = str_replace($obj->plain(),$obj->get(),$src);
 			}
 		}
 		return $src;
@@ -1496,54 +1487,6 @@ class Template extends \org\rhaco\Object{
 		*/
 		/***
 		 	$src = pre('
-						<table rt:param="xyz" rt:var="o" rt:offset="1" rt:limit="1">
-						<tr><td>{$o["B"]}</td></tr>
-						</table>
-					');
-			$result = pre('
-							<table><tr><td>222</td></tr>
-							</table>
-						');
-			$t = new self();
-			$t->vars("xyz",array(array("A"=>"111","B"=>"222"),array("A"=>"333","B"=>"444"),array("A"=>"555","B"=>"666")));
-			eq($result,$t->get($src));
-		*/
-		/***
-		 	$src = pre('
-						<table rt:param="xyz" rt:var="o" rt:offset="1" rt:limit="1">
-						<thead>
-							<tr><th>hoge</th></tr>
-						</thead>
-						<tbody>
-							<tr><td>{$o["B"]}</td></tr>
-						</tbody>
-						</table>
-					');
-			$result = pre('
-							<table>
-							<thead>
-								<tr><th>hoge</th></tr>
-							</thead>
-							<tbody>	<tr><td>222</td></tr>
-							</tbody>
-							</table>
-						');
-			$t = new self();
-			$t->vars("xyz",array(array("A"=>"111","B"=>"222"),array("A"=>"333","B"=>"444"),array("A"=>"555","B"=>"666")));
-			eq($result,$t->get($src));
-		*/
-		/***
-		 	$src = pre('
-						<table rt:param="xyz" rt:null="true">
-						<tr><td>{$o["B"]}</td></tr>
-						</table>
-					');
-			$t = new self();
-			$t->vars("xyz",array());
-			eq("",$t->get($src));
-		*/
-		/***
-		 	$src = pre('
 						<ul rt:param="xyz" rt:var="o">
 							<li class="odd">{$o["B"]}</li>
 						</ul>
@@ -1589,13 +1532,6 @@ class Template extends \org\rhaco\Object{
 			$t = new self();
 			$t->vars("abc",array(array(array("A","B")),array(array("C","D"))));
 			$t->vars("xyz",array(1,2));
-			eq($result,$t->get($src));
-		*/
-		/***
-			# range
-		 	$src = pre('<ul rt:range="1,3" rt:var="o"><li>{$o}</li></ul>');
-			$result = pre('<ul><li>1</li><li>2</li><li>3</li></ul>');
-			$t = new self();
 			eq($result,$t->get($src));
 		*/
 		/***
