@@ -149,7 +149,7 @@ class Template extends \org\rhaco\Object{
 		 * @param org.rhaco.lang.String $obj
 		 */
 		$this->object_module('before_template',\org\rhaco\lang\String::ref($obj,$src));
-		$src = $this->rtif($this->rtloop($this->rtunit($this->html_form($this->html_list((string)$obj)))));
+		$src = $this->rtif($this->rtloop($this->html_form($this->html_list((string)$obj))));
 		/**
 		 * テンプレート作成の後処理
 		 * @param org.rhaco.lang.String $obj
@@ -353,106 +353,7 @@ class Template extends \org\rhaco\Object{
 			eq('123456',$t->get($src));
 		 */
 	}
-	private function rtunit($src){
-		if(strpos($src,'rt:unit') !== false){
-			while(Xml::set($tag,$src,'rt:unit')){
-				$tag->escape(false);
-				$uniq = uniqid('');
-				$param = $tag->in_attr('param');
-				$var = '$'.$tag->in_attr('var','_var_'.$uniq);
-				$offset = $tag->in_attr('offset',1);
-				$total = $tag->in_attr('total','_total_'.$uniq);
-				$cols = ($tag->is_attr('cols')) ? (ctype_digit($tag->in_attr('cols')) ? $tag->in_attr('cols') : $this->variable_string($this->parse_plain_variable($tag->in_attr('cols')))) : 1;
-				$rows = ($tag->is_attr('rows')) ? (ctype_digit($tag->in_attr('rows')) ? $tag->in_attr('rows') : $this->variable_string($this->parse_plain_variable($tag->in_attr('rows')))) : 0;
-				$value = $tag->value();
-
-				$cols_count = '$_ucount_'.$uniq;
-				$cols_total = '$'.$tag->in_attr('cols_total','_cols_total_'.$uniq);
-				$rows_count = '$'.$tag->in_attr('counter','_counter_'.$uniq);
-				$rows_total = '$'.$tag->in_attr('rows_total','_rows_total_'.$uniq);
-				$ucols = '$_ucols_'.$uniq;
-				$urows = '$_urows_'.$uniq;
-				$ulimit = '$_ulimit_'.$uniq;
-				$ufirst = '$_ufirst_'.$uniq;
-				$ufirstnm = '_ufirstnm_'.$uniq;
-
-				$ukey = '_ukey_'.$uniq;
-				$uvar = '_uvar_'.$uniq;
-
-				$src = str_replace(
-							$tag->plain(),
-							sprintf('<?php %s=%s; %s=%s; %s=%s=1; %s=null; %s=%s*%s; %s=array(); ?>'
-									.'<rt:loop param="%s" var="%s" key="%s" total="%s" offset="%s" first="%s">'
-										.'<?php if(%s <= %s){ %s[$%s]=$%s; } ?>'
-										.'<rt:first><?php %s=$%s; ?></rt:first>'
-										.'<rt:last><?php %s=%s; ?></rt:last>'
-										.'<?php if(%s===%s){ ?>'
-											.'<?php if(isset(%s)){ $%s=""; } ?>'
-											.'<?php %s=sizeof(%s); ?>'
-											.'<?php %s=ceil($%s/%s); ?>'
-											.'%s'
-											.'<?php %s=array(); %s=null; %s=1; %s++; ?>'
-										.'<?php }else{ %s++; } ?>'
-									.'</rt:loop>'
-									,$ucols,$cols,$urows,$rows,$cols_count,$rows_count,$ufirst,$ulimit,$ucols,$urows,$var
-									,$param,$uvar,$ukey,$total,$offset,$ufirstnm
-										,$cols_count,$ucols,$var,$ukey,$uvar
-										,$ufirst,$ufirstnm
-										,$cols_count,$ucols
-										,$cols_count,$ucols
-											,$ufirst,$ufirstnm
-											,$cols_total,$var
-											,$rows_total,$total,$ucols
-											,$value
-											,$var,$ufirst,$cols_count,$rows_count
-										,$cols_count
-							)
-							.($tag->is_attr('rows') ?
-								sprintf('<?php for(;%s<=%s;%s++){ %s=array(); ?>%s<?php } ?>',$rows_count,$rows,$rows_count,$var,$value) : ''
-							)
-							,$src
-						);
-			}
-		}
-		return $src;
-		/***
-			# unit
-			$src = pre('
-						<rt:unit param="abc" var="unit_list" cols="3" offset="2" counter="counter">
-						<rt:first>FIRST</rt:first>{$counter}{
-						<rt:loop param="unit_list" var="a"><rt:first>first</rt:first>{$a}<rt:last>last</rt:last></rt:loop>
-						}
-						<rt:last>LAST</rt:last>
-						</rt:unit>
-					');
-			$result = pre('
-							FIRST1{
-							first234last}
-							2{
-							first567last}
-							3{
-							first8910last}
-							LAST
-						');
-			$t = new self();
-			$t->vars("abc",array(1,2,3,4,5,6,7,8,9,10));
-			eq($result,$t->get($src));
-		*/
-		/***
-			# rows_fill
-			$src = pre('<rt:unit param="abc" var="abc_var" cols="3" rows="3">[<rt:loop param="abc_var" var="a" limit="3"><rt:fill>0<rt:else />{$a}</rt:fill></rt:loop>]</rt:unit>');
-			$result = '[123][400][000]';
-			$t = new self();
-			$t->vars("abc",array(1,2,3,4));
-			eq($result,$t->get($src));
-
-			$src = pre('<rt:unit param="abc" var="abc_var" offset="3" cols="3" rows="3">[<rt:loop param="abc_var" var="a" limit="3"><rt:fill>0<rt:else />{$a}</rt:fill></rt:loop>]</rt:unit>');
-			$result = '[340][000][000]';
-			$t = new self();
-			$t->vars("abc",array(1,2,3,4));
-			eq($result,$t->get($src));
-		 */
-	}
+	// TODO
 	private function rtloop($src){
 		if(strpos($src,'rt:loop') !== false){
 			while(Xml::set($tag,$src,'rt:loop')){
