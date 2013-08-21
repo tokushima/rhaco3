@@ -1040,17 +1040,24 @@ class Template extends \org\rhaco\Object{
 		foreach($tag->in('form') as $obj){
 			if($this->is_reference($obj)){
 				if($obj->is_attr('rt:param')){
+					$param = $this->variable_string($this->parse_plain_variable($obj->in_attr('rt:param')));
 					$uniq = uniqid('');
+					$var = '$__form_var__'.$uniq;
 					$k = '$__form_k__'.$uniq;
 					$v = '$__form_v__'.$uniq;
-					$param = $this->variable_string($this->parse_plain_variable($obj->in_attr('rt:param')));
-					$tag = sprintf('<?php if( isset(%s) && ( is_array(%s) || (is_object(%s) && %s instanceof \Traversable) ) ){ '
-							.'foreach(%s as %s => %s){ '
-								.'if(!isset($%s) && preg_match(\'/^[a-zA-Z0-9]+$/\',%s)){ $%s = %s; }'
-							.'}'
-							.'} ?>'.PHP_EOL
-							,$param,$param,$param,$param
-							,$param,$k,$v
+					$tag = sprintf('<?php try{ ?>'
+							.'<?php '
+								.'%s=%s; '
+								.'if( isset(%s) && ( is_array(%s) || (is_object(%s) && %s instanceof \Traversable) ) ){ '
+									.'foreach(%s as %s => %s){ '
+										.'if(!isset($%s) && preg_match(\'/^[a-zA-Z0-9]+$/\',%s)){ $%s = %s; }'
+									.'}'
+								.'} '
+							.' ?>'
+							.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ print($e->getMessage());} } ?>'.PHP_EOL
+							,$var,$param
+							,$var,$var,$var,$var
+							,$var,$k,$v
 							,$k,$k,$k,$v
 					);
 					$obj->rm_attr('rt:param');
