@@ -380,4 +380,14 @@ class Helper{
 	public function gte($a,$b){
 		return ($a >= $b);
 	}
+	/**
+	 * ある範囲の整数を有する配列を作成します。
+	 * @param mixed  $start
+	 * @param mixed  $end
+	 * @param number $step
+	 * @return multitype:
+	 */
+	public function range($start,$end,$step=1){
+		return range($start,$end,$step);
+	}
 }
