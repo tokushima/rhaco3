@@ -388,6 +388,11 @@ class Helper{
 	 * @return multitype:
 	 */
 	public function range($start,$end,$step=1){
-		return range($start,$end,$step);
+		if(ctype_digit((string)$start) && ctype_digit((string)$end)){
+			$start = (int)$start;
+			$end = (int)$end;
+		}
+		$array = range($start,$end,$step);
+		return array_combine($array,$array);
 	}
 }

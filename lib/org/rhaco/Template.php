@@ -1018,17 +1018,16 @@ class Template extends \org\rhaco\Object{
 				if($obj->is_attr('rt:param')){
 					switch($lname){
 						case 'select':
-							$value = sprintf('<rt:loop param="%s" var="%s" counter="%s" key="%s" evenodd="%s" even_value="%s" odd_value="%s">'
+							$value = sprintf('<rt:loop param="%s" var="%s" key="%s">'
 											.'<option value="{$%s}">{$%s}</option>'
 											.'</rt:loop>'
-											,$obj->in_attr('rt:param'),$obj->in_attr('rt:var','loop_var'.$uid),$obj->in_attr('rt:counter','loop_counter'.$uid)
-											,$obj->in_attr('rt:key','loop_key'.$uid),$obj->in_attr('rt:evenodd','loop_evenodd'.$uid),$obj->in_attr('rt:even_value','even'),$obj->in_attr('rt:odd_value','odd')
+											,$obj->in_attr('rt:param'),$obj->in_attr('rt:var','loop_var'.$uid),$obj->in_attr('rt:key','loop_key'.$uid)
 											,$obj->in_attr('rt:key','loop_key'.$uid),$obj->in_attr('rt:var','loop_var'.$uid)
 							);
 							$obj->value($this->rtloop($value));
 							if($obj->is_attr('rt:null')) $obj->value('<option value="">'.$obj->in_attr('rt:null').'</option>'.$obj->value());
 					}
-					$obj->rm_attr('rt:param','rt:key','rt:var','rt:counter','rt:evenodd','rt:even_value','rt:odd_value');
+					$obj->rm_attr('rt:param','rt:key','rt:var');
 					$change = true;
 				}
 				if($this->is_reference($obj)){
