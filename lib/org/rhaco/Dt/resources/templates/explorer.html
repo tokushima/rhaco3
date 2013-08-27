@@ -85,8 +85,6 @@
 					$("#result_status").html("(status " + header.status + ")");
 					$("#result_header").html(header.getAllResponseHeaders());
 					$("#result_body").html($("<div>").text(data).html());
-					$("#result_body").addClass("prettyprint");
-				    prettyPrint();				    
 				},
 				error: function(data){
 					alert(data.status + " " + data.statusText);
