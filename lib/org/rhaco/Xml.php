@@ -79,7 +79,6 @@ class Xml implements \IteratorAggregate{
 		}else if($v === ''){
 			$v = null;
 		}else if(is_array($v) || is_object($v)){
-			if(!($v instanceof \Traversable) && ($v instanceof \org\rhaco\Object)) $v = $v->hash();
 			$r = '';
 			foreach($v as $k => $c){
 				if(is_numeric($k) && is_object($c)){
