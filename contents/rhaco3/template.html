@@ -208,35 +208,6 @@ def</pre>
 				<td>offsetからの現在のカウント数を格納する変数名</td>
 			</tr>
 			<tr>
-				<td>loop_counter</td>
-				<td>現在のカウント数を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>total</td>
-				<td>paramに含まれる要素の合計を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>offset</td>
-				<td>開始値</td>
-			</tr>
-			<tr>
-				<td>limit</td>
-				<td>処理する最大数</td>
-			</tr>
-			<tr>
-				<td>range</td>
-				<td>
-					処理する値の範囲 range="開始値,終了値"
-					paramが指定されていた場合は無視される
-				</td>
-			</tr>
-			<tr>
-				<td>range_step</td>
-				<td>
-					rangeのステップ数
-				</td>
-			</tr>
-			<tr>
 				<td>evenodd</td>
 				<td>偶数か奇数かを表す文字列を格納する変数名</td>
 			</tr>
@@ -248,145 +219,14 @@ def</pre>
 				<td>odd_value</td>
 				<td>奇数を表す文字列</td>
 			</tr>
-			<tr>
-				<td>first</td>
-				<td>初回を表す文字列を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>first_value</td>
-				<td>初回を表す文字列</td>
-			</tr>
-			<tr>
-				<td>last</td>
-				<td>最後を表す文字列を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>last_value</td>
-				<td>最後を表す文字列</td>
-			</tr>
-			<tr>
-				<td>shortfall</td>
-				<td>処理が最大数に満たなかった場合に不足数を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>reverse</td>
-				<td>paramを逆順にする(true, false)</td>
-			</tr>
 			</tbody>
 		</table>
-		<h5>要素</h5>
-		<div>
-			<a href="#template_rt_first">&lt;rt:first&gt;</a>
-			<a href="#template_rt_middle">&lt;rt:middle&gt;</a>
-			<a href="#template_rt_last">&lt;rt:last&gt;</a>
-			<a href="#template_rt_fill">&lt;rt:fill&gt;</a>
-			<a href="#template_rt_else">&lt;rt:else&gt;</a>
-		</div>
 
 		<pre class="prettyprint" style="margin-top: 20px; ">&lt;rt:loop param=&quot;object_list&quot; var=&quot;obj&quot;&gt;
 &nbsp;&nbsp;{$obj.fm_value()}
-&lt;/rt:loop&gt;
-
-&lt;rt:loop range=&quot;5,30&quot; range_step=&quot;5&quot; var=&quot;i&quot;&gt;
-&nbsp;&nbsp;{$i}
-&lt;/rt:loop&gt;</pre>
+&lt;/rt:loop&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
 	</div>
 
-	<div>
-		<a name="template_rt_first"></a>
-		<h4>&lt;rt:first&gt;</h4>
-		<p>
-			親要素の処理が最初の場合にのみ<a href="#template_rt_first">&lt;rt:first&gt;</a>で囲まれたブロックを処理する
-		</p>
-	</div>
-	<div>
-		<a name="template_rt_middle"></a>
-		<h4>&lt;rt:middle&gt;</h4>
-		<p>
-			親要素の処理が最初または最後`ではない`場合にのみ<a href="#template_rt_middle">&lt;rt:middle&gt;</a>で囲まれたブロックを処理する
-		</p>
-	</div>
-	<div>
-		<a name="template_rt_last"></a>
-		<h4>&lt;rt:last&gt;</h4>
-		<p>
-			親要素の処理が最後の場合にのみ<a href="#template_rt_last">&lt;rt:last&gt;</a>で囲まれたブロックを処理する
-		</p>
-	</div>	
-	<div>
-		<a name="template_rt_fill"></a>
-		<h4>&lt;rt:fill&gt;</h4>
-		<p>
-			親要素の条件が指定数に満たなかった場合に指定数になるまで<a href="#template_rt_fill">&lt;rt:fill&gt;</a>で囲まれたブロックを繰り返す
-		</p>
-	</div>
-	<div>
-		<a name="template_rt_else"></a>
-		<h4>&lt;rt:else&gt;</h4>
-		<p>
-			親要素の条件が偽の場合に親要素の<a href="#template_rt_else">&lt;rt:else&nbsp;/&gt;</a>の`下のブロック`を処理する
-		</p>
-	</div>
-	
-	<div>
-		<a name="template_rt_unit"></a>
-		<h4>&lt;rt:unit&gt;</h4>
-		<p>
-			指定数で分割して配列にし処理する。varを<a href="#template_rt_loop">&lt;rt:loop&gt;</a>に渡す事ができる
-		</p>
-		<table class="table table-striped table-bordered table-condensed">
-			<thead>
-			<tr>
-				<th>属性</th>
-				<th>説明</th>
-			</tr>
-			</thead>
-			<tbody>
-			<tr>
-				<td>param</td>
-				<td>対象の変数名</td>
-			</tr>
-			<tr>
-				<td>var</td>
-				<td>paramからとりだされた値１行分を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>offset</td>
-				<td>開始値を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>total</td>
-				<td>トータル数を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>cols</td>
-				<td>最大列数を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>rows</td>
-				<td>最大行数を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>cols_total</td>
-				<td>現在の行の値の数を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>rows_total</td>
-				<td>結果の行数を格納する変数名</td>
-			</tr>
-			<tr>
-				<td>counter</td>
-				<td>現在の値の数を格納する変数名</td>
-			</tr>
-			</tbody>
-		</table>
-		
-		<p></p>
-		<pre class="prettyprint" style="margin-top: 20px; ">&lt;rt:unit param=&quot;abc&quot; var=&quot;unit_list&quot; cols=&quot;3&quot;&gt;
-&nbsp;&nbsp;&lt;rt:loop param=&quot;unit_list&quot; var=&quot;a&quot;&gt;{$a}&lt;/rt:loop&gt;
-&nbsp;&nbsp;&lt;br /&gt;
-&lt;/rt:unit&gt;</pre>
-	</div>
 	
 	<div>
 		<a name="template_rt_if"></a>
