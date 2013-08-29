@@ -11,10 +11,10 @@ class Object implements \IteratorAggregate{
 
 	public function getIterator(){
 		$r = array();
-		foreach($this->props(false) as $n => $v){
+		foreach($this->props(false) as $n => $null){
 			if($this->prop_anon($n,'get') !== false && $this->prop_anon($n,'hash') !== false){
 				switch($this->prop_anon($n,'type')){
-					case 'boolean': $r[$n] = $v; break;
+					case 'boolean': $r[$n] = $this->{$n}(); break;
 					default: $r[$n] = $this->{'fm_'.$n}();
 				}
 			}
