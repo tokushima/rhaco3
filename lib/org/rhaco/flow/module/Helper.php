@@ -395,4 +395,21 @@ class Helper{
 		$array = range($start,$end,$step);
 		return array_combine($array,$array);
 	}
+	/**
+	 * 配列を逆順にして返す
+	 * @param mixed $array
+	 * @return array
+	 */
+	public function reverse($array){
+		if(is_object($array) && ($array instanceof \Traversable)){
+			$list = array();
+			foreach($array as $v) $list[] = $v;
+			$array = $list;
+		}
+		if(is_array($array)){
+			rsort($array);
+			return $array;
+		}
+		return array();
+	}
 }
