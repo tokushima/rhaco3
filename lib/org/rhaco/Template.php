@@ -435,30 +435,41 @@ class Template extends \org\rhaco\TemplateVariable{
 		 */
 	}
 	private function rtif($src){
-		if(strpos($src,'rt:if') !== false){
-			while(Xml::set($tag,$src,'rt:if')){
-				$tag->escape(false);
-				if(!$tag->is_attr('param')) throw new \LogicException('if');
-				$arg1 = $this->variable_string($this->parse_plain_variable($tag->in_attr('param')));
-
-				if($tag->is_attr('value')){
-					$arg2 = $this->parse_plain_variable($tag->in_attr('value'));
-					if($arg2 == 'true' || $arg2 == 'false' || preg_match('/^-?[0-9]+$/',(string)$arg2)){
-						$cond = sprintf('<?php if(%s === %s || %s === "%s"){ ?>',$arg1,$arg2,$arg1,$arg2);
+		foreach(array('rt:if','rt:notif') as $k => $rttag){
+			if(strpos($src,$rttag) !== false){
+				$not = ($k === 1) ? '!' : '';
+				
+				while(\org\rhaco\Xml::set($tag,$src,$rttag)){
+					$tag->escape(false);
+					if(!$tag->is_attr('param')) throw new \LogicException('if');
+					$arg1 = $this->variable_string($this->parse_plain_variable($tag->in_attr('param')));
+	
+					if($tag->is_attr('value')){
+						$arg2 = $this->parse_plain_variable($tag->in_attr('value'));
+						if($arg2 == 'true' || $arg2 == 'false' || preg_match('/^-?[0-9]+$/',(string)$arg2)){
+							$cond = sprintf('<?php if(%s(%s === %s || %s === "%s")){ ?>',$not,$arg1,$arg2,$arg1,$arg2);
+						}else{
+							if($arg2 === '' || $arg2[0] != '$') $arg2 = '"'.$arg2.'"';
+							$cond = sprintf('<?php if(%s(%s === %s)){ ?>',$not,$arg1,$arg2);
+						}
 					}else{
-						if($arg2 === '' || $arg2[0] != '$') $arg2 = '"'.$arg2.'"';
-						$cond = sprintf('<?php if(%s === %s){ ?>',$arg1,$arg2);
+						$uniq = uniqid('$I');
+						$cond = sprintf(
+									'<?php try{ '
+										.' %s=%s; '
+									.'}catch(\Exception $e){ %s=null; } ?>'
+									.'<?php if(%s(%s !== null && %s !== false && ( (!is_string(%s) && !is_array(%s)) || (is_string(%s) && %s !== "") || (is_array(%s) && !empty(%s)) ) )){ ?>'
+											,$uniq,$arg1
+											,$uniq
+											,$not,$uniq,$uniq,$uniq,$uniq,$uniq,$uniq,$uniq,$uniq
+								);
 					}
-				}else{
-					$uniq = uniqid('$I');
-					$cond = sprintf("<?php try{ %s=%s; }catch(\\Exception \$e){ %s=null; } ?>",$uniq,$arg1,$uniq)
-								.sprintf('<?php if(%s !== null && %s !== false && ( (!is_string(%s) && !is_array(%s)) || (is_string(%s) && %s !== "") || (is_array(%s) && !empty(%s)) ) ){ ?>',$uniq,$uniq,$uniq,$uniq,$uniq,$uniq,$uniq,$uniq);
+					$src = str_replace(
+								$tag->plain(),
+								$this->php_exception_catch($cond.preg_replace('/<rt\:else[\s]*.*?>/i','<?php }else{ ?>',$tag->value()).'<?php } ?>')
+								,$src
+							);
 				}
-				$src = str_replace(
-							$tag->plain()
-							,$this->php_exception_catch($cond.preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$tag->value()).'<?php } ?>')
-							,$src
-						);
 			}
 		}
 		return $src;
@@ -554,6 +565,19 @@ class Template extends \org\rhaco\TemplateVariable{
 			$result = pre('hoge');
 			$t = new self();
 			$t->vars("abc",0);
+			eq($result,$t->get($src));
+		*/
+		/***
+			$src = pre('<rt:notif param="abc">hoge</rt:notif>');
+			$result = pre('hoge');
+			$t = new self();
+			$t->vars("abc",false);
+			eq($result,$t->get($src));
+				
+			$src = pre('<rt:notif param="abc" value="0">hoge</rt:notif>');
+			$result = pre('hoge');
+			$t = new self();
+			$t->vars("abc",1);
 			eq($result,$t->get($src));
 		*/
 	}
