@@ -1,32 +1,36 @@
 <rt:extends href="base.html" />
-
-
 <rt:block name="content">
-	<table rt:param="{$maps}" rt:var="map" rt:key="url">
+    <h1>Urls</h1>
+
+	<table rt:param="map_list" rt:var="map" rt:key="map_name">
 	<thead>
-		<tr>
-			<th>Entry</th>
-			<th>Url</th>			
-			<th>Name</th>
-			<th>Summary</th>
-		</tr>
+	<tr>
+		<th class="span4">Name</th>	
+		<th class="span4">Url</th>
+		<th>Summary</th>
+	</tr>
 	</thead>
 	<tbody>
-		<tr class="even" style="{$t.cond_switch($map['deprecated'],'text-decoration: line-through;','')}">
-			<td>{$map['entry']}</td>
-			<td>{$map['url']}</td>
-			<td nowrap>
-				<rt:if param="{$map['class']}">
-					<a href="{$t.package_method_url('method_doc',$map['class'],$map['method'])}">{$map['name']}</a>
-				<rt:else />
-					{$map['name']}
-				</rt:if>
-			</td>
-			<td>
-				<span>{$map['summary']}</span>
-				<span style="color:#ff0000; font-weight: bold;">{$map['error']}</span>
-			</td>
-		</tr>
+	<tr class="even" style="{$t.cond_switch($map['deprecated'],'text-decoration: line-through;','')}">
+		<td nowrap>
+			<rt:if param="{$map['class']}">
+				<a href="{$t.package_method_url('method_doc',$map['class'],$map['method'])}">{$map['entry']}::{$map['name']}</a>
+			<rt:else />
+				{$map['entry']}::{$map['name']}
+			</rt:if>		
+		</td>
+		<td>
+			<rt:if param="{$map['entry']}" value="index">
+				{$map['url']}
+			<rt:else />
+				{$map['entry']}/{$map['url']}
+			</rt:if>
+		</td>
+		<td>
+			<span>{$t.html($map['summary'])}</span>
+			<span style="color:#ff0000; font-weight: bold;">{$map['error']}</span>
+		</td>
+	</tr>
 	</tbody>
 	</table>
 </rt:block>

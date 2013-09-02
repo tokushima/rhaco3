@@ -85,7 +85,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function index(){
-		$this->vars('maps',$this->get_flow_output_maps());
+		$this->vars('map_list',$this->get_flow_output_maps());
 	}
 	/**
 	 * Daoモデルの一覧
