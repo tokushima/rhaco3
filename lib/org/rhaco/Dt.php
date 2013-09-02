@@ -65,8 +65,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 											$info = \org\rhaco\Dt\Man::method_info($m['class'],$m['method']);
 											list($summary) = explode(PHP_EOL,$info['description']);
 										}
+										$m['summary'] = $summary;
 									}
-									$m['summary'] = $summary;
 									$m['entry'] = $entry_name;										
 								}catch(\Exception $e){
 									$m['error'] = $e->getMessage();
