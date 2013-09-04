@@ -12,7 +12,7 @@ class HtmlFilter{
 	 */
 	public function before_exec_template(\org\rhaco\lang\String $obj){
 		$src = $obj->get();
-		if(preg_match_all('/@print\((.+?)\);/ms',$src,$match)){
+		if(preg_match_all('/$_t_->output\((.+?)\);/ms',$src,$match)){
 			$src = str_replace($match[0],array_map(array($this,'add_escape'),$match[1]),$src);
 			$obj->set($src);
 		}
@@ -28,6 +28,6 @@ class HtmlFilter{
 		)){
 			$value = '$_t_->htmlencode('.$value.')';
 		}
-		return '@print('.$value.');';
+		return '$_t_->output('.$value.');';
 	}
 }
