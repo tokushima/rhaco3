@@ -6,10 +6,23 @@ namespace org\rhaco;
  *
  */
 class TemplateVariable extends \org\rhaco\Object{
+	public function htmlencode($value){
+		if(!empty($value) && is_string($value)){
+			$value = mb_convert_encoding($value,'UTF-8',mb_detect_encoding($value));
+			return htmlentities($value,ENT_QUOTES,'UTF-8');
+		}
+		return $value;
+	}
+	public function output($v){
+		print($v);
+	}
+	protected function default_vars(){
+		return array('_t_'=>new self());
+	}
 	protected function parse_print_variable($src){
 		foreach($this->match_variable($src) as $variable){
 			$name = $this->parse_plain_variable($variable);
-			$value = $this->php_exception_catch('<?php @print('.$name.'); ?>');
+			$value = $this->php_exception_catch('<?php $_t_->output('.$name.'); ?>');
 			$src = str_replace(array($variable."\n",$variable),array($value."<?php 'PLRP'; ?>\n\n",$value),$src);
 			$src = str_replace($variable,$value,$src);
 		}
@@ -35,7 +48,7 @@ class TemplateVariable extends \org\rhaco\Object{
 	protected function php_exception_catch($tag){
 		return '<?php try{ ?>'
 		.$tag
-		.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ print($e->getMessage()); } } ?>';
+		.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ $_t_->output($e->getMessage()); } } ?>';
 	}
 	protected function match_variable($src){
 		$hash = array();

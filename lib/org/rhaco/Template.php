@@ -195,7 +195,9 @@ class Template extends \org\rhaco\TemplateVariable{
 		 * @param org.rhaco.lang.String $obj
 		 */
 		$this->object_module('before_exec_template',\org\rhaco\lang\String::ref($_obj_,$_src_));
-		$this->vars('_t_',new Template\Helper());
+		foreach($this->default_vars() as $k => $v){
+			$this->vars($k,$v);
+		}
 		ob_start();
 			if(is_array($this->vars) && !empty($this->vars)) extract($this->vars);
 			eval('?><?php $_display_exception_='.((\org\rhaco\Conf::get('display_exception') === true) ? 'true' : 'false').'; ?>'.((string)$_obj_));
@@ -645,7 +647,7 @@ class Template extends \org\rhaco\TemplateVariable{
 									.'}'
 								.'} '
 							.' ?>'
-							.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ print($e->getMessage());} } ?>'.PHP_EOL
+							.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ $_t_->output($e->getMessage());} } ?>'.PHP_EOL
 							,$var,$param
 							,$var,$var,$var,$var
 							,$var,$k,$v
@@ -1059,7 +1061,7 @@ class Template extends \org\rhaco\TemplateVariable{
 										.' || ((%s === "true" || %s === "false") ? (%s === (%s == "true")) : false)'
 										.' || in_array(%s,((is_array(%s)) ? %s : (is_null(%s) ? array() : array(%s))),true) '
 									.') '
-					.'){print(" %s=\"%s\"");} ?>'
+					.'){ $_t_->output(" %s=\"%s\""); } ?>'
 					,$name,$name,$value
 					,$name,$name,$name,$value
 					,$value,$value,$name,$value
