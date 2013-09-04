@@ -720,59 +720,58 @@ class Template extends \org\rhaco\TemplateVariable{
 					$obj->rm_attr('rt:param','rt:key','rt:var');
 					$change = true;
 				}
-				if($this->is_reference($obj)){
-					switch($lname){
-						case 'textarea':
-							$obj->value($this->no_exception_str(sprintf('{$_t_.htmlencode(%s)}',((preg_match("/^{\$(.+)}$/",$originalName,$match)) ? '{$$'.$match[1].'}' : '{$'.$originalName.'}'))));
-							break;
-						case 'select':
-							$select = $obj->value();
-							foreach($obj->in('option') as $option){
-								$option->escape(false);
-								$value = $this->parse_plain_variable($option->in_attr('value'));
-								if(empty($value) || $value[0] != '$') $value = sprintf("'%s'",$value);
-								$option->rm_attr('selected');
-								$option->plain_attr($this->check_selected($name,$value,'selected'));
-								$select = str_replace($option->plain(),$option->get(),$select);
-							}
-							$obj->value($select);
-							break;
-						case 'input':
-							switch($type){
-								case 'checkbox':
-								case 'radio':
-									$value = $this->parse_plain_variable($obj->in_attr('value','true'));
-									$value = (substr($value,0,1) != '$') ? sprintf("'%s'",$value) : $value;
-									$obj->rm_attr('checked');
-									$obj->plain_attr($this->check_selected($name,$value,'checked'));
-									break;
-								case 'text':
-								case 'hidden':
-								case 'password':
-								case 'search':
-								case 'url':
-								case 'email':
-								case 'tel':
-								case 'datetime':
-								case 'date':
-								case 'month':
-								case 'week':
-								case 'time':
-								case 'datetime-local':
-								case 'number':
-								case 'range':
-								case 'color':
-									$obj->attr('value',$this->no_exception_str(sprintf('{$_t_.htmlencode(%s)}',
-																((preg_match("/^\{\$(.+)\}$/",$originalName,$match)) ?
-																	'{$$'.$match[1].'}' :
-																	'{$'.$originalName.'}'))));
-									break;
-							}
-							break;
+				if($obj->is_attr('rt:ref')){
+					if($this->is_reference($obj)){
+						switch($lname){
+							case 'textarea':
+								$obj->value($this->no_exception_str(sprintf('{$_t_.htmlencode(%s)}',((preg_match("/^{\$(.+)}$/",$originalName,$match)) ? '{$$'.$match[1].'}' : '{$'.$originalName.'}'))));
+								break;
+							case 'select':
+								$select = $obj->value();
+								foreach($obj->in('option') as $option){
+									$option->escape(false);
+									$value = $this->parse_plain_variable($option->in_attr('value'));
+									if(empty($value) || $value[0] != '$') $value = sprintf("'%s'",$value);
+									$option->rm_attr('selected');
+									$option->plain_attr($this->check_selected($name,$value,'selected'));
+									$select = str_replace($option->plain(),$option->get(),$select);
+								}
+								$obj->value($select);
+								break;
+							case 'input':
+								switch($type){
+									case 'checkbox':
+									case 'radio':
+										$value = $this->parse_plain_variable($obj->in_attr('value','true'));
+										$value = (substr($value,0,1) != '$') ? sprintf("'%s'",$value) : $value;
+										$obj->rm_attr('checked');
+										$obj->plain_attr($this->check_selected($name,$value,'checked'));
+										break;
+									case 'text':
+									case 'hidden':
+									case 'password':
+									case 'search':
+									case 'url':
+									case 'email':
+									case 'tel':
+									case 'datetime':
+									case 'date':
+									case 'month':
+									case 'week':
+									case 'time':
+									case 'datetime-local':
+									case 'number':
+									case 'range':
+									case 'color':
+										$obj->attr('value',$this->no_exception_str(sprintf('{$_t_.htmlencode(%s)}',
+																	((preg_match("/^\{\$(.+)\}$/",$originalName,$match)) ?
+																		'{$$'.$match[1].'}' :
+																		'{$'.$originalName.'}'))));
+										break;
+								}
+								break;
+						}
 					}
-					$change = true;
-				}else if($obj->is_attr('rt:ref')){
-					$obj->rm_attr('rt:ref');
 					$change = true;
 				}
 				if($change){
@@ -1271,7 +1270,7 @@ class Template extends \org\rhaco\TemplateVariable{
 		return (strpos($name,'[') && preg_match("/^(.+)\[([^\"\']+)\]$/",$name,$match)) ?
 			'{$'.$match[1].'["'.$match[2].'"]'.'}' : '{$'.$name.'}';
 	}
-	private function is_reference(&$tag){
+	private function is_reference($tag){
 		$bool = ($tag->in_attr('rt:ref') === 'true');
 		$tag->rm_attr('rt:ref');
 		return $bool;
