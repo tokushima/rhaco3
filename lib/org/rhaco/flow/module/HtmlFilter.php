@@ -18,14 +18,11 @@ class HtmlFilter{
 		}
 	}
 	private function add_escape($value){
-		if(!(
-				strpos($value,'$_t_->htmlencode(') === 0
-				|| strpos($value,'$t->map_url(') === 0
-				|| strpos($value,'$t->htmlencode(') === 0
-				|| strpos($value,'$t->html(') === 0
-				|| strpos($value,'$t->text(') === 0
-				|| strpos($value,'$t->noop(') === 0
-		)){
+		if(strpos($value,'$_t_->htmlencode(') === false
+			&& strpos($value,'$t->html(') === false
+			&& strpos($value,'$t->text(') === false
+			&& strpos($value,'$t->noop(') !== 0
+		){
 			$value = '$_t_->htmlencode('.$value.')';
 		}
 		return '$_t_->print_variable('.$value.');';
