@@ -1061,7 +1061,7 @@ class Template extends \org\rhaco\TemplateVariable{
 										.' || ((%s === "true" || %s === "false") ? (%s === (%s == "true")) : false)'
 										.' || in_array(%s,((is_array(%s)) ? %s : (is_null(%s) ? array() : array(%s))),true) '
 									.') '
-					.'){ print(" %s=\"%s\""); } ?>'
+					.'){ print(" %s=\"%s\""); } ?>' // !escape
 					,$name,$name,$value
 					,$name,$name,$name,$value
 					,$value,$value,$name,$value
