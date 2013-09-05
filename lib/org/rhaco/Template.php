@@ -647,7 +647,7 @@ class Template extends \org\rhaco\TemplateVariable{
 									.'}'
 								.'} '
 							.' ?>'
-							.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ $_t_->output_variable($e->getMessage());} } ?>'.PHP_EOL
+							.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ $_t_->print_variable($e->getMessage());} } ?>'.PHP_EOL
 							,$var,$param
 							,$var,$var,$var,$var
 							,$var,$k,$v
@@ -1061,7 +1061,7 @@ class Template extends \org\rhaco\TemplateVariable{
 										.' || ((%s === "true" || %s === "false") ? (%s === (%s == "true")) : false)'
 										.' || in_array(%s,((is_array(%s)) ? %s : (is_null(%s) ? array() : array(%s))),true) '
 									.') '
-					.'){ $_t_->output_variable(" %s=\"%s\""); } ?>'
+					.'){ $_t_->print_variable(" %s=\"%s\""); } ?>'
 					,$name,$name,$value
 					,$name,$name,$name,$value
 					,$value,$value,$name,$value
