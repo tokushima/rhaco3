@@ -13,7 +13,7 @@ class TemplateVariable extends \org\rhaco\Object{
 		}
 		return $value;
 	}
-	public function output($v){
+	public function output_variable($v){
 		print($v);
 	}
 	protected function default_vars(){
@@ -22,7 +22,7 @@ class TemplateVariable extends \org\rhaco\Object{
 	protected function parse_print_variable($src){
 		foreach($this->match_variable($src) as $variable){
 			$name = $this->parse_plain_variable($variable);
-			$value = $this->php_exception_catch('<?php $_t_->output('.$name.'); ?>');
+			$value = $this->php_exception_catch('<?php $_t_->output_variable('.$name.'); ?>');
 			$src = str_replace(array($variable."\n",$variable),array($value."<?php 'PLRP'; ?>\n\n",$value),$src);
 			$src = str_replace($variable,$value,$src);
 		}
@@ -48,7 +48,7 @@ class TemplateVariable extends \org\rhaco\Object{
 	protected function php_exception_catch($tag){
 		return '<?php try{ ?>'
 		.$tag
-		.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ $_t_->output($e->getMessage()); } } ?>';
+		.'<?php }catch(\Exception $e){ if(!isset($_nes_) && $_display_exception_){ $_t_->output_variable($e->getMessage()); } } ?>';
 	}
 	protected function match_variable($src){
 		$hash = array();
