@@ -8,7 +8,7 @@ namespace org\rhaco\flow\module;
 class Csrf{
 	private $no;
 	
-	public function before_flow_handle($req){
+	public function before_flow_action($req){
 		if($req->is_post() && ($req->in_vars('csrftoken') == '' || $req->in_sessions('csrftoken') !== $req->in_vars('csrftoken'))){
 			throw new \RuntimeException('csrf '.$req->in_vars('csrftoken'));
 		}

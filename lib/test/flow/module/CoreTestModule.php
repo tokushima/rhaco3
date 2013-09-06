@@ -2,11 +2,11 @@
 namespace test\flow\module;
 
 class CoreTestModule extends \org\rhaco\flow\parts\RequestFlow{
-	public function before_flow_handle(\org\rhaco\flow\FlowInterface $flow){
-		$flow->vars('before_flow_handle','BEFORE_FLOW_HANDLE');
+	public function before_flow_action(\org\rhaco\flow\FlowInterface $flow){
+		$flow->vars('before_flow_action','BEFORE_FLOW_HANDLE');
 	}
-	public function after_flow_handle(\org\rhaco\flow\FlowInterface $flow){
-		$flow->vars('after_flow_handle','AFTER_FLOW_HANDLE');	
+	public function after_flow_action(\org\rhaco\flow\FlowInterface $flow){
+		$flow->vars('after_flow_action','AFTER_FLOW_HANDLE');	
 	}	
 	public function init_template(\org\rhaco\lang\String $obj){
 		$obj->set($obj->get().'INIT_TEMPLATE'.PHP_EOL);
