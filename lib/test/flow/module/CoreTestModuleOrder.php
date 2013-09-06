@@ -2,10 +2,10 @@
 namespace test\flow\module;
 
 class CoreTestModuleOrder extends \org\rhaco\flow\parts\RequestFlow{
-	public function before_flow_handle(\org\rhaco\flow\FlowInterface $flow){
+	public function before_flow_action(\org\rhaco\flow\FlowInterface $flow){
 		$flow->vars("order",$flow->in_vars("order")."3");		
 	}
-	public function after_flow_handle(\org\rhaco\flow\FlowInterface $flow){
+	public function after_flow_action(\org\rhaco\flow\FlowInterface $flow){
 		$flow->vars("order",$flow->in_vars("order")."4");		
 	}
 	public function init_template(\org\rhaco\lang\String $obj){

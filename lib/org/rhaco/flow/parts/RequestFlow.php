@@ -137,12 +137,12 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 */
 	public function before(){
 		if(method_exists($this,'__before__')) $this->__before__();
-		if($this->has_object_module('before_flow_handle')){
+		if($this->has_object_module('before_flow_action')){
 			/**
 			 * 前処理
 			 * @param self $this
 			 */
-			$this->object_module('before_flow_handle',$this);
+			$this->object_module('before_flow_action',$this);
 		}
 		if(!$this->is_login() && ((isset($this->anon_login['require']) && $this->anon_login['require'] === true) || $this->has_object_module('login_condition'))) $this->login_required();
 	}
@@ -152,12 +152,12 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 	 */
 	public function after(){
 		if(method_exists($this,'__after__')) $this->__after__();
-		if($this->has_object_module('after_flow_handle')){
+		if($this->has_object_module('after_flow_action')){
 			/**
 			 * 後処理
 			 * @param self $this
 			 */
-			$this->object_module('after_flow_handle',$this);
+			$this->object_module('after_flow_action',$this);
 		}
 	}
 	/**
