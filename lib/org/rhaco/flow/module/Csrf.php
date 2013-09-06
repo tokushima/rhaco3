@@ -10,7 +10,8 @@ class Csrf{
 	
 	public function before_flow_action($req){
 		if($req->is_post() && ($req->in_vars('csrftoken') == '' || $req->in_sessions('csrftoken') !== $req->in_vars('csrftoken'))){
-			throw new \RuntimeException('csrf '.$req->in_vars('csrftoken'));
+			\org\rhaco\net\http\Header::send_status(403);
+			throw new \RuntimeException('CSRF verification failed');
 		}
 		$this->no = md5(rand(1000,10000).time());
 		$req->sessions('csrftoken',$this->no);
