@@ -148,12 +148,12 @@ array(
 	),
 	'csrf'=>array(
 		'name'=>'csrf',
-		'action'=>'test.CoreApp::noop',
+		'action'=>'org.rhaco.flow.parts.RequestFlow::noop',
 		'modules'=>array('org.rhaco.flow.module.Csrf'),
 	),
 	'csrf_template'=>array(
 		'name'=>'csrf_template',
-		'action'=>'test.CoreApp::noop',
+		'action'=>'org.rhaco.flow.parts.RequestFlow::noop',
 		'modules'=>array('org.rhaco.flow.module.Csrf'),
 		'template'=>'csrf.html',
 	),
