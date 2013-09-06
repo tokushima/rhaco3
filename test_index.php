@@ -144,10 +144,19 @@ array(
 			'ppp'=>'PPPPP',
 			'qqq'=>'<tag>QQQ</tag>',
 		),
-		'modules'=>array('org.rhaco.flow.module.HtmlFilter')
+		'modules'=>array('org.rhaco.flow.module.HtmlFilter'),
 	),
-	
-	'dt'=>array('action'=>'org.rhaco.Dt','mode'=>'local'),
+	'csrf'=>array(
+		'name'=>'csrf',
+		'action'=>'test.CoreApp::noop',
+		'modules'=>array('org.rhaco.flow.module.Csrf'),
+	),
+	'csrf_template'=>array(
+		'name'=>'csrf_template',
+		'action'=>'test.CoreApp::noop',
+		'modules'=>array('org.rhaco.flow.module.Csrf'),
+		'template'=>'csrf.html',
+	),
 )));
 
 /***
@@ -671,6 +680,45 @@ meq('<textarea name="ttt">&lt;tag&gt;ttt&lt;/tag&gt;</textarea>',$b->body());
 meq('<option value="456" selected="selected">456</option>',$b->body());
 meq('<option value="789" selected="selected">789</option>',$b->body());
 meq('<select name="XYZ"><option value="A">456</option><option value="B" selected="selected">789</option><option value="C">010</option></select>',$b->body());
+*/
+
+/***
+#csrf
+$b = b();
+
+$b->do_get(test_map_url('csrf'));
+eq(200,$b->status());
+meq('<result>',$b->body());
+
+$b->do_post(test_map_url('csrf'));
+eq(403,$b->status());
+meq('<error>',$b->body());
+
+
+
+$b->do_get(test_map_url('csrf'));
+eq(200,$b->status());
+meq('<result>',$b->body());
+
+$no = null;
+if(xml($xml,$b->body(),'csrftoken')){
+	$no = $xml->value();
+}
+neq(null,$no);
+
+$b->vars('csrftoken',$no);
+$b->do_post(test_map_url('csrf'));
+eq(200,$b->status());
+meq('<result>',$b->body());
+
+
+$b->do_get(test_map_url('csrf_template'));
+eq(200,$b->status());
+meq('<form><input type="hidden" name="csrftoken"',$b->body());
+meq('<form method="post"><input type="hidden" name="csrftoken"',$b->body());
+meq('<form method="get"><input type="hidden" name="csrftoken"',$b->body());
+meq(sprintf('<form action="%s"><input type="hidden" name="csrftoken"',test_map_url('csrf')),$b->body());
+meq('<form action="http://localhost"><input type="text" name="aaa" /></form>',$b->body());
 */
 
 
