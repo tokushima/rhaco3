@@ -1,6 +1,10 @@
 <?php
 namespace org\rhaco\flow\module;
-
+/**
+ * CSRFトークン
+ * @author tokushima
+ *
+ */
 class Csrf{
 	private $no;
 	
