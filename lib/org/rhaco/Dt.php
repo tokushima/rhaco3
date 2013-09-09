@@ -54,18 +54,21 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					if(strpos($src,'Flow') !== false){
 						$entry_name = substr($e->getFilename(),0,-4);
 						foreach(\org\rhaco\Flow::get_maps($e->getPathname()) as $k => $m){
+							if(!isset($m['deprecated'])) $m['deprecated'] = false;
+							if(!isset($m['mode'])) $m['mode'] = null;
+							if(!isset($m['summary'])) $m['summary'] = null;
+														
 							if(!isset($m['class']) || $m['class'] != str_replace('\\','.',__CLASS__)){
 								$m['error'] = '';
 								$m['url'] = $k;
-									
+
 								try{
-									if(!isset($m['summary'])){
-										$summary = '';
-										if(isset($m['method'])){
-											$info = \org\rhaco\Dt\Man::method_info($m['class'],$m['method']);
-											list($summary) = explode(PHP_EOL,$info['description']);
+									if(isset($m['method'])){
+										$info = \org\rhaco\Dt\Man::method_info($m['class'],$m['method']);
+										if(!isset($m['summary'])){
+											list($m['summary']) = explode(PHP_EOL,$info['description']);
 										}
-										$m['summary'] = $summary;
+										if(!$m['deprecated']) $m['deprecated'] = $info['deprecated'];
 									}
 									$m['entry'] = $entry_name;										
 								}catch(\Exception $e){
