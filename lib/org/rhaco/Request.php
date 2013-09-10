@@ -47,7 +47,7 @@ class Request implements \IteratorAggregate{
 			}
 			if(isset($_COOKIE) && is_array($_COOKIE)){
 				foreach($_COOKIE as $k => $v){
-					if($k[0] != '_' && $k != session_name()) $this->vars[$k] = $v;
+					if(ctype_alpha($k[0]) && $k != session_name()) $this->vars[$k] = $v;
 				}
 			}
 		}else if(isset($_SERVER['argv'])){
