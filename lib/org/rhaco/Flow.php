@@ -379,13 +379,10 @@ class Flow{
 							$this->redirect($apps,$map['error_redirect']);
 						}else if(isset($apps[$k]['error_template'])){
 							$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$put_block,$obj,$apps,$k);
-							exit;
 						}else if(isset($map['error_template'])){
 							$this->print_template($this->template_path,$map['error_template'],$this->media_url,$put_block,$obj,$apps,$k);
-							exit;
 						}else if(isset($apps[$k]['@']) && is_file($t = $apps[$k]['@'].'/resources/templates/error.html')){
 							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$put_block,$obj,$apps,$k,false);
-							exit;
 						}else if(isset($apps[$k]['template']) || (isset($apps[$k]['@']) && is_file($apps[$k]['@'].'/resources/templates/'.$apps[$k]['method'].'.html'))){
 							if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
 							exit;
@@ -483,6 +480,7 @@ class Flow{
 		$src = (string)$obj;
 		header('Content-Length: '.strlen($src));
 		print($src);
+		exit;
 	}
 	private function str_reflection($package){
 		if(is_object($package)) return $package;
