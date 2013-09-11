@@ -181,7 +181,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 							if(isset($m['format']) && $current == $m['format']) $current = null;
 						}
 					}
-					if($current !== null) $this->set_login_redirect($current);
+					if(!empty($current)) $this->set_login_redirect($current);
 				}
 				$req = new \org\rhaco\Request();
 				$this->sess->vars(__CLASS__.'_login_vars',array(time(),$req->ar_vars()));
