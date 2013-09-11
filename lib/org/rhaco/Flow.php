@@ -112,7 +112,7 @@ class Flow{
 		if(is_string($map) && preg_match('/^[\w\.]+$/',$map)) $map = array('patterns'=>array(''=>array('action'=>$map)));
 		$apps = $urls = array();
 		$idx = $pkg_id =0;
-		$theme = $put_block = null;
+		$put_block = null;
 
 		if(isset($map['patterns']) && is_array($map['patterns'])){
 			$exp_patterns = array();
@@ -127,7 +127,6 @@ class Flow{
 						$maps_nam = isset($maps['name']) ? $maps['name'] : null;
 						$maps_act = isset($maps['action']) ? $maps['action'] : null;
 						$maps_med = isset($maps['media_path']) ? $maps['media_path'] : null;
-						$maps_the = isset($maps['theme_path']) ? $maps['theme_path'] : null;
 						$maps_tem = isset($maps['template_path']) ? $maps['template_path'] : null;
 						$maps_err = isset($maps['error_template']) ? $maps['error_template'] : null;
 						$maps_sup = isset($maps['template_super']) ? $maps['template_super'] : null;
@@ -137,7 +136,6 @@ class Flow{
 							if(!empty($maps_act) && isset($m['action'])) $m['action'] = $maps_act.'::'.$m['action'];
 							if(!empty($maps_nam)) $m['name'] = $maps_nam.((isset($m['name']) && !empty($m['name'])) ? '/'.$m['name'] : '');
 							if(!empty($maps_med)) $m['media_path'] = $maps_med;
-							if(!empty($maps_the)) $m['theme_path'] = $maps_the;
 							if(!empty($maps_tem)) $m['template_path'] = $maps_tem;
 							if(!empty($maps_err)) $m['error_template'] = $maps_err;
 							if(!empty($maps_sup)) $m['template_super'] = $maps_sup;
@@ -221,7 +219,7 @@ class Flow{
 						($m['secure'] ? $surl : $url)
 						,(empty($u)) ? '' : substr(preg_replace_callback("/([^\\\\])(\(.*?[^\\\\]\))/",function($n){return $n[1].'%s';},' '.$u,-1,$cnt),1)
 						);
-				foreach(array('template_path','media_path','theme_path') as $k){
+				foreach(array('template_path','media_path') as $k){
 					if(isset($map[$k]) || isset($m[$k])) $m[$k] = \org\rhaco\net\Path::slash((isset($map[$k])?$map[$k]:''),null,true).(isset($m[$k])?$m[$k]:'');
 				}
 				$apps[$u] = array_merge($m,array(
@@ -308,7 +306,6 @@ class Flow{
 									foreach($ext_modules as $o) $this->template->set_object_module($o);
 								}
 								$obj->before();
-								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
 							}
 							try{
@@ -319,7 +316,6 @@ class Flow{
 							}						
 							if($obj instanceof \org\rhaco\flow\FlowInterface){
 								$obj->after();
-								$theme = $obj->get_theme();
 								$put_block = $obj->get_block();
 							}
 							if($func_exception instanceof \Exception) throw $func_exception;
@@ -329,9 +325,9 @@ class Flow{
 						}else if(isset($apps[$k]['after']) && !\org\rhaco\Exceptions::has()){
 							$this->after_redirect($apps[$k]['after'],$apps[$k],$apps,$obj);
 						}else if(isset($apps[$k]['template'])){
-							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
+							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$put_block,$obj,$apps,$k);
 						}else if(isset($apps[$k]['@']) && is_file($t = $apps[$k]['@'].'/resources/templates/'.$apps[$k]['method'].'.html')){
-							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
+							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$put_block,$obj,$apps,$k,false);
 						}else if($this->has_object_module('flow_output')){
 							/**
 							 * 結果出力
@@ -382,13 +378,13 @@ class Flow{
 						}else if(isset($map['error_redirect'])){
 							$this->redirect($apps,$map['error_redirect']);
 						}else if(isset($apps[$k]['error_template'])){
-							$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
+							$this->print_template($this->template_path,$apps[$k]['error_template'],$this->media_url,$put_block,$obj,$apps,$k);
 							exit;
 						}else if(isset($map['error_template'])){
-							$this->print_template($this->template_path,$map['error_template'],$this->media_url,$theme,$put_block,$obj,$apps,$k);
+							$this->print_template($this->template_path,$map['error_template'],$this->media_url,$put_block,$obj,$apps,$k);
 							exit;
 						}else if(isset($apps[$k]['@']) && is_file($t = $apps[$k]['@'].'/resources/templates/error.html')){
-							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$theme,$put_block,$obj,$apps,$k,false);
+							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$put_block,$obj,$apps,$k,false);
 							exit;
 						}else if(isset($apps[$k]['template']) || (isset($apps[$k]['@']) && is_file($apps[$k]['@'].'/resources/templates/'.$apps[$k]['method'].'.html'))){
 							if(!isset($map['error_status'])) \org\rhaco\net\http\Header::send_status(500);
@@ -463,19 +459,10 @@ class Flow{
 		if(empty($name)) \org\rhaco\net\http\Header::redirect_referer();
 		$this->redirect($apps,$name,$args);
 	}
-	private function print_template($template_path,$template,$media_url,$theme,$put_block,$obj,$apps,$index,$path_replace=true){
+	private function print_template($template_path,$template,$media_url,$put_block,$obj,$apps,$index,$path_replace=true){
 		if($path_replace){
 			if(isset($apps[$index]['media_path'])) $media_url = $media_url.\org\rhaco\net\Path::slash($apps[$index]['media_path'],true,false);
 			if(isset($apps[$index]['template_path'])) $template_path = $template_path.\org\rhaco\net\Path::slash($apps[$index]['template_path'],false,true);
-		}
-		if(isset($apps[$index]['theme_path']) || !empty($theme)){
-			if(empty($theme)) $theme = 'default';
-			$theme = \org\rhaco\net\Path::slash($theme,true,true);
-			$theme_path =\org\rhaco\net\Path::slash((isset($apps[$index]['theme_path']) ? $apps[$index]['theme_path'] : 'theme'),false,false);
-			$template = ((strpos($template,'://') === false) ? $template_path : '').$theme_path.$theme.$template;
-			$media_url = $media_url.$theme_path.$theme;
-		}else{
-			$template = ((strpos($template,'://') === false) ? $template_path : '').$template;
 		}
 		if(!empty($put_block)) $this->template->put_block(\org\rhaco\net\Path::absolute($this->template_path,$put_block));
 		if(isset($apps[$index]['template_super'])) $this->template->template_super($this->template_path.$apps[$index]['template_super']);
@@ -487,7 +474,7 @@ class Flow{
 		$this->template->cp($obj);
 		if(isset($apps[$index]['vars'])) $this->template->cp($apps[$index]['vars']);
 		$this->template->vars('t',new \org\rhaco\flow\module\Helper($this->app_url,$media_url,$apps[$index]['name'],$apps[$index]['num'],$this->entry_file(),$apps,$obj));
-		$src = $this->template->read($template);
+		$src = $this->template->read(\org\rhaco\net\Path::absolute($template_path,$template));
 		/**
 		 * テンプレートの出力
 		 * @param org.rhaco.lang.String $obj

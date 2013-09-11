@@ -6,12 +6,6 @@ namespace org\rhaco\flow;
  */
 interface FlowInterface{
 	/**
-	 * 
-	 * テーマを取得する
-	 * @return string
-	 */
-	public function get_theme();
-	/**
 	 * ブロックを取得する
 	 * @return string
 	 */
