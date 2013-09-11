@@ -472,10 +472,10 @@ class Flow{
 			if(empty($theme)) $theme = 'default';
 			$theme = \org\rhaco\net\Path::slash($theme,true,true);
 			$theme_path =\org\rhaco\net\Path::slash((isset($apps[$index]['theme_path']) ? $apps[$index]['theme_path'] : 'theme'),false,false);
-			$template = $template_path.$theme_path.$theme.$template;
+			$template = ((strpos($template,'://') === false) ? $template_path : '').$theme_path.$theme.$template;
 			$media_url = $media_url.$theme_path.$theme;
 		}else{
-			$template = $template_path.$template;
+			$template = ((strpos($template,'://') === false) ? $template_path : '').$template;
 		}
 		if(!empty($put_block)) $this->template->put_block(\org\rhaco\net\Path::absolute($this->template_path,$put_block));
 		if(isset($apps[$index]['template_super'])) $this->template->template_super($this->template_path.$apps[$index]['template_super']);
@@ -493,7 +493,9 @@ class Flow{
 		 * @param org.rhaco.lang.String $obj
 		 */
 		$this->object_module('before_flow_print_template',\org\rhaco\lang\String::ref($obj,$src));
-		print((string)$obj);
+		$src = (string)$obj;
+		header('Content-Length: '.strlen($src));
+		print($src);
 	}
 	private function str_reflection($package){
 		if(is_object($package)) return $package;
