@@ -160,13 +160,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 			}
 			if(!$this->is_login()){
 				if(!$this->is_sessions('logined_redirect_to')){
-					$current = \org\rhaco\Request::current_url().\org\rhaco\Request::request_string(true);
-					foreach($this->maps as $k => $m){
-						if((isset($m['name']) && $m['name'] == 'logout') || (isset($m['method']) && $m['method'] == 'do_logout')){
-							if(isset($m['format']) && $current == $m['format']) $current = null;
-						}
-					}
-					if(!empty($current)) $this->set_login_redirect($current);
+					$this->set_login_redirect(\org\rhaco\Request::current_url().\org\rhaco\Request::request_string(true));
 				}
 				$req = new \org\rhaco\Request();
 				$this->sess->vars(__CLASS__.'_login_vars',array(time(),$req->ar_vars()));
