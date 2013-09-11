@@ -8,7 +8,6 @@ class PatternBlocks implements \org\rhaco\flow\FlowInterface{
 	private $put_block;
 	private $args;
 	
-	public function get_theme(){}
 	public function get_block(){
 		return $this->put_block;
 	}

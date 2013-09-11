@@ -20,29 +20,10 @@ array(
 			'xml_var_objC'=>\test\FlowVar::ccc(),
 		)
 	),
-	'sample_flow_theme_media'=>array(
-		'theme_path'=>'theme_path',
-		'action'=>'test.SampleMediaFlow',
-		'patterns'=>array(
-			''=>array('name'=>'sample_flow_theme_media_index','action'=>'index','template'=>'sample_media.html'),
-			'hoge'=>array('name'=>'sample_flow_theme_media_hoge','action'=>'hoge','template'=>'sample_media.html'),
-		)
-	),
-	'sample_flow_theme_media_plain'=>array(
-		'media_path'=>'media_path',
-		'action'=>'test.SampleMediaFlow',
-		'patterns'=>array(
-			''=>array('name'=>'sample_flow_theme_media_plain_index','action'=>'index','template'=>'sample_media.html'),
-			'hoge'=>array('name'=>'sample_flow_theme_media_plain_hoge','action'=>'hoge','template'=>'sample_media.html'),
-		)
-	),
 	'map_url'=>array('template'=>'map_url.html'),
-	'plain_theme/template_path_theme_html'=>array('name'=>'template_path_theme_html','template_path'=>'template_path','theme_path'=>'theme_path','template'=>'index.html'),
-	'plain_theme/template_path_html'=>array('name'=>'template_path_html','template'=>'index.html','template_path'=>'template_path'),
 	'module'=>array('name'=>'module','template'=>'module_index.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','modules'=>'test.flow.module.CoreTestModule'),
 	'module_request_flow'=>array('name'=>'module_request_flow','template'=>'module_index.html','modules'=>'test.flow.module.CoreTestModule','action'=>'org.rhaco.flow.parts.RequestFlow::noop'),
 	'sample_flow_html'=>array('name'=>'sample_flow_html','template'=>'sample.html'),
-	'sample_media_flow'=>array('name'=>'sample_media_flow','action'=>'test.SampleMediaFlow','media_path'=>'media_path'),
 	'sample_flow_exception/throw'=>array('name'=>'sample_flow_exception_throw','action'=>'test.SampleExceptionFlow::throw_method','error_template'=>'exception_flow/error.html'),
 	'sample_flow_exception/throw/xml'=>array('name'=>'sample_flow_exception_throw_xml','action'=>'test.SampleExceptionFlow::throw_method'),
 	'sample_flow_exception/throw/xml/package'=>array('name'=>'sample_flow_exception_package_throw_xml','action'=>'test.SampleExceptionFlow::throw_method_package'),
@@ -71,29 +52,12 @@ array(
 	'notemplate'=>array('name'=>'notemplate','action'=>'test.CoreTestNotTemplate::aaa'),
 	
 	'put_block'=>array('name'=>'put_block','action'=>'test.CoreTestPutBlock::index','template'=>'put_block.html'),
-	'theme'=>array('name'=>'theme','action'=>'test.CoreTestTheme::index','template'=>'abc.html','theme_path'=>'custom_theme'),
-	'theme_maps'=>array('name'=>'theme_maps','action'=>'test.CoreTestTheme::index','template'=>'abc.html','theme_path'=>'custom_theme','theme_path'=>'custom_theme'),
-
-	'theme_none'=>array('name'=>'theme_none','action'=>'test.CoreTestTheme::index','template'=>'abc.html'),
 	'sample_flow'=>array('name'=>'sample_flow','action'=>'test.SampleFlow'),
 
 	'set_session'=>array('name'=>'set_session','action'=>'test.flow.Session::set_session'),
 	'get_session'=>array('name'=>'get_session','action'=>'test.flow.Session::get_session'),
 	'plain_noop'=>array('request_redirect','action'=>'test.flow.PlainFlow::noop'),
 	
-	'sample_flow_theme'=>array(
-		'theme_path'=>'theme_path',
-		'patterns'=>array(
-			''=>array('name'=>'sample_flow_theme_index','action'=>'test.SampleFlow::index','template'=>'sample.html'),
-			'hoge'=>array('name'=>'sample_flow_theme_hoge','action'=>'test.SampleFlow::hoge','template'=>'sample.html'),
-		)
-	),
-	'sample_flow_theme_not_path'=>array(
-		'patterns'=>array(
-			''=>array('name'=>'sample_flow_theme_not_index','action'=>'test.SampleFlow::index','template'=>'sample.html'),
-			'hoge'=>array('name'=>'sample_flow_theme_not_hoge','action'=>'test.SampleFlow::hoge','template'=>'sample.html'),
-		)
-	),
 	'upload_multi'=>array('name'=>'upload_multi','action'=>'test.SampleFlow::upload_multi'),
 	'upload_value'=>array('name'=>'upload_value','action'=>'test.SampleFlow::upload_value'),
 	'upload_file'=>array('name'=>'upload_file','action'=>'test.SampleFlow::upload_file'),
@@ -183,165 +147,6 @@ meq('BBB',$b->body());
 meq('b',$b->body());
 nmeq('CCC',$b->body());
 */
-
-/***
-# theme
-$b = b();
-$b->do_get(test_map_url('theme'));
-meq('AAA',$b->body());
-meq('BBB',$b->body());
-meq('NONE',$b->body());
-meq("/resources/media/custom_theme/default/123\">a</a>",$b->body());
-
-$b = b();
-$b->vars('hoge','aaa');
-$b->do_get(test_map_url('theme'));
-meq('AAA',$b->body());
-meq('BBB',$b->body());
-meq('xxx',$b->body());
-meq('/resources/media/custom_theme/aaa/123',$b->body());
-
-$b = b();
-$b->vars('hoge','bbb');
-$b->do_get(test_map_url('theme'));
-meq('AAA',$b->body());
-meq('BBB',$b->body());
-meq('yyy',$b->body());
-meq('/resources/media/custom_theme/bbb/123',$b->body());
-*/
-
-/***
-# theme_maps
-$b = b();
-$b->do_get(test_map_url('theme_maps'));
-meq('AAA',$b->body());
-meq('BBB',$b->body());
-meq('NONE',$b->body());
-meq('/resources/media/custom_theme/default/123',$b->body());
-
-$b = b();
-$b->vars('hoge','aaa');
-$b->do_get(test_map_url('theme_maps'));
-meq('AAA',$b->body());
-meq('BBB',$b->body());
-meq('xxx',$b->body());
-meq('/resources/media/custom_theme/aaa/123',$b->body());
-
-$b = b();
-$b->vars('hoge','bbb');
-$b->do_get(test_map_url('theme_maps'));
-meq('AAA',$b->body());
-meq('BBB',$b->body());
-meq('yyy',$b->body());
-meq('/resources/media/custom_theme/bbb/123',$b->body());
-*/
-
-/***
-# theme_none
-$b = b();
-$b->do_get(test_map_url('theme_none'));
-eq(403,$b->status());
-
-$b = b();
-$b->vars('hoge','aaa');
-$b->do_get(test_map_url('theme_none'));
-eq(403,$b->status());
-
-$b = b();
-$b->vars('hoge','bbb');
-$b->do_get(test_map_url('theme_none'));
-eq(403,$b->status());
-*/
-
-/***
-# sample_flow
-
-$b = b();
-
-$b->do_get(test_map_url('sample_flow_html'));
-eq('SAMPLE',$b->body());
-
-$b->do_get(test_map_url('template_path_html'));
-eq('INDEX',$b->body());
-
-$b->do_get(test_map_url('template_path_theme_html'));
-eq('THEME',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_index'));
-eq('DEFAULT',$b->body());
-$b->do_get(test_map_url('sample_flow_theme_index').'?view=blue');
-eq('BLUE',$b->body());
-$b->do_get(test_map_url('sample_flow_theme_index').'?view=red');
-eq('RED',$b->body());
-$b->do_get(test_map_url('sample_flow_theme_index').'?view=green');
-eq('DEFAULT',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_hoge'));
-eq('DEFAULT',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_not_index'));
-eq('SAMPLE',$b->body());
-$b->do_get(test_map_url('sample_flow_theme_not_index').'?view=blue');
-eq('blue',$b->body());
-$b->do_get(test_map_url('sample_flow_theme_not_index').'?view=red');
-eq('red',$b->body());
-$b->do_get(test_map_url('sample_flow_theme_not_index').'?view=green');
-eq('default',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_not_hoge'));
-eq('SAMPLE',$b->body());
-
-
-$b->do_get(test_map_url('sample_flow/index'));
-eq('SAMPLE_FLOW_INDEX',$b->body());
-$b->do_get(test_map_url('sample_flow/index').'?view=blue');
-eq('SAMPLE_FLOW_BLUE',$b->body());
-$b->do_get(test_map_url('sample_flow/index').'?view=red');
-eq('SAMPLE_FLOW_RED',$b->body());
-$b->do_get(test_map_url('sample_flow/index').'?view=green');
-eq('SAMPLE_FLOW_DEFAULT',$b->body());
-
-$b->do_get(test_map_url('sample_flow/hoge'));
-eq('SAMPLE_FLOW_HOGE',$b->body());
-*/
-
-
-/***
-# sample_media_flow
-
-$b = b();
-
-$b->do_get(test_map_url('sample_media_flow/index'));
-eq(true,(1 == preg_match('/\/package\/resources\/media\/\d+\/hoge.jpg/',$b->body())));
-
-$b->do_get(test_map_url('sample_media_flow/hoge'));
-eq(true,(1 == preg_match('/\/package\/resources\/media\/\d+\/hoge.jpg/',$b->body())));
-
-$b->do_get(test_map_url('sample_flow_theme_media_index'));
-meq('resources/media/theme_path/default/hoge.jpg',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_media_index').'?view=blue');
-meq('resources/media/theme_path/blue/hoge.jpg',$b->body());
-$b->do_get(test_map_url('sample_flow_theme_media_index').'?view=red');
-meq('resources/media/theme_path/red/hoge.jpg',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_media_hoge'));
-meq('resources/media/theme_path/default/hoge.jpg',$b->body());
-
-
-$b->do_get(test_map_url('sample_flow_theme_media_index'));
-meq('resources/media/theme_path/default/hoge.jpg',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_media_hoge'));
-meq('resources/media/theme_path/default/hoge.jpg',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_media_plain_index'));
-meq('/resources/media/media_path/hoge.jpg',$b->body());
-
-$b->do_get(test_map_url('sample_flow_theme_media_plain_hoge'));
-meq('/resources/media/media_path/hoge.jpg',$b->body());
-*/
-
 
 /***
 # sample_exception_flow
