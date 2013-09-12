@@ -172,7 +172,8 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 					if(((isset($m['name']) && $m['name'] == 'login')) || (isset($m['method']) && $this->select_map['class'] == $m['class'] && $m['method'] == 'do_login') 
 						&& isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
 				}
-				throw new \LogicException('name `login` not found');
+				\org\rhaco\net\http\Header::send_status(401);
+				if(!\org\rhaco\Exceptions::has()) \org\rhaco\Exceptions::add(new \LogicException('Unauthorized'),'do_login');
 			}
 		}
 	}
