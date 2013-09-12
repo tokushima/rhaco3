@@ -173,7 +173,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 						&& isset($m['format'])) return \org\rhaco\net\http\Header::redirect($m['format']);
 				}
 				\org\rhaco\net\http\Header::send_status(401);
-				if(!\org\rhaco\Exceptions::has()) \org\rhaco\Exceptions::add(new \LogicException('Unauthorized'),'do_login');
+				throw new \LogicException('Unauthorized');
 			}
 		}
 	}
