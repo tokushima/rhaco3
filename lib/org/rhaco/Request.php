@@ -98,17 +98,15 @@ class Request implements \IteratorAggregate{
 	 * @return string
 	 */
 	static public function current_url($port_https=443,$port_http=80){
-		$port = isset($_SERVER['HTTPS']) ? (($_SERVER['HTTPS'] === 'on') ? $port_https : $port_http) : null;
-		if(!isset($port)){
-			if(isset($_SERVER['HTTP_X_FORWARDED_PORT'])){
-				$port = $_SERVER['HTTP_X_FORWARDED_PORT'];
-			}else if(isset($_SERVER['HTTP_X_FORWARDED_PROTO'])){
-				$port = ($_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? $port_https : $port_http;
-			}else if(isset($_SERVER['SERVER_PORT']) && !isset($_SERVER['HTTP_X_FORWARDED_HOST'])){
-				$port = $_SERVER['SERVER_PORT'];
-			}else{
-				$port = $port_http;
-			}
+		$port = $port_http;
+		if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'){
+			$port = $port_https;
+		}else if(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
+			$port = $port_https;
+		}else if(isset($_SERVER['HTTP_X_FORWARDED_PORT'])){
+			$port = $_SERVER['HTTP_X_FORWARDED_PORT'];
+		}else if(isset($_SERVER['SERVER_PORT']) && !isset($_SERVER['HTTP_X_FORWARDED_HOST'])){
+			$port = $_SERVER['SERVER_PORT'];
 		}
 		$server = preg_replace("/^(.+):\d+$/","\\1",isset($_SERVER['HTTP_X_FORWARDED_HOST']) ?
 					$_SERVER['HTTP_X_FORWARDED_HOST'] :
