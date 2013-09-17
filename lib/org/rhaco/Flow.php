@@ -270,7 +270,11 @@ class Flow{
 					if(isset($apps[$k]['secure']) && $apps[$k]['secure'] === true && \org\rhaco\Conf::get('secure',true) !== false){
 						$this->template->secure(true);
 						if(substr($current_url,0,5) === 'http:' &&
-							(!isset($_SERVER['HTTP_X_FORWARDED_HOST']) || (isset($_SERVER['HTTP_X_FORWARDED_PORT']) || isset($_SERVER['HTTP_X_FORWARDED_PROTO'])))
+							(
+								!isset($_SERVER['HTTP_X_FORWARDED_HOST']) || 
+								(isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] != 443) || 
+								(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] != 'https')
+							)
 						){
 							header('Location: '.preg_replace("/^.+(:\/\/.+)$/","https\\1",$current_url));
 							exit;
