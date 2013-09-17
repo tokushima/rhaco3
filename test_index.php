@@ -1,5 +1,5 @@
 <?php
-include_once('bootstrap.php');
+include_once(__DIR__.'/bootstrap.php');
 
 /**
  * @name rhaco.org
