@@ -91,7 +91,7 @@ class Session extends \org\rhaco\Object{
 	final public function gc($maxlifetime){
 		/**
 		 * ガベージコレクタ
-		 * @param integer $maxlifetime
+		 * @param integer $maxlifetime session.gc_maxlifetime
 		 * @return boolean
 		 */
 		return static::module('session_gc',$maxlifetime);
