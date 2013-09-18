@@ -1,5 +1,10 @@
-##rhaco3 PHP framework (PHP 5 >= 5.3.0)
+##rhaco3
+__2010-11-11__
+
+PHP framework (PHP 5 >= 5.3.0)
+
 ( no composer version: <https://github.com/tokushima/rhaco3_old> )
+
 
 ## Install
 
