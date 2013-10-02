@@ -261,7 +261,11 @@ class Http{
 						$s = explode('=',$q,2);
 						if(isset($s[1])){
 							if(!is_file($f=urldecode($s[1]))) throw new \RuntimeException($f.' not found');
-							$vars[urldecode($s[0])] = '@'.$f;
+							if(class_exists('\\CURLFile',false)){
+								$vars[urldecode($s[0])] = new \CURLFile($f);
+							}else{
+								$vars[urldecode($s[0])] = '@'.$f;
+							}
 						}
 					}
 					curl_setopt($this->resource,CURLOPT_POSTFIELDS,$vars);
