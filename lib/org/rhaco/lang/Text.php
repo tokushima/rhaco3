@@ -45,7 +45,7 @@ class Text{
 	static public function htmldecode($value){
 		if(!empty($value) && is_string($value)){
 			$value = mb_convert_encoding($value,'UTF-8',mb_detect_encoding($value));
-			$value = preg_replace("/&#[xX]([0-9a-fA-F]+);/eu","'&#'.hexdec('\\1').';'",$value);
+			$value = preg_replace_callback("/&#[xX]([0-9a-fA-F]+);/u",function($m){return '&#'.hexdec($m[1]).';';},$value);
 			$value = mb_decode_numericentity($value,array(0x0,0x10000,0,0xfffff),"UTF-8");
 			$value = html_entity_decode($value,ENT_QUOTES,"UTF-8");
 			$value = str_replace(array("\\\"","\\'","\\\\"),array("\"","\'","\\"),$value);

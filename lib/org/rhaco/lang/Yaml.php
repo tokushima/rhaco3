@@ -11,8 +11,8 @@ class Yaml{
 	 * @return mixed[]
 	 */
 	static public function decode($src){
-		$src = preg_replace("/([\"\'])(.+)\\1/me",'str_replace(array("#",":"),array("__SHAPE__","__COLON__"),"\\0")',$src);
-		$src = preg_replace("/^([\t]+)/me",'str_replace("\t"," ","\\1")',str_replace(array("\r\n","\r","\n"),"\n",$src));
+		$src = preg_replace_callback("/([\"\'])(.+)\\1/m",function($m){return str_replace(array("#",":"),array("__SHAPE__","__COLON__"),$m[0]);},$src);
+		$src = preg_replace_callback("/^([\t]+)/m",function($m){return str_replace("\t"," ",$m[1]);},str_replace(array("\r\n","\r","\n"),"\n",$src));
 		$src = preg_replace("/#.+$/m","",$src);
 		$stream = array();
 
