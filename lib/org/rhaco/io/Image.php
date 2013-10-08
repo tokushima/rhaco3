@@ -77,8 +77,10 @@ class Image extends \org\rhaco\Object{
 				default:
 					throw new Image\ImageException();
 			}
+		}catch(Image\ImageException $e){
+			throw new Image\ImageException('invalid data: '.$size[2]);
 		}catch(\Exception $e){
-			throw new Image\ImageException('invalid data');
+			throw new Image\ImageException($e->getMessage());
 		}
 		return $self;
 	}
