@@ -452,8 +452,8 @@ abstract class Dao extends \org\rhaco\Object{
 						$q[] = Q::eq($c,$this->{$c}());
 					}
 				}
-				foreach($this->primary_columns() as $column){
-					if(null !== ($pv = $this->{$column->name()})) $q[] = Q::neq($column->name(),$this->{$column->name()});
+				foreach($this->primary_columns() as $primary){
+					if(null !== ($pv = $this->{$primary->name()})) $q[] = Q::neq($primary->name(),$this->{$primary->name()});
 				}
 				if(0 < call_user_func_array(array(get_class($this),'find_count'),$q)){
 					\org\rhaco\Exceptions::add(new \org\rhaco\store\db\exception\UniqueDaoException($name.' unique'),$name);
