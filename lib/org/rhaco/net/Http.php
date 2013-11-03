@@ -125,7 +125,7 @@ class Http{
 	 * @return integer
 	 */
 	public function status(){
-		return $this->status;
+		return empty($this->status) ? null : (int)$this->status;
 	}
 	/**
 	 * HEADリクエスト
@@ -241,13 +241,6 @@ class Http{
 			list($url) = explode('?',$url,2);
 		}
 		switch($method){
-			case 'POST': curl_setopt($this->resource,CURLOPT_POST,true); break;
-			case 'GET': curl_setopt($this->resource,CURLOPT_HTTPGET,true); break;
-			case 'HEAD': curl_setopt($this->resource,CURLOPT_NOBODY,true); break;
-			case 'PUT': curl_setopt($this->resource,CURLOPT_PUT,true); break;
-			case 'DELETE': curl_setopt($this->resource,CURLOPT_CUSTOMREQUEST,'DELETE'); break;
-		}
-		switch($method){
 			case 'POST':
 				if(!empty($this->request_file_vars)){
 					$vars = array();
@@ -274,6 +267,13 @@ class Http{
 			case 'PUT':
 			case 'DELETE':
 				$url = $url.(!empty($this->request_vars) ? '?'.http_build_query($this->request_vars) : '');
+		}
+		switch($method){
+			case 'POST': curl_setopt($this->resource,CURLOPT_POST,true); break;
+			case 'GET': curl_setopt($this->resource,CURLOPT_HTTPGET,true); break;
+			case 'HEAD': curl_setopt($this->resource,CURLOPT_NOBODY,true); break;
+			case 'PUT': curl_setopt($this->resource,CURLOPT_PUT,true); break;
+			case 'DELETE': curl_setopt($this->resource,CURLOPT_CUSTOMREQUEST,'DELETE'); break;
 		}
 		curl_setopt($this->resource,CURLOPT_URL,$url);
 		curl_setopt($this->resource,CURLOPT_FOLLOWLOCATION,false);
@@ -349,7 +349,7 @@ class Http{
 		$this->url = trim(curl_getinfo($this->resource,CURLINFO_EFFECTIVE_URL));
 		$this->status = curl_getinfo($this->resource,CURLINFO_HTTP_CODE);
 
-		if($err_code = curl_errno($this->resource) > 0){
+		if(($err_code = curl_errno($this->resource)) > 0){
 			if($err_code == 47) return $this;
 			throw new \RuntimeException($err_code.': '.curl_error($this->resource));
 		}
