@@ -346,7 +346,7 @@ class Http{
 			fclose($fp);
 		}
 
-		$this->url = trim(curl_getinfo($this->resource,CURLINFO_EFFECTIVE_URL));
+		$this->url = curl_getinfo($this->resource,CURLINFO_EFFECTIVE_URL);
 		$this->status = curl_getinfo($this->resource,CURLINFO_HTTP_CODE);
 
 		if(($err_code = curl_errno($this->resource)) > 0){

@@ -1,4 +1,1168 @@
 <?php
+namespace angela{
+	
+class Conf{
+	static private $conf_file;
+	static private $entry_dir;
+	static private $test_dir;
+	static private $lib_dir;
+
+	static private $urls;
+	static private $setup_func;
+	static private $output_obj;
+
+	static private $start_time;
+	static private $ini_error_log;
+	static private $ini_error_log_start_size;
+
+	static public function set($path){
+		self::$conf_file = $path;
+	}
+	static public function init($rootdir,$params,$conf_file=null){
+		self::$start_time = microtime(true);
+		self::$ini_error_log = ini_get('error_log');
+		self::$ini_error_log_start_size = (empty(self::$ini_error_log) || !is_file(self::$ini_error_log)) ? 0 : filesize(self::$ini_error_log);
+		
+		$conf = array();
+		self::$conf_file = empty($conf_file) ? null : realpath($conf_file);
+		if(is_file(self::$conf_file)){
+			$conf = include(self::$conf_file);
+			if(!is_array($conf)) throw new \RuntimeException('invalid '.$f);
+		}
+		foreach($conf as $k => $v){
+			$params[$k] = $v;
+		}
+		
+		$path_func = function($p){
+			$p = str_replace('\\','/',$p);
+			if(substr($p,-1) != '/') $p = $p.'/';
+			return $p;
+		};
+		if(substr($rootdir,-1) != '/') $rootdir = $rootdir.'/';
+		self::$entry_dir = $rootdir;
+		self::$test_dir = isset($params['test_dir']) ? $path_func($params['test_dir']) : self::$entry_dir.'test/';
+		self::$lib_dir = isset($params['lib_dir']) ? $path_func($params['lib_dir']) : self::$entry_dir.'lib/';
+		
+		set_include_path(get_include_path()
+			.PATH_SEPARATOR.self::$lib_dir
+		);
+		spl_autoload_register(function($c){
+			$cp = str_replace('\\','//',(($c[0] == '\\') ? substr($c,1) : $c));
+			foreach(explode(PATH_SEPARATOR,get_include_path()) as $p){
+				if(!empty($p) && ($r = realpath($p)) !== false && is_file($f=($r.'/'.$cp.'.php'))){
+					require_once($f);
+					break;
+				}
+			}
+			return (class_exists($c,false) || interface_exists($c,false) || (function_exists('trait_exists') && trait_exists($c,false)));
+		},true,false);		
+		
+		if(isset($params['urls']) && is_array($params['urls'])) self::$urls = $params['urls'];
+		if(isset($params['setup_func']) ) self::$setup_func = $params['setup_func'];
+		if(isset($params['output'])){
+			$r = new \ReflectionClass("\\".str_replace('.',"\\",$params['output']));
+			self::$output_obj = $r->newInstance();
+		}
+	}
+	static public function output_obj(){
+		return isset(self::$output_obj) ? self::$output_obj : new \angela\ReportStdout();
+	}
+	static public function error_log(){
+		$ini_error_log_end_size = (empty(self::$ini_error_log) || !is_file(self::$ini_error_log)) ? 0 : filesize(self::$ini_error_log);
+		return ($ini_error_log_end_size != self::$ini_error_log_start_size) ? file_get_contents(self::$ini_error_log,false,null,self::$ini_error_log_start_size) : null;
+	}
+	static public function entry_dir(){
+		return self::$entry_dir;
+	}
+	/**
+	 * ライブラリのパス
+	 */
+	static public function lib_dir(){
+		return self::$lib_dir;
+	}
+	/**
+	 * テストのパス
+	 */
+	static public function test_dir(){
+		return self::$test_dir;
+	}
+	/**
+	 * エントリのURL一覧
+	 * @return array
+	 */
+	static public function urls(){
+		return self::$urls;
+	}
+	static public function call_setup_func(){
+		if(isset(self::$setup_func)){
+			call_user_func(self::$setup_func);
+		}
+	}
+	static public function info($bool=false){
+		if(!empty(self::$conf_file)){
+			print('load configuration file: '.self::$conf_file.PHP_EOL);
+		}
+		if(!empty(self::$output_obj)){
+			print('load output class: '.get_class(self::$output_obj).PHP_EOL);
+		}
+		print('searching entry '.self::$entry_dir.PHP_EOL);
+		print('searching test '.self::$test_dir.PHP_EOL);
+		print('searching lib  '.self::$lib_dir.PHP_EOL);
+		print(PHP_EOL);
+
+		if($bool){
+			print('executing test ... '.PHP_EOL);
+		}
+	}
+}
+class AssertException extends \Exception{
+}
+class Assert{
+	static private $failure_info = array('',0,null,null);
+	
+	static private function debug_info($file,$line){
+		if(!isset($file)){
+			list(,$debug) = debug_backtrace(false);
+			$line = $debug['line'];
+			$file = $debug['file'];
+		}
+		if(strpos($file,'eval()\'d') !== false){
+			$file = \angela\Runner::current_file();
+		}
+		return array($file,$line);
+	}
+	public function equals($arg1,$arg2,$file=null,$line=null){
+		if(!(self::expvar($arg1) === self::expvar($arg2))){
+			list($file,$line) = self::debug_info($file, $line);
+			self::$failure_info = array($file,$line,var_export($arg1,true),var_export($arg2,true));
+			throw new \angela\AssertException();
+		}
+	}
+	public function not_equals($arg1,$arg2,$file=null,$line=null){
+		if(!(self::expvar($arg1) !== self::expvar($arg2))){
+			list($file,$line) = self::debug_info($file, $line);
+			self::$failure_info = array($file,$line,var_export($arg1,true),var_export($arg2,true));
+			throw new \angela\AssertException();
+		}
+	}
+	public function match_equals($keyword,$src,$file=null,$line=null){
+		if($src instanceof \angela\Http) $src = $src->body();
+		$valid = array();
+		
+		if(!is_array($keyword)) $keyword = array($keyword);
+		foreach($keyword as $q){
+			if(mb_strpos($src,$q) !== false){
+				$valid[] = $q;
+			}
+		}
+		if(!(self::expvar($keyword) === self::expvar($valid))){
+			list($file,$line) = self::debug_info($file, $line);
+			self::$failure_info = array($file,$line,var_export($keyword,true),var_export($valid,true));
+			throw new \angela\AssertException();
+		}
+	}
+	public function match_not_equals($keyword,$src,$file=null,$line=null){
+		if($src instanceof \angela\Http) $src = $src->body();
+		$valid = array();
+	
+		if(!is_array($keyword)) $keyword = array($keyword);
+		foreach($keyword as $q){
+			if(mb_strpos($src,$q) === false){
+				$valid[] = $q;
+			}
+		}
+		if(!(self::expvar($keyword) === self::expvar($valid))){
+			list($file,$line) = self::debug_info($file, $line);
+			self::$failure_info = array($file,$line,var_export($keyword,true),var_export($valid,true));
+			throw new \angela\AssertException();
+		}
+	}	
+	static public function failure_info(){
+		return self::$failure_info;
+	}
+	static private function expvar($var){
+		if(is_numeric($var)) return strval($var);
+		if(is_object($var)) $var = get_object_vars($var);
+		if(is_array($var)){
+			foreach($var as $key => $v){
+				$var[$key] = self::expvar($v);
+			}
+		}
+		return $var;
+	}
+}
+class Runner{
+	static private $result = array();
+
+	static private $current_entry;
+	static private $current_class;
+	static private $current_method;
+	static private $current_file;
+
+	static private $current_block_start_time;
+
+	static private $exec_file = array();
+	static private $exec_file_exception = array();
+	static private $has_exception = false;
+
+	static public function get(){
+		return self::$result;
+	}
+	static public function has_exception(){
+		return self::$has_exception;
+	}
+	static public function current_file(){
+		return self::$current_file;
+	}
+	static public function current_entry(){
+		return self::$current_entry;
+	}
+
+	static private function color_format($msg,$color='30'){
+		return (php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg;
+	}
+	/**
+	 * ディレクトリ内のファイルをテスト
+	 * @param string $tests_path
+	 * @param string $class_name
+	 * @param string $method_name
+	 * @param string $block_name
+	 * @param boolean $print_progress
+	 * @param boolean $include_tests
+	 * @return boolean
+	 */
+	static private function dir_run($tests_path,$class_name,$method_name,$block_name,$print_progress,$include_tests){
+		if(is_dir($d=$tests_path.str_replace('.','/',$class_name))){
+			foreach(self::file_list($d) as $f){
+				if(self::is($f)){
+					self::run($f->getPathname(),$method_name,$block_name,$print_progress,$include_tests);
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * テストを実行する
+	 * @param string $class_name クラス名
+	 * @param string $method メソッド名
+	 * @param string $block_name ブロック名
+	 * @param boolean $print_progress 実行中のブロック名を出力するか
+	 * @param boolean $include_tests testsディレクトリも参照するか
+	 */
+	static private function run($class_name,$method_name=null,$block_name=null,$print_progress=false,$include_tests=false){
+		$entry_path = \angela\Conf::entry_dir();
+		$tests_path = \angela\Conf::test_dir();
+
+		if($class_name == __FILE__) return new self();
+
+		if(is_file($class_name)){
+			$doctest = (strpos($class_name,$tests_path) === false) ? self::get_entry_doctest($class_name) : self::get_unittest($class_name);
+		}else if(is_file($f=$entry_path.$class_name.'.php')){
+			$doctest = self::get_entry_doctest($f);
+		}else if(is_file($f=$tests_path.str_replace('.','/',$class_name).'.php')){
+			$doctest = self::get_unittest($f);
+		}else if(is_file($f=$tests_path.$class_name)){
+			$doctest = self::get_unittest($f);
+		}else if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true)
+				|| interface_exists($f,true)
+				|| (function_exists('trait_exists') && trait_exists($f,true))
+		){
+			if(empty($method_name)) self::dir_run($tests_path,$class_name,$method_name,$block_name,$print_progress,$include_tests);
+			$doctest = self::get_doctest($f);
+		}else if(self::dir_run($tests_path,$class_name,$method_name,$block_name,$print_progress,$include_tests)){
+			return new self();
+		}else{
+			throw new \ErrorException($class_name.' test not found');
+		}
+		self::$current_file = $doctest['filename'];
+		self::$current_class = ($doctest['type'] == 1) ? $doctest['name'] : null;
+		self::$current_entry = ($doctest['type'] == 2 || $doctest['type'] == 3) ? $doctest['name'] : null;
+		self::$current_method = null;
+		$s_block_name = (substr($block_name,-4) == '.php') ? substr(basename($block_name),0,-4) : $block_name;
+
+		foreach($doctest['tests'] as $test_method_name => $tests){
+			if($method_name === null || $method_name === $test_method_name){
+				self::$current_method = $test_method_name;
+				$starttime = microtime(true);
+				$test_result = array('none',0);
+
+				if(!empty($tests['blocks'])){
+					foreach($tests['blocks'] as $test_block){
+						list($name,$label,$block) = $test_block;
+						$exec_block_name = ' #'.(($class_name == $name) ? '' : $name);
+						$current_block_start_time = microtime(true);
+						$s_name = (substr($name,-4) == '.php') ? substr(basename($name),0,-4) : $name;
+
+						if($block_name === null || $s_block_name === $s_name){
+							if($print_progress && substr(PHP_OS,0,3) != 'WIN') self::stdout($exec_block_name);
+							try{
+								ob_start();
+								\angela\Conf::call_setup_func();
+
+								if($doctest['type'] == 3){
+									self::include_setup_teardown($doctest['filename'],'__setup__.php');
+									include($doctest['filename']);
+								}else{
+									if(isset($doctest['tests']['@']['__setup__'])) eval($doctest['tests']['@']['__setup__'][2]);
+									eval($block);
+								}
+								$result = ob_get_clean();
+								if(preg_match('/(Parse|Fatal) error:.+/',$result,$match)){
+									$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$result,$line) ?
+											'Parse error: syntax error '.$doctest['filename'].' code on line '.$line[1]
+											: $match[0]);
+									throw new \ErrorException($err);
+								}
+								$test_result = array(
+										'success',
+										(round(microtime(true) - $current_block_start_time,3))
+								);
+							}catch(\angela\AssertException $e){
+								self::$has_exception = true;
+								$test_result = array(
+										'fail',
+										(round(microtime(true) - $current_block_start_time,3)),
+										\angela\Assert::failure_info()
+								);
+							}catch(\Exception $e){
+								self::$has_exception = true;
+								if(ob_get_level() > 0) $result = ob_get_clean();
+								list($message,$file,$line) = array($e->getMessage(),$e->getFile(),$e->getLine());
+								$trace = $e->getTrace();
+								$eval = false;
+
+								foreach($trace as $k => $t){
+									if(isset($t['class']) && isset($t['function']) && ($t['class'].'::'.$t['function']) == __METHOD__ && isset($trace[$k-2])
+											&& isset($trace[$k-1]['file']) && $trace[$k-1]['file'] == __FILE__ && isset($trace[$k-1]['function']) && $trace[$k-1]['function'] == 'eval'
+									){
+										$file = self::$current_file;
+										$line = $trace[$k-2]['line'];
+										$eval = true;
+										break;
+									}
+								}
+								if(!$eval && isset($trace[0]['file']) && self::$current_file == $trace[0]['file']){
+									$file = $trace[0]['file'];
+									$line = $trace[0]['line'];
+								}
+								$test_result = array(
+										'exception',
+										(round(microtime(true) - $current_block_start_time,3)),
+										array($file,$line,$message)
+								);
+							}
+							if($doctest['type'] == 3){
+								self::include_setup_teardown($doctest['filename'],'__teardown__.php');
+							}else{
+								if(isset($doctest['tests']['@']['__teardown__'])) eval($doctest['tests']['@']['__teardown__'][2]);
+							}
+							if($print_progress && substr(PHP_OS,0,3) != 'WIN') self::stdout("\033[".strlen($exec_block_name).'D'."\033[0K");
+						}
+					}
+				}
+				$time = round((microtime(true) - (float)$starttime),4);
+				self::$result[self::$current_file][self::$current_class][self::$current_method][] = $test_result;
+			}
+		}
+		if($include_tests && ($doctest['type'] == 1 || $doctest['type'] == 2)){
+			$test_name = ($doctest['type'] == 1) ? str_replace("\\",'/',substr($doctest['name'],1)) : $doctest['name'];
+			if(!empty($test_name) && is_dir($d=($tests_path.str_replace(array('.'),'/',$test_name)))){
+				foreach(self::file_list($d) as $f){
+					if(self::is($f) && ($block_name === null || $s_block_name === substr($f->getFilename(),0,-4))){
+						self::run($f->getPathname(),null,null,$print_progress,$include_tests);
+					}
+				}
+			}
+		}
+	}
+	static private function include_setup_teardown($test_file,$include_file){
+		if(strpos($test_file,\angela\Conf::test_dir()) === 0){
+			$inc = array();
+			$dir = dirname($test_file);
+			while($dir.'/' != \angela\Conf::test_dir()){
+				if(is_file($f=($dir.'/'.$include_file))) array_unshift($inc,$f);
+				$dir = dirname($dir);
+			}
+			if(is_file($f=(\angela\Conf::test_dir().$include_file))) array_unshift($inc,$f);
+			foreach($inc as $i) include($i);
+		}else if(is_file($f=(dirname($test_file).$include_file))){
+			include($f);
+		}
+	}
+	static private function get_unittest($filename){
+		$result = array();
+		$result['@']['line'] = 0;
+		$result['@']['blocks'][] = array($filename,null,$filename,0);
+		$name = (preg_match("/^".preg_quote(\angela\Conf::test_dir(),'/')."(.+)\/[^\/]+\.php$/",$filename,$match)) ? $match[1] : null;
+		return array('filename'=>$filename,'type'=>3,'name'=>$name,'tests'=>$result);
+	}
+	static private function get_entry_doctest($filename){
+		$result = array();
+		$entry = basename($filename,'.php');
+		$src = file_get_contents($filename);
+		if(preg_match_all("/\/\*\*"."\*.+?\*\//s",$src,$doctests,PREG_OFFSET_CAPTURE)){
+			foreach($doctests[0] as $doctest){
+				if(isset($doctest[0][5]) && $doctest[0][5] != '*'){
+					$test_start_line = sizeof(explode("\n",substr($src,0,$doctest[1]))) - 1;
+					$test_block = str_repeat("\n",$test_start_line).preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array("/"."***","*"."/"),"",$doctest[0]));
+					$test_block_name = preg_match("/^[\s]*#([^#].*)/",trim($test_block),$match) ? trim($match[1]) : null;
+					$test_block_label = preg_match("/^[\s]*##(.+)/m",trim($test_block),$match) ? trim($match[1]) : null;
+					if(trim($test_block) == '') $test_block = null;
+					$result['@']['line'] = $test_start_line;
+					$result['@']['blocks'][] = array($test_block_name,$test_block_label,$test_block,$test_start_line);
+				}
+			}
+			self::merge_setup_teardown($result);
+		}
+		return array('filename'=>$filename,'type'=>2,'name'=>$entry,'tests'=>$result);
+	}
+	static private function get_doctest($class_name){
+		$result = array();
+		$rc = new \ReflectionClass($class_name);
+		$filename = $rc->getFileName();
+		$class_src_lines = file($filename);
+		$class_src = implode('',$class_src_lines);
+
+		foreach($rc->getMethods() as $method){
+			if($method->getDeclaringClass()->getName() == $rc->getName()){
+				$method_src = implode('',array_slice($class_src_lines,$method->getStartLine()-1,$method->getEndLine()-$method->getStartLine(),true));
+				$result = array_merge($result,self::get_method_doctest($rc->getName(),$method->getName(),$method->getStartLine(),$method->isPublic(),$method_src));
+				$class_src = str_replace($method_src,str_repeat("\n",sizeof(explode("\n",$method_src)) - 1),$class_src);
+			}
+		}
+		$result = array_merge($result,self::get_method_doctest($rc->getName(),'@',1,false,$class_src));
+		self::merge_setup_teardown($result);
+		return array('filename'=>$filename,'type'=>1,'name'=>$rc->getName(),'tests'=>$result);
+	}
+	static private function merge_setup_teardown(&$result){
+		if(isset($result['@']['blocks'])){
+			foreach($result['@']['blocks'] as $k => $block){
+				if($block[0] == '__setup__' || $block[0] == '__teardown__'){
+					$result['@'][$block[0]] = array($result['@']['blocks'][$k][3],null,$result['@']['blocks'][$k][2]);
+					unset($result['@']['blocks'][$k]);
+				}
+			}
+		}
+	}
+	static private function get_method_doctest($class_name,$method_name,$method_start_line,$is_public,$method_src){
+		$result = array();
+		if(preg_match_all("/\/\*\*"."\*.+?\*\//s",$method_src,$doctests,PREG_OFFSET_CAPTURE)){
+			foreach($doctests[0] as $doctest){
+				if(isset($doctest[0][5]) && $doctest[0][5] != "*"){
+					$test_start_line = $method_start_line + substr_count(substr($method_src,0,$doctest[1]),"\n") - 1;
+					$test_block = str_repeat("\n",$test_start_line).str_replace(array('self::','new self(','extends self{'),array($class_name.'::','new '.$class_name.'(','extends '.$class_name.'{'),preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."***","*"."/"),"",$doctest[0])));
+					$test_block_name = preg_match("/^[\s]*#([^#].*)/",trim($test_block),$match) ? trim($match[1]) : null;
+					$test_block_label = preg_match("/^[\s]*##(.+)/m",trim($test_block),$match) ? trim($match[1]) : null;
+					if(trim($test_block) == '') $test_block = null;
+					$result[$method_name]['line'] = $method_start_line;
+					$result[$method_name]['blocks'][] = array($test_block_name,$test_block_label,$test_block,$test_start_line);
+				}
+			}
+		}else if($is_public && $method_name[0] != '_'){
+			$result[$method_name]['line'] = $method_start_line;
+			$result[$method_name]['blocks'] = array();
+		}
+		return $result;
+	}
+	/**
+	 * テストの実行
+	 * @param string $class_name クラス名、またはファイル名
+	 * @param string $m メソッド名
+	 * @param string $b ブロック名
+	 * @param boolean $include_tests スペックテストも含むか
+	 * @throws Exception
+	 */
+	static public function verify_format($class_name,$m=null,$b=null,$include_tests=false){
+		$f = ' '.$class_name.(isset($m) ? '::'.$m : '');
+		self::stdout($f);
+		$throw = null;
+		$starttime = microtime(true);
+		try{
+			self::run($class_name,$m,$b,true,$include_tests);
+		}catch(\Exception $e){
+			$throw = $e;
+		}
+		$time = round((microtime(true) - (float)$starttime),4);
+		self::stdout(' ('.$time.' sec)'.PHP_EOL);
+		if(isset($throw)) throw $throw;
+	}
+	static private function is($f){
+		return !(
+				!$f->isFile()
+				|| substr($f->getFilename(),-4) != '.php'
+				|| preg_match('/\/[\._]/',$f->getPathname())
+				|| in_array($f->getPathname(),self::$exec_file)
+				|| strpos($f->getPathname(),substr(__FILE__,0,-4)) === 0
+		);
+
+	}
+	static private function file_list($d,$res=false){
+		$it = new \RecursiveDirectoryIterator($d,
+				\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+		);
+		if($res) return new \RecursiveIteratorIterator($it,\RecursiveIteratorIterator::SELF_FIRST);
+		return $it;
+	}
+	static public function run_all(){
+		if(is_dir(\angela\Conf::lib_dir())){
+			self::stdout(self::color_format(PHP_EOL.'Library'.PHP_EOL,'1;34'));
+				
+			foreach(self::file_list(\angela\Conf::lib_dir(),true) as $f){
+				if(ctype_upper(substr($f->getFilename(),0,1)) && self::is($f)){
+					$class_file = str_replace(\angela\Conf::lib_dir(),'',substr($f->getPathname(),0,-4));
+					if(preg_match("/^(.*)\/(\w+)\/(\w+)\.php$/",$f->getPathname(),$m) && $m[2] == $m[3]) $class_file = dirname($class_file);
+					if(!preg_match('/[A-Z]/',dirname($class_file))){
+						$class_name = "\\".str_replace('/',"\\",$class_file);
+
+						if(strpos($class_name,"\\test\\") !== 0){
+							try{
+								self::verify_format($class_name,null,null,false);
+								self::$exec_file[] = $f->getPathname();
+							}catch(\Exception $e){
+								self::$exec_file_exception[$class_name] = $e->getMessage().PHP_EOL.PHP_EOL.$e->getTraceAsString();
+							}
+						}
+					}
+				}
+			}
+		}
+		if(is_dir(\angela\Conf::test_dir())){
+			self::stdout(self::color_format(PHP_EOL.'Specs'.PHP_EOL,'1;34'));
+				
+			foreach(self::file_list(\angela\Conf::test_dir(),true) as $f){
+				if(self::is($f)){
+					try{
+						self::verify_format($f->getPathname(),null,null,false);
+						self::$exec_file[] = $f->getPathname();
+					}catch(\Exception $e){
+						$exceptions[$f->getFilename()] = implode('',$e->getTrace());
+					}
+				}
+			}
+		}
+		if(is_dir(\angela\Conf::entry_dir())){
+			self::stdout(self::color_format(PHP_EOL.'Entrys'.PHP_EOL,'1;34'));
+
+			$pre = getcwd();
+			chdir(\angela\Conf::entry_dir());
+
+			foreach(self::file_list(\angela\Conf::entry_dir()) as $f){
+				if(self::is($f)){
+					try{
+						self::verify_format($f->getPathname(),null,null,false);
+						self::$exec_file[] = $f->getPathname();
+					}catch(\Exception $e){
+						self::$exec_file_exception[$f->getFilename()] = $e->getMessage().PHP_EOL.PHP_EOL.$e->getTraceAsString();
+					}
+				}
+			}
+			chdir($pre);
+		}
+
+	}
+	static public function stdout($v){
+		print($v);
+	}
+}
+
+class Coverage{
+	static private $start = false;
+	static private $db;
+
+	static public function has_started(&$vars){
+		if(self::$start){
+			$vars['savedb'] = self::$db;
+			return true;
+		}
+		return false;
+	}
+	static public function db(){
+		return self::$db;
+	}
+	static public function delete(){
+		if(is_file(self::$db)){
+			unlink(self::$db);
+		}
+	}
+	static public function start($savedb,$lib_dir){
+		if(extension_loaded('xdebug')){
+			$exist = (is_file($savedb));
+			if(substr($lib_dir,-1) != '/') $lib_dir = $lib_dir.'/';
+			
+			if($db = new \PDO('sqlite:'.$savedb)){
+				self::$start = true;
+				self::$db = $savedb;
+
+				if(!$exist){
+					$sql = 'create table coverage_info('.
+							'id integer not null primary key,'.
+							'covered_line text null,'.
+							'ignore_line text,'.
+							'active_len integer,'.
+							'file_path text null,'.
+							'percent integer'.
+							')';
+					if(false === $db->query($sql)) throw new \RuntimeException('failure create target_info table');
+											
+					foreach(new \RecursiveIteratorIterator(
+							new \RecursiveDirectoryIterator(
+									$lib_dir,
+									\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+							),\RecursiveIteratorIterator::SELF_FIRST
+					) as $f){
+						if($f->isFile() &&
+								substr($f->getFilename(),-4) == '.php' &&
+								strpos($f->getPathname(),'/test/') === false &&
+								ctype_upper(substr($f->getFilename(),0,1))
+						){
+							$src = file_get_contents($f->getPathname());
+							$ignore_line = array();
+								
+							foreach(array(
+									"/(\/\*.*?\*\/)/ms",
+									"/^((namespace|use|class)[\s].+)$/m",
+									"/^[\s]*(include)[\040\(].+$/m",
+									"/^([\s]*(final|static|protected|private|public|const)[\s].+)$/m",
+									"/^([\s]*\/\/.+)$/m",
+									"/^([\s]*#.+)$/m",
+									"/^([\s]*<\?php[\s]*)$/ms",
+									"/^([\s]*\?>[\s]*)$/m",
+									"/^([\s]*try[\s]*\{[\s]*)$/m",
+									"/^([\s\}]*catch[\s]*\(.+\).+)$/m",
+									"/^(.*array\()[\s]*$/m",
+									"/^([\s]*\}[\s]*else[\s]*\{[\s]*)$/m",
+									"/^([\s]*\{[\s]*)$/m",
+									"/^([\s]*\}[\s]*)$/m",
+									"/^([\s\(\)]+)$/m",
+									"/^([\s]*)$/ms",
+									"/(\n)$/s",
+							) as $pattern){
+								if(preg_match_all($pattern,$src,$m,PREG_OFFSET_CAPTURE)){
+									foreach($m[1] as $c){
+										$ignore_line = array_merge($ignore_line,call_user_func_array(function($c0,$c1,$src){
+											$s = substr_count(substr($src,0,$c1),PHP_EOL);
+											$e = substr_count($c0,PHP_EOL);
+											return range($s+1,$s+1+$e);
+										},array($c[0],$c[1],$src)));
+									}
+								}
+							}
+							$ignore_line = array_unique($ignore_line);
+							sort($ignore_line);
+							$active_len = empty($src) ? 0 : (substr_count($src,PHP_EOL) - sizeof($ignore_line) + 1);
+								
+							$ps = $db->prepare('insert into coverage_info(file_path,ignore_line,active_len,percent) values(?,?,?,?)');
+							$ps->execute(array($f->getPathname(),implode(',',$ignore_line),$active_len,0));
+						}
+					}
+				}
+			}
+			xdebug_start_code_coverage();
+		}
+	}
+	static public function stop(){
+		if(is_file(self::$db) && $db = new \PDO('sqlite:'.self::$db)){
+			foreach(xdebug_get_code_coverage() as $file_path => $lines){
+				$sql = 'select id,covered_line,ignore_line,active_len from coverage_info where file_path = ?';
+				$ps = $db->prepare($sql);
+				$ps->execute(array($file_path));
+					
+				if($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
+					$id = (int)$resultset['id'];
+					$active_len = (int)$resultset['active_len'];
+					$ignore_line = explode(',',$resultset['ignore_line']);
+					$covered_line = empty($resultset['covered_line']) ? array() : explode(',',$resultset['covered_line']);
+					$covered_line = array_merge(array_keys($lines),$covered_line);
+					$covered_line = array_unique($covered_line);
+					sort($covered_line);
+						
+					$covered_len = sizeof(array_diff($covered_line,$ignore_line));
+					$percent = (!empty($covered_line) && $active_len === 0) ? 100 : (($covered_len === 0) ? 0 : (floor($covered_len / $active_len * 100)));
+					if($percent > 100) $percent = 100;
+						
+					$ps = $db->prepare('update coverage_info set covered_line=?,percent=? where id=?');
+					$ps->execute(array(implode(',',$covered_line),$percent,$id));
+				}
+			}
+		}
+		xdebug_stop_code_coverage();
+	}
+	static public function get(){
+		$list = array();
+		if(is_file(self::$db)){
+			if($db = new \PDO('sqlite:'.self::$db)){
+				$sql = 'select file_path,percent,covered_line,ignore_line from coverage_info order by file_path';
+				$ps = $db->prepare($sql);
+				$ps->execute();
+	
+				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
+					$list[] = $resultset;
+				}
+			}
+		}
+		return $list;
+	}
+	
+}
+class Http{
+	private $resource;
+	private $agent;
+	private $timeout = 30;
+	private $redirect_max = 20;
+	private $redirect_count = 1;
+
+	private $request_header = array();
+	private $request_vars = array();
+	private $request_file_vars = array();
+	private $head;
+	private $body;
+	private $cookie = array();
+	private $url;
+	private $status;
+
+	public function __construct($agent=null,$timeout=30,$redirect_max=20){
+		$this->agent = $agent;
+		$this->timeout = (int)$timeout;
+		$this->redirect_max = (int)$redirect_max;
+	}
+	public function redirect_max($redirect_max){
+		$this->redirect_max = (integer)$redirect_max;
+	}
+	public function timeout($timeout){
+		$this->timeout = (int)$timeout;
+	}
+	public function agent($agent){
+		$this->agent = $agent;
+	}
+	public function __toString(){
+		return $this->body();
+	}
+	public function header($key,$value=null){
+		$this->request_header[$key] = $value;
+	}
+	public function vars($key,$value=null){
+		if(is_bool($value)) $value = ($value) ? 'true' : 'false';
+		$this->request_vars[$key] = $value;
+		if(isset($this->request_file_vars[$key])) unset($this->request_file_vars[$key]);
+	}
+	public function file_vars($key,$value){
+		$this->request_file_vars[$key] = $value;
+		if(isset($this->request_vars[$key])) unset($this->request_vars[$key]);
+	}
+	public function has_vars($key){
+		return (array_key_exists($key,$this->request_vars) || array_key_exists($key,$this->request_file_vars));
+	}
+	public function setopt($key,$value){
+		if(!isset($this->resource)) $this->resource = curl_init();
+		curl_setopt($this->resource,$key,$value);
+	}
+	public function head(){
+		return $this->head;
+	}
+	public function body(){
+		return ($this->body === null || is_bool($this->body)) ? '' : $this->body;
+	}
+	public function url(){
+		return $this->url;
+	}
+	public function status(){
+		return empty($this->status) ? null : (int)$this->status;
+	}
+	public function do_head($url){
+		return $this->request('HEAD',$url);
+	}
+	public function do_put($url){
+		return $this->request('PUT',$url);
+	}
+	public function do_delete(){
+		return $this->request('DELETE',$url);
+	}
+	public function do_get($url){
+		return $this->request('GET',$url);
+	}
+	public function do_post($url){
+		return $this->request('POST',$url);
+	}
+	public function do_download($url,$download_path){
+		return $this->request('GET',$url,$download_path);
+	}
+	public function do_post_download($url,$download_path){
+		return $this->request('POST',$url,$download_path);
+	}
+	public function callback_head($resource,$data){
+		$this->head .= $data;
+		return strlen($data);
+	}
+	public function callback_body($resource,$data){
+		$this->body .= $data;
+		return strlen($data);
+	}
+	private function request($method,$url,$download_path=null){
+		if(!isset($this->resource)) $this->resource = curl_init();
+		$url_info = parse_url($url);
+		$cookie_base_domain = (isset($url_info['host']) ? $url_info['host'] : '').(isset($url_info['path']) ? $url_info['path'] : '');
+		if(\angela\Coverage::has_started($vars)) $this->request_vars['_coverage_vars_'] = $vars;
+		
+		if(isset($url_info['query'])){
+			parse_str($url_info['query'],$vars);
+			foreach($vars as $k => $v){
+				if(!isset($this->request_vars[$k])) $this->request_vars[$k] = $v;
+			}
+			list($url) = explode('?',$url,2);
+		}
+		switch($method){
+			case 'POST':
+				if(!empty($this->request_file_vars)){
+					$vars = array();
+					if(!empty($this->request_vars)){
+						foreach(explode('&',http_build_query($this->request_vars)) as $q){
+							$s = explode('=',$q,2);
+							$vars[urldecode($s[0])] = isset($s[1]) ? urldecode($s[1]) : null;
+						}
+					}
+					foreach(explode('&',http_build_query($this->request_file_vars)) as $q){
+						$s = explode('=',$q,2);
+						if(isset($s[1])){
+							if(!is_file($f=urldecode($s[1]))) throw new \RuntimeException($f.' not found');
+							$vars[urldecode($s[0])] = (class_exists('\\CURLFile',false)) ? new \CURLFile($f) : '@'.$f;
+						}
+					}
+					curl_setopt($this->resource,CURLOPT_POSTFIELDS,$vars);
+				}else{
+					curl_setopt($this->resource,CURLOPT_POSTFIELDS,http_build_query($this->request_vars));
+				}
+				break;
+			case 'GET':
+			case 'HEAD':
+			case 'PUT':
+			case 'DELETE':
+				$url = $url.(!empty($this->request_vars) ? '?'.http_build_query($this->request_vars) : '');
+		}
+		switch($method){
+			case 'POST': curl_setopt($this->resource,CURLOPT_POST,true); break;
+			case 'GET': curl_setopt($this->resource,CURLOPT_HTTPGET,true); break;
+			case 'HEAD': curl_setopt($this->resource,CURLOPT_NOBODY,true); break;
+			case 'PUT': curl_setopt($this->resource,CURLOPT_PUT,true); break;
+			case 'DELETE': curl_setopt($this->resource,CURLOPT_CUSTOMREQUEST,'DELETE'); break;
+		}
+		curl_setopt($this->resource,CURLOPT_URL,$url);
+		curl_setopt($this->resource,CURLOPT_FOLLOWLOCATION,false);
+		curl_setopt($this->resource,CURLOPT_HEADER,false);
+		curl_setopt($this->resource,CURLOPT_RETURNTRANSFER,false);
+		curl_setopt($this->resource,CURLOPT_FORBID_REUSE,true);
+		curl_setopt($this->resource,CURLOPT_FAILONERROR,false);
+		curl_setopt($this->resource,CURLOPT_TIMEOUT,$this->timeout);
+
+		if(!isset($this->request_header['Expect'])){
+			$this->request_header['Expect'] = null;
+		}
+		if(!isset($this->request_header['Cookie'])){
+			$cookies = '';
+			foreach($this->cookie as $domain => $cookie_value){
+				if(strpos($cookie_base_domain,$domain) === 0 || strpos($cookie_base_domain,(($domain[0] == '.') ? $domain : '.'.$domain)) !== false){
+					foreach($cookie_value as $k => $v){
+						if(!$v['secure'] || ($v['secure'] && substr($url,0,8) == 'https://')) $cookies .= sprintf('%s=%s; ',$k,$v['value']);
+					}
+				}
+			}
+			curl_setopt($this->resource,CURLOPT_COOKIE,$cookies);
+		}
+		if(!isset($this->request_header['User-Agent'])){
+			curl_setopt($this->resource,CURLOPT_USERAGENT,
+					(empty($this->agent) ?
+							(isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null) :
+							$this->agent
+					)
+			);
+		}
+		if(!isset($this->request_header['Accept']) && isset($_SERVER['HTTP_ACCEPT'])){
+			$this->request_header['Accept'] = $_SERVER['HTTP_ACCEPT'];
+		}
+		if(!isset($this->request_header['Accept-Language']) && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
+			$this->request_header['Accept-Language'] = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+		}
+		if(!isset($this->request_header['Accept-Charset']) && isset($_SERVER['HTTP_ACCEPT_CHARSET'])){
+			$this->request_header['Accept-Charset'] = $_SERVER['HTTP_ACCEPT_CHARSET'];
+		}
+		curl_setopt($this->resource,
+			CURLOPT_HTTPHEADER,
+			array_map(
+				function($k,$v){ return $k.': '.$v; },
+				array_keys($this->request_header),
+				$this->request_header
+			)
+		);
+		curl_setopt($this->resource,CURLOPT_HEADERFUNCTION,array($this,'callback_head'));
+
+		if(empty($download_path)){
+			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,array($this,'callback_body'));
+		}else{
+			if(!is_dir(dirname($download_path))) mkdir(dirname($download_path),0777,true);
+			$fp = fopen($download_path,'wb');
+
+			curl_setopt($this->resource,CURLOPT_WRITEFUNCTION,function($c,$data) use(&$fp){
+				if($fp) fwrite($fp,$data);
+				return strlen($data);
+			});
+		}
+		$this->request_header = $this->request_vars = array();
+		$this->head = $this->body = '';
+		curl_exec($this->resource);
+		if(!empty($download_path) && $fp){
+			fclose($fp);
+		}
+		if(($err_code = curl_errno($this->resource)) > 0){
+			if($err_code == 47) return $this;
+			throw new \RuntimeException($err_code.': '.curl_error($this->resource));
+		}
+
+		$this->status = curl_getinfo($this->resource,CURLINFO_HTTP_CODE);
+		$this->url = curl_getinfo($this->resource,CURLINFO_EFFECTIVE_URL);
+
+		if(strpos($this->url,'?') !== false){
+			list($url,$query) = explode('?',$this->url,2);
+			if(!empty($query)){
+				parse_str($query,$vars);
+				if(isset($vars['_coverage_vars_'])) unset($vars['_coverage_vars_']);
+				if(!empty($vars)){
+					$url = $url.'?'.http_build_query($vars);
+				}
+			}
+			$this->url = $url;
+		}
+		if(preg_match_all('/Set-Cookie:[\s]*(.+)/i',$this->head,$match)){
+			$unsetcookie = $setcookie = array();
+			foreach($match[1] as $cookies){
+				$cookie_name = $cookie_value = $cookie_domain = $cookie_path = $cookie_expires = null;
+				$cookie_domain = $cookie_base_domain;
+				$cookie_path = '/';
+				$secure = false;
+
+				foreach(explode(';',$cookies) as $cookie){
+					$cookie = trim($cookie);
+					if(strpos($cookie,'=') !== false){
+						list($k,$v) = explode('=',$cookie,2);
+						$k = trim($k);
+						$v = trim($v);
+						switch(strtolower($k)){
+							case 'expires': $cookie_expires = ctype_digit($v) ? (int)$v : strtotime($v); break;
+							case 'domain': $cookie_domain = preg_replace('/^[\w]+:\/\/(.+)$/','\\1',$v); break;
+							case 'path': $cookie_path = $v; break;
+							default:
+								$cookie_name = $k;
+								$cookie_value = $v;
+						}
+					}else if(strtolower($cookie) == 'secure'){
+						$secure = true;
+					}
+				}
+				$cookie_domain = substr('http://'.$cookie_domain.$cookie_path,7);
+				if($cookie_expires !== null && $cookie_expires < time()){
+					if(isset($this->cookie[$cookie_domain][$cookie_name])) unset($this->cookie[$cookie_domain][$cookie_name]);
+				}else{
+					$this->cookie[$cookie_domain][$cookie_name] = array('value'=>$cookie_value,'expires'=>$cookie_expires,'secure'=>$secure);
+				}
+			}
+		}
+		curl_close($this->resource);
+		unset($this->resource);
+
+		if($this->redirect_count++ < $this->redirect_max){
+			switch($this->status){
+				case 300:
+				case 301:
+				case 302:
+				case 303:
+				case 307:
+					if(preg_match('/Location:[\040](.*)/i',$this->head,$redirect_url)){
+						return $this->request('GET',trim($redirect_url[1]),$download_path);
+					}
+			}
+		}
+		$this->redirect_count = 1;
+
+		return $this;
+	}
+	public function __destruct(){
+		if(isset($this->resource)) curl_close($this->resource);
+	}
+}
+class ReportStdout{
+	public function coverage($coverage_list){
+		print(PHP_EOL);
+		print(self::color_format('Coverage: '.PHP_EOL,'1;34'));
+			
+		foreach($coverage_list as $resultset){
+			$color = '1;31';
+			
+			if($resultset['percent'] == 100){
+				$color = '1;32';
+			}else if($resultset['percent'] > 50){
+				$color = '1;33';
+			}
+			print(self::color_format(sprintf(' %3d%% %s'.PHP_EOL,$resultset['percent'],$resultset['file_path']),$color));
+		}
+		print(PHP_EOL);
+	}
+	public function result($result_list,$params,$error_str){
+		$result = '';
+		$tab = '  ';
+		$count = $fail = $none = $exception = $total_time = 0;
+
+		foreach($result_list as $file => $f){
+			foreach($f as $class => $c){
+				$print_head = false;
+
+				foreach($c as $method => $info_list){
+					$count++;
+
+					foreach($info_list as $info){
+						$time = $info[1];
+						$total_time = (float)$total_time + (float)$time;
+
+						switch($info[0]){
+							case 'none':
+								$none++;
+								break;
+							case 'success':
+								break;
+							case 'fail':
+								$fail++;
+								list($file,$line,$r1,$r2) = $info[2];
+
+								if(!$print_head){
+									$result .= "\n";
+									$result .= (empty($class) ? "*****" : str_replace("\\",'.',(substr($class,0,1) == "\\") ? substr($class,1) : $class))." [ ".$file." ]\n";
+									$result .= str_repeat("-",80)."\n";
+									$print_head = true;
+								}
+								$result .= "[".$line."]".$method.": ".self::color_format("failure","1;31")."\n";
+								$result .= $tab.str_repeat("=",70)."\n";
+								ob_start();
+								var_dump($r1);
+								$result .= self::color_format($tab.str_replace("\n","\n".$tab,ob_get_contents()),"33");
+								ob_end_clean();
+								$result .= "\n".$tab.str_repeat("=",70)."\n";
+
+								ob_start();
+								var_dump($r2);
+								$result .= self::color_format($tab.str_replace("\n","\n".$tab,ob_get_contents()),"31");
+								ob_end_clean();
+								$result .= "\n".$tab.str_repeat("=",70)."\n";
+								break;
+							case 'exception':
+								$exception++;
+								list($file,$line,$msg) = $info[2];
+
+								if(!$print_head){
+									$result .= "\n";
+									$result .= (empty($class) ? "*****" : str_replace("\\",'.',(substr($class,0,1) == "\\") ? substr($class,1) : $class))." [ ".$file." ]\n";
+									$result .= str_repeat("-",80)."\n";
+									$print_head = true;
+								}
+								$result .= '['.$line.']'.$method.': '.self::color_format('error','1;31')."\n";
+								$result .= $tab.str_repeat("=",70)."\n";
+								$result .= self::color_format($tab.$msg,31);
+								$result .= "\n".$tab.str_repeat("=",70)."\n";
+								break;
+						}
+					}
+				}
+			}
+		}
+		$result .= "\n";
+		$result .= self::color_format(" tests: ".$count." ","7;32")
+		." ".self::color_format(" failures: ".$fail." ","7;31")
+		." ".self::color_format(" errors: ".$exception." ","7;31")
+		.sprintf(' ( %.05f sec / %s MByte ) ',$total_time,round(number_format((memory_get_usage() / 1024 / 1024),3),4));
+
+		print($result.PHP_EOL);
+
+		if(!empty($error_str)){
+			print(PHP_EOL.self::color_format('Errors','1;31').PHP_EOL);
+			print(self::color_format($error_str,'0;31'));
+		}
+		return (empty($fail) && empty($exception));
+	}
+	static private function color_format($msg,$color='30'){
+		return (php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg;
+	}
+}
+}
+
+namespace{
+
+/**
+ *　等しい
+ * @param mixed $expectation 期待値
+ * @param mixed $result 実行結果
+ */
+function eq($expectation,$result){
+	list($debug) = debug_backtrace(false);
+	$assert = new \angela\Assert();
+	$assert->equals($expectation,$result,$debug['file'],$debug['line']);
+	return true;
+}
+/**
+ * 等しくない
+ * @param mixed $expectation 期待値
+ * @param mixed $result 実行結果
+ */
+function neq($expectation,$result){
+	list($debug) = debug_backtrace(false);
+	$assert = new \angela\Assert();
+	$assert->not_equals($expectation,$result,$debug['file'],$debug['line']);
+	return true;
+}
+/**
+ *　文字列中に指定した文字列がすべて存在していれば成功
+ * @param string|array $keyword
+ * @param string $src
+ */
+function meq($keyword,$src){
+	list($debug) = debug_backtrace(false);
+	$assert = new \angela\Assert();
+	$assert->match_equals($keyword,$src,$debug['file'],$debug['line']);
+	return true;
+}
+/**
+ *　文字列中に指定した文字列がすべて存在していなければ成功
+ * @param string|array $keyword
+ * @param string $src
+ */
+function mneq($keyword,$src){
+	list($debug) = debug_backtrace(false);
+	$assert = new \angela\Assert();
+	$assert->match_not_equals($keyword,$src,$debug['file'],$debug['line']);
+	return true;
+}
+/**
+ * mapに定義されたurlをフォーマットして返す
+ * @param string $name
+ * @return string
+ */
+function test_map_url($map_name){
+	$urls = \angela\Conf::urls();
+	$args = func_get_args();
+	array_shift($args);
+
+	if(empty($urls)) throw new \RuntimeException('urls empty');
+	$map_name = (strpos($map_name,'::') === false) ? (preg_replace('/^([^\/]+)\/.+$/','\\1',\angela\Runner::current_entry()).'::'.$map_name) : $map_name;
+	if(isset($urls[$map_name]) && substr_count($urls[$map_name],'%s') == sizeof($args)) return vsprintf($urls[$map_name],$args);
+	throw new \RuntimeException($map_name.(isset($urls[$map_name]) ? '['.sizeof($args).']' : '').' not found');
+}
+/**
+ * Httpリクエスト
+ * @return angela.Http
+ */
+function b($agent=null,$timeout=30,$redirect_max=20){
+	$b = new \angela\Http($agent,$timeout,$redirect_max);
+	return $b;
+}
+
+
+// main
 ini_set('display_errors','On');
 ini_set('html_errors','Off');
 ini_set('error_reporting',E_ALL);
@@ -16,116 +1180,71 @@ if(extension_loaded('mbstring')){
 set_error_handler(function($n,$s,$f,$l){
 	throw new \ErrorException($s,0,$n,$f,$l);
 });
-$dp = function($src){
-	if(empty($src)) return;
-	return '?>'.gzuncompress(base64_decode(trim(str_replace(PHP_EOL,'',$src))));
-};
-$lib=eval($dp('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'));
-$func=eval($dp('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'));
-$cc=('eJyFVW1r2zAQ/uz8Cg1MbYM79rlZGrok6z6MddAWBqUIxT4nWh3bk+S03Zb/vpPkyC+tuwRio7t77nlOd5eP82pbTXgWwpOCQvKyoHnJUkjD4CmFdb0JoujPxPOTcg+CbYDumZBkRriUoEKffr+6vrkLaM9Mg/uIzMmokZyRiWc+4RHmcjWO8roNQZgQ7DmMoqk38VDB/yhFpC7e9pj2cEY4tTAjDtOJgXkHu0o9h/3KReTk5Fi7nuEukGwP6VqLNi404zmMO+lL8QRsuFQgqNzWKi0fC5rVRaLwEkP3gnTlEMcEa45+usa7LOCRfF9ehYH8lXMFZ8H7t9N6nr8BRSsBFROAAC4Z4sU+ojRunl/pXsHT0/PGOzTmqTVrBtpjhhAslxARtRXloyH0tdzwZPWUQGWRO2ECVC0KgqH24GAfJs0aS1LcCFZI1ui3Rkebp9SS6kgwvAMJOSSK8DQ26iGlOS+AZKLcEcWE9udFVpLHLRqJvh5aMbWdzYMmh8+xMYQaw7dWwgtVdvFCh9TLG5vjHIr2FN+lSCKyZ3kNMpzHzTdyBOoqZQrGCFhrTws2Iulmnc276WbzRixPX6qEp9FEXaUN3JhKBVKZ474sJ8n8ZKUAlmxDu5GozpeUKbjRwyZnkvg6hYYis3Pia3R57ENsNKlEVcrQb3kMm7ypS8qFHkLdlB+O8djIKBQhKMrMWfJyMNdMgg2NgyB2VI4t27be6TkWLqkVhHZ9+VXknJqHHgsBss6Vvh5b4CY2A4V1wGE9O/u8ull8oRfX11eLyPH0jG5qoDHSPGmW8yr8KXG1p6Dr1kG/C7q3geSVqKEl5Cpvy2mq/GDKu49IJ9Wd/3CviT64QL83Q0cmD/Asw05cm8hzga6Hh5UyCqCwCrrwUSz5byiz4WlXJk/19pr2kx0Al05bOje+L+8o7iYfapGRY2CXtrv9lpn1s0Nt+7fA/1slu86uGodJn5EdtSErVzqk5975rso1xyAO4td4tkGDBk5qIZAQLdgO+6Bxc5Qso0O7Z5Nyt+PquF2bwZSqrIaTaRx04MG8Ok8mhkP8Y7n6dHtJFwt6++32erX82x4sVxdLurharjTGYXKYzM//ATKDvEs=');
-$rootdir = __DIR__;
 
-if(!isset($_SERVER['REQUEST_URI']) || !isset($_SERVER['REQUEST_METHOD'])){
-	$params = array();
-	$conf = array();
-	$argv = array_slice($_SERVER['argv'],1);
-	$value = (empty($argv)) ? null : array_shift($argv);
-	
-	if(substr($value,0,1) == '-'){
-		array_unshift($argv,$value);
-		$value = null;
-	}
-	for($i=0;$i<sizeof($argv);$i++){
-		if($argv[$i][0] == '-'){
-			$k = substr($argv[$i],1);
-			$v = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
-			if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
-			$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
-		}
-	}
-	if(isset($params['replace'])){
-		$complile = function($path){
-			$p = realpath($path);
-			if($p === false) throw \RuntimeException($path.' not found');
-		
-			$src = '';
-			if(is_dir($p)){
-				foreach(new \DirectoryIterator($p) as $f){
-					if($f->isFile()){
-						$src = $src.file_get_contents($f->getPathname());
-					}
-				}
-			}else{
-				$src = file_get_contents($p);
-			}
-			return str_replace(PHP_EOL,'',base64_encode(gzcompress($src)));
-		};
-		if(is_dir(__DIR__.'/src/lib')){
-			$self_src = file_get_contents(__FILE__);
-			if(preg_match('/\$lib=eval\(\$dp\(\'(.+?)\'/',$self_src,$m)){
-				$self_src = str_replace($m[1],$complile(__DIR__.'/src/lib'),$self_src);
-			}
-			if(preg_match('/\$func=eval\(\$dp\(\'(.+?)\'/',$self_src,$m)){
-				$self_src = str_replace($m[1],$complile(__DIR__.'/src/func.php'),$self_src);
-			}
-			if(preg_match('/\$cc=\(\'(.+?)\'/',$self_src,$m)){
-				$self_src = str_replace($m[1],$complile(__DIR__.'/src/cc.php'),$self_src);
-			}
-			if(\angela\Xml::set($self_src,'angela:template_list',$x)){
-				$html = PHP_EOL;
-				foreach(new \RecursiveDirectoryIterator(__DIR__.'/src/templates',\FilesystemIterator::SKIP_DOTS) as $f){
-					$html .= sprintf('<rt:template name="%s">',substr($f->getFilename(),0,-5)).PHP_EOL
-								.trim(file_get_contents($f->getPathname())).PHP_EOL
-								.'</rt:template>'.PHP_EOL;
-				}
-				$x->escape(false);
-				$x->value($html);
-				$self_src = str_replace($x->plain(),$x->get(),$self_src);
-			}
-			foreach(new \RecursiveDirectoryIterator(__DIR__.'/src/script',\FilesystemIterator::SKIP_DOTS) as $f){
-				if(\angela\Xml::set($self_src,'angela:'.substr($f->getFilename(),0,-4),$x)){
-					$x->escape(false);
-					$x->value(PHP_EOL.trim(substr(file_get_contents($f->getPathname()),5)).PHP_EOL.'# ');
-					$self_src = str_replace($x->plain(),$x->get(),$self_src);
-				}
-			}
-			file_put_contents($f=__FILE__,$self_src);
-			print('writen: '.$f.PHP_EOL);
-		}
-		exit;
-	}else if(isset($params['trim'])){
-		$work = trim($params['trim']);
-		if(empty($work)) $work = __DIR__;
-		
-		
-		$count = 0;
-		foreach(new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator(
-					$work,
-					\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
-			),\RecursiveIteratorIterator::SELF_FIRST
-		) as $f){
-			if($f->isFile() && substr($f->getFilename(),-4) == '.php'){
-				$src = file_get_contents($f->getPathname());
-				$nsrc = str_replace(array("\r\n","\r","\n"),"\n",$src);
-				$nsrc = preg_replace('/^(.+)[\040\t]+$/','\\1',$nsrc);
-				if($src != $nsrc){
-					file_put_contents($f->getPathname(),$nsrc);
-					print(' '.$f->getPathname().PHP_EOL);
-					$count++;
-				}
-			}
-		}
-		print('trimming: '.$count.PHP_EOL);
-		exit;
-	}else if(isset($params['cc'])){
-		file_put_contents($f=substr(__FILE__,0,-4).'.cc.php',gzuncompress(base64_decode($cc)));		
-		print('writen: '.$f.PHP_EOL);
-		exit;
+$params = array();
+$conf = array();
+$argv = array_slice($_SERVER['argv'],1);
+$value = (empty($argv)) ? null : array_shift($argv);
+
+if(substr($value,0,1) == '-'){
+	array_unshift($argv,$value);
+	$value = null;
+}
+for($i=0;$i<sizeof($argv);$i++){
+	if($argv[$i][0] == '-'){
+		$k = substr($argv[$i],1);
+		$v = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
+		if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
+		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
 	}
 }
+if(isset($params['cc'])){
+	$out = substr(__FILE__,0,-4).'.cc.php';
+	file_put_contents($out,'<?'.'php'.PHP_EOL.
+<<< '_SRC_'
+if(extension_loaded('xdebug')){
+	$coverage_vars = isset($_POST['_coverage_vars_']) ? $_POST['_coverage_vars_'] : 
+						(isset($_GET['_coverage_vars_']) ? $_GET['_coverage_vars_'] : array());	
+	if(isset($_POST['_coverage_vars_'])) unset($_POST['_coverage_vars_']);
+	if(isset($_GET['_coverage_vars_'])) unset($_GET['_coverage_vars_']);
 
-# <angela:init>
+	if(isset($coverage_vars['savedb']) && is_file($coverage_vars['savedb'])){
+		register_shutdown_function(function() use($coverage_vars){
+			$savedb = $coverage_vars['savedb'];
+			if(is_file($savedb) && $db = new \PDO('sqlite:'.$savedb)){
+				foreach(xdebug_get_code_coverage() as $file_path => $lines){
+					$sql = 'select id,covered_line,ignore_line,active_len from coverage_info where file_path = ?';
+					$ps = $db->prepare($sql);
+					$ps->execute(array($file_path));
+						
+					if($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
+						$id = (int)$resultset['id'];
+						$active_len = (int)$resultset['active_len'];
+						$ignore_line = explode(',',$resultset['ignore_line']);
+						$covered_line = empty($resultset['covered_line']) ? array() : explode(',',$resultset['covered_line']);
+						$covered_line = array_merge(array_keys($lines),$covered_line);
+						$covered_line = array_unique($covered_line);
+						sort($covered_line);
+							
+						$covered_len = sizeof(array_diff($covered_line,$ignore_line));
+						$percent = ($active_len === 0) ? 100 : (($covered_len === 0) ? 0 : (floor($covered_len / $active_len * 100)));
+						if($percent > 100) $percent = 100;
+							
+						$ps = $db->prepare('update coverage_info set covered_line=?,percent=? where id=?');
+						$ps->execute(array(implode(',',$covered_line),$percent,$id));
+					}
+				}
+			}
+			xdebug_stop_code_coverage();			
+		});
+		xdebug_start_code_coverage();
+	}
+}
+_SRC_
+	);
+	print('output: '.$out.PHP_EOL);
+	exit;
+}
 $rootdir = (basename(__DIR__) == 'test') ? dirname(__DIR__) : __DIR__;
 $conf = array();
 
@@ -135,532 +1254,40 @@ if(is_file($f=$rootdir.'/bootstrap.php') || is_file($f=$rootdir.'/vendor/autoloa
 		include_once($f);
 	ob_end_clean();
 }
-// load angela conf
-if(is_file($f=substr(__FILE__,0,-4).'.conf.php')){
-	$conf = include($f);
-	if(!is_array($conf)) throw new \RuntimeException('invalid '.$f);
-	\angela\TestRunner::set_conf_file(realpath($f));
-}
 // test init
-\angela\TestRunner::init($rootdir,$conf);
+\angela\Conf::init($rootdir,$params,substr(__FILE__,0,-4).'.conf.php');
+\angela\Conf::info(isset($value));
 
-// default auto loader
-set_include_path(get_include_path()
-	.PATH_SEPARATOR.\angela\TestRunner::lib_dir()
-	.PATH_SEPARATOR.\angela\TestRunner::lib_dir().'test'
-);
-spl_autoload_register(function($c){
-	$cp = str_replace('\\','//',(($c[0] == '\\') ? substr($c,1) : $c));
-	foreach(explode(PATH_SEPARATOR,get_include_path()) as $p){
-		if(!empty($p) && ($r = realpath($p)) !== false && is_file($f=($r.'/'.$cp.'.php'))){
-			require_once($f);
-			break;
-		}
-	}
-	return (class_exists($c,false) || interface_exists($c,false) || (function_exists('trait_exists') && trait_exists($c,false)));
-},true,false);
-# </angela:init>
-
-if(!isset($_SERVER['REQUEST_URI']) || !isset($_SERVER['REQUEST_METHOD'])){
-# <angela:cli>
 if(isset($params['report'])){
 	if(!extension_loaded('xdebug')) die('xdebug extension not loaded'.PHP_EOL);
+	$db = __DIR__.'/'.microtime(true).'.coverage.db';
 	
-	$report_dir = str_replace('\\','/',(empty($params['report']) ? $rootdir.'/report' : $params['report']));
-	if(substr($report_dir,-1) == '/') $report_dir = substr($report_dir,0,-1);
-	if(!is_dir($report_dir)) mkdir($report_dir,0777,true);
-	
-	$db = $report_dir.'/'.date('Ymd_His').(empty($value) ? '' : '_'.str_replace(array('\\','/'),'_',$value));
-	if(isset($params['m'])) $db = $db.'_'.$params['m'];
-	if(isset($params['b'])) $db = $db.'_'.$params['b'];
-	$db = $db.'.report';
-
-	\angela\Coverage::start($db);
+	\angela\Coverage::start($db,\angela\Conf::lib_dir());
 }
-\angela\TestRunner::info(isset($value));
-
 if(isset($value)){
-	\angela\TestRunner::verify_format(
+	\angela\Runner::verify_format(
 			$value
 			,(isset($params['m']) ? $params['m'] : null)
 			,(isset($params['b']) ? $params['b'] : null)
 			,true
 	);
 }else{
-	\angela\TestRunner::run_all(true);
+	\angela\Runner::run_all(true);
 }
-if((array_key_exists('xml',$params))){
-	$exit_status = \angela\TestRunner::output('xml',$params['xml']);
-}else{
-	$exit_status = \angela\TestRunner::output();
+if(isset($params['report'])){
+	\angela\Coverage::stop();
 }
-# </angela:cli>
+$output_obj = \angela\Conf::output_obj();
 
-	exit(isset($exit_status) ? $exit_status : 0);
-}else{
-# <angela:web>
-$in_value = function($key,$default=null){
-	$params = isset($_GET) ? $_GET : array();
-	if(!isset($params[$key])) return $default;
-	return $params[$key];
-};
-
-$report_dir = ($in_value('report_dir') == '') ? $rootdir.'/report' : realpath($in_value('report_dir'));
-$dblist = array();
-
-if(is_dir($report_dir)){
-	foreach(new RecursiveDirectoryIterator(
-			$report_dir,
-			\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
-	) as $e){
-		if(preg_match('/^.+\.report$/',$e->getFilename())){
-			$db_path = str_replace($report_dir.'/','',$e->getFilename());
-			$dblist[$db_path] = $e->getMTime();
-		}
+if(method_exists($output_obj,'result')){
+	$output_obj->result(\angela\Runner::get(),$params,\angela\Conf::error_log());
+}
+if(isset($params['report'])){
+	if(method_exists($output_obj,'coverage')){
+		$output_obj->coverage(\angela\Coverage::get(),$params);
 	}
-	if(!empty($dblist)){
-		arsort($dblist);
-		$dblist = array_combine(array_keys($dblist),array_keys($dblist));
-	}
+	\angela\Coverage::delete();
 }
-try{
-	$uri = (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
-	$db = $in_value('db');
-	if(empty($db) && !empty($dblist)) $db = current($dblist);
-	$db_file = \angela\Util::path_absolute($report_dir,$db);
-	$template = new \angela\Template($uri.'?resource=');
-	$template->vars('t',new \angela\Helper());
-	$template_name = null;
-	$appname = ucfirst(basename($rootdir));
 
-	switch($in_value('view_mode')){
-		case 'source':
-			if($in_value('file') != ''){
-				$template->vars('info',\angela\Coverage::file($db_file,$in_value('file')));
-				$template->vars('file',$in_value('file'));
-				$template_name = 'source';
-			}
-			break;
-		case 'result':
-			list($success,$fail,$none,$failure) = \angela\Coverage::test_result($db_file);
-			$template->vars('success',$success);
-			$template->vars('fail',$fail);
-			$template->vars('none',$none);
-			$template->vars('failure',$failure);
-			$template_name = 'test_result';
-			break;
-		case 'time':
-			$order = $in_value('order','test_path');
-			list($test_list,$sum) = \angela\Coverage::test_time($db_file,$order);
-			$template->vars('test_list',$test_list);
-			$template->vars('sum',$sum);
-			$template->vars('desc',(substr($order,0,1) == '-') ? '' : '-');
-			$template_name = 'test_time';
-			break;
-		case 'coverage':
-			$order = $in_value('order','file_path');
-			list($file_list,$avg) = \angela\Coverage::all_file_list($db_file,$order);
-			$template->vars('file_list',$file_list);
-			$template->vars('avg',$avg);
-			$template->vars('desc',(substr($order,0,1) == '-') ? '' : '-');
-			$template_name = 'coverage_list';
-			break;
-		case 'help':
-			$template_name = 'help';
-			break;
-		default:
-	}
-	if(empty($template_name)) $template_name = 'top';
-	$template->vars('dblist',$dblist);
-	$template->vars('db',$db);
-	$template->vars('view_mode',$in_value('view_mode'));
-	$template->vars('appname',$appname);
-	$template->output(__FILE__,$template_name);
-}catch(Exception $e){
-	die($e->getMessage());
+exit(\angela\Runner::has_exception() ? 1 : 0);
 }
-# </angela:web>
-}
-exit;
-?>
-<angela:template_list>
-<rt:template name="coverage_list">
-<rt:extends href="#index" />
-
-<rt:block name="inner_content">
-<table>
-<tr>
-	<td style="width:350px;">
-		<div class="progress progress-striped active">
-			<div class="bar bar-success" style="width: {$avg['covered']}%;"></div>
-			<div class="bar bar-danger" style="width: {$avg['uncovered']}%;"></div>
-		</div>
-	</td>
-	<td>
-		<div style="height: 40px;">&nbsp;{$avg['avg']}%</div>
-	</td>
-</tr>
-</table>
-<rt:if param="{$path}">
-	<h3>( {$path} )</h3>
-</rt:if>
-<rt:if param="{$file_list}">
-	<table rt:param="file_list" rt:var="file" class="table table-striped table-bordered table-condensed">
-	<thead>
-	<tr>
-		<th><a href="?view_mode=coverage&db={$db}&order={$desc}file_path">file</a></th>
-		<th colspan="3"><a href="?view_mode=coverage&db={$db}&order={$desc}covered">covered</a></th>
-	</tr>
-	</thead>		
-	<tbody>
-	<tr>
-		<td><a href="?view_mode=source&file={$file['file_path']}&db={$db}">{$file['file_path']}</a></td>
-		<td style="width:110px;">
-			<div class="progress">
-				<div class="bar bar-success" style="width: {$file['covered']}%;"></div>
-				<div class="bar bar-danger" style="width: {$file['uncovered']}%;"></div>
-			</div>
-		</td>
-		<td style="width:30px; text-align: right;">{$file['percent']}%</td>
-		<td style="width:80px; text-align: right; color: #666666;">{$file['covered_len']} / {$file['active_len']}</td>
-	</tr>
-	</tbody>
-	</table>
-</rt:if>
-</rt:block>
-</rt:template>
-<rt:template name="help">
-<rt:extends href="#index" />
-
-<rt:block name="contents">
-<div style="margin-bottom: 50px;">
-	<h3>Requirements</h3>
-	<pre>
-PHP 5.3 (or later).
-must have Xdebug 2.2.1 (or later) in order to gather code coverage information.
-	</pre>
-	
-	<div style="margin-bottom: 50px;">
-	<h4>Install Xdebug</h4>
-	&gt;&nbsp;<a href="http://xdebug.org/docs/install">http://xdebug.org/docs/install</a>
-	
-	<h5>for MAMP</h5>
-	
-	/Applications/MAMP/bin/php/php5.4.4/conf/php.ini
-	<pre>
-[xdebug]
-zend_extension="/Applications/MAMP/bin/php/php5.4.4/lib/php/extensions/no-debug-non-zts-20100525/xdebug.so"
-xdebug.overload_var_dump = 0
-
-xdebug.profiler_output_name = %t.%s.%p.profile
-xdebug.profiler_output_dir = "/Applications/MAMP/bin/php/php5.4.4/profile"
-;xdebug.profiler_enable = 1
-xdebug.profiler_enable_trigger = 1
-
-xdebug.default_enable = 1
-xdebug.remote_enable  = 1
-xdebug.remote_port    = 9000
-xdebug.remote_handler = dbgp
-xdebug.remote_autostart = 1
-xdebug.remote_connect_back = 1
-	</pre>
-	<p>
-	enable the profiler by using a GET/POST or COOKIE variable of the name <span class="text-warning">XDEBUG_PROFILE</span>.<Br />
-	stepping PDT by sending an <span class="text-warning">XDEBUG_SESSION_START=ECLIPSE_DBGP</span>
-	</p>
-	<p>
-		&gt; Xdebug Profiling Web Frontend <a href="https://github.com/jokkedk/webgrind">webgrind</a>
-	</p>
-	</div>
-		
-	
-	<div style="margin-bottom: 50px;">
-	<h3>Running Tests</h3>
-	<pre>
-&gt; php angela.php [class path or test file path]
-	</pre>
-	
-	<h4>options</h4>
-	
-	<table class="table table-striped table-bordered table-condensed">
-	<tbody>
-	<tr>
-		<td>-m</td>
-		<td>method name</td>
-	</tr>
-	<tr>
-		<td>-b</td>
-		<td>block name</td>
-	</tr>
-	<tr>
-		<td>-report</td>
-		<td>filename for the report</td>
-	</tr>
-	</tbody>
-	</table>
-	
-	<div style="margin-bottom: 20px;"></div>
-	<h3>Test code for class</h3>
-	<p>
-		Test code for the class is described in the comment block.<br />
-		(comment block /&lowast;&lowast;&lowast;〜&lowast;/ - that's <span class="text-error">three asterisks</span>)<br />
-		test of the method described in the code of the method.<br />
-		first line that starts with a # is a block name.<br />
-		<span class="text-error">static::</span> introduces its class.
-	</p>
-	<pre>
-&lt;?php
-class Sample{
-&nbsp;&nbsp;public function abc($str){
-&nbsp;&nbsp;&nbsp;&nbsp;return '('.$str.')';
-&nbsp;&nbsp;&nbsp;&nbsp;/&lowast;&lowast;&lowast;
-&nbsp;&nbsp;&nbsp;&nbsp; &lowast; $self = new self();
-&nbsp;&nbsp;&nbsp;&nbsp; &lowast; eq("(hoge)",$self->abc("hoge"));
-&nbsp;&nbsp;&nbsp;&nbsp; &lowast;/
-&nbsp;&nbsp;&nbsp;&nbsp;/&lowast;&lowast;&lowast;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# fuga
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$self = new self();
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eq("(fuga)",$self->abc("fuga"));
-&nbsp;&nbsp;&nbsp;&nbsp; &lowast;/
-&nbsp;&nbsp;}
-&nbsp;&nbsp;static public function def($str){
-&nbsp;&nbsp;&nbsp;&nbsp;return '('.$str.')';
-&nbsp;&nbsp;&nbsp;&nbsp;/&lowast;&lowast;&lowast;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eq("(hoge)",self::def("hoge"));
-&nbsp;&nbsp;&nbsp;&nbsp; &lowast;/
-&nbsp;&nbsp;}
-&nbsp;&nbsp;/&lowast;&lowast;&lowast;
-&nbsp;&nbsp;&nbsp;&nbsp;eq("(hoge)",self::def("hoge"));
-&nbsp;&nbsp;&nbsp;&nbsp;$self = new self();
-&nbsp;&nbsp;&nbsp;&nbsp;eq("(fuga)",$self->abc("fuga"));
-&nbsp;&nbsp; &lowast;/
-&nbsp;&nbsp; 
-&nbsp;&nbsp;/&lowast;&lowast;&lowast;
-&nbsp;&nbsp;&nbsp;&nbsp;# __setup__
-&nbsp;&nbsp;&nbsp;&nbsp;eq(true,true);
-&nbsp;&nbsp; &lowast;/
-&nbsp;&nbsp;/&lowast;&lowast;&lowast;
-&nbsp;&nbsp;&nbsp;&nbsp;# __teardown__
-&nbsp;&nbsp;&nbsp;&nbsp;eq(true,true);
-&nbsp;&nbsp; &lowast;/
-}
-	</pre>
-	<p>
-		__teardown__ and __setup__ is a special block name (rather than in the method) in the class. <br />
-		__setup__ is called before the test block. <br />
-		__teardown__ is called after the test block.
-	</p>
-	
-	</div>
-	
-	
-	<div style="margin-bottom: 50px;">
-<h3>Assertion functions</h3>
-<table class="table table-striped table-bordered table-condensed">
-	<tbody>
-	<tr>
-		<td>eq($expected,$actual)</td>
-		<td>$expected === $actual</td>
-	</tr>
-	<tr>
-		<td>neq($expected,$actual)</td>
-		<td>$expected !== $actual</td>
-	</tr>
-	<tr>
-		<td>match($keyword,$string)</td>
-		<td>match.  An array may be used to designate multiple needles.</td>
-	</tr>
-	<tr>
-		<td>nomatch($keyword,$string)</td>
-		<td>not match.  An array may be used to designate multiple needles.</td>
-	</tr>
-	</tbody>
-</table>
-</div>
-
-<div style="margin-bottom: 50px;">
-<h3>functions</h3>
-<table class="table table-striped table-bordered table-condensed">
-	<tbody>
-	<tr>
-		<td>test_map_url($map_name,$arg...)</td>
-		<td>Get a remote url</td>
-	</tr>
-	<tr>
-		<td>b()</td>
-		<td>Get a instances of HTTP request class (<a href="#Http">Http</a>)</td>
-	</tr>
-	</tbody>
-</table>
-</div>
-
-
-<a name="Http"></a>
-<div style="margin-bottom: 50px;">
-<h3>Class:Http method</h3>
-<table class="table table-striped table-bordered table-condensed">
-	<tbody>
-	<tr>
-		<td>do_post($url)</td>
-		<td>POST requests</td>
-	</tr>
-	<tr>
-		<td>do_get($url)</td>
-		<td>GET requests</td>
-	</tr>
-	<tr>
-		<td>vars($name,$value)</td>
-		<td>Set up request parameter</td>
-	</tr>
-	<tr>
-		<td>file_vars($name,$filepath)</td>
-		<td>Set up request parameter</td>
-	</tr>		
-	<tr>
-		<td>header($name,$value)</td>
-		<td>Set up request header</td>
-	</tr>
-	<tr>
-		<td>status()</td>
-		<td>Gets the response status code</td>
-	</tr>
-	<tr>
-		<td>head()</td>
-		<td>Gets the response header</td>
-	</tr>
-	<tr>
-		<td>body()</td>
-		<td>Gets the response body</td>
-	</tr>
-	</tbody>
-</table>
-</div>
-
-</rt:block>
-</rt:template>
-<rt:template name="index">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>Angela {$appname}</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">	
-	<style type="text/css"> 
-		body{ padding-top: 60px }	
-		.covered{ background-color: #ecffec; }
-		.uncovered{ background-color: #ffecec; }
-		.ignore{ background-color: #fcfcfc; }
-		.popover{ width: 800px; }
-		.code{ 
-			font-family: Consolas, 'Liberation Mono', Courier, monospace; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal;
-			width:100%; height: 16px; line-height: 0px; margin: 0; white-space: pre; padding-left: 10px; padding-right: 10px;		
-		}
-	</style>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-	<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-</head>
-<body>
-<div class="navbar navbar-inverse navbar-fixed-top">
-	<div class="navbar-inner">
-		<div class="container">
-			<a class="brand" href="?view_mode={$view_mode}&db={$db}">{$appname}</a>
-			<div class="nav-collapse collapse">
-				<ul class="nav">
-					<li class="{$t.cond_pattern_switch($view_mode,'file','active','')}"><a href="?view_mode=coverage&db={$db}">Coverage</a></li>
-					<li class="{$t.cond_pattern_switch($view_mode,'result','active','')}"><a href="?view_mode=result&db={$db}">Result</a></li>
-					<li class="{$t.cond_pattern_switch($view_mode,'time','active','')}"><a href="?view_mode=time&db={$db}">Time</a></li>						
-					<li class="{$t.cond_pattern_switch($view_mode,'help','active','')}"><a href="?view_mode=help">Help</a></li>
-				</ul>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="container">	
-<rt:block name="contents">
-	<form rt:ref="true">
-		<input type="hidden" name="view_mode" />
-		<input type="hidden" name="path" />
-		<input type="hidden" name="file" />
-		<input type="hidden" name="db" />
-		<select rt:param="dblist" name="db" onChange="this.form.submit()" style="width:300px;"></select>
-	</form>
-	<rt:block name="inner_content">
-	</rt:block>		
-</rt:block>
-</div>
-<rt:block name="footer_block"></rt:block>
-</body>
-</html>
-</rt:template>
-<rt:template name="source">
-<rt:extends href="#index" />
-
-<rt:block name="inner_content">
-<h2>{$info['file_path']}</h2>
-<table rt:param="{$info['view']}" rt:var="f" rt:counter="cnt">
-<tr class="{$f['class']} {$f['class']}_tooltip" data-content="{$t.htmlencode($t.nl2br($f['test_path']))}">
-	<td align="right" style="width:50px;"><a name="{$cnt}"></a><a href="#{$cnt}">{$cnt}</a></td>
-	<td class="code">{$t.htmlencode($f['value'])}</td>
-</tr>
-</table>
-<div style="height:50px;"></div>
-
-<script type="text/javascript">$('.covered_tooltip').popover({trigger: 'hover',html:true,placement:'top',title:'covered test'});</script>
-</rt:block>
-</rt:template>
-<rt:template name="test_result">
-<rt:extends href="#index" />
-
-<rt:block name="inner_content">
-<span class="label label-success">Success: {$success}</span>
-<span class="label label-important">Failure: {$fail}</span>
-<span class="label label-warning">None: {$none}</span>
-
-<h3>Failure</h3>
-<table rt:param="{$failure}" rt:var="result" class="table table-striped table-bordered table-condensed">
-<thead>
-<tr>
-	<th>file</th>
-	<th>line</th>
-	<th>expected</th>
-	<th>actual</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-	<td>{$result['location']['file']}</td>
-	<td style="text-align: right;">{$result['location']['line']}</td>	
-	<td style="padding: 0;"><pre style="border: 0; widht:100%; height:100%;">{$result['expected']}</pre></td>
-	<td style="padding: 0;"><pre style="border: 0; widht:100%; height:100%;">{$result['actual']}</pre></td>
-</tr>
-</tbody>
-</table>
-</rt:block>
-</rt:template>
-<rt:template name="test_time">
-<rt:extends href="#index" />
-
-<rt:block name="inner_content">
-
-<h3>Time ( {$sum} sec )</h3>
-<table rt:param="{$test_list}" rt:var="result" class="table table-striped table-bordered table-condensed">
-<thead>
-<tr>
-	<th><a href="?view_mode=time&db={$db}&order={$desc}test_path">test</a></th>
-	<th style="width:50px;"><a href="?view_mode=time&db={$db}&order={$desc}exec_time">sec</a></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-	<td class="muted">{$result['test_path']}</td>
-	<td class="{$t.time_color($result['exec_time'])}" style="text-align: right;">{$result['exec_time']}</td>	
-</tr>
-</tbody>
-</table>
-</rt:block>
-</rt:template>
-<rt:template name="top">
-<rt:extends href="#help" />
-</rt:template>
-</angela:template_list>
