@@ -259,6 +259,7 @@ abstract class Base{
 										.' from '.implode(',',$from)
 										.(empty($where_sql) ? '' : ' where '.$where_sql)
 										.(empty($group_column) ? '' : ' group by key_column')
+										.' order by target_column'
 									)
 							,$where_vars
 				);

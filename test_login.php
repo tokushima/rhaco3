@@ -37,6 +37,7 @@ eq(401,$b->status());
 meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 */
 /***
+#no_user
 $b = b();
 $b->vars('user_name','aaaa');
 $b->vars('password','bbbb');
@@ -44,31 +45,18 @@ $b->do_get(test_map_url('login'));
 eq(401,$b->status());
 meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 */
-/***
-$b = b();
-$b->vars('user_name','aaaa');
-$b->vars('password','bbbb');
-$b->do_post(test_map_url('login'));
-eq(401,$b->status());
-meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
-*/
-/***
-$b = b();
-$b->vars('user_name','hogeuser');
-$b->vars('password','hogehoge');
-$b->do_post(test_map_url('login'));
-eq(200,$b->status());
-eq('<result><user_name>hogeuser</user_name></result>',$b->body());
-*/
 
 /***
+#login
 $b = b();
 $b->vars('user_name','hogeuser');
 $b->vars('password','hogehoge');
 $b->do_post(test_map_url('login'));
 eq(200,$b->status());
 eq('<result><user_name>hogeuser</user_name></result>',$b->body());
+
 $b->do_post(test_map_url('aaa'));
+eq(200,$b->status());
 eq('<result><user><nickname>hogeuser</nickname><code>1234</code></user></result>',$b->body());
 */
 
