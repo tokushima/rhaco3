@@ -189,7 +189,10 @@ class Flow{
 										$p = is_dir(substr($r->getFilename(),0,-4)) ? substr($r->getFilename(),0,-4) : dirname($r->getFilename());
 										$mapvar = array_merge($v,array('name'=>$n.'/'.$m->getName(),'class'=>$v['class'],'method'=>$m->getName(),'num'=>$i,'@'=>$p,'pkg_id'=>$pkg_id));										
 										if($automap){
-											if(!empty($auto_anon)) $mapvar = array_merge($mapvar,$auto_anon);
+											if(!empty($auto_anon)){
+												$mapvar = array_merge($mapvar,$auto_anon);
+												if(empty($suffix) && isset($mapvar['suffix'])) $suffix = $mapvar['suffix'];
+											}
 											$automaps[$url.$suffix] = $mapvar;
 										}else{
 											$methodmaps[$url.$suffix] = $mapvar;

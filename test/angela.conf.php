@@ -36,19 +36,16 @@ function pre($text){
 	return $text;
 }
 function xml(&$xml,$src,$name=null){
-	return \org\rhaco\Xml::set($xml,$src,$name);
+	if(\org\rhaco\Xml::set($xml,$src,$name)){
+		return $xml;
+	}
+	\org\rhaco\Log::warn('none of the `'.$name.'` noodes:'.PHP_EOL.$src);
+	throw new \RuntimeException('none of the `'.$name.'` noodes');
 }
 function success(){
 }
 function fail($msg='failure'){
 }
-function notice(){
-}
-function nmeq($keyword,$src){
-	mneq($keyword,$src);
-}
-
-
 
 return array(
 	'urls'=>\org\rhaco\Dt::get_urls(),

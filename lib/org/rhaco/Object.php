@@ -440,12 +440,8 @@ class Object implements \IteratorAggregate{
 			}catch(InvalidArgumentException $e){
 				success();
 			}
-			try{
-				$obj->kk("Abc@example.com");
-				success();
-			}catch(InvalidArgumentException $e){
-				notice();
-			}
+			$obj->kk("Abc@example.com");
+
 			try{
 				$obj->kk(" Abc@example.com ");
 				eq("Abc@example.com",$obj->kk());
@@ -596,12 +592,8 @@ class Object implements \IteratorAggregate{
 			}catch(InvalidArgumentException $e){
 				success();
 			}
-			try{
-				$obj->oo("123.0");
-				success();
-			}catch(InvalidArgumentException $e){
-				notice();
-			}
+			$obj->oo("123.0");
+
 			
 			try{
 				$obj->oo("123.000000001");
@@ -627,12 +619,8 @@ class Object implements \IteratorAggregate{
 			}catch(InvalidArgumentException $e){
 				success();
 			}
-			try{
-				$obj->oo(123.0);
-				success();
-			}catch(InvalidArgumentException $e){
-				notice();
-			}
+			$obj->oo(123.0);
+
 			$obj->qq(2);
 			eq(2,$obj->qq());
 			$obj->qq(3.123);

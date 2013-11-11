@@ -137,7 +137,7 @@ $b->do_get(test_map_url('put_block'));
 meq('AAA',$b->body());
 meq('BBB',$b->body());
 meq('a',$b->body());
-nmeq('CCC',$b->body());
+mneq('CCC',$b->body());
 
 $b = b();
 $b->vars('hoge','b');
@@ -145,7 +145,7 @@ $b->do_get(test_map_url('put_block'));
 meq('AAA',$b->body());
 meq('BBB',$b->body());
 meq('b',$b->body());
-nmeq('CCC',$b->body());
+mneq('CCC',$b->body());
 */
 
 /***
@@ -295,7 +295,7 @@ meq('BEFORE_FLOW_PRINT_TEMPLATE',$b->body());
 $b = b();
 $b->do_get(test_map_url('module_raise'));
 eq(403,$b->status());
-nmeq('INDEX',$b->body());
+mneq('INDEX',$b->body());
 
 meq('BEFORE_FLOW_HANDLE',$b->body());
 meq('[EXCEPTION]',$b->body());
