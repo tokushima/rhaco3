@@ -525,5 +525,3 @@ meq('<form method="get"><input type="hidden" name="csrftoken"',$b->body());
 meq(sprintf('<form action="%s"><input type="hidden" name="csrftoken"',test_map_url('csrf')),$b->body());
 meq('<form action="http://localhost"><input type="text" name="aaa" /></form>',$b->body());
 */
-
-
