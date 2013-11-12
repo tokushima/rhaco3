@@ -1,5 +1,11 @@
 <?php
 use \org\rhaco\store\db\Q;
+
+$ref = function($obj){
+	return $obj;
+};
+
+
 \test\model\InitHasParent::create_table();
 
 $obj = new \test\model\InitHasParent();
@@ -10,13 +16,7 @@ foreach($columns as $column){
 }
 
 \test\model\ExtraInitHasParent::create_table();
-
-try{
-	$result = \test\model\ExtraInitHasParent::find_all();
-	success();
-}catch(Excepton $e){
-	fail();
-}
+$result = \test\model\ExtraInitHasParent::find_all();
 
 
 \test\model\DateTime::create_table();
@@ -106,8 +106,6 @@ foreach(\test\model\UniqueCodeDigit::find() as $o){
 	neq('000',substr($o->code2(),-3));
 }
 
-
-
 \test\model\UniqueCodeAlpha::create_table();
 \test\model\UniqueCodeAlpha::find_delete();
 $obj = new \test\model\UniqueCodeAlpha();
@@ -141,15 +139,12 @@ foreach(\test\model\UniqueCodeIgnore::find() as $o){
 	eq('9',$o->code1());
 }
 
-
 \test\model\DoublePrimary::create_table();
 \test\model\DoublePrimary::find_delete();
-try{
-	$obj = new \test\model\DoublePrimary();
-	$obj->id1(1)->id2(1)->value("hoge")->save();
-}catch(\Exception $e){
-	fail();
-}
+
+$obj = new \test\model\DoublePrimary();
+$obj->id1(1)->id2(1)->value("hoge")->save();
+
 $p = new \test\model\DoublePrimary();
 eq("hoge",$p->id1(1)->id2(1)->sync()->value());
 
@@ -159,42 +154,33 @@ eq("hoge",$p->id1(1)->id2(1)->sync()->value());
 $obj = new \test\model\LimitVerify();
 $obj->value1("123");
 $obj->value2(3);
-try{
-	$obj->save();
-	success();
-}catch(\Exception $e){
-	\org\rhaco\Exceptions::clear();
-	fail();
-}
+$obj->save();
+
 $obj = new \test\model\LimitVerify();
 $obj->value1("1234");
-$obj->value2(4);
+$obj->value2(0);
+
+// TODO
 try{
 	$obj->save();
 	fail();
-}catch(\Exception $e){
+}catch(\org\rhaco\Exceptions $e){
 	\org\rhaco\Exceptions::clear();
-	success();
 }
 
 $obj = new \test\model\LimitVerify();
 $obj->value1("1");
 $obj->value2(1);
+
+// TODO
 try{
 	$obj->save();
 	fail();
-}catch(\Exception $e){
+}catch(\org\rhaco\Exceptions $e){
 	\org\rhaco\Exceptions::clear();
-	success();
 }
 $obj = new \test\model\LimitVerify();
-try{
-	$obj->save();
-	success();
-}catch(\Exception $e){
-	\org\rhaco\Exceptions::clear();
-	fail();
-}
+$obj->save();
 
 
 \test\model\UniqueVerify::create_table();
@@ -203,34 +189,22 @@ try{
 $obj = new \test\model\UniqueVerify();
 $obj->u1(2);
 $obj->u2(3);
-try{
-	$obj->save();
-	success();
-}catch(\Exception $e){
-	fail();
-	\org\rhaco\Exceptions::clear();
-}
+$obj->save();
 
+// TODO
 $obj = new \test\model\UniqueVerify();
 $obj->u1(2);
 $obj->u2(3);
 try{
 	$obj->save();
 	fail();
-}catch(\Exception $e){
-	success();
+}catch(\org\rhaco\Exceptions $e){
 	\org\rhaco\Exceptions::clear();
 }
 $obj = new \test\model\UniqueVerify();
 $obj->u1(2);
 $obj->u2(4);
-try{
-	$obj->save();
-	success();
-}catch(\Exception $e){
-	fail();
-	\org\rhaco\Exceptions::clear();
-}
+$obj->save();
 
 
 \test\model\UniqueTripleVerify::create_table();
@@ -241,14 +215,9 @@ $obj = new \test\model\UniqueTripleVerify();
 $obj->u1(2);
 $obj->u2(3);
 $obj->u3(4);
-try{
-	$obj->save();
-	success();
-}catch(\Exception $e){
-	fail();
-	\org\rhaco\Exceptions::clear();
-}
+$obj->save();
 
+// TODO
 $obj = new \test\model\UniqueTripleVerify();
 $obj->u1(2);
 $obj->u2(3);
@@ -256,29 +225,22 @@ $obj->u3(4);
 try{
 	$obj->save();
 	fail();
-}catch(\Exception $e){
-	success();
+}catch(\org\rhaco\Exceptions $e){
 	\org\rhaco\Exceptions::clear();
 }
 $obj = new \test\model\UniqueTripleVerify();
 $obj->u1(2);
 $obj->u2(4);
 $obj->u3(4);
-try{
-	$obj->save();
-	success();
-}catch(\Exception $e){
-	fail();
-	\org\rhaco\Exceptions::clear();
-}
+$obj->save();
 
 \test\model\Calc:: create_table();
 \test\model\Calc::find_delete();
 
-r(new \test\model\Calc())->price(30)->type("B")->name("AAA")->save();
-r(new \test\model\Calc())->price(20)->type("B")->name("ccc")->save();
-r(new \test\model\Calc())->price(20)->type("A")->name("AAA")->save();
-r(new \test\model\Calc())->price(10)->type("A")->name("BBB")->save();
+$ref(new \test\model\Calc())->price(30)->type("B")->name("AAA")->save();
+$ref(new \test\model\Calc())->price(20)->type("B")->name("ccc")->save();
+$ref(new \test\model\Calc())->price(20)->type("A")->name("AAA")->save();
+$ref(new \test\model\Calc())->price(10)->type("A")->name("BBB")->save();
 
 eq(80,\test\model\Calc::find_sum("price"));
 eq(30,\test\model\Calc::find_sum("price",Q::eq("type","A")));
@@ -321,14 +283,14 @@ eq(array("AAA"=>2,"BBB"=>1,"ccc"=>1),\test\model\Calc::find_count_by("type","nam
 \test\model\ManyChild::find_delete();
 \test\model\ManyParent::find_delete();
 
-$p1 = r(new \test\model\ManyParent())->value("parent1")->save();
-$p2 = r(new \test\model\ManyParent())->value("parent2")->save();
+$p1 = $ref(new \test\model\ManyParent())->value("parent1")->save();
+$p2 = $ref(new \test\model\ManyParent())->value("parent2")->save();
 
-$c1 = r(new \test\model\ManyChild())->parent_id($p1->id())->value("child1-1")->save();
-$c2 = r(new \test\model\ManyChild())->parent_id($p1->id())->value("child1-2")->save();
-$c3 = r(new \test\model\ManyChild())->parent_id($p1->id())->value("child1-3")->save();
-$c4 = r(new \test\model\ManyChild())->parent_id($p2->id())->value("child2-1")->save();
-$c5 = r(new \test\model\ManyChild())->parent_id($p2->id())->value("child2-2")->save();
+$c1 = $ref(new \test\model\ManyChild())->parent_id($p1->id())->value("child1-1")->save();
+$c2 = $ref(new \test\model\ManyChild())->parent_id($p1->id())->value("child1-2")->save();
+$c3 = $ref(new \test\model\ManyChild())->parent_id($p1->id())->value("child1-3")->save();
+$c4 = $ref(new \test\model\ManyChild())->parent_id($p2->id())->value("child2-1")->save();
+$c5 = $ref(new \test\model\ManyChild())->parent_id($p2->id())->value("child2-2")->save();
 
 $size = array(3,2);
 $i = 0;
@@ -359,23 +321,23 @@ foreach(\test\model\ManyParent::find_all() as $r){
 
 \test\model\JoinABC::create_table();
 
-$a1 = r(new \test\model\JoinA())->save();
-$a2 = r(new \test\model\JoinA())->save();
-$a3 = r(new \test\model\JoinA())->save();
-$a4 = r(new \test\model\JoinA())->save();
-$a5 = r(new \test\model\JoinA())->save();
-$a6 = r(new \test\model\JoinA())->save();
+$a1 = $ref(new \test\model\JoinA())->save();
+$a2 = $ref(new \test\model\JoinA())->save();
+$a3 = $ref(new \test\model\JoinA())->save();
+$a4 = $ref(new \test\model\JoinA())->save();
+$a5 = $ref(new \test\model\JoinA())->save();
+$a6 = $ref(new \test\model\JoinA())->save();
 
-$b1 = r(new \test\model\JoinB())->name("aaa")->save();
-$b2 = r(new \test\model\JoinB())->name("bbb")->save();
+$b1 = $ref(new \test\model\JoinB())->name("aaa")->save();
+$b2 = $ref(new \test\model\JoinB())->name("bbb")->save();
 
-$c1 = r(new \test\model\JoinC())->a_id($a1->id())->b_id($b1->id())->save();
-$c2 = r(new \test\model\JoinC())->a_id($a2->id())->b_id($b1->id())->save();
-$c3 = r(new \test\model\JoinC())->a_id($a3->id())->b_id($b1->id())->save();
-$c4 = r(new \test\model\JoinC())->a_id($a4->id())->b_id($b2->id())->save();
-$c5 = r(new \test\model\JoinC())->a_id($a4->id())->b_id($b1->id())->save();
-$c6 = r(new \test\model\JoinC())->a_id($a5->id())->b_id($b2->id())->save();
-$c7 = r(new \test\model\JoinC())->a_id($a5->id())->b_id($b1->id())->save();
+$c1 = $ref(new \test\model\JoinC())->a_id($a1->id())->b_id($b1->id())->save();
+$c2 = $ref(new \test\model\JoinC())->a_id($a2->id())->b_id($b1->id())->save();
+$c3 = $ref(new \test\model\JoinC())->a_id($a3->id())->b_id($b1->id())->save();
+$c4 = $ref(new \test\model\JoinC())->a_id($a4->id())->b_id($b2->id())->save();
+$c5 = $ref(new \test\model\JoinC())->a_id($a4->id())->b_id($b1->id())->save();
+$c6 = $ref(new \test\model\JoinC())->a_id($a5->id())->b_id($b2->id())->save();
+$c7 = $ref(new \test\model\JoinC())->a_id($a5->id())->b_id($b1->id())->save();
 
 $re = \test\model\JoinABC::find_all();
 eq(7,sizeof($re));
@@ -392,11 +354,11 @@ eq(2,sizeof($re));
 \test\model\UpdateModel::create_table();
 \test\model\UpdateModel::find_delete();
 
-r(new \test\model\UpdateModel())->value("abc")->save();
-r(new \test\model\UpdateModel())->value("def")->save();
-r(new \test\model\UpdateModel())->value("def")->save();
-r(new \test\model\UpdateModel())->value("def")->save();
-r(new \test\model\UpdateModel())->value("ghi")->save();
+$ref(new \test\model\UpdateModel())->value("abc")->save();
+$ref(new \test\model\UpdateModel())->value("def")->save();
+$ref(new \test\model\UpdateModel())->value("def")->save();
+$ref(new \test\model\UpdateModel())->value("def")->save();
+$ref(new \test\model\UpdateModel())->value("ghi")->save();
 
 eq(5,\test\model\UpdateModel::find_count());
 \test\model\UpdateModel::find_delete(Q::eq("value","def"));
@@ -404,9 +366,9 @@ eq(2,\test\model\UpdateModel::find_count());
 
 
 \test\model\UpdateModel::find_delete();
-$d1 = r(new \test\model\UpdateModel())->value("abc")->save();
-$d2 = r(new \test\model\UpdateModel())->value("def")->save();
-$d3 = r(new \test\model\UpdateModel())->value("ghi")->save();
+$d1 = $ref(new \test\model\UpdateModel())->value("abc")->save();
+$d2 = $ref(new \test\model\UpdateModel())->value("def")->save();
+$d3 = $ref(new \test\model\UpdateModel())->value("ghi")->save();
 
 eq(3,\test\model\UpdateModel::find_count());
 $obj = new \test\model\UpdateModel();
@@ -419,9 +381,9 @@ eq("def",\test\model\UpdateModel::find_get()->value());
 
 
 \test\model\UpdateModel::find_delete();
-$s1 = r(new \test\model\UpdateModel())->value("abc")->save();
-$s2 = r(new \test\model\UpdateModel())->value("def")->save();
-$s3 = r(new \test\model\UpdateModel())->value("ghi")->save();
+$s1 = $ref(new \test\model\UpdateModel())->value("abc")->save();
+$s2 = $ref(new \test\model\UpdateModel())->value("def")->save();
+$s3 = $ref(new \test\model\UpdateModel())->value("ghi")->save();
 
 eq(3,\test\model\UpdateModel::find_count());
 $obj = new \test\model\UpdateModel();
@@ -436,8 +398,8 @@ eq("hoge",$obj->value());
 
 
 \test\model\UpdateModel::find_delete();
-$s1 = r(new \test\model\UpdateModel())->value("abc")->save();
-$s2 = r(new \test\model\UpdateModel())->value("def")->save();
+$s1 = $ref(new \test\model\UpdateModel())->value("abc")->save();
+$s2 = $ref(new \test\model\UpdateModel())->value("def")->save();
 
 eq(2,\test\model\UpdateModel::find_count());
 $obj = new \test\model\UpdateModel();
@@ -452,7 +414,6 @@ try{
 	$obj->id($s2->id()+100)->sync();
 	fail();
 }catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
-	success();
 }
 \test\model\UpdateModel::find_delete();
 
@@ -463,10 +424,10 @@ try{
 \test\model\CrossParent::find_delete();
 \test\model\CrossChild::find_delete();
 
-$p1 = r(new \test\model\CrossParent())->value("A")->save();
-$p2 = r(new \test\model\CrossParent())->value("B")->save();
-$c1 = r(new \test\model\CrossChild())->parent_id($p1->id())->save();
-$c2 = r(new \test\model\CrossChild())->parent_id($p2->id())->save();
+$p1 = $ref(new \test\model\CrossParent())->value("A")->save();
+$p2 = $ref(new \test\model\CrossParent())->value("B")->save();
+$c1 = $ref(new \test\model\CrossChild())->parent_id($p1->id())->save();
+$c2 = $ref(new \test\model\CrossChild())->parent_id($p2->id())->save();
 
 $result = array($p1->id()=>"A",$p2->id()=>"B");
 foreach(\test\model\CrossChild::find_all() as $o){
@@ -489,20 +450,14 @@ try{
 	$obj->value("hoge")->save();
 	fail();
 }catch(\BadMethodCallException $e){
-	success();
 }
 
 $result = \test\model\ReplicationSlave::find_all();
 eq(0,sizeof($result));
 
-try{
-	$obj = new \test\model\Replication();
-	$obj->value("hoge");
-	$obj->save();
-	success();
-}catch(\BadMethodCallException $e){
-	fail();
-}
+$obj = new \test\model\Replication();
+$obj->value("hoge");
+$obj->save();
 
 $result = \test\model\ReplicationSlave::find_all();
 eq(1,sizeof($result));
@@ -528,19 +483,19 @@ if(eq(1,sizeof($result))){
 
 
 \test\model\CompositePrimaryKeys::find_delete();
-r(new \test\model\CompositePrimaryKeys())->id1(1)->id2(1)->value('AAA1')->save();
-r(new \test\model\CompositePrimaryKeys())->id1(1)->id2(2)->value('AAA2')->save();
-r(new \test\model\CompositePrimaryKeys())->id1(1)->id2(3)->value('AAA3')->save();
+$ref(new \test\model\CompositePrimaryKeys())->id1(1)->id2(1)->value('AAA1')->save();
+$ref(new \test\model\CompositePrimaryKeys())->id1(1)->id2(2)->value('AAA2')->save();
+$ref(new \test\model\CompositePrimaryKeys())->id1(1)->id2(3)->value('AAA3')->save();
 
-r(new \test\model\CompositePrimaryKeys())->id1(2)->id2(1)->value('BBB1')->save();
-r(new \test\model\CompositePrimaryKeys())->id1(2)->id2(2)->value('BBB2')->save();
-r(new \test\model\CompositePrimaryKeys())->id1(2)->id2(3)->value('BBB3')->save();
+$ref(new \test\model\CompositePrimaryKeys())->id1(2)->id2(1)->value('BBB1')->save();
+$ref(new \test\model\CompositePrimaryKeys())->id1(2)->id2(2)->value('BBB2')->save();
+$ref(new \test\model\CompositePrimaryKeys())->id1(2)->id2(3)->value('BBB3')->save();
 
 \test\model\CompositePrimaryKeysRef::find_delete();
-r(new \test\model\CompositePrimaryKeysRef())->ref_id(1)->type_id(1)->save();
-r(new \test\model\CompositePrimaryKeysRef())->ref_id(2)->type_id(1)->save();
-r(new \test\model\CompositePrimaryKeysRef())->ref_id(1)->type_id(2)->save();
-r(new \test\model\CompositePrimaryKeysRef())->ref_id(2)->type_id(2)->save();
+$ref(new \test\model\CompositePrimaryKeysRef())->ref_id(1)->type_id(1)->save();
+$ref(new \test\model\CompositePrimaryKeysRef())->ref_id(2)->type_id(1)->save();
+$ref(new \test\model\CompositePrimaryKeysRef())->ref_id(1)->type_id(2)->save();
+$ref(new \test\model\CompositePrimaryKeysRef())->ref_id(2)->type_id(2)->save();
 
 
 $i = 0;

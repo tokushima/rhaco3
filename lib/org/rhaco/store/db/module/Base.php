@@ -30,14 +30,14 @@ abstract class Base{
 	 * @return PDO
 	 */
 	public function connect($name,$host,$port,$user,$password,$sock){
-		throw new \BadMethodCallException('undef');
+		throw new \org\rhaco\store\db\exception\DaoBadMethodCallException('undef');
 	}
 	/**
 	 * 最後のインサートされたserial値を返す文を生成する
 	 * @return Daq
 	 */
 	public function last_insert_id_sql(){
-		throw new \BadMethodCallException('undef');
+		throw new \org\rhaco\store\db\exception\DaoBadMethodCallException('undef');
 	}
 	/**
 	 * insert文を生成する
@@ -69,7 +69,7 @@ abstract class Base{
 			$where[] = $this->quotation($column->column()).' = ?';
 			$wherevars[] = $this->update_value($dao,$column->name());
 		}
-		if(empty($where)) throw new \LogicException('primary not found');
+		if(empty($where)) throw new \org\rhaco\store\db\exception\QueryException('primary not found');
 		foreach($dao->self_columns() as $column){
 			if(!$column->primary()){
 				$update[] = $this->quotation($column->column()).' = ?';
@@ -94,7 +94,7 @@ abstract class Base{
 			$where[] = $this->quotation($column->column()).' = ?';
 			$vars[] = $dao->{$column->name()}();
 		}
-		if(empty($where)) throw new \LogicException('not primary');
+		if(empty($where)) throw new \org\rhaco\store\db\exception\QueryException('not primary');
 		return new Daq(
 						'delete from '.$this->quotation($column->table()).' where '.implode(' and ',$where)
 						,$vars
@@ -140,7 +140,7 @@ abstract class Base{
 				}
 			}
 		}
-		if(empty($select)) throw new \LogicException('select invalid');
+		if(empty($select)) throw new \org\rhaco\store\db\exception\QueryException('select invalid');
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(true),$this->where_cond_columns($dao->conds(),$from));
 		return new Daq(('select '.implode(',',$select).' from '.implode(',',$from)
 										.(empty($where_sql) ? '' : ' where '.$where_sql)
@@ -245,7 +245,7 @@ abstract class Base{
 		}else{
 			$target_column = $this->get_column($target_name,$dao->columns());
 		}
-		if(empty($target_column)) throw new \LogicException('undef primary');
+		if(empty($target_column)) throw new \org\rhaco\store\db\exception\QueryException('undef primary');
 		if(!empty($gorup_name)){
 			$group_column = $this->get_column($gorup_name,$dao->columns());
 			$select[] = $group_column->table_alias().'.'.$this->quotation($group_column->column()).' key_column';
@@ -407,7 +407,7 @@ abstract class Base{
 		foreach($self_columns as $c){
 			if($c->name() == $column_str) return $c;
 		}
-		throw new \LogicException('undef '.$column_str);
+		throw new \org\rhaco\store\db\exception\QueryException('undef '.$column_str);
 	}
 	protected function column_alias_sql(Dao $dao,Column $column,Q $q,$alias=true){
 		$column_str = ($alias) ? $column->table_alias().'.'.$this->quotation($column->column()) : $this->quotation($column->column());

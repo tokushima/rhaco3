@@ -30,7 +30,7 @@ for($i=1;$i<=5;$i++){
 
 $i = 0;
 foreach(\org\rhaco\store\queue\Queue::gets(5,'test') as $model){
-	$i++;	
+	$i++;
 	eq($i,$model->data()); // ロックだけする
 }
 eq(5,$i);

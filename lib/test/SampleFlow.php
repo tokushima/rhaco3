@@ -29,7 +29,6 @@ class SampleFlow extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function upload_file(){
 		if($this->is_post()){
-\org\rhaco\Log::trace($_FILES,$_POST);
 			$file_info1 = $this->in_files('upfile1');			
 			$this->rm_vars();
 			

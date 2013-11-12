@@ -154,6 +154,8 @@ class Util{
 }
 class AssertException extends \Exception{
 }
+class AssertFailure extends \Exception{
+}
 class Assert{
 	static private $failure_info = array('',0,null,null);
 	
@@ -167,6 +169,9 @@ class Assert{
 			$file = \angela\Runner::current_file();
 		}
 		return array($file,$line);
+	}
+	public function failure($msg='failure'){
+		throw new \angela\AssertFailure($msg);
 	}
 	public function equals($arg1,$arg2,$file=null,$line=null){
 		if(!(self::expvar($arg1) === self::expvar($arg2))){
@@ -290,124 +295,144 @@ class Runner{
 	static private function run($class_name,$method_name=null,$block_name=null,$print_progress=false,$include_tests=false){
 		$entry_path = \angela\Conf::entry_dir();
 		$tests_path = \angela\Conf::test_dir();
-
 		if($class_name == __FILE__) return new self();
-
+		$test_list = array();
+		
 		if(is_file($class_name)){
-			$doctest = (strpos($class_name,$tests_path) === false) ? self::get_entry_doctest($class_name) : self::get_unittest($class_name);
-		}else if(is_file($f=$entry_path.$class_name.'.php')){
-			$doctest = self::get_entry_doctest($f);
-		}else if(is_file($f=$tests_path.str_replace('.','/',$class_name).'.php')){
-			$doctest = self::get_unittest($f);
-		}else if(is_file($f=$tests_path.$class_name)){
-			$doctest = self::get_unittest($f);
-		}else if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true)
+			$test_list[$class_name] = (strpos($class_name,$tests_path) === false) ? self::get_entry_doctest($class_name) : self::get_unittest($class_name);
+		}
+		if(is_file($f=$entry_path.$class_name.'.php')){
+			$test_list[$f] = self::get_entry_doctest($f);
+		}
+		if(is_file($f=$tests_path.str_replace('.','/',$class_name).'.php')){
+			$test_list[$f] = self::get_unittest($f);
+		}
+		if(is_file($f=$tests_path.$class_name)){
+			$test_list[$f] = self::get_unittest($f);
+		}
+		if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true)
 				|| interface_exists($f,true)
 				|| (function_exists('trait_exists') && trait_exists($f,true))
 		){
 			if(empty($method_name)) self::dir_run($tests_path,$class_name,$method_name,$block_name,$print_progress,$include_tests);
-			$doctest = self::get_doctest($f);
-		}else if(self::dir_run($tests_path,$class_name,$method_name,$block_name,$print_progress,$include_tests)){
-			return new self();
-		}else{
-			throw new \ErrorException($class_name.' test not found');
+			$test_list[$f] = self::get_doctest($f);
 		}
-		self::$current_file = $doctest['filename'];
-		self::$current_class = ($doctest['type'] == 1) ? $doctest['name'] : null;
-		self::$current_entry = ($doctest['type'] == 2 || $doctest['type'] == 3) ? $doctest['name'] : null;
-		self::$current_method = null;
-		$s_block_name = (substr($block_name,-4) == '.php') ? substr(basename($block_name),0,-4) : $block_name;
-
-		foreach($doctest['tests'] as $test_method_name => $tests){
-			if($method_name === null || $method_name === $test_method_name){
-				self::$current_method = $test_method_name;
-				$starttime = microtime(true);
-				$test_result = array('none',0);
-
-				if(!empty($tests['blocks'])){
-					foreach($tests['blocks'] as $test_block){
-						list($name,$label,$block) = $test_block;
-						$exec_block_name = ' #'.(($class_name == $name) ? '' : $name);
-						$current_block_start_time = microtime(true);
-						$s_name = (substr($name,-4) == '.php') ? substr(basename($name),0,-4) : $name;
-
-						if($block_name === null || $s_block_name === $s_name){
-							if($print_progress && substr(PHP_OS,0,3) != 'WIN') self::stdout($exec_block_name);
-							try{
-								ob_start();
-								\angela\Conf::call_setup_func();
-
-								if($doctest['type'] == 3){
-									self::include_setup_teardown($doctest['filename'],'__setup__.php');
-									include($doctest['filename']);
-								}else{
-									if(isset($doctest['tests']['@']['__setup__'])) eval($doctest['tests']['@']['__setup__'][2]);
-									eval($block);
-								}
-								$result = ob_get_clean();
-								if(preg_match('/(Parse|Fatal) error:.+/',$result,$match)){
-									$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$result,$line) ?
-											'Parse error: syntax error '.$doctest['filename'].' code on line '.$line[1]
-											: $match[0]);
-									throw new \ErrorException($err);
-								}
-								$test_result = array(
-										'success',
-										(round(microtime(true) - $current_block_start_time,3))
-								);
-							}catch(\angela\AssertException $e){
-								self::$has_exception = true;
-								$test_result = array(
-										'fail',
-										(round(microtime(true) - $current_block_start_time,3)),
-										\angela\Assert::failure_info()
-								);
-							}catch(\Exception $e){
-								self::$has_exception = true;
-								if(ob_get_level() > 0) $result = ob_get_clean();
-								list($message,$file,$line) = array($e->getMessage(),$e->getFile(),$e->getLine());
-								$trace = $e->getTrace();
-								$eval = false;
-
-								foreach($trace as $k => $t){
-									if(isset($t['class']) && isset($t['function']) && ($t['class'].'::'.$t['function']) == __METHOD__ && isset($trace[$k-2])
-											&& isset($trace[$k-1]['file']) && $trace[$k-1]['file'] == __FILE__ && isset($trace[$k-1]['function']) && $trace[$k-1]['function'] == 'eval'
-									){
-										$file = self::$current_file;
-										$line = $trace[$k-2]['line'];
-										$eval = true;
-										break;
-									}
-								}
-								if(!$eval && isset($trace[0]['file']) && self::$current_file == $trace[0]['file']){
-									$file = $trace[0]['file'];
-									$line = $trace[0]['line'];
-								}
-								$test_result = array(
-										'exception',
-										(round(microtime(true) - $current_block_start_time,3)),
-										array($file,$line,$message)
-								);
-							}
-							if($doctest['type'] == 3){
-								self::include_setup_teardown($doctest['filename'],'__teardown__.php');
-							}else{
-								if(isset($doctest['tests']['@']['__teardown__'])) eval($doctest['tests']['@']['__teardown__'][2]);
-							}
-							if($print_progress && substr(PHP_OS,0,3) != 'WIN') self::stdout("\033[".strlen($exec_block_name).'D'."\033[0K");
-						}
-					}
-				}
-				$time = round((microtime(true) - (float)$starttime),4);
-				self::$result[self::$current_file][self::$current_class][self::$current_method][] = $test_result;
+		if(empty($test_list)){
+			if(self::dir_run($tests_path,$class_name,$method_name,$block_name,$print_progress,$include_tests)){
+				return new self();
+			}else{
+				throw new \ErrorException($class_name.' test not found');
 			}
 		}
-		if($include_tests && ($doctest['type'] == 1 || $doctest['type'] == 2)){
-			$test_name = ($doctest['type'] == 1) ? str_replace("\\",'/',substr($doctest['name'],1)) : $doctest['name'];
-			if(!empty($test_name) && is_dir($d=($tests_path.str_replace(array('.'),'/',$test_name)))){
-				foreach(self::file_list($d) as $f){
-					if(self::is($f) && ($block_name === null || $s_block_name === substr($f->getFilename(),0,-4))){
-						self::run($f->getPathname(),null,null,$print_progress,$include_tests);
+		
+		foreach($test_list as $doctest){
+			self::$current_file = $doctest['filename'];
+			self::$current_class = ($doctest['type'] == 1) ? $doctest['name'] : null;
+			self::$current_entry = ($doctest['type'] == 2 || $doctest['type'] == 3) ? $doctest['name'] : null;
+			self::$current_method = null;
+			$s_block_name = (substr($block_name,-4) == '.php') ? substr(basename($block_name),0,-4) : $block_name;
+	
+			foreach($doctest['tests'] as $test_method_name => $tests){
+				if($method_name === null || $method_name === $test_method_name){
+					self::$current_method = $test_method_name;
+					$starttime = microtime(true);
+					$test_result = array('none',0);
+	
+					if(!empty($tests['blocks'])){
+						foreach($tests['blocks'] as $test_block){
+							list($name,$label,$block) = $test_block;
+							$exec_block_name = ' #'.(($class_name == $name) ? '' : $name);
+							$current_block_start_time = microtime(true);
+							$s_name = (substr($name,-4) == '.php') ? substr(basename($name),0,-4) : $name;
+	
+							if($block_name === null || $s_block_name === $s_name){
+								if($print_progress && substr(PHP_OS,0,3) != 'WIN') self::stdout($exec_block_name);
+								try{
+									ob_start();
+									\angela\Conf::call_setup_func();
+	
+									if($doctest['type'] == 3){
+										self::include_setup_teardown($doctest['filename'],'__setup__.php');
+										include($doctest['filename']);
+									}else{
+										if(isset($doctest['tests']['@']['__setup__'])) eval($doctest['tests']['@']['__setup__'][2]);
+										eval($block);
+									}
+									$result = ob_get_clean();
+									if(preg_match('/(Parse|Fatal) error:.+/',$result,$match)){
+										$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$result,$line) ?
+												'Parse error: syntax error '.$doctest['filename'].' code on line '.$line[1]
+												: $match[0]);
+										throw new \ErrorException($err);
+									}
+									$test_result = array(
+											'success',
+											(round(microtime(true) - $current_block_start_time,3))
+									);
+								}catch(\angela\AssertException $e){
+									self::$has_exception = true;
+									$test_result = array(
+											'fail',
+											(round(microtime(true) - $current_block_start_time,3)),
+											\angela\Assert::failure_info()
+									);
+								}catch(\Exception $e){
+									self::$has_exception = true;
+									if(ob_get_level() > 0) $result = ob_get_clean();
+									list($message,$file,$line) = array(get_class($e).': '.$e->getMessage(),$e->getFile(),$e->getLine());
+									$trace = $e->getTrace();
+									$eval = false;
+									$exeline = -1;									
+	
+									foreach($trace as $k => $t){
+										if(isset($t['class']) && isset($t['function']) && ($t['class'].'::'.$t['function']) == __METHOD__ && isset($trace[$k-2])
+												&& isset($trace[$k-1]['file']) && $trace[$k-1]['file'] == __FILE__ && isset($trace[$k-1]['function']) && $trace[$k-1]['function'] == 'eval'
+										){
+											$file = self::$current_file;
+											$line = $trace[$k-2]['line'];
+											$eval = true;
+											break;
+										}
+									}									
+									if(!$eval && isset($trace[0]['file']) && self::$current_file == $trace[0]['file']){
+										$file = $trace[0]['file'];
+										$line = $trace[0]['line'];
+									}
+
+									krsort($trace);
+									foreach($trace as $k => $t){
+										if(isset($t['file']) && $t['file'] != __FILE__ && isset($t['line'])){
+											$exeline = $t['line'];
+											$exe = $k;
+											break;
+										}
+									}
+									$test_result = array(
+											'exception',
+											(round(microtime(true) - $current_block_start_time,3)),
+											array(self::$current_file,$exeline,sprintf('%s: %d',$file,$line),$message)
+									);
+								}
+								if($doctest['type'] == 3){
+									self::include_setup_teardown($doctest['filename'],'__teardown__.php');
+								}else{
+									if(isset($doctest['tests']['@']['__teardown__'])) eval($doctest['tests']['@']['__teardown__'][2]);
+								}
+								if($print_progress && substr(PHP_OS,0,3) != 'WIN') self::stdout("\033[".strlen($exec_block_name).'D'."\033[0K");
+							}
+						}
+					}
+					$time = round((microtime(true) - (float)$starttime),4);
+					self::$result[self::$current_file][self::$current_class][self::$current_method][] = $test_result;
+				}
+			}
+			if($include_tests && ($doctest['type'] == 1 || $doctest['type'] == 2)){
+				$test_name = ($doctest['type'] == 1) ? str_replace("\\",'/',substr($doctest['name'],1)) : $doctest['name'];
+				if(!empty($test_name) && is_dir($d=($tests_path.str_replace(array('.'),'/',$test_name)))){
+					foreach(self::file_list($d) as $f){
+						if(self::is($f) && ($block_name === null || $s_block_name === substr($f->getFilename(),0,-4))){
+							self::run($f->getPathname(),null,null,$print_progress,$include_tests);
+						}
 					}
 				}
 			}
@@ -849,6 +874,13 @@ class Http{
 			list($url) = explode('?',$url,2);
 		}
 		switch($method){
+			case 'POST': curl_setopt($this->resource,CURLOPT_POST,true); break;
+			case 'GET': curl_setopt($this->resource,CURLOPT_HTTPGET,true); break;
+			case 'HEAD': curl_setopt($this->resource,CURLOPT_NOBODY,true); break;
+			case 'PUT': curl_setopt($this->resource,CURLOPT_PUT,true); break;
+			case 'DELETE': curl_setopt($this->resource,CURLOPT_CUSTOMREQUEST,'DELETE'); break;
+		}
+		switch($method){
 			case 'POST':
 				if(!empty($this->request_file_vars)){
 					$vars = array();
@@ -875,13 +907,6 @@ class Http{
 			case 'PUT':
 			case 'DELETE':
 				$url = $url.(!empty($this->request_vars) ? '?'.http_build_query($this->request_vars) : '');
-		}
-		switch($method){
-			case 'POST': curl_setopt($this->resource,CURLOPT_POST,true); break;
-			case 'GET': curl_setopt($this->resource,CURLOPT_HTTPGET,true); break;
-			case 'HEAD': curl_setopt($this->resource,CURLOPT_NOBODY,true); break;
-			case 'PUT': curl_setopt($this->resource,CURLOPT_PUT,true); break;
-			case 'DELETE': curl_setopt($this->resource,CURLOPT_CUSTOMREQUEST,'DELETE'); break;
 		}
 		curl_setopt($this->resource,CURLOPT_URL,$url);
 		curl_setopt($this->resource,CURLOPT_FOLLOWLOCATION,false);
@@ -1046,7 +1071,7 @@ class ReportStdout{
 	public function result($result_list,$params,$error_str){
 		$result = '';
 		$tab = '  ';
-		$count = $fail = $none = $exception = $total_time = 0;
+		$success = $count = $fail = $none = $exception = $total_time = 0;
 
 		foreach($result_list as $file => $f){
 			foreach($f as $class => $c){
@@ -1064,6 +1089,7 @@ class ReportStdout{
 								$none++;
 								break;
 							case 'success':
+								$success++;
 								break;
 							case 'fail':
 								$fail++;
@@ -1091,7 +1117,7 @@ class ReportStdout{
 								break;
 							case 'exception':
 								$exception++;
-								list($file,$line,$msg) = $info[2];
+								list($file,$line,$pos,$msg) = $info[2];
 
 								if(!$print_head){
 									$result .= "\n";
@@ -1101,6 +1127,7 @@ class ReportStdout{
 								}
 								$result .= '['.$line.']'.$method.': '.self::color_format('error','1;31')."\n";
 								$result .= $tab.str_repeat("=",70)."\n";
+								$result .= self::color_format($tab.$pos,33)."\n";
 								$result .= self::color_format($tab.$msg,31);
 								$result .= "\n".$tab.str_repeat("=",70)."\n";
 								break;
@@ -1110,7 +1137,7 @@ class ReportStdout{
 			}
 		}
 		$result .= "\n";
-		$result .= self::color_format(" tests: ".$count." ","7;32")
+		$result .= self::color_format(" success: ".$success." ","7;32")
 		." ".self::color_format(" failures: ".$fail." ","7;31")
 		." ".self::color_format(" errors: ".$exception." ","7;31")
 		.sprintf(' ( %.05f sec / %s MByte ) ',$total_time,round(number_format((memory_get_usage() / 1024 / 1024),3),4));
@@ -1130,7 +1157,14 @@ class ReportStdout{
 }
 
 namespace{
-
+/**
+ * 失敗
+ * @param string $msg
+ */
+function fail($msg='failure'){
+	$assert = new \angela\Assert();
+	$assert->failure($msg);
+}
 /**
  *　等しい
  * @param mixed $expectation 期待値

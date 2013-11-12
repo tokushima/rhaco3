@@ -95,33 +95,6 @@ class Xml implements \IteratorAggregate{
 			$v = '<![CDATA['.$v.']]>';
 		}
 		return $v;
-		/***
-			$obj = newclass('
-							class * extends \org\rhaco\Object{
-								protected $aaa = "hoge";
-								protected $ccc = 123;
-							}
-						');
-			$self = new self('abc',$obj);
-			eq('<abc><aaa>hoge</aaa><ccc>123</ccc></abc>',$self->get());
-
-			$n = get_class($obj);
-			$obj1 = clone($obj);
-			$obj2 = clone($obj);
-			$obj3 = clone($obj);
-			$obj2->ccc(456);
-			$obj3->ccc(789);
-			$arr = array($obj1,$obj2,$obj3);
-			$self = new self('abc',$arr);
-			eq(
-				sprintf('<abc>'
-					.'<%s><aaa>hoge</aaa><ccc>123</ccc></%s>'
-					.'<%s><aaa>hoge</aaa><ccc>456</ccc></%s>'
-					.'<%s><aaa>hoge</aaa><ccc>789</ccc></%s>'
-					.'</abc>',
-					$n,$n,$n,$n,$n,$n
-				),$self->get());
-		 */
 	}
 	/**
 	 * 値を設定、取得する
@@ -238,7 +211,7 @@ class Xml implements \IteratorAggregate{
 			$x->attr("abc",123);
 			$x->attr("def",456);
 			$x->attr("ghi",789);
-
+			
 			eq(array("abc"=>123,"def"=>456,"ghi"=>789),iterator_to_array($x));
 			$x->rm_attr("def");
 			eq(array("abc"=>123,"ghi"=>789),iterator_to_array($x));

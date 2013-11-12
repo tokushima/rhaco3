@@ -1,42 +1,41 @@
 <?php
 use \org\rhaco\store\db\Q;
 
+$ref = function($obj){
+	return $obj;
+};
+
+
 \test\model\Find::create_table();
-
 \test\model\AbcFind::create_table();
-
 \test\model\RefFind::create_table();
-
 \test\model\RefRefFind::create_table();
-
 \test\model\HasFind::create_table();
-
 \test\model\SubFind::create_table();
-
 \test\model\RefRefFind::find_delete();
 \test\model\RefFind::find_delete();
 \test\model\Find::find_delete();
 \test\model\SubFind::find_delete();
 
-$abc = r(new \test\model\Find())->order(4)->value1("abc")->value2("ABC")->save();
-$def = r(new \test\model\Find())->order(3)->value1("def")->value2("DEF")->save();
-$ghi = r(new \test\model\Find())->order(1)->value1("ghi")->value2("GHI")->updated("2008/12/24 10:00:00")->save();
-$jkl = r(new \test\model\Find())->order(2)->value1("jkl")->value2("EDC")->save();
-$aaa = r(new \test\model\Find())->order(2)->value1("aaa")->value2("AAA")->updated("2008/12/24 10:00:00")->save();
-$bbb = r(new \test\model\Find())->order(2)->value1("bbb")->value2("Aaa")->save();
-$ccc = r(new \test\model\Find())->order(2)->value1("ccc")->value2("aaa")->save();
-$mno = r(new \test\model\Find())->order(2)->value1("mno")->value2(null)->save();
+$abc = $ref(new \test\model\Find())->order(4)->value1("abc")->value2("ABC")->save();
+$def = $ref(new \test\model\Find())->order(3)->value1("def")->value2("DEF")->save();
+$ghi = $ref(new \test\model\Find())->order(1)->value1("ghi")->value2("GHI")->updated("2008/12/24 10:00:00")->save();
+$jkl = $ref(new \test\model\Find())->order(2)->value1("jkl")->value2("EDC")->save();
+$aaa = $ref(new \test\model\Find())->order(2)->value1("aaa")->value2("AAA")->updated("2008/12/24 10:00:00")->save();
+$bbb = $ref(new \test\model\Find())->order(2)->value1("bbb")->value2("Aaa")->save();
+$ccc = $ref(new \test\model\Find())->order(2)->value1("ccc")->value2("aaa")->save();
+$mno = $ref(new \test\model\Find())->order(2)->value1("mno")->value2(null)->save();
 
 
-$ref1 = r(new \test\model\RefFind())->parent_id($jkl->id())->save();
-$ref2 = r(new \test\model\RefFind())->parent_id($ccc->id())->save();
+$ref1 = $ref(new \test\model\RefFind())->parent_id($jkl->id())->save();
+$ref2 = $ref(new \test\model\RefFind())->parent_id($ccc->id())->save();
 
-$refref1 = r(new \test\model\RefRefFind())->parent_id($ref1->id())->save();
+$refref1 = $ref(new \test\model\RefRefFind())->parent_id($ref1->id())->save();
 
-$sub1 = r(new \test\model\SubFind())->value("abc")->order(4)->save();
-$sub2 = r(new \test\model\SubFind())->value("def")->order(3)->save();
-$sub3 = r(new \test\model\SubFind())->value("ghi")->order(1)->save();
-$sub4 = r(new \test\model\SubFind())->value("jkl")->order(2)->save();
+$sub1 = $ref(new \test\model\SubFind())->value("abc")->order(4)->save();
+$sub2 = $ref(new \test\model\SubFind())->value("def")->order(3)->save();
+$sub3 = $ref(new \test\model\SubFind())->value("ghi")->order(1)->save();
+$sub4 = $ref(new \test\model\SubFind())->value("jkl")->order(2)->save();
 
 eq(8,sizeof(\test\model\Find::find_all()));
 
@@ -109,9 +108,9 @@ foreach(\test\model\Find::find(Q::neq("value1","abc")) as $obj){
 try{
 	\test\model\Find::find(Q::eq("value_error","abc"));
 	fail();
-}catch(\Exception $e){
-	success();
+}catch(\org\rhaco\store\db\exception\QueryException $e){
 }
+
 
 $i = 0;
 $r = array("aaa","bbb","ccc");

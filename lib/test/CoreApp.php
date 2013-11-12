@@ -43,7 +43,6 @@ class CoreApp extends \org\rhaco\flow\parts\RequestFlow{
 				\org\rhaco\Exceptions::throw_over();
 				fail();
 			}catch(\org\rhaco\Exceptions $e){
-				success();
 			}
 		 */
 		/***
@@ -52,7 +51,6 @@ class CoreApp extends \org\rhaco\flow\parts\RequestFlow{
 			\org\rhaco\Exceptions::clear();
 			try{
 				\org\rhaco\Exceptions::throw_over();
-				success();
 			}catch(\org\rhaco\Exceptions $e){
 				fail();
 			}

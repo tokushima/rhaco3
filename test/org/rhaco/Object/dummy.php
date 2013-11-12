@@ -1,2 +1,0 @@
-<?php
-eq(true,true);

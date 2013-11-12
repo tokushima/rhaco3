@@ -6,7 +6,7 @@ xml($xml,$b->body(),'result');
 eq('abcd',$xml->f('get_data1.value()'));
 
 $b->file_vars('upfile1',__FILE__);
-$b->do_post(test_map_url('upload_value'));
+$b->do_post(test_map_url('upload_file'));
 xml($xml,$b->body(),'result');
 eq(basename(__FILE__),$xml->f('original_name1.value()'));
 eq(filesize(__FILE__),(int)$xml->f('size1.value()'));

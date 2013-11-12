@@ -201,7 +201,6 @@ class Json{
 			 	self::decode("{'hoge':'123,456'}");
 			 	fail();
 			 }catch(\InvalidArgumentException $e){
-			 	success();
 			 }
 		 */
 	}
