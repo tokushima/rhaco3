@@ -20,10 +20,6 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
-	<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
-	<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
-
   </head>
 
   <body>
@@ -41,22 +37,18 @@
 
 			<ul class="nav">
 				<li class="{$t.endswith_pattern_switch('index','active','inactive')}"><a href="{$t.package_method_url('index')}">Urls</a></li>
+				<li class="{$t.endswith_pattern_switch('explorer','active','inactive')}"><a href="{$t.package_method_url('explorer')}">Explorer</a></li>
+				
 				<li class="{$t.endswith_pattern_switch('class_list','active','inactive')}"><a href="{$t.package_method_url('class_list')}">Classes</a></li>
 				<rt:if param="{$has_dao}">
 					<li class="{$t.endswith_pattern_switch('model_list','active','inactive')}"><a href="{$t.package_method_url('model_list')}">Models</a></li>
 				</rt:if>
-				<li class="{$t.endswith_pattern_switch('explorer','active','inactive')}"><a href="{$t.package_method_url('explorer')}">Explorer</a></li>
 				
-				<li class="{$t.endswith_pattern_switch('module_list','active','inactive')}"><a href="{$t.package_method_url('module_list')}">Module</a></li>
-				<li class="{$t.endswith_pattern_switch('conf_list','active','inactive')}"><a href="{$t.package_method_url('conf_list')}">Conf</a></li>
 				<rt:if param="{$has_smtp_blackhole_dao}">
 					<li class="{$t.endswith_pattern_switch('mail_list','active','inactive')}"><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
 				</rt:if>
 				<rt:if param="{$t.is_login()}">
 					<li class="{$t.endswith_pattern_switch('do_logout','active','inactive')}"><a href="{$t.package_method_url('do_logout')}">Logout</a></li>
-				</rt:if>
-				<rt:if param="{$has_document}">
-					<li class="{$t.endswith_pattern_switch('document','active','inactive')}"><a href="{$t.package_method_url('document')}">Document</a></li>
 				</rt:if>
 			</ul>
 
@@ -71,8 +63,12 @@
 		</rt:block>
     </div>
     <!-- /container -->
-		<footer>
-			<hr />
-		</footer>
+	<footer>
+		<hr />
+	</footer>
+	
+	<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+	
   </body>
 </html>
