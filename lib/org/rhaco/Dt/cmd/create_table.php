@@ -2,6 +2,7 @@
 /**
  * create table 
  * @param string $model
+ * @param boolean $drop
  */
 if($has('model')){
 	$model = str_replace('.','\\',$in_value('model'));
