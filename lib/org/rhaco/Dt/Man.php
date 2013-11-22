@@ -241,6 +241,7 @@ class Man{
 	}
 	/**
 	 * ライブラリ一覧
+	 * composerの場合はcomposer.jsonで定義しているPSR-0のもののみ
 	 * @return array
 	 */
 	static public function classes($include_test=false){

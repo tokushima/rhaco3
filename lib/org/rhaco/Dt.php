@@ -97,7 +97,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function model_list(){
 		$list = $errors = $error_query = $model_list = $con = array();
-		Dt\Man::classes();
+		self::classes();
 		foreach(get_declared_classes() as $class){
 			$r = new \ReflectionClass($class);
 			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,$this->dao)){
@@ -136,7 +136,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function class_list(){
 		$libs = array();
-		foreach(Dt\Man::classes() as $package => $info){
+		foreach(self::classes() as $package => $info){
 			$r = new \ReflectionClass($info['class']);
 			$src = file_get_contents($r->getFileName());
 			$class_doc = $r->getDocComment();
@@ -480,8 +480,22 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	static public function method_info($class,$method){
 		return Dt\Man::method_info($class,$method);
 	}
-	static public function classes(){
-		return Dt\Man::classes();
+	static public function classes($include_test=false){
+		$class_list = Dt\Man::classes($include_test);
+		
+		$add = \org\rhaco\Conf::get('extra_classes',array());
+		if(is_string($add)) $add = array($add);
+		foreach($add as $class){
+			$class = str_replace('.','\\',$class);
+			if(substr($class,0,1) != '\\') $class = '\\'.$class;
+			$r = new \ReflectionClass($class);
+			
+			if(!$r->isInterface() && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
+				$n = str_replace('\\','/',$r->getName());
+				$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$class);
+			}
+		}
+		return $class_list;
 	}
 	/**
 	 * エントリのURL群
