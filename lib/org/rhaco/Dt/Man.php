@@ -252,19 +252,16 @@ class Man{
 		if(class_exists('Composer\Autoload\ClassLoader')){
 			$r = new \ReflectionClass('Composer\Autoload\ClassLoader');
 			$composer_dir = dirname($r->getFileName());
-		
-			if(is_file($bf=realpath(dirname($composer_dir).'/autoload.php'))){
-				ob_start();
-				include_once($bf);
-				if(is_file($an=$composer_dir.'//autoload_namespaces.php')){
-					$class_loader = include($bf);
-					foreach($class_loader->getPrefixes() as $v){
-						foreach($v as $p){
-							$include_path[] = $p;
-						}
+			$json_file = dirname(dirname($composer_dir)).'/composer.json';
+			
+			if(is_file($json_file)){
+				$json = json_decode(file_get_contents($json_file),true);
+				if(isset($json['autoload']['psr-0'])){
+					foreach($json['autoload']['psr-0'] as $path){
+						$p = realpath(dirname($json_file).'/'.$path);
+						if($p !== false) $include_path[] = $p;
 					}
 				}
-				ob_end_clean();
 			}
 		}
 		foreach($include_path as $libdir){
@@ -296,6 +293,7 @@ class Man{
 				$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$class);
 			}
 		}
+		ksort($result);
 		return $result;
 	}
 	static private function type($type,$class){

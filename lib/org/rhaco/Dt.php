@@ -98,7 +98,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	public function model_list(){
 		$list = $errors = $error_query = $model_list = $con = array();
 		Dt\Man::classes();
-		
 		foreach(get_declared_classes() as $class){
 			$r = new \ReflectionClass($class);
 			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,$this->dao)){
@@ -124,6 +123,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 				$model_list[$package] = $summary;				
 			}
 		}
+		ksort($model_list);
 		$this->vars('dao_models',$model_list);
 		$this->vars('dao_model_errors',$errors);
 		$this->vars('dao_model_error_query',$error_query);
