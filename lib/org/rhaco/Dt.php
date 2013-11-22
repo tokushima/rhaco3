@@ -57,6 +57,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 							if(!isset($m['deprecated'])) $m['deprecated'] = false;
 							if(!isset($m['mode'])) $m['mode'] = null;
 							if(!isset($m['summary'])) $m['summary'] = null;
+							if(!isset($m['template'])) $m['template'] = null;
 														
 							if(!isset($m['class']) || $m['class'] != str_replace('\\','.',__CLASS__)){
 								$m['error'] = '';
@@ -120,7 +121,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					$errors[$package] = $e->getMessage();
 					$error_query[$package] = print_r($dao::recorded_query(),true);
 				}
-				if($this->search_str($package,$summary)) $model_list[$package] = $summary;				
+				$model_list[$package] = $summary;				
 			}
 		}
 		$this->vars('dao_models',$model_list);
@@ -128,17 +129,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('dao_model_error_query',$error_query);
 		$this->vars('dao_model_con',$con);
 		$this->vars('getcwd',getcwd());
-	}
-
-	private function search_str(){
-		$query = str_replace('　',' ',trim($this->in_vars('q')));
-		if(!empty($query)){
-			$args = func_get_args();
-			foreach(explode(' ',$query) as $q){
-				if(stripos(str_replace('\\','.',implode(' ',$args)),$q) === false) return false;
-			}
-		}
-		return true;
 	}
 	/**
 	 * ライブラリの一覧
@@ -167,14 +157,11 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 					}
 				}
 				$modules = implode(':',array_keys($module));
-				$bool = $this->search_str($info['class'],$document,$modules);
 			}
-			if($bool){
-				$c = new \org\rhaco\Object();
-				$c->summary = $summary;
-				$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
-				$libs[$package] = $c;
-			}
+			$c = new \org\rhaco\Object();
+			$c->summary = $summary;
+			$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
+			$libs[$package] = $c;
 		}
 		ksort($libs);
 		$this->vars('class_list',$libs);
@@ -472,46 +459,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('obj',$model);
 	}
 	/**
-	 * Confの一覧
-	 * @automap
-	 */
-	public function conf_list(){
-		$list = array();
-		foreach(self::config_all() as $p => $confs){
-			foreach($confs as $n => $conf){
-				$obj = new \org\rhaco\Object();
-				$obj->package = $p;
-				$obj->name = $n;
-				$obj->type = $conf[0];
-				$obj->summary = $conf[1];
-				$obj->exists = \org\rhaco\Conf::exists($p,$n);
-				if($this->search_str($obj->package,$obj->name,$obj->summary)) $list[$p.'@'.$n] = $obj;
-			}
-		}
-		ksort($list);
-		$this->vars('object_list',$list);
-	}
-
-	/**
-	 * モジュールの一覧
-	 * @automap
-	 */
-	public function module_list(){
-		$list = array();
-		foreach(Dt\Man::classes() as $package => $info){
-			$i = Dt\Man::class_info($package);
-			foreach($i['modules'] as $name => $m){
-				$obj = new \org\rhaco\Object();
-				$obj->package = $package;
-				$obj->name = $name;
-				$obj->summary = $m[0];
-				
-				if($this->search_str($obj->package,$obj->name,$obj->summary)) $list[] = $obj;
-			}
-		}
-		$this->vars('object_list',$list);
-	}
-	/**
 	 * @automap
 	 */
 	public function explorer(){
@@ -527,90 +474,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		}catch(\Exception $e){}
 		\org\rhaco\lang\Json::output($result);
 	}
-	/**
-	 * @automap
-	 */
-	public function document(){
-		$filename = $this->in_vars('page');
-		if($filename[0] === '/') $filename = substr($filename,1);
-		$path = \org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('document'));
-		if(substr($path,-1) !== '/') $path = $path.'/';
-		$template_path = $path.'templates/';
-		$list = $document_list = array();
-		$paginator = null;
-
-		if(is_file($template_path.$filename)){
-			$this->set_block($template_path.$filename);
-			$paginator = \org\rhaco\Paginator::dynamic_contents(1,$filename);
-		}
-		if(is_dir($template_path)){
-			foreach(\org\rhaco\io\File::ls($template_path,true) as $f){
-				$name = $file = str_replace($template_path,'',$f->fullname());
-				$dirname = dirname($name);
-				if($dirname == '.') $dirname = '';
-				$src = file_get_contents($f->fullname());
-				
-				if($this->search_str($dirname.$src)){
-					if(\org\rhaco\Xml::set($xml,$src,'h2')) $name = trim($xml->value());
-					$list[$dirname.'/'.$f->fullname()] = array($name,$dirname,$file);
-				}
-			}
-			$keys = array_keys($list);
-			natcasesort($keys);
-
-			foreach($keys as $k){
-				if(isset($paginator) && !$paginator->add($list[$k][2])) break;
-				$document_list[$list[$k][2]] = $list[$k];
-			}
-		}
-		if(isset($paginator)) $paginator->vars('q',$this->in_vars('q'));
-		$this->vars('document_list',$document_list);
-		$this->vars('paginator',$paginator);
-		$this->vars('q',$this->in_vars('q'));
-	}
-	/**
-	 * @automap
-	 * @param string $file
-	 */
-	public function document_media($file){
-		$path = \org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('document'));
-		if(substr($path,-1) !== '/') $path = $path.'/';
-		$media_path = $path.'media/'.$file;
-		
-		\org\rhaco\net\http\File::attach($media_path);
-	}
-	
-	/**
-	 * Configの一覧を取得する
-	 * @return array
-	 */
-	static public function config_all(){
-		$conf_get = function($filename){
-			$src = file_get_contents($filename);
-			$gets = array();
-			if(preg_match_all('/[^\w]Conf::'.'(get)\(([\"\'])(.+?)\\2/',$src,$m)){
-				foreach($m[3] as $k => $n){
-					if(!isset($gets[$n])) $gets[$n] = array('string','');
-				}
-			}
-			if(preg_match_all("/@conf\s+([^\s]+)\s+\\$(\w+)(.*)/",$src,$m)){
-				foreach($m[0] as $k => $v) $docs[trim($m[2][$k])] = array($m[1][$k],trim($m[3][$k]));
-			}
-			if(preg_match_all("/@conf\s+\\$(\w+)(.*)/",$src,$m)){
-				foreach($m[0] as $k => $v) $docs[trim($m[1][$k])] = array('string',trim($m[2][$k]));
-			}
-			foreach($gets as $n => $v){
-				if(isset($docs[$n])) $gets[$n] = $docs[$n];
-			}
-			return $gets;
-		};
-		$gets = array();
-		foreach(Dt\Man::classes() as $p => $lib){
-			$ret = $conf_get($lib['filename']);
-			if(!empty($ret)) $gets[$p] = $ret;
-		}
-		return $gets;
-	}
 	static public function class_info($class){
 		return Dt\Man::class_info($class);
 	}
@@ -619,30 +482,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	}
 	static public function classes(){
 		return Dt\Man::classes();
-	}
-	static public function startup(){
-		$cwd = getcwd();
-		
-		$bool = true;
-		foreach(\org\rhaco\io\File::ls($cwd,false) as $f){
-			if($f->is_ext('php')){
-				$bool = false;
-				break;
-			}
-		}
-		if($bool){
-			file_put_contents($cwd.'/index.php',file_get_contents(__DIR__.'/Dt/resources/index.tmpl'));
-		}
-		if(!is_file($f=$cwd.'/bootstrap.php')){
-			file_put_contents($f,'<?php'.PPH_EOL.'include_once(\'vendor/autoload.php\');');
-		}
-		if(!is_file($f=$cwd.'/kate.php')){
-			file_put_contents($f,file_get_contents('https://raw.github.com/tokushima/kate/master/kate.php'));
-		}
-		if(!is_file($f=$cwd.'/angela.php')){
-			file_put_contents($f,file_get_contents('https://raw.github.com/tokushima/angela/master/angela.php'));
-			file_put_contents($cwd.'/angela_cc.php',file_get_contents('https://raw.github.com/tokushima/angela/master/angela_cc.php'));			
-		}
 	}
 	/**
 	 * エントリのURL群

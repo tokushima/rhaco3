@@ -7,7 +7,6 @@
 	<tr>
 		<th class="span4">Name</th>	
 		<th class="span4">Url</th>
-		<th class="span4">template</th>
 		<th class="span4">Summary</th>
 	</tr>
 	</thead>
@@ -15,9 +14,9 @@
 	<tr class="even" style="{$t.cond_switch($map['deprecated'],'color: #cc6666; text-decoration: line-through;','')}{$t.cond_switch($map['mode'],' color: #6666cc; font-style: italic; ','')}">
 		<td nowrap>
 			<rt:if param="{$map['class']}">
-				<a href="{$t.package_method_url('method_doc',$map['class'],$map['method'])}">{$map['entry']}::{$map['name']}</a>
+				<a href="{$t.package_method_url('method_doc',$map['class'],$map['method'])}" data-toggle="tooltip" data-placement="top" title="{$map['template']}">{$map['entry']}::{$map['name']}</a>
 			<rt:else />
-				{$map['entry']}::{$map['name']}
+				<a href="#" data-toggle="tooltip" data-placement="top" title="{$map['template']}">{$map['entry']}::{$map['name']}</a>
 			</rt:if>		
 		</td>
 		<td>
@@ -25,11 +24,6 @@
 				{$map['url']}
 			<rt:else />
 				{$map['entry']}/{$map['url']}
-			</rt:if>
-		</td>
-		<td>
-			<rt:if param="{$map['template']}">
-				{$map['template']}
 			</rt:if>
 		</td>
 		<td>
