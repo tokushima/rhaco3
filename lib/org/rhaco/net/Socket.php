@@ -5,7 +5,7 @@ namespace org\rhaco\net;
  * @author SHIGETA Takeshiro
  * @author yabeken
  */
-class Socket{
+class Socket {
 	private $address;
 	private $port;
 	private $timeout = 30;	
@@ -96,5 +96,12 @@ class Socket{
 	 */
 	public function read_line($length=null){
 		return intval($length) > 0 ? fgets($this->_resource_,intval($length)) : fgets($this->_resource_);
+	}
+	/**
+	 * 入出力を暗号化する
+	 * @return boolean
+	 */
+	public function enable_crypt(){
+		return stream_socket_enable_crypto($this->_resource_,true,STREAM_CRYPTO_METHOD_TLS_CLIENT);
 	}
 }

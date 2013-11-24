@@ -17,18 +17,19 @@ class Smtp extends \org\rhaco\net\Socket{
 	protected $response;
 	protected $response_code;
 
-	protected function __new__($hostname=null,$username=null,$password=null,$port=25,$timeout=5){
+	public function __construct($hostname=null,$username=null,$password=null,$port=25,$timeout=5){
 		if($hostname === null){
 			list($hostname,$port,$timeout,$username,$password) = \org\rhaco\Conf::get('server',null,array('host','port','timeout','username','password'));
 			if($port === null) $port = 25;
 			if($timeout === null) $timeout = 5;
 		}
-		parent::__new__($hostname,$port,$timeout);
+		parent::__construct($hostname,$port,$timeout);
 		$this->username = $username;
 		$this->password = $password;
 	}
-	protected function __del__(){
+	public function __destruct(){
 		$this->logout();
+		parent::__destruct();
 	}
 	/**
 	 * ログイン
