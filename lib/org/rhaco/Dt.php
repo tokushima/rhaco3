@@ -536,7 +536,41 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			if(substr($class,0,1) != '\\') $class = '\\'.$class;
 			$set($result,new \ReflectionClass($class),$include_path,$parent_class);
 		}
-		ksort($result);		
+		ksort($result);
+		return $result;
+	}
+	/**
+	 * モデルからtableを作成する
+	 * @param string $model
+	 * @param boolean $drop
+	 * @reutrn array 処理されたモデル
+	 * @throws \Exception
+	 */
+	static public function create_talbe($model=null,$drop=false){
+		$model_list = array();
+		$result = array();
+		
+		if(!empty($model)){
+			$model = str_replace('.','\\',$model);
+			if(substr($model,0,1) !== '\\') $model = '\\'.$model;
+			$model_list = array($model=>array('class'=>$model));
+		}else{
+			$model_list = self::classes('\org\rhaco\store\db\Dao');
+		}
+		foreach($model_list as $class_info){
+			try{
+				$r = new \ReflectionClass($class_info['class']);
+		
+				if($drop && call_user_func(array($r->getName(),'drop_table'))){
+					$result[] = array(-1,$r->getName());
+				}
+				if(call_user_func(array($r->getName(),'create_table'))){
+					$result[] = array(1,$r->getName());
+				}
+			}catch(\Exception $e){
+				throw new \Exception($r->getName().' '.$e->getMessage());
+			}
+		}
 		return $result;
 	}
 	/**
