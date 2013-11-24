@@ -93,7 +93,7 @@ class Smtp extends \org\rhaco\net\Socket{
 	 * @param string $message
 	 * @return boolean
 	 */
-	private function talk($message){
+	protected function talk($message){
 		$this->response = $this->response_code = null;
 		$this->write($message."\r\n");
 		$this->gets();
