@@ -5,7 +5,7 @@ namespace org\rhaco\net;
  * @author SHIGETA Takeshiro
  * @author yabeken
  */
-class Socket extends \org\rhaco\Object{
+class Socket {
 	private $address;
 	private $port;
 	private $timeout = 30;	
