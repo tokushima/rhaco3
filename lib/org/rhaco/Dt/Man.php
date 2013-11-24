@@ -239,64 +239,6 @@ class Man{
 				,'deprecated'=>$deprecated,'modules'=>$modules,'see_class'=>$see_class,'see_method'=>$see_method,'see_url'=>$see_url
 				);
 	}
-	/**
-	 * ライブラリ一覧
-	 * composerの場合はcomposer.jsonで定義しているPSR-0のもののみ
-	 * @return array
-	 */
-	static public function classes($include_test=false){
-		$result = array();
-		$include_path = array();
-		if(is_dir(getcwd().'/lib')){
-			$include_path[] = getcwd().'/lib';
-		}
-		if(class_exists('Composer\Autoload\ClassLoader')){
-			$r = new \ReflectionClass('Composer\Autoload\ClassLoader');
-			$composer_dir = dirname($r->getFileName());
-			$json_file = dirname(dirname($composer_dir)).'/composer.json';
-			
-			if(is_file($json_file)){
-				$json = json_decode(file_get_contents($json_file),true);
-				if(isset($json['autoload']['psr-0'])){
-					foreach($json['autoload']['psr-0'] as $path){
-						$p = realpath(dirname($json_file).'/'.$path);
-						if($p !== false) $include_path[] = $p;
-					}
-				}
-			}
-		}
-		foreach($include_path as $libdir){
-			if($libdir !== '.'){
-				foreach(new \RecursiveIteratorIterator(
-							new \RecursiveDirectoryIterator(
-									$libdir,
-									\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
-							),\RecursiveIteratorIterator::SELF_FIRST
-				) as $e){
-					if(strpos($e->getPathname(),'/.') === false 
-							&& strpos($e->getPathname(),'/_') === false 
-							&& ($include_test || strpos(strtolower($e->getPathname()),'/test') === false)						
-							&& ctype_upper(substr($e->getFilename(),0,1)) 
-							&& substr($e->getFilename(),-4) == '.php'
-					){
-						try{
-							include_once($e->getPathname());
-						}catch(\Exeption $ex){}
-					}
-				}
-			}
-		}
-		foreach(get_declared_classes() as $class){
-			$r = new \ReflectionClass($class);
-
-			if(!$r->isInterface() && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
-				$n = str_replace('\\','/',$r->getName());
-				$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$class);
-			}
-		}
-		ksort($result);
-		return $result;
-	}
 	static private function type($type,$class){
 		if($type == 'self' || $type == '$this') $type = $class;
 		$type = str_replace('\\','.',$type);

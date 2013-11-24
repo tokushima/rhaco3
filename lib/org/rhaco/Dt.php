@@ -16,14 +16,9 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$name = $summary = $description = null;
 		$d = debug_backtrace(false);
 		$d = array_pop($d);
-		$this->smtp_blackhole_dao = '\\'.implode('\\',array('org','rhaco','net','mail','module','SmtpBlackholeDao'));
-		$this->dao = '\\'.implode('\\',array('org','rhaco','store','db','Dao'));
 		
 		$this->vars('app_mode',\org\rhaco\Conf::appmode());
 		$this->vars('f',new Dt\Helper());
-		$this->vars('has_smtp_blackhole_dao',class_exists($this->smtp_blackhole_dao));
-		$this->vars('has_dao',class_exists($this->dao));
-		$this->vars('has_document',is_dir(\org\rhaco\Conf::get('document_path',\org\rhaco\io\File::resource_path('document'))));
 	}
 	public function get_template_modules(){
 		return array(
@@ -97,31 +92,30 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function model_list(){
 		$list = $errors = $error_query = $model_list = $con = array();
-		self::classes();
-		foreach(get_declared_classes() as $class){
+
+		foreach(self::classes('\org\rhaco\store\db\Dao') as $class_info){
+			$class = $class_info['class'];
 			$r = new \ReflectionClass($class);
-			if((!$r->isInterface() && !$r->isAbstract()) && is_subclass_of($class,$this->dao)){
-				$class_doc = $r->getDocComment();
-				$package = str_replace('\\','.',$class);
-				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
-				list($summary) = explode("\n",$document);
-				$errors[$package] = null;
-				$con[$package] = true;
-				$dao = $this->dao;
-				try{
-					$dao::start_record();
-					$class::find_get();
-					$dao::stop_record();
-				}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
-				}catch(\org\rhaco\store\db\exception\DaoConnectionException $e){
-					$errors[$package] = $e->getMessage();
-					$con[$package] = false;
-				}catch(\Exception $e){
-					$errors[$package] = $e->getMessage();
-					$error_query[$package] = print_r($dao::recorded_query(),true);
-				}
-				$model_list[$package] = $summary;				
+			$class_doc = $r->getDocComment();
+			$package = str_replace('\\','.',substr($class,1));
+			$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
+			list($summary) = explode("\n",$document);
+			$errors[$package] = null;
+			$con[$package] = true;
+			
+			try{
+				\org\rhaco\store\db\Dao::start_record();
+				$class::find_get();
+				\org\rhaco\store\db\Dao::stop_record();
+			}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
+			}catch(\org\rhaco\store\db\exception\DaoConnectionException $e){
+				$errors[$package] = $e->getMessage();
+				$con[$package] = false;
+			}catch(\Exception $e){
+				$errors[$package] = $e->getMessage();
+				$error_query[$package] = print_r(\org\rhaco\store\db\Dao::recorded_query(),true);
 			}
+			$model_list[$package] = $summary;
 		}
 		ksort($model_list);
 		$this->vars('dao_models',$model_list);
@@ -188,19 +182,15 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		foreach($info as $k => $v){
 			$this->vars($k,$v);
 		}
-		$is_dao = false;
 		$class_name = str_replace(array('.','/'),'\\',$class);
 		if(substr($class_name,0,1) != '\\') $class_name = '\\'.$class_name;
 		
-		if(is_subclass_of($class_name,$this->dao)){
+		if(is_subclass_of($class_name,'\org\rhaco\store\db\Dao')){
 			try{
 				$class_name::find_get();
-				$is_dao = true;
 			}catch(\org\rhaco\store\db\exception\NotfoundDaoException $e){
-				$is_dao = true;
 			}catch(\Exception $e){}
 		}
-		$this->vars('is_dao',$is_dao);
 	}
 	/**
 	 * クラスドメソッドのキュメント
@@ -408,11 +398,10 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 */
 	public function mail_list(){
 		$order = $this->in_vars('order','-id');
-		$name = $this->smtp_blackhole_dao;
-		list($object_list,$paginator) = $this->filter_find($name,$order);
+		list($object_list,$paginator) = $this->filter_find('\org\rhaco\net\mail\module\SmtpBlackholeDao',$order);
 		$this->vars('object_list',$object_list);
 		$this->vars('paginator',$paginator);
-		$this->vars('model',new $name());
+		$this->vars('model',new \org\rhaco\net\mail\module\SmtpBlackholeDao());
 	}
 	private function filter_find($class,$order){
 		$object_list = array();
@@ -454,9 +443,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function mail_detail($id){
-		$sbd = $this->smtp_blackhole_dao;
-		$model = $sbd::find_get(Q::eq('id',$id));
-		$this->vars('obj',$model);
+		$this->vars('obj',\org\rhaco\net\mail\module\SmtpBlackholeDao::find_get(Q::eq('id',$id)));
 	}
 	/**
 	 * @automap
@@ -480,22 +467,77 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	static public function method_info($class,$method){
 		return Dt\Man::method_info($class,$method);
 	}
-	static public function classes($include_test=false){
-		$class_list = Dt\Man::classes($include_test);
-		
-		$add = \org\rhaco\Conf::get('extra_classes',array());
+	/**
+	 * ライブラリ一覧
+	 * composerの場合はcomposer.jsonで定義しているPSR-0のもののみ
+	 * @return array
+	 */
+	static public function classes($parent_class=null){
+		$result = array();
+		$include_path = array();
+		if(is_dir(getcwd().'/lib')){
+			$include_path[] = realpath(getcwd().'/lib');
+		}
+		if(class_exists('Composer\Autoload\ClassLoader')){
+			$r = new \ReflectionClass('Composer\Autoload\ClassLoader');
+			$composer_dir = dirname($r->getFileName());
+			$json_file = dirname(dirname($composer_dir)).'/composer.json';
+			
+			if(is_file($json_file)){
+				$json = json_decode(file_get_contents($json_file),true);
+				if(isset($json['autoload']['psr-0'])){
+					foreach($json['autoload']['psr-0'] as $path){
+						$p = realpath(dirname($json_file).'/'.$path);
+						if($p !== false) $include_path[] = $p;
+					}
+				}
+			}
+		}
+		foreach($include_path as $libdir){
+			if($libdir !== '.'){
+				foreach(new \RecursiveIteratorIterator(
+							new \RecursiveDirectoryIterator(
+									$libdir,
+									\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+							),\RecursiveIteratorIterator::SELF_FIRST
+				) as $e){
+					if(strpos($e->getPathname(),'/.') === false 
+							&& strpos($e->getPathname(),'/_') === false 
+							&& strpos(strtolower($e->getPathname()),'/test') === false					
+							&& ctype_upper(substr($e->getFilename(),0,1)) 
+							&& substr($e->getFilename(),-4) == '.php'
+					){
+						try{
+							include_once($e->getPathname());
+						}catch(\Exeption $ex){}
+					}
+				}
+			}
+		}
+		$set = function(&$result,$r,$include_path,$parent_class){
+			if(!$r->isInterface() && !$r->isAbstract() && (empty($parent_class) || is_subclass_of($r->getName(),$parent_class))){
+				if(empty($include_path)) return true;
+				foreach($include_path as $libdir){
+					if(strpos($r->getFileName(),$libdir) === 0){
+						$n = str_replace('\\','/',$r->getName());
+						$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$r->getName());
+						break;
+					}
+				}
+			}
+		};
+		foreach(get_declared_classes() as $class){
+			$set($result,new \ReflectionClass($class),$include_path,$parent_class);
+		}
+		$add = \org\rhaco\Conf::get('use_vendor',array());
 		if(is_string($add)) $add = array($add);
 		foreach($add as $class){
 			$class = str_replace('.','\\',$class);
 			if(substr($class,0,1) != '\\') $class = '\\'.$class;
-			$r = new \ReflectionClass($class);
-			
-			if(!$r->isInterface() && preg_match("/(.*)\\\\[A-Z][^\\\\]+$/",$class,$m) && preg_match("/^[^A-Z]+$/",$m[1])){
-				$n = str_replace('\\','/',$r->getName());
-				$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$class);
-			}
+			$set($result,new \ReflectionClass($class),$include_path,$parent_class);
 		}
-		return $class_list;
+		ksort($result);		
+		return $result;
 	}
 	/**
 	 * エントリのURL群

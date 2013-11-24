@@ -28,7 +28,7 @@ if($has('model')){
 		
 		if((!$r->isInterface() 
 			&& !$r->isAbstract()) 
-			&& is_subclass_of($class,'\\org\\rhaco\store\\db\\Dao')
+			&& is_subclass_of($class,'\org\rhaco\store\db\Dao')
 			&& $r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'
 		){
 			try{
