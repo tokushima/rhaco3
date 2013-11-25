@@ -566,11 +566,13 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			try{
 				$r = new \ReflectionClass($class_info['class']);
 		
-				if($drop && call_user_func(array($r->getName(),'drop_table'))){
-					$result[] = array(-1,$r->getName());
-				}
-				if(call_user_func(array($r->getName(),'create_table'))){
-					$result[] = array(1,$r->getName());
+				if($r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'){
+					if($drop && call_user_func(array($r->getName(),'drop_table'))){
+						$result[] = array(-1,$r->getName());
+					}
+					if(call_user_func(array($r->getName(),'create_table'))){
+						$result[] = array(1,$r->getName());
+					}
 				}
 			}catch(\Exception $e){
 				throw new \Exception($r->getName().' '.$e->getMessage());
