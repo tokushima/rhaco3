@@ -38,5 +38,7 @@ class SmtpBlackholeDao extends \org\rhaco\store\db\Dao{
 		$self->message(mb_convert_encoding($mail->message(),'UTF-8','JIS'));
 		$self->manuscript($mail->manuscript());
 		$self->save();
+		
+		self::commit();
 	}
 }

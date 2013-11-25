@@ -566,7 +566,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			try{
 				$r = new \ReflectionClass($class_info['class']);
 		
-				if($r->getParentClass()->getName() == '\org\rhaco\store\db\Dao'){
+				if($r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'){
 					if($drop && call_user_func(array($r->getName(),'drop_table'))){
 						$result[] = array(-1,$r->getName());
 					}
@@ -579,6 +579,32 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			}
 		}
 		return $result;
+	}
+	/**
+	 * SmtpBlackholeDaoから送信されたメールの一番新しいものを返す
+	 * @param string $to
+	 * @param string $subject
+	 * @param number $late_time sec
+	 * @throws \LogicException
+	 * @return \org\rhaco\net\mail\module\SmtpBlackholeDao
+	 */
+	static public function find_mail($to,$keyword=null,$late_time=60){
+		if(empty($to)) throw new \LogicException('`to` not found');
+		
+		$result = array();
+		$q = new Q();
+		$q->add(Q::eq('to',$to));
+		$q->add(Q::gte('create_date',time()-$late_time));
+		if(!empty($subject)) $q->add(Q::contains('subject',$subject));
+		
+		foreach(\org\rhaco\net\mail\module\SmtpBlackholeDao::find($q,Q::order('-id')) as $mail){
+			$value = $mail->subject().$mail->message();
+			
+			if(empty($keyword) || mb_strpos($value,$keyword) !== false){
+				return $mail;
+			}
+		}
+		throw new \LogicException('指定のメールが飛んでいない > ['.$to.'] '.$keyword);
 	}
 	/**
 	 * エントリのURL群
