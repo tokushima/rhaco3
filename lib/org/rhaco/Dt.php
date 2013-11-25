@@ -516,13 +516,18 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		$set = function(&$result,$r,$include_path,$parent_class){
 			if(!$r->isInterface() && !$r->isAbstract() && (empty($parent_class) || is_subclass_of($r->getName(),$parent_class))){
-				if(empty($include_path)) return true;
-				foreach($include_path as $libdir){
-					if(strpos($r->getFileName(),$libdir) === 0){
-						$n = str_replace('\\','/',$r->getName());
-						$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$r->getName());
-						break;
+				$bool = empty($include_path);
+				if(!$bool){
+					foreach($include_path as $libdir){
+						if(strpos($r->getFileName(),$libdir) === 0){
+							$bool = true;
+							break;
+						}
 					}
+				}
+				if($bool){
+					$n = str_replace('\\','/',$r->getName());
+					$result[str_replace('/','.',$n)] = array('filename'=>$r->getFileName(),'class'=>'\\'.$r->getName());
 				}
 			}
 		};
@@ -534,7 +539,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		foreach($add as $class){
 			$class = str_replace('.','\\',$class);
 			if(substr($class,0,1) != '\\') $class = '\\'.$class;
-			$set($result,new \ReflectionClass($class),$include_path,$parent_class);
+			$set($result,new \ReflectionClass($class),array(),$parent_class);
 		}
 		ksort($result);
 		return $result;
