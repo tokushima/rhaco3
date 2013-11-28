@@ -11,12 +11,10 @@ class Conf{
 
 	static private $urls;
 	static private $setup_func;
-	static private $output_obj;
 
-	static private $start_time;
-	static private $ini_error_log;
-	static private $ini_error_log_start_size;
-	static private $memory_limit;
+	static private $ini_error_log = null;
+	static private $ini_error_log_start_size = 0;
+	static private $memory_limit = 32;
 
 	/**
 	 * 設定ファイル(.php)のセット
@@ -34,7 +32,6 @@ class Conf{
 	 * @return Ambigous <string, mixed>|boolean
 	 */
 	static public function init($rootdir,$params,$conf_file=null){
-		self::$start_time = microtime(true);
 		self::$ini_error_log = ini_get('error_log');
 		self::$ini_error_log_start_size = (empty(self::$ini_error_log) || !is_file(self::$ini_error_log)) ? 0 : filesize(self::$ini_error_log);
 		
@@ -45,9 +42,8 @@ class Conf{
 			if(!is_array($conf)) throw new \RuntimeException('invalid '.$f);
 		}
 		foreach($conf as $k => $v){
-			$params[$k] = $v;
+			if(!array_key_exists($k,$params)) $params[$k] = $v;
 		}
-		
 		$path_func = function($p){
 			$p = str_replace('\\','/',$p);
 			if(substr($p,-1) != '/') $p = $p.'/';
@@ -73,7 +69,7 @@ class Conf{
 		},true,false);		
 		
 		if(isset($params['memory_limit'])){
-			self::$memory_limit = (int)$params['memory_limit'];
+			self::$memory_limit = (int)(isset($params['memory_limit']) ? $params['memory_limit'] : $params['memory-limit']);
 			if(!empty(self::$memory_limit) && self::$memory_limit >= 8){
 				ini_set('memory_limit',self::$memory_limit.'M');
 			}else{
@@ -86,20 +82,17 @@ class Conf{
 		if(isset($params['setup_func'])){
 			self::$setup_func = $params['setup_func'];
 		}
-		if(isset($params['output'])){
-			$r = new \ReflectionClass("\\".str_replace('.',"\\",$params['output']));
-			self::$output_obj = $r->newInstance();
-		}
 	}
+	/**
+	 * 設定情報表示
+	 * @param string $bool
+	 */
 	static public function info($bool=false){
 		if(!empty(self::$conf_file)){
 			print('load configuration file: '.self::$conf_file.PHP_EOL);
 		}
 		if(!empty(self::$memory_limit)){
-			print('memory limit: '.self::$memory_limit.'mb'.PHP_EOL);
-		}
-		if(!empty(self::$output_obj)){
-			print('load output class: '.get_class(self::$output_obj).PHP_EOL);
+			print('memory limit: '.self::$memory_limit.'M'.PHP_EOL);
 		}
 		print('searching entry '.self::$entry_dir.PHP_EOL);
 		print('searching test '.self::$test_dir.PHP_EOL);
@@ -111,13 +104,6 @@ class Conf{
 		}
 	}
 	/**
-	 * 結果出力制御インスタンス
-	 * @return Ambigous <\angela\Output, object>
-	 */
-	static public function output_obj(){
-		return isset(self::$output_obj) ? self::$output_obj : new \angela\Output();
-	}
-	/**
 	 * テスト中に発生したPHPのエラー
 	 * @return Ambigous <NULL, string>
 	 */
@@ -125,34 +111,67 @@ class Conf{
 		$ini_error_log_end_size = (empty(self::$ini_error_log) || !is_file(self::$ini_error_log)) ? 0 : filesize(self::$ini_error_log);
 		return ($ini_error_log_end_size != self::$ini_error_log_start_size) ? file_get_contents(self::$ini_error_log,false,null,self::$ini_error_log_start_size) : null;
 	}
+	/**
+	 * エントリディレクトリ
+	 * @return string
+	 */
 	static public function entry_dir(){
 		return self::$entry_dir;
 	}
+	/**
+	 * ライブラリディレクトリ
+	 * @return string
+	 */
 	static public function lib_dir(){
 		return self::$lib_dir;
 	}
+	/**
+	 * テストディレクトリ
+	 * @return string
+	 */
 	static public function test_dir(){
 		return self::$test_dir;
 	}
+	/**
+	 * URLのマッピング
+	 * @return array
+	 */
 	static public function urls(){
 		return self::$urls;
 	}
+	/**
+	 * URLをマッピングデータから取得
+	 * @param string $map_name
+	 * @throws \RuntimeException
+	 * @return string
+	 */
 	static public function map_url($map_name){
 		if(empty(self::$urls)) throw new \RuntimeException('urls empty');
 		$args = func_get_args();
 		array_shift($args);
-
-		$map_name = (strpos($map_name,'::') === false) ? (preg_replace('/^([^\/]+)\/.+$/','\\1',\angela\Runner::current_entry()).'::'.$map_name) : $map_name;
+				
 		if(isset(self::$urls[$map_name]) && substr_count(self::$urls[$map_name],'%s') == sizeof($args)) return vsprintf(self::$urls[$map_name],$args);
 		throw new \RuntimeException($map_name.(isset(self::$urls[$map_name]) ? '['.sizeof($args).']' : '').' not found');
 	}
+	/**
+	 * 全体で都度実行されるsetup関数
+	 */
 	static public function call_setup_func(){
 		if(isset(self::$setup_func)){
 			call_user_func(self::$setup_func);
 		}
 	}
 }
+/**
+ * ユーティリティ
+ */
 class Util{
+	/**
+	 * 絶対パスにする
+	 * @param string $a
+	 * @param string $b
+	 * @return string
+	 */
 	static public function absolute($a,$b){
 		$a = str_replace("\\",'/',$a);
 		if($b === '' || $b === null) return $a;
@@ -188,11 +207,29 @@ class Util{
 		$d = (!empty($d) && $d[0] != '/' && substr($d,0,3) != '#T#' && !strpos($d,'#W#')) ? '/'.$d : $d;
 		return str_replace($p[4],$p[5],$r.$d.$t);
 	}
+	/**
+	 * 文字色を指定したフォーマット
+	 * @param string $msg
+	 * @param string $color
+	 * @return string
+	 */
+	static public function color_format($msg,$color='30'){
+		return (php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg;
+	}
 }
+/**
+ * 例外発生時
+ */
 class AssertException extends \Exception{
 }
+/**
+ * テスト失敗時
+ */
 class AssertFailure extends \Exception{
 }
+/**
+ * 検証用メソッド
+ */
 class Assert{
 	static private $failure_info = array('',0,null,null);
 	
@@ -207,9 +244,22 @@ class Assert{
 		}
 		return array($file,$line);
 	}
+	/**
+	 * 失敗とする
+	 * @param string $msg
+	 * @throws \angela\AssertFailure
+	 */
 	public function failure($msg='failure'){
 		throw new \angela\AssertFailure($msg);
 	}
+	/**
+	 * 一致
+	 * @param mixed $arg1
+	 * @param mixed $arg2
+	 * @param string $file
+	 * @param string $line
+	 * @throws \angela\AssertException
+	 */
 	public function equals($arg1,$arg2,$file=null,$line=null){
 		if(!(self::expvar($arg1) === self::expvar($arg2))){
 			list($file,$line) = self::debug_info($file, $line);
@@ -217,6 +267,14 @@ class Assert{
 			throw new \angela\AssertException();
 		}
 	}
+	/**
+	 * 不一致
+	 * @param mixed $arg1
+	 * @param mixed $arg2
+	 * @param string $file
+	 * @param string $line
+	 * @throws \angela\AssertException
+	 */
 	public function not_equals($arg1,$arg2,$file=null,$line=null){
 		if(!(self::expvar($arg1) !== self::expvar($arg2))){
 			list($file,$line) = self::debug_info($file, $line);
@@ -224,6 +282,14 @@ class Assert{
 			throw new \angela\AssertException();
 		}
 	}
+	/**
+	 * 文字列中に指定の文字列がすべて存在する
+	 * @param string/array $keyword
+	 * @param string $src
+	 * @param string $file
+	 * @param string $line
+	 * @throws \angela\AssertException
+	 */
 	public function match_equals($keyword,$src,$file=null,$line=null){
 		if($src instanceof \angela\Http) $src = $src->body();
 		$valid = array();
@@ -240,6 +306,14 @@ class Assert{
 			throw new \angela\AssertException();
 		}
 	}
+	/**
+	 * 文字列中に指定の文字列がすべて存在しない
+	 * @param string/array $keyword
+	 * @param string $src
+	 * @param string $file
+	 * @param string $line
+	 * @throws \angela\AssertException
+	 */
 	public function match_not_equals($keyword,$src,$file=null,$line=null){
 		if($src instanceof \angela\Http) $src = $src->body();
 		$valid = array();
@@ -255,7 +329,7 @@ class Assert{
 			self::$failure_info = array($file,$line,var_export($keyword,true),var_export($valid,true));
 			throw new \angela\AssertException();
 		}
-	}	
+	}
 	static public function failure_info(){
 		return self::$failure_info;
 	}
@@ -270,55 +344,43 @@ class Assert{
 		return $var;
 	}
 }
+/**
+ * テストランナー
+ */
 class Runner{
 	static private $result = array();
 
-	static private $current_entry;
-	static private $current_class;
-	static private $current_method;
+	static private $current_execute_file;
 	static private $current_file;
-
 	static private $current_block_start_time;
+	static private $current_entry;
 
-	static private $exec_file = array();
-	static private $exec_file_exception = array();
+	static private $read_file = array();
 	static private $has_exception = false;
+	static private 	$fixture = false;
 
 	static public function get(){
 		return self::$result;
 	}
+	/**
+	 * エラーがあったか
+	 * @return boolean
+	 */
 	static public function has_exception(){
 		return self::$has_exception;
 	}
+	/**
+	 * 実行中のファイル
+	 * @return string
+	 */
 	static public function current_file(){
 		return self::$current_file;
 	}
+	/**
+	 * 実行中のエントリテスト
+	 */
 	static public function current_entry(){
 		return self::$current_entry;
-	}
-
-	static private function color_format($msg,$color='30'){
-		return (php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg;
-	}
-	/**
-	 * ディレクトリ内のファイルをテスト
-	 * @param string $tests_path
-	 * @param string $class_name
-	 * @param string $method_name
-	 * @param string $block_name
-	 * @param boolean $include_tests
-	 * @return boolean
-	 */
-	static private function dir_run($tests_path,$class_name,$method_name,$block_name,$include_tests){
-		if(is_dir($d=$tests_path.str_replace('.','/',$class_name))){
-			foreach(self::file_list($d) as $f){
-				if(self::is($f)){
-					self::run($f->getPathname(),$method_name,$block_name,$include_tests);
-				}
-			}
-			return true;
-		}
-		return false;
 	}
 	/**
 	 * テストを実行する
@@ -328,71 +390,128 @@ class Runner{
 	 * @param boolean $include_tests testsディレクトリも参照するか
 	 */
 	static private function run($class_name,$method_name=null,$block_name=null,$include_tests=false){
-		$tests_path = \angela\Conf::test_dir();
 		if($class_name == __FILE__) return new self();
-		$test_list = array();
+		$test_list = array(\angela\Conf::test_dir()=>array('type'=>3,'tests'=>array()),\angela\Conf::entry_dir()=>array('type'=>2,'tests'=>array()));
 		
-		if(is_file($class_name)){
-			$test_list[$class_name] = (strpos($class_name,$tests_path) === false) ? self::get_entry_doctest($class_name) : self::get_unittest($class_name);
-		}
-		if(is_file($f=\angela\Conf::entry_dir().$class_name.'.php')){
-			$test_list[$f] = self::get_entry_doctest($f);
-		}
-		if(is_file($f=$tests_path.str_replace('.','/',$class_name).'.php')){
-			$test_list[$f] = self::get_unittest($f);
-		}
-		if(is_file($f=$tests_path.$class_name)){
-			$test_list[$f] = self::get_unittest($f);
-		}
-		if(class_exists($f=((substr($class_name,0,1) != "\\") ? "\\" : '').str_replace('.',"\\",$class_name),true)
-				|| interface_exists($f,true)
-				|| (function_exists('trait_exists') && trait_exists($f,true))
+		// テストを探す
+		if(class_exists($cn=((substr($class_name,0,1) != '\\') ? '\\' : '').str_replace('.','\\',$class_name),true)
+			|| interface_exists($cn,true)
+			|| (function_exists('trait_exists') && trait_exists($cn,true))
 		){
-			if(empty($method_name)) self::dir_run($tests_path,$class_name,$method_name,$block_name,$include_tests);
-			$test_list[$f] = self::get_doctest($f);
+			// class
+			$rc = new \ReflectionClass($cn);
+			if(!isset(self::$read_file[$rc->getFileName()])){
+				$tests = array();
+				self::$read_file[$rc->getFileName()] = true;
+				$class_src_lines = file($rc->getFileName());
+				$class_src = implode('',$class_src_lines);
+				
+				foreach($rc->getMethods() as $method){
+					if($method->getDeclaringClass()->getName() == $rc->getName()){
+						$method_src = implode('',array_slice($class_src_lines,$method->getStartLine()-1,$method->getEndLine()-$method->getStartLine(),true));
+						$tests = array_merge($tests,self::get_method_doctest($rc->getName(),$method->getName(),$method->getStartLine(),$method->isPublic(),$method_src));
+						$class_src = str_replace($method_src,str_repeat("\n",sizeof(explode("\n",$method_src)) - 1),$class_src);
+					}
+				}
+				$tests = array_merge($tests,self::get_method_doctest($rc->getName(),'class',1,false,$class_src));
+				$test_list[$rc->getFileName()] = array('type'=>1,'tests'=>$tests);
+			}
+		}else if((is_file($f=$class_name) && strpos($class_name,\angela\Conf::entry_dir()) === 0 && strpos(str_replace(\angela\Conf::entry_dir(),'',$class_name),'/') === false)
+			|| is_file($f=\angela\Conf::entry_dir().$class_name.'.php')
+		){
+			// entry
+			if(!isset(self::$read_file[$f])){
+				self::$read_file[$f] = true;
+				
+				$tests = array();
+				$entry = basename($f,'.php');
+				$src = file_get_contents($f);
+				if(preg_match_all("/\/\*\*"."\*.+?\*\//s",$src,$doctests,PREG_OFFSET_CAPTURE)){
+					foreach($doctests[0] as $doctest){
+						if(isset($doctest[0][5]) && $doctest[0][5] != '*'){
+							$test_start_line = sizeof(explode("\n",substr($src,0,$doctest[1]))) - 1;
+							$test_block = str_repeat("\n",$test_start_line).preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array("/"."***","*"."/"),"",$doctest[0]));
+							$test_block_name = preg_match("/^[\s]*#([^#].*)/",trim($test_block),$match) ? trim($match[1]) : null;
+							if(trim($test_block) == '') $test_block = null;
+							
+							if($test_block_name == '__setup__' || $test_block_name == '__teardown__'){
+								$test_list[\angela\Conf::entry_dir()]['tests']['@'][$test_block_name] = array($test_block_name,$test_block,$test_start_line);
+							}else{
+								$test_list[\angela\Conf::entry_dir()]['tests'][$f][] = array($test_block_name,$test_block,$test_start_line);
+							}
+						}
+					}
+				}
+			}
+		}else if(is_file($f=$class_name) && strpos($class_name,\angela\Conf::test_dir()) === 0
+			|| is_file($f=\angela\Conf::test_dir().$class_name.'.php')
+		){
+			// test
+			if(!isset(self::$read_file[$f]) &&
+				substr($f,-4) == '.php' &&
+				!preg_match('/\/[\._]/',$f)
+			){
+				self::$read_file[$f] = true;
+				$test_list[\angela\Conf::test_dir()]['tests'][$f] = array(array(basename($f,'.php'),$f,0));
+			}
 		}
-		if(empty($test_list)){
-			if(self::dir_run($tests_path,$class_name,$method_name,$block_name,$include_tests)){
-				return new self();
-			}else{
-				throw new \ErrorException($class_name.' test not found');
+		// test
+		if(is_file($f=\angela\Conf::test_dir().str_replace('.','/',$class_name).'.php')){
+			if(!isset(self::$read_file[$f]) &&
+				substr($f,-4) == '.php' &&
+				!preg_match('/\/[\._]/',$f)
+			){
+				self::$read_file[$f] = true;
+				$test_list[\angela\Conf::test_dir()]['tests'][$f] = array(array(basename($f,'.php'),$f,0));
+			}
+		}
+		// test
+		if(is_dir($d=\angela\Conf::test_dir().str_replace('.','/',$class_name))){
+			foreach(self::file_list($d,true,'/\.php/') as $f){
+				if(!isset(self::$read_file[$f->getPathname()]) &&
+					!preg_match('/\/[\._]/',$f->getPathname())
+				){
+					self::$read_file[$f->getPathname()] = true;
+					$test_list[\angela\Conf::test_dir()]['tests'][$f->getPathname()] = array(array(basename($f->getPathname(),'.php'),$f,0));
+				}
 			}
 		}
 		
-		foreach($test_list as $doctest){
-			self::$current_file = $doctest['filename'];
-			self::$current_class = ($doctest['type'] == 1) ? $doctest['name'] : null;
-			self::$current_entry = ($doctest['type'] == 2 || $doctest['type'] == 3) ? $doctest['name'] : null;
-			self::$current_method = null;
+		// テスト実行
+		foreach($test_list as $filename => $doctest){
+			self::$current_file = $filename;
+			self::$current_entry = null;
+			self::$current_execute_file = null;
 			$s_block_name = (substr($block_name,-4) == '.php') ? substr(basename($block_name),0,-4) : $block_name;
 			
 			foreach($doctest['tests'] as $test_method_name => $tests){
 				if($method_name === null || $method_name === $test_method_name){
-					self::$current_method = $test_method_name;
-					$starttime = microtime(true);
-					$test_result = array('none',0);
+					self::$current_execute_file = $test_method_name;
 	
-					if(!empty($tests['blocks'])){
-						foreach($tests['blocks'] as $test_block){
-							list($name,$label,$block,$start_line) = $test_block;
+					if(!empty($tests)){
+						foreach($tests as $test_block){
+							list($name,$block,$start_line) = $test_block;
 							$current_block_start_time = microtime(true);
 							$s_name = (substr($name,-4) == '.php') ? substr(basename($name),0,-4) : $name;
 	
 							if($block_name === null || $s_block_name === $s_name){
 								$exec_block_name = ' #'.$s_name;
-								self::stdout($exec_block_name);
+								print($exec_block_name);
 								try{
 									ob_start();
 									\angela\Conf::call_setup_func();
 	
 									if($doctest['type'] == 3){
-										self::include_setup_teardown($doctest['filename'],'__setup__.php');
-										include($doctest['filename']);
+										self::include_setup_teardown($block,'__setup__.php');
+										include($block);
 									}else{
-										if(isset($doctest['tests']['@']['__setup__'])) eval($doctest['tests']['@']['__setup__'][2]);
+										if($doctest['type'] == 2){
+											self::$current_entry = basename($test_method_name,'.php');
+										}
 										eval($block);
 									}
 									$result = ob_get_clean();
+									
 									if(preg_match('/(Parse|Fatal) error:.+/',$result,$match)){
 										$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$result,$line) ?
 												'Parse error: syntax error '.$doctest['filename'].' code on line '.$line[1]
@@ -401,14 +520,17 @@ class Runner{
 									}
 									$test_result = array(
 											'success',
-											(round(microtime(true) - $current_block_start_time,3))
+											(round(microtime(true) - $current_block_start_time,3)),
+											array(),
+											$name,
 									);
 								}catch(\angela\AssertException $e){
 									self::$has_exception = true;
 									$test_result = array(
 											'fail',
 											(round(microtime(true) - $current_block_start_time,3)),
-											\angela\Assert::failure_info()
+											\angela\Assert::failure_info(),
+											$name,
 									);
 								}catch(\Exception $e){
 									self::$has_exception = true;
@@ -417,7 +539,7 @@ class Runner{
 									$trace = $e->getTrace();
 									$eval = false;
 									$exeline = -1;									
-	
+									
 									foreach($trace as $k => $t){
 										if(isset($t['class']) && isset($t['function']) && ($t['class'].'::'.$t['function']) == __METHOD__ && isset($trace[$k-2])
 												&& isset($trace[$k-1]['file']) && $trace[$k-1]['file'] == __FILE__ && isset($trace[$k-1]['function']) && $trace[$k-1]['function'] == 'eval'
@@ -444,33 +566,41 @@ class Runner{
 									$test_result = array(
 											'exception',
 											(round(microtime(true) - $current_block_start_time,3)),
-											array(self::$current_file,$exeline,sprintf('%s: %d',$file,$line),$message)
+											array(self::$current_execute_file,$exeline,sprintf('%s: %d',$file,$line),$message),
+											$name,
 									);
 								}
 								if($doctest['type'] == 3){
-									self::include_setup_teardown($doctest['filename'],'__teardown__.php');
-								}else{
-									if(isset($doctest['tests']['@']['__teardown__'])) eval($doctest['tests']['@']['__teardown__'][2]);
+									self::include_setup_teardown($block,'__teardown__.php');
 								}
-								self::stdout("\033[".strlen($exec_block_name).'D'."\033[0K");
+								print("\033[".strlen($exec_block_name).'D'."\033[0K");
+								
+								self::$result[self::$current_file][self::$current_execute_file][] = $test_result;
 							}
 						}
-					}
-					$time = round((microtime(true) - (float)$starttime),4);
-					self::$result[self::$current_file][self::$current_class][self::$current_method][] = $test_result;
-				}
-			}
-			if($include_tests && ($doctest['type'] == 1 || $doctest['type'] == 2)){
-				$test_name = ($doctest['type'] == 1) ? str_replace("\\",'/',substr($doctest['name'],1)) : $doctest['name'];
-				if(!empty($test_name) && is_dir($d=($tests_path.str_replace(array('.'),'/',$test_name)))){
-					foreach(self::file_list($d) as $f){
-						if(self::is($f) && ($block_name === null || $s_block_name === substr($f->getFilename(),0,-4))){
-							self::run($f->getPathname(),null,null,$include_tests);
-						}
+					}else{
+						self::$result[self::$current_file][self::$current_execute_file][] = array('none',0,array(),null,null);
 					}
 				}
 			}
 		}
+	}
+	static private function get_method_doctest($class_name,$method_name,$method_start_line,$is_public,$method_src){
+		$result = array();
+		if(preg_match_all("/\/\*\*"."\*.+?\*\//s",$method_src,$doctests,PREG_OFFSET_CAPTURE)){
+			foreach($doctests[0] as $doctest){
+				if(isset($doctest[0][5]) && $doctest[0][5] != "*"){
+					$test_start_line = $method_start_line + substr_count(substr($method_src,0,$doctest[1]),"\n") - 1;
+					$test_block = str_repeat("\n",$test_start_line).str_replace(array('self::','new self(','extends self{'),array($class_name.'::','new '.$class_name.'(','extends '.$class_name.'{'),preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."***","*"."/"),"",$doctest[0])));
+					$test_block_name = preg_match("/^[\s]*#([^#].*)/",trim($test_block),$match) ? trim($match[1]) : null;
+					if(trim($test_block) == '') $test_block = null;
+					$result[$method_name][] = array($test_block_name,$test_block,$test_start_line);
+				}
+			}
+		}else if($is_public && $method_name[0] != '_'){
+			$result[$method_name] = array();
+		}
+		return $result;
 	}
 	static private function include_setup_teardown($test_file,$include_file){
 		if(strpos($test_file,\angela\Conf::test_dir()) === 0){
@@ -486,81 +616,6 @@ class Runner{
 			include($f);
 		}
 	}
-	static private function get_unittest($filename){
-		$result = array();
-		$result['@']['line'] = 0;
-		$result['@']['blocks'][] = array($filename,null,$filename,0);
-		$name = (preg_match("/^".preg_quote(\angela\Conf::test_dir(),'/')."(.+)\/[^\/]+\.php$/",$filename,$match)) ? $match[1] : null;
-		return array('filename'=>$filename,'type'=>3,'name'=>$name,'tests'=>$result);
-	}
-	static private function get_entry_doctest($filename){
-		$result = array();
-		$entry = basename($filename,'.php');
-		$src = file_get_contents($filename);
-		if(preg_match_all("/\/\*\*"."\*.+?\*\//s",$src,$doctests,PREG_OFFSET_CAPTURE)){
-			foreach($doctests[0] as $doctest){
-				if(isset($doctest[0][5]) && $doctest[0][5] != '*'){
-					$test_start_line = sizeof(explode("\n",substr($src,0,$doctest[1]))) - 1;
-					$test_block = str_repeat("\n",$test_start_line).preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array("/"."***","*"."/"),"",$doctest[0]));
-					$test_block_name = preg_match("/^[\s]*#([^#].*)/",trim($test_block),$match) ? trim($match[1]) : null;
-					$test_block_label = preg_match("/^[\s]*##(.+)/m",trim($test_block),$match) ? trim($match[1]) : null;
-					if(trim($test_block) == '') $test_block = null;
-					$result['@']['line'] = $test_start_line;
-					$result['@']['blocks'][] = array($test_block_name,$test_block_label,$test_block,$test_start_line);
-				}
-			}
-			self::merge_setup_teardown($result);
-		}
-		return array('filename'=>$filename,'type'=>2,'name'=>$entry,'tests'=>$result);
-	}
-	static private function get_doctest($class_name){
-		$result = array();
-		$rc = new \ReflectionClass($class_name);
-		$filename = $rc->getFileName();
-		$class_src_lines = file($filename);
-		$class_src = implode('',$class_src_lines);
-
-		foreach($rc->getMethods() as $method){
-			if($method->getDeclaringClass()->getName() == $rc->getName()){
-				$method_src = implode('',array_slice($class_src_lines,$method->getStartLine()-1,$method->getEndLine()-$method->getStartLine(),true));
-				$result = array_merge($result,self::get_method_doctest($rc->getName(),$method->getName(),$method->getStartLine(),$method->isPublic(),$method_src));
-				$class_src = str_replace($method_src,str_repeat("\n",sizeof(explode("\n",$method_src)) - 1),$class_src);
-			}
-		}
-		$result = array_merge($result,self::get_method_doctest($rc->getName(),'@',1,false,$class_src));
-		self::merge_setup_teardown($result);
-		return array('filename'=>$filename,'type'=>1,'name'=>$rc->getName(),'tests'=>$result);
-	}
-	static private function merge_setup_teardown(&$result){
-		if(isset($result['@']['blocks'])){
-			foreach($result['@']['blocks'] as $k => $block){
-				if($block[0] == '__setup__' || $block[0] == '__teardown__'){
-					$result['@'][$block[0]] = array($result['@']['blocks'][$k][3],null,$result['@']['blocks'][$k][2]);
-					unset($result['@']['blocks'][$k]);
-				}
-			}
-		}
-	}
-	static private function get_method_doctest($class_name,$method_name,$method_start_line,$is_public,$method_src){
-		$result = array();
-		if(preg_match_all("/\/\*\*"."\*.+?\*\//s",$method_src,$doctests,PREG_OFFSET_CAPTURE)){
-			foreach($doctests[0] as $doctest){
-				if(isset($doctest[0][5]) && $doctest[0][5] != "*"){
-					$test_start_line = $method_start_line + substr_count(substr($method_src,0,$doctest[1]),"\n") - 1;
-					$test_block = str_repeat("\n",$test_start_line).str_replace(array('self::','new self(','extends self{'),array($class_name.'::','new '.$class_name.'(','extends '.$class_name.'{'),preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."***","*"."/"),"",$doctest[0])));
-					$test_block_name = preg_match("/^[\s]*#([^#].*)/",trim($test_block),$match) ? trim($match[1]) : null;
-					$test_block_label = preg_match("/^[\s]*##(.+)/m",trim($test_block),$match) ? trim($match[1]) : null;
-					if(trim($test_block) == '') $test_block = null;
-					$result[$method_name]['line'] = $method_start_line;
-					$result[$method_name]['blocks'][] = array($test_block_name,$test_block_label,$test_block,$test_start_line);
-				}
-			}
-		}else if($is_public && $method_name[0] != '_'){
-			$result[$method_name]['line'] = $method_start_line;
-			$result[$method_name]['blocks'] = array();
-		}
-		return $result;
-	}
 	/**
 	 * テストの実行
 	 * @param string $class_name クラス名、またはファイル名
@@ -569,101 +624,93 @@ class Runner{
 	 * @param boolean $include_tests スペックテストも含むか
 	 * @throws Exception
 	 */
-	static public function verify_format($class_name,$m=null,$b=null,$include_tests=false){
-		$f = ' '.$class_name.(isset($m) ? '::'.$m : '');
-		self::stdout($f);
-		$throw = null;
-		$starttime = microtime(true);
-		$startmem = round(number_format((memory_get_usage() / 1024 / 1024),3),4);
-		
-		try{
-			self::run($class_name,$m,$b,$include_tests);
-		}catch(\Exception $e){
-			$throw = $e;
+	static public function varidate($class_name,$m=null,$b=null,$include_tests=false,$label=null){
+		if(strpos($class_name,substr(__FILE__,0,-4)) !== 0){
+			if(!self::$fixture){
+				if(is_file(\angela\Conf::test_dir().'__fixture__.php')){
+					ob_start();
+						include_once(\angela\Conf::test_dir().'__fixture__.php');
+					ob_end_clean();
+				}
+				self::$fixture = true;
+			}
+			$f = ' '.(empty($label) ? $class_name : $label).(isset($m) ? '::'.$m : '');
+			print($f);
+			$throw = null;
+			$starttime = microtime(true);
+			$startmem = round(number_format((memory_get_usage() / 1024 / 1024),3),4);
+			try{
+				self::run($class_name,$m,$b,$include_tests);
+			}catch(\Exception $e){
+				$throw = $e;
+			}
+			$time = round((microtime(true) - (float)$starttime),4);
+			$mem = round(number_format((memory_get_usage() / 1024 / 1024),3),4) - $startmem;
+			print(' ('.$time.' sec)'.PHP_EOL);
+			if(isset($throw)) throw $throw;
 		}
-		$time = round((microtime(true) - (float)$starttime),4);
-		$mem = round(number_format((memory_get_usage() / 1024 / 1024),3),4) - $startmem;
-		self::stdout(' ('.$time.' sec, '.$mem.' mb)'.PHP_EOL);
-		if(isset($throw)) throw $throw;
 	}
-	static private function is($f){
-		return !(
-				!$f->isFile()
-				|| substr($f->getFilename(),-4) != '.php'
-				|| preg_match('/\/[\._]/',$f->getPathname())
-				|| in_array($f->getPathname(),self::$exec_file)
-				|| strpos($f->getPathname(),substr(__FILE__,0,-4)) === 0
-		);
-
-	}
-	static private function file_list($d,$res=false){
+	static private function file_list($d,$res=false,$reg=null){
 		$it = new \RecursiveDirectoryIterator($d,
 				\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
 		);
-		if($res) return new \RecursiveIteratorIterator($it,\RecursiveIteratorIterator::SELF_FIRST);
+		if($res) $it = new \RecursiveIteratorIterator($it,\RecursiveIteratorIterator::SELF_FIRST);
+		if(!empty($reg)) $it = new \RegexIterator($it,$reg);
 		return $it;
 	}
+	/**
+	 * すべてのテストを実行する
+	 */
 	static public function run_all(){
 		if(is_dir(\angela\Conf::lib_dir())){
-			self::stdout(self::color_format(PHP_EOL.'Library'.PHP_EOL,'1;34'));
-				
-			foreach(self::file_list(\angela\Conf::lib_dir(),true) as $f){
-				if(ctype_upper(substr($f->getFilename(),0,1)) && self::is($f)){
-					$class_file = str_replace(\angela\Conf::lib_dir(),'',substr($f->getPathname(),0,-4));
-					if(preg_match("/^(.*)\/(\w+)\/(\w+)\.php$/",$f->getPathname(),$m) && $m[2] == $m[3]) $class_file = dirname($class_file);
-					if(!preg_match('/[A-Z]/',dirname($class_file))){
-						$class_name = "\\".str_replace('/',"\\",$class_file);
-
-						if(strpos($class_name,"\\test\\") !== 0){
-							try{
-								self::verify_format($class_name,null,null,false);
-								self::$exec_file[] = $f->getPathname();
-							}catch(\Exception $e){
-								self::$exec_file_exception[$class_name] = $e->getMessage().PHP_EOL.PHP_EOL.$e->getTraceAsString();
-							}
-						}
+			print(\angela\Util::color_format(PHP_EOL.'Library'.PHP_EOL,'1;34'));
+			
+			$lib = \angela\Conf::lib_dir();
+			foreach(self::file_list($lib,true,'/\.php/') as $f){
+				if(ctype_upper(substr($f->getFilename(),0,1))){
+					if(strpos($f->getPathname(),'/test/') === false){
+						$class = substr(str_replace(array($lib,'/'),array('','.'),$f->getPathname()),0,-4);
+						self::varidate($class,null,null,false,$f->getPathname());
 					}
-				}
-			}
-		}
-		if(is_dir(\angela\Conf::test_dir())){
-			self::stdout(self::color_format(PHP_EOL.'Specs'.PHP_EOL,'1;34'));
-				
-			foreach(self::file_list(\angela\Conf::test_dir(),true) as $f){
-				if(self::is($f)){
-					self::verify_format($f->getPathname(),null,null,false);
-					self::$exec_file[] = $f->getPathname();
 				}
 			}
 		}
 		if(is_dir(\angela\Conf::entry_dir())){
-			self::stdout(self::color_format(PHP_EOL.'Entrys'.PHP_EOL,'1;34'));
-
+			print(\angela\Util::color_format(PHP_EOL.'Entry'.PHP_EOL,'1;34'));
+		
 			$pre = getcwd();
 			chdir(\angela\Conf::entry_dir());
-
-			foreach(self::file_list(\angela\Conf::entry_dir()) as $f){
-				if(self::is($f)){
-					try{
-						self::verify_format($f->getPathname(),null,null,false);
-						self::$exec_file[] = $f->getPathname();
-					}catch(\Exception $e){
-						self::$exec_file_exception[$f->getFilename()] = $e->getMessage().PHP_EOL.PHP_EOL.$e->getTraceAsString();
-					}
+		
+			foreach(self::file_list(\angela\Conf::entry_dir(),false,'/\.php/') as $f){
+				if(substr($f->getFilename(),-4) == '.php' && !preg_match('/\/[\._]/',$f->getPathname())){
+					self::varidate($f->getPathname(),null,null,false);
 				}
 			}
 			chdir($pre);
 		}
-	}
-	static public function stdout($v){
-		print($v);
+		if(is_dir(\angela\Conf::test_dir())){
+			print(\angela\Util::color_format(PHP_EOL.'Test'.PHP_EOL,'1;34'));
+				
+			foreach(self::file_list(\angela\Conf::test_dir(),true,'/\.php/') as $f){
+				if(substr($f->getFilename(),-4) == '.php' && !preg_match('/\/[\._]/',$f->getPathname())){
+					self::varidate($f->getPathname(),null,null,false);
+				}
+			}
+		}
 	}
 }
-
+/**
+ * カヴァレッジ
+ */
 class Coverage{
 	static private $start = false;
 	static private $db;
 
+	/**
+	 * 実行中か
+	 * @param array $vars
+	 * @return boolean
+	 */
 	static public function has_started(&$vars){
 		if(self::$start){
 			$vars['savedb'] = self::$db;
@@ -671,14 +718,27 @@ class Coverage{
 		}
 		return false;
 	}
+	/**
+	 * 実行中のdbファイルパス
+	 */
 	static public function db(){
 		return self::$db;
 	}
+	/**
+	 * dbファイルの削除
+	 */
 	static public function delete(){
 		if(is_file(self::$db)){
 			unlink(self::$db);
 		}
 	}
+	/**
+	 * カヴァレッジ開始
+	 * @param string $savedb
+	 * @param string $lib_dir
+	 * @throws \RuntimeException
+	 * @return multitype:
+	 */
 	static public function start($savedb,$lib_dir){
 		if(extension_loaded('xdebug')){
 			$exist = (is_file($savedb));
@@ -756,6 +816,9 @@ class Coverage{
 			xdebug_start_code_coverage();
 		}
 	}
+	/**
+	 * カヴァレッジ終了
+	 */
 	static public function stop(){
 		if(is_file(self::$db) && $db = new \PDO('sqlite:'.self::$db)){
 			foreach(xdebug_get_code_coverage() as $file_path => $lines){
@@ -783,6 +846,10 @@ class Coverage{
 		}
 		xdebug_stop_code_coverage();
 	}
+	/**
+	 * 結果取得
+	 * @return array
+	 */
 	static public function get(){
 		$list = array();
 		if(is_file(self::$db)){
@@ -798,8 +865,10 @@ class Coverage{
 		}
 		return $list;
 	}
-	
 }
+/**
+ * HTTPリクエスト
+ */
 class Http{
 	private $resource;
 	private $agent;
@@ -880,40 +949,98 @@ class Http{
 	public function has_vars($key){
 		return (array_key_exists($key,$this->request_vars) || array_key_exists($key,$this->request_file_vars));
 	}
+	/**
+	 * curlへのオプション
+	 * @param string $key
+	 * @param string $value
+	 */
 	public function setopt($key,$value){
 		if(!isset($this->resource)) $this->resource = curl_init();
 		curl_setopt($this->resource,$key,$value);
 	}
+	/**
+	 * 結果ヘッダの取得
+	 * @returnstring
+	 */
 	public function head(){
 		return $this->head;
 	}
+	/**
+	 * 結果ボディーの取得
+	 * @return string
+	 */
 	public function body(){
 		return ($this->body === null || is_bool($this->body)) ? '' : $this->body;
 	}
+	/**
+	 * 最終実行URL
+	 * @return string
+	 */
 	public function url(){
 		return $this->url;
 	}
+	/**
+	 * 最終HTTPステータス
+	 * @return integer
+	 */
 	public function status(){
 		return empty($this->status) ? null : (int)$this->status;
 	}
+	/**
+	 * HEADでリクエスト
+	 * @param string $url
+	 * @return self
+	 */
 	public function do_head($url){
 		return $this->request('HEAD',$url);
 	}
+	/**
+	 * PUTでリクエスト
+	 * @param string $url
+	 * @return self
+	 */
 	public function do_put($url){
 		return $this->request('PUT',$url);
 	}
+	/**
+	 * DELETEでリクエスト
+	 * @param string $url
+	 * @return self
+	 */
 	public function do_delete(){
 		return $this->request('DELETE',$url);
 	}
+	/**
+	 * GETでリクエスト
+	 * @param string $url
+	 * @return self
+	 */
 	public function do_get($url){
 		return $this->request('GET',$url);
 	}
+	/**
+	 * POSTでリクエスト
+	 * @param string $url
+	 * @return self
+	 */
 	public function do_post($url){
 		return $this->request('POST',$url);
 	}
+	/**
+	 * GETでリクエストしてダウンロード
+	 * @param string $url
+	 * @param string $download_path 保存パス
+	 * @return self
+	 */
 	public function do_download($url,$download_path){
 		return $this->request('GET',$url,$download_path);
 	}
+	/**
+	 * POSTでリクエストしてダウンロード
+	 * @param string $url
+	 * @param string $download_path 保存パス
+	 * @return self
+	 */
 	public function do_post_download($url,$download_path){
 		return $this->request('POST',$url,$download_path);
 	}
@@ -1116,11 +1243,18 @@ class Http{
 		if(isset($this->resource)) curl_close($this->resource);
 	}
 }
+/**
+ * 結果出力
+ */
 class Output{
+	/**
+	 * カバレッジ結果を出力
+	 * @param array $coverage_list
+	 */
 	public function coverage($coverage_list){
 		print(PHP_EOL);
-		print(self::color_format('Coverage: '.PHP_EOL,'1;34'));
-			
+		print(\angela\Util::color_format('Coverage: '.PHP_EOL,'1;34'));
+		
 		foreach($coverage_list as $resultset){
 			$color = '1;31';
 			
@@ -1129,161 +1263,175 @@ class Output{
 			}else if($resultset['percent'] > 50){
 				$color = '1;33';
 			}
-			print(self::color_format(sprintf(' %3d%% %s'.PHP_EOL,$resultset['percent'],$resultset['file_path']),$color));
+			print(\angela\Util::color_format(sprintf(' %3d%% %s'.PHP_EOL,$resultset['percent'],$resultset['file_path']),$color));
 		}
 		print(PHP_EOL);
 	}
-	public function result($result_list,$params,$error_str){
+	/**
+	 * カバレッジをXMLで返す
+	 * @param array $coverage_list
+	 * @return string
+	 */
+	public function xml_coverage($coverage_list){
+		$xml = new \SimpleXMLElement('<coverage></coverage>');
+		if(!empty($name)) $xml->addAttribute('name',$name);
+
+		foreach($coverage_list as $resultset){
+			$f = $xml->addChild('file');
+			$f->addAttribute('name',$resultset['file_path']);
+			$f->addAttribute('percent',$resultset['percent']);
+			
+			$f->addChild('covered',$resultset['covered_line']);
+			$f->addChild('ignore',$resultset['ignore_line']);			
+		}
+		return $xml->asXML();
+	}
+	/**
+	 * テスト結果
+	 * @param array $result_list
+	 * @param array $params
+	 * @param string $error_str
+	 * @return boolean
+	 */
+	public function result($result_list,$error_str){
 		$result = '';
 		$tab = '  ';
 		$success = $count = $fail = $none = $exception = $total_time = 0;
-
+		
 		foreach($result_list as $file => $f){
-			foreach($f as $class => $c){
-				$print_head = false;
+			foreach($f as $method => $info_list){
+				$count++;
 
-				foreach($c as $method => $info_list){
-					$count++;
+				foreach($info_list as $info){
+					$time = $info[1];
+					$name = $info[3];
+					$total_time = (float)$total_time + (float)$time;
 
-					foreach($info_list as $info){
-						$time = $info[1];
-						$total_time = (float)$total_time + (float)$time;
+					switch($info[0]){
+						case 'none':
+							$none++;
+							break;
+						case 'success':
+							$success++;
+							break;
+						case 'fail':
+							$fail++;
+							list($file,$line,$r1,$r2) = $info[2];
 
-						switch($info[0]){
-							case 'none':
-								$none++;
-								break;
-							case 'success':
-								$success++;
-								break;
-							case 'fail':
-								$fail++;
-								list($file,$line,$r1,$r2) = $info[2];
+							$result .= "\n";
+							$result .= $file."\n";
+							$result .= str_repeat("-",80)."\n";
 
-								if(!$print_head){
-									$result .= "\n";
-									$result .= (empty($class) ? "*****" : str_replace("\\",'.',(substr($class,0,1) == "\\") ? substr($class,1) : $class))." [ ".$file." ]\n";
-									$result .= str_repeat("-",80)."\n";
-									$print_head = true;
-								}
-								$result .= "[".$line."]".$method.": ".self::color_format("failure","1;31")."\n";
-								$result .= $tab.str_repeat("=",70)."\n";
-								ob_start();
+							$result .= "[".$line."]: ".\angela\Util::color_format("failure","1;31")."\n";
+							$result .= $tab.str_repeat("=",70)."\n";
+							ob_start();
 								var_dump($r1);
-								$result .= self::color_format($tab.str_replace("\n","\n".$tab,ob_get_contents()),"33");
-								ob_end_clean();
-								$result .= "\n".$tab.str_repeat("=",70)."\n";
+								$result .= \angela\Util::color_format($tab.str_replace("\n","\n".$tab,ob_get_contents()),"33");
+							ob_end_clean();
+							$result .= "\n".$tab.str_repeat("=",70)."\n";
 
-								ob_start();
+							ob_start();
 								var_dump($r2);
-								$result .= self::color_format($tab.str_replace("\n","\n".$tab,ob_get_contents()),"31");
-								ob_end_clean();
-								$result .= "\n".$tab.str_repeat("=",70)."\n";
-								break;
-							case 'exception':
-								$exception++;
-								list($file,$line,$pos,$msg) = $info[2];
+								$result .= \angela\Util::color_format($tab.str_replace("\n","\n".$tab,ob_get_contents()),"31");
+							ob_end_clean();
+							$result .= "\n".$tab.str_repeat("=",70)."\n";
+							break;
+						case 'exception':
+							$exception++;
+							list($file,$line,$pos,$msg) = $info[2];
 
-								if(!$print_head){
-									$result .= "\n";
-									$result .= (empty($class) ? "*****" : str_replace("\\",'.',(substr($class,0,1) == "\\") ? substr($class,1) : $class))." [ ".$file." ]\n";
-									$result .= str_repeat("-",80)."\n";
-									$print_head = true;
-								}
-								$result .= '['.$line.']'.$method.': '.self::color_format('error','1;31')."\n";
-								$result .= $tab.str_repeat("=",70)."\n";
-								$result .= self::color_format($tab.$pos,33)."\n";
-								$result .= self::color_format($tab.$msg,31);
-								$result .= "\n".$tab.str_repeat("=",70)."\n";
-								break;
-						}
+							$result .= "\n";
+							$result .= $file."\n";
+							$result .= str_repeat("-",80)."\n";
+							
+							$result .= '['.$line.']: '.\angela\Util::color_format('error','1;31')."\n";
+							$result .= $tab.str_repeat("=",70)."\n";
+							$result .= \angela\Util::color_format($tab.$pos,33)."\n";
+							$result .= \angela\Util::color_format($tab.$msg,31);
+							$result .= "\n".$tab.str_repeat("=",70)."\n";
+							break;
 					}
 				}
 			}
 		}
 		$result .= "\n";
-		$result .= self::color_format(" success: ".$success." ","7;32")
-		." ".self::color_format(" failures: ".$fail." ","7;31")
-		." ".self::color_format(" errors: ".$exception." ","7;31")
+		$result .= \angela\Util::color_format(" success: ".$success." ","7;32")
+		." ".\angela\Util::color_format(" failures: ".$fail." ","7;31")
+		." ".\angela\Util::color_format(" errors: ".$exception." ","7;31")
 		.sprintf(' ( %.05f sec / %s MByte ) ',$total_time,round(number_format((memory_get_usage() / 1024 / 1024),3),4));
 
 		print($result.PHP_EOL);
 
 		if(!empty($error_str)){
-			print(PHP_EOL.self::color_format('Errors','1;31').PHP_EOL);
-			print(self::color_format($error_str,'0;31'));
-		}
-		if(isset($params['xml'])){
-			$output_dir = empty($params['xml']) ? __DIR__ : $params['xml'];
-			$output = $output_dir.'/'.substr(basename(__FILE__),0,-4).'.result.xml';
-			self::xml_result($output,$result_list, $error_str);
+			print(PHP_EOL.\angela\Util::color_format('Errors','1;31').PHP_EOL);
+			print(\angela\Util::color_format($error_str,'0;31'));
 		}
 		return (empty($fail) && empty($exception));
 	}
-	static private function color_format($msg,$color='30'){
-		return (php_sapi_name() == 'cli' && substr(PHP_OS,0,3) != 'WIN') ? "\033[".$color."m".$msg."\033[0m" : $msg;
-	}
-	static private function xml_result($output,$result_list,$system_err){
+	/**
+	 * テスト結果をXMLで返す
+	 * @param array $result_list
+	 * @param string $system_err
+	 * @return string
+	 */
+	static public function xml_result($result_list,$system_err){
 		$xml = new \SimpleXMLElement('<testsuites></testsuites>');
 		if(!empty($name)) $xml->addAttribute('name',$name);
 		
 		$count = $success = $fail = $none = $exception = $alltime = 0;
 		foreach($result_list as $file => $f){
+			
 			$case = $xml->addChild('testsuite');
-			$case->addAttribute('name',substr(basename($file),0,-4));
+			$case->addAttribute('name',$file);
 			$case->addAttribute('file',$file);
 		
-			foreach($f as $class => $c){
-				foreach($c as $method => $info_list){
-					foreach($info_list as $info){
-						$time = $info[1];
-						$alltime += $time;
-						$count++;
-		
-						switch($info[0]){
-							case 'none':
-								$none++;
-								break;
-							case 'success':
-								$success++;
-		
-								$x = $case->addChild('testcase');
-								$x->addAttribute('name',$method);
-								$x->addAttribute('class',$class);
-								$x->addAttribute('file',$file);
-								$x->addAttribute('time',$time);
-								break;
-							case 'fail':
-								$fail++;
-								list($file,$line,$r1,$r2) = $info[2];
-								ob_start();
+			foreach($f as $method => $info_list){
+				foreach($info_list as $info){
+					$time = $info[1];
+					$name = $info[3];
+					$alltime += $time;
+					$count++;
+					
+					switch($info[0]){
+						case 'none':
+							$none++;
+							break;
+						case 'success':
+							$success++;
+	
+							$x = $case->addChild('testcase');
+							$x->addAttribute('name',$method);
+							$x->addAttribute('file',$file);
+							$x->addAttribute('time',$time);
+							break;
+						case 'fail':
+							$fail++;
+							list($file,$line,$r1,$r2) = $info[2];
+							ob_start();
 								var_dump($r2);
-								$failure_value = 'Line. '.$line.' '.$method.': '."\n".ob_get_clean();
-		
-								$x = $case->addChild('testcase');
-								$x->addAttribute('name',$method);
-								$x->addAttribute('class',$class);
-								$x->addAttribute('file',$file);
-								$x->addAttribute('time',$time);
-								$x->addAttribute('line',$line);
-								$x->addChild('failure',$failure_value);
-								break;
-							case 'exception':
-								$exception++;
-								list($file,$line,$pos,$msg) = $info[2];
-								$error_value = 'Line. '.$line.' '.$method.': '.$msg;
-		
-								$x = $case->addChild('testcase');
-								$x->addAttribute('name',$method);
-								$x->addAttribute('class',$class);
-								$x->addAttribute('file',$file);
-								$x->addAttribute('time',$time);
-								$x->addAttribute('line',$line);
-		
-								$error = $x->addChild('error',$error_value);
-								$error->addAttribute('line',$line);
-								break;
-						}
+							$failure_value = 'Line. '.$line.': '."\n".ob_get_clean();
+	
+							$x = $case->addChild('testcase');
+							$x->addAttribute('name',$method);
+							$x->addAttribute('file',$file);
+							$x->addAttribute('time',$time);
+							$x->addAttribute('line',$line);
+							$x->addChild('failure',$failure_value);
+							break;
+						case 'exception':
+							$exception++;
+							list($file,$line,$pos,$msg) = $info[2];
+							$error_value = 'Line. '.$line.': '.$msg;
+	
+							$x = $case->addChild('testcase');
+							$x->addAttribute('name',$method);
+							$x->addAttribute('file',$file);
+							$x->addAttribute('time',$time);
+							$x->addAttribute('line',$line);
+	
+							$error = $x->addChild('error',$error_value);
+							$error->addAttribute('line',$line);
+							break;
 					}
 				}
 			}
@@ -1296,14 +1444,15 @@ class Output{
 		$xml->addChild('system-out');
 		$xml->addChild('system-err',$system_err);
 
-		file_put_contents($output,$xml->asXML());
-		print(self::color_format("Written XML: ".$output." ","1;34").PHP_EOL);
+		return $xml->asXML();
 	}
 }
 }
 
-namespace{	
-// main
+/**
+ * main
+ */
+namespace{
 ini_set('display_errors','On');
 ini_set('html_errors','Off');
 ini_set('error_reporting',E_ALL);
@@ -1333,7 +1482,7 @@ if(substr($value,0,1) == '-'){
 }
 for($i=0;$i<sizeof($argv);$i++){
 	if($argv[$i][0] == '-'){
-		$k = substr($argv[$i],1);
+		$k = str_replace('-','_',substr($argv[$i],($argv[$i][1] == '-') ? 2 : 1));
 		$v = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
 		if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
 		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
@@ -1400,7 +1549,11 @@ if(is_file($f=$rootdir.'/bootstrap.php') || is_file($f=$rootdir.'/vendor/autoloa
 \angela\Conf::init($rootdir,$params,substr(__FILE__,0,-4).'.conf.php');
 \angela\Conf::info(isset($value));
 
-if(!isset($params['load_test_func']) || $params['load_test_func'] !== false){
+
+/**
+ * 検証用メソッドの省略関数
+ */
+{
 	/**
 	 * 失敗
 	 * @param string $msg
@@ -1460,6 +1613,7 @@ if(!isset($params['load_test_func']) || $params['load_test_func'] !== false){
 	 */
 	function test_map_url($map_name){
 		$args = func_get_args();
+		if(strpos($args[0],'::') == false) $args[0] = \angela\Runner::current_entry().'::'.$args[0];
 		return call_user_func_array(array('\angela\Conf','map_url'),$args);
 	}
 	/**
@@ -1470,35 +1624,52 @@ if(!isset($params['load_test_func']) || $params['load_test_func'] !== false){
 		return new \angela\Http($agent,$timeout,$redirect_max);
 	}	
 }
-if(isset($params['coverage'])){
+/**
+ * Help
+ */
+if(isset($params['h']) || isset($params['help'])){
+	print('usage: php '.basename(__FILE__).' [-t target] [-m method] [-b block] [-c coverage.xml] [-o result.xml]'.PHP_EOL);
+	print('       php '.basename(__FILE__).' --cc'.PHP_EOL);
+	print('       php '.basename(__FILE__).' --help'.PHP_EOL);
+	print(PHP_EOL);
+	exit;
+}
+
+
+$value = (isset($params['t']) ? $params['t'] : $value);
+$coverage = isset($params['c']) ? \angela\Util::absolute(getcwd(),$params['c']) : null;
+
+if(!empty($coverage)){
 	if(!extension_loaded('xdebug')) die('xdebug extension not loaded'.PHP_EOL);
-	$db = empty($params['coverage']) ? __DIR__.'/'.microtime(true).'.coverage.db' : $params['coverage'];
+	file_put_contents($coverage,'');
+	$db = dirname($coverage).'/'.microtime(true).'.coverage.db';
 	\angela\Coverage::start($db,\angela\Conf::lib_dir());
 }
-if(isset($value)){
-	\angela\Runner::verify_format(
+if(!empty($value)){
+	\angela\Runner::varidate(
 			$value
 			,(isset($params['m']) ? $params['m'] : null)
 			,(isset($params['b']) ? $params['b'] : null)
 			,true
 	);
 }else{
-	\angela\Runner::run_all(true);
+	\angela\Runner::run_all();
 }
-if(isset($params['coverage'])){
+$output_obj = new \angela\Output();
+$output_obj->result(\angela\Runner::get(),\angela\Conf::error_log());
+if(isset($params['o']) && !empty($params['o'])){
+	$filename = \angela\Util::absolute(getcwd(),$params['o']);
+	file_put_contents($filename, $output_obj->xml_result(\angela\Runner::get(),\angela\Conf::error_log()));
+	print(\angela\Util::color_format('Written XML: '.$filename.' ','1;34').PHP_EOL);
+}
+if(!empty($coverage)){
 	\angela\Coverage::stop();
-}
-$output_obj = \angela\Conf::output_obj();
 
-if(method_exists($output_obj,'result')){
-	$output_obj->result(\angela\Runner::get(),$params,\angela\Conf::error_log());
-}
-if(isset($params['coverage'])){
-	if(method_exists($output_obj,'coverage')){
-		$output_obj->coverage(\angela\Coverage::get(),$params);
-	}
+	$output_obj->coverage(\angela\Coverage::get());
+	file_put_contents($coverage, $output_obj->xml_coverage(\angela\Coverage::get()));
+	print(\angela\Util::color_format('Written XML: '.$coverage.' ','1;34').PHP_EOL);
+	
 	\angela\Coverage::delete();
 }
-
 exit(\angela\Runner::has_exception() ? 1 : 0);
 }
