@@ -302,7 +302,7 @@ class Assert{
 		}
 		if(!(self::expvar($keyword) === self::expvar($valid))){
 			list($file,$line) = self::debug_info($file, $line);
-			self::$failure_info = array($file,$line,var_export($keyword,true),var_export($valid,true));
+			self::$failure_info = array($file,$line,'match: '.var_export($keyword,true),'matched: '.var_export($valid,true).PHP_EOL.PHP_EOL.'Source:'.PHP_EOL.$src);
 			throw new \angela\AssertException();
 		}
 	}
@@ -326,7 +326,7 @@ class Assert{
 		}
 		if(!(self::expvar($keyword) === self::expvar($valid))){
 			list($file,$line) = self::debug_info($file, $line);
-			self::$failure_info = array($file,$line,var_export($keyword,true),var_export($valid,true));
+			self::$failure_info = array($file,$line,'match none: '.var_export($keyword,true),'match none: '.var_export($valid,true).PHP_EOL.PHP_EOL.'Source:'.PHP_EOL.$src);
 			throw new \angela\AssertException();
 		}
 	}
@@ -355,7 +355,7 @@ class Runner{
 	static private $current_block_start_time;
 	static private $current_entry;
 
-	static private $read_file = array();
+	static private $load_file = array();
 	static private $has_exception = false;
 	static private 	$fixture = false;
 
@@ -382,6 +382,15 @@ class Runner{
 	static public function current_entry(){
 		return self::$current_entry;
 	}
+	static private function loaded_file($file){
+		if(!isset(self::$load_file[strtolower($file)])){
+			if(substr($file,-4) == '.php' && !preg_match('/\/[\._]/',$file)){
+				self::$load_file[strtolower($file)] = true;
+				return true;
+			}
+		}
+		return false;
+	}
 	/**
 	 * テストを実行する
 	 * @param string $class_name クラス名
@@ -400,9 +409,8 @@ class Runner{
 		){
 			// class
 			$rc = new \ReflectionClass($cn);
-			if(!isset(self::$read_file[$rc->getFileName()])){
+			if(self::loaded_file($rc->getFileName())){
 				$tests = array();
-				self::$read_file[$rc->getFileName()] = true;
 				$class_src_lines = file($rc->getFileName());
 				$class_src = implode('',$class_src_lines);
 				
@@ -420,9 +428,7 @@ class Runner{
 			|| is_file($f=\angela\Conf::entry_dir().$class_name.'.php')
 		){
 			// entry
-			if(!isset(self::$read_file[$f])){
-				self::$read_file[$f] = true;
-				
+			if(self::loaded_file($f)){
 				$tests = array();
 				$entry = basename($f,'.php');
 				$src = file_get_contents($f);
@@ -447,31 +453,20 @@ class Runner{
 			|| is_file($f=\angela\Conf::test_dir().$class_name.'.php')
 		){
 			// test
-			if(!isset(self::$read_file[$f]) &&
-				substr($f,-4) == '.php' &&
-				!preg_match('/\/[\._]/',$f)
-			){
-				self::$read_file[$f] = true;
+			if(self::loaded_file($f)){
 				$test_list[\angela\Conf::test_dir()]['tests'][$f] = array(array(basename($f,'.php'),$f,0));
 			}
 		}
 		// test
 		if(is_file($f=\angela\Conf::test_dir().str_replace('.','/',$class_name).'.php')){
-			if(!isset(self::$read_file[$f]) &&
-				substr($f,-4) == '.php' &&
-				!preg_match('/\/[\._]/',$f)
-			){
-				self::$read_file[$f] = true;
+			if(self::loaded_file($f)){
 				$test_list[\angela\Conf::test_dir()]['tests'][$f] = array(array(basename($f,'.php'),$f,0));
 			}
 		}
 		// test
 		if(is_dir($d=\angela\Conf::test_dir().str_replace('.','/',$class_name))){
 			foreach(self::file_list($d,true,'/\.php/') as $f){
-				if(!isset(self::$read_file[$f->getPathname()]) &&
-					!preg_match('/\/[\._]/',$f->getPathname())
-				){
-					self::$read_file[$f->getPathname()] = true;
+				if(self::loaded_file($f->getPathname())){
 					$test_list[\angela\Conf::test_dir()]['tests'][$f->getPathname()] = array(array(basename($f->getPathname(),'.php'),$f,0));
 				}
 			}
