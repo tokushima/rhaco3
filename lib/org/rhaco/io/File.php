@@ -217,7 +217,8 @@ class File extends \org\rhaco\Object{
 	 * @param string $dest コピー先のファイルパス
 	 */
 	static public function copy($source,$dest){
-		if(!is_dir($source) && !is_file($source)) throw new \InvalidArgumentException(sprintf('permission denied `%s`',$source));
+		if(!is_dir($source) && !is_file($source)) throw new \InvalidArgumentException(sprintf('permission denied `%s`',$source));		
+		self::mkdir(dirname($dest));
 		if(is_dir($source)){
 			$bool = true;
 			if($handle = opendir($source)){
