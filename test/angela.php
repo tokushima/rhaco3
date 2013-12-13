@@ -660,13 +660,10 @@ class Runner{
 		if(is_dir(\angela\Conf::lib_dir())){
 			print(\angela\Util::color_format(PHP_EOL.'Library'.PHP_EOL,'1;34'));
 			
-			$lib = \angela\Conf::lib_dir();
-			foreach(self::file_list($lib,true,'/\.php/') as $f){
-				if(ctype_upper(substr($f->getFilename(),0,1))){
-					if(strpos($f->getPathname(),'/test/') === false){
-						$class = substr(str_replace(array($lib,'/'),array('','.'),$f->getPathname()),0,-4);
-						self::varidate($class,null,null,false,$f->getPathname());
-					}
+			foreach(self::file_list(\angela\Conf::lib_dir(),true,'/\.php$/') as $f){
+				if(ctype_upper(substr($f->getFilename(),0,1)) && !preg_match('/\/[\._]/',$f->getPathname()) && strpos($f->getPathname(),'/test/') === false){
+					$class = substr(str_replace(array(\angela\Conf::lib_dir(),'/'),array('','.'),$f->getPathname()),0,-4);
+					self::varidate($class,null,null,false,$f->getPathname());
 				}
 			}
 		}
@@ -676,8 +673,8 @@ class Runner{
 			$pre = getcwd();
 			chdir(\angela\Conf::entry_dir());
 		
-			foreach(self::file_list(\angela\Conf::entry_dir(),false,'/\.php/') as $f){
-				if(substr($f->getFilename(),-4) == '.php' && !preg_match('/\/[\._]/',$f->getPathname())){
+			foreach(self::file_list(\angela\Conf::entry_dir(),false,'/\.php$/') as $f){
+				if(!preg_match('/\/[\._]/',$f->getPathname())){
 					self::varidate($f->getPathname(),null,null,false);
 				}
 			}
@@ -686,8 +683,8 @@ class Runner{
 		if(is_dir(\angela\Conf::test_dir())){
 			print(\angela\Util::color_format(PHP_EOL.'Test'.PHP_EOL,'1;34'));
 				
-			foreach(self::file_list(\angela\Conf::test_dir(),true,'/\.php/') as $f){
-				if(substr($f->getFilename(),-4) == '.php' && !preg_match('/\/[\._]/',$f->getPathname())){
+			foreach(self::file_list(\angela\Conf::test_dir(),true,'/\.php$/') as $f){
+				if(!preg_match('/\/[\._]/',$f->getPathname())){
 					self::varidate($f->getPathname(),null,null,false);
 				}
 			}
@@ -744,6 +741,7 @@ class Coverage{
 				self::$db = $savedb;
 
 				if(!$exist){
+					$db->query('begin');
 					$sql = 'create table coverage_info('.
 							'id integer not null primary key,'.
 							'covered_line text null,'.
@@ -806,6 +804,7 @@ class Coverage{
 							}
 						}
 					}
+					$db->query('commit');
 				}
 			}
 			xdebug_start_code_coverage();
@@ -816,6 +815,7 @@ class Coverage{
 	 */
 	static public function stop(){
 		if(is_file(self::$db) && $db = new \PDO('sqlite:'.self::$db)){
+			$db->query('begin');
 			foreach(xdebug_get_code_coverage() as $file_path => $lines){
 				$sql = 'select id,covered_line,ignore_line,active_len from coverage_info where file_path = ?';
 				$ps = $db->prepare($sql);
@@ -838,6 +838,7 @@ class Coverage{
 					$ps->execute(array(implode(',',$covered_line),$percent,$id));
 				}
 			}
+			$db->query('commit');
 		}
 		xdebug_stop_code_coverage();
 	}
@@ -854,6 +855,13 @@ class Coverage{
 				$ps->execute();
 	
 				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
+					$ignore = array_flip(explode(',',$resultset['ignore_line']));
+					$covered = array();
+					
+					foreach(explode(',',$resultset['covered_line']) as $cover){
+						if(!array_key_exists($cover,$ignore)) $covered[] = $cover;
+					}
+					$resultset['covered_line'] = implode(',',$covered);
 					$list[] = $resultset;
 				}
 			}
@@ -1411,7 +1419,9 @@ class Output{
 							$x->addAttribute('file',$file);
 							$x->addAttribute('time',$time);
 							$x->addAttribute('line',$line);
-							$x->addChild('failure',$failure_value);
+							
+							$failure = dom_import_simplexml($x->addChild('failure'));
+							$failure->appendChild($failure->ownerDocument->createCDATASection($failure_value));
 							break;
 						case 'exception':
 							$exception++;
@@ -1424,8 +1434,11 @@ class Output{
 							$x->addAttribute('time',$time);
 							$x->addAttribute('line',$line);
 	
-							$error = $x->addChild('error',$error_value);
+							$error = $x->addChild('error');
 							$error->addAttribute('line',$line);
+							$error_node = dom_import_simplexml($error);
+							$error_node->appendChild($error_node->ownerDocument->createCDATASection($error_value));							
+							
 							break;
 					}
 				}
@@ -1495,32 +1508,41 @@ if(extension_loaded('xdebug')){
 
 	if(isset($coverage_vars['savedb']) && is_file($coverage_vars['savedb'])){
 		register_shutdown_function(function() use($coverage_vars){
-			$savedb = $coverage_vars['savedb'];
-			if(is_file($savedb) && $db = new \PDO('sqlite:'.$savedb)){
-				foreach(xdebug_get_code_coverage() as $file_path => $lines){
-					$sql = 'select id,covered_line,ignore_line,active_len from coverage_info where file_path = ?';
-					$ps = $db->prepare($sql);
-					$ps->execute(array($file_path));
+			register_shutdown_function(function() use($coverage_vars){
+				$savedb = $coverage_vars['savedb'];
+				
+				if(is_file($savedb) && $db = new \PDO('sqlite:'.$savedb)){
+					$db->query('begin');
+					foreach(xdebug_get_code_coverage() as $file_path => $lines){
+						$sql = 'select id,covered_line,ignore_line,active_len from coverage_info where file_path = ?';
+						$ps = $db->prepare($sql);
+						$ps->execute(array($file_path));
 						
-					if($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
-						$id = (int)$resultset['id'];
-						$active_len = (int)$resultset['active_len'];
-						$ignore_line = explode(',',$resultset['ignore_line']);
-						$covered_line = empty($resultset['covered_line']) ? array() : explode(',',$resultset['covered_line']);
-						$covered_line = array_merge(array_keys($lines),$covered_line);
-						$covered_line = array_unique($covered_line);
-						sort($covered_line);
+						if($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
+							$id = (int)$resultset['id'];
+							$active_len = (int)$resultset['active_len'];
+							$ignore_line = explode(',',$resultset['ignore_line']);
 							
-						$covered_len = sizeof(array_diff($covered_line,$ignore_line));
-						$percent = ($active_len === 0) ? 100 : (($covered_len === 0) ? 0 : (floor($covered_len / $active_len * 100)));
-						if($percent > 100) $percent = 100;
+							$covered_line = empty($resultset['covered_line']) ? array() : explode(',',$resultset['covered_line']);
+							$covered_line = array_merge(array_keys($lines),$covered_line);
+							$covered_line = array_unique($covered_line);
+							sort($covered_line);
+							$coverd = implode(',',$covered_line);
 							
-						$ps = $db->prepare('update coverage_info set covered_line=?,percent=? where id=?');
-						$ps->execute(array(implode(',',$covered_line),$percent,$id));
+							if($coverd !== $resultset['covered_line']){
+								$covered_len = sizeof(array_diff($covered_line,$ignore_line));
+								$percent = ($active_len === 0) ? 100 : (($covered_len === 0) ? 0 : (floor($covered_len / $active_len * 100)));
+								if($percent > 100) $percent = 100;
+								
+								$ps = $db->prepare('update coverage_info set covered_line=?,percent=? where id=?');
+								$ps->execute(array($coverd,$percent,$id));
+							}
+						}
 					}
+					$db->query('commit');
 				}
-			}
-			xdebug_stop_code_coverage();			
+				xdebug_stop_code_coverage();			
+			});
 		});
 		xdebug_start_code_coverage();
 	}
