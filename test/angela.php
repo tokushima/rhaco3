@@ -1277,12 +1277,13 @@ class Output{
 	 */
 	public function xml_coverage($coverage_list){
 		$xml = new \SimpleXMLElement('<coverage></coverage>');
-		if(!empty($name)) $xml->addAttribute('name',$name);
+		$xml->addAttribute('time',date('Y/m/d H:i:s'));
 
 		foreach($coverage_list as $resultset){
 			$f = $xml->addChild('file');
 			$f->addAttribute('name',$resultset['file_path']);
 			$f->addAttribute('percent',$resultset['percent']);
+			$f->addAttribute('modify_date',date('Y/m/d H:i:s',filemtime($resultset['file_path'])));
 			
 			$f->addChild('covered',$resultset['covered_line']);
 			$f->addChild('ignore',$resultset['ignore_line']);			
@@ -1461,6 +1462,83 @@ class Output{
  * main
  */
 namespace{
+/**
+ * 検証用メソッドの省略関数
+ */
+{
+	/**
+	 * 失敗
+	 * @param string $msg
+	 */
+	function fail($msg='failure'){
+		$assert = new \angela\Assert();
+		$assert->failure($msg);
+	}
+	/**
+	 *　等しい
+	 * @param mixed $expectation 期待値
+	 * @param mixed $result 実行結果
+	 */
+	function eq($expectation,$result){
+		list($debug) = debug_backtrace(false);
+		$assert = new \angela\Assert();
+		$assert->equals($expectation,$result,$debug['file'],$debug['line']);
+		return true;
+	}
+	/**
+	 * 等しくない
+	 * @param mixed $expectation 期待値
+	 * @param mixed $result 実行結果
+	 */
+	function neq($expectation,$result){
+		list($debug) = debug_backtrace(false);
+		$assert = new \angela\Assert();
+		$assert->not_equals($expectation,$result,$debug['file'],$debug['line']);
+		return true;
+	}
+	/**
+	 *　文字列中に指定した文字列がすべて存在していれば成功
+	 * @param string|array $keyword
+	 * @param string $src
+	 */
+	function meq($keyword,$src){
+		list($debug) = debug_backtrace(false);
+		$assert = new \angela\Assert();
+		$assert->match_equals($keyword,$src,$debug['file'],$debug['line']);
+		return true;
+	}
+	/**
+	 *　文字列中に指定した文字列がすべて存在していなければ成功
+	 * @param string|array $keyword
+	 * @param string $src
+	 */
+	function mneq($keyword,$src){
+		list($debug) = debug_backtrace(false);
+		$assert = new \angela\Assert();
+		$assert->match_not_equals($keyword,$src,$debug['file'],$debug['line']);
+		return true;
+	}
+	/**
+	 * mapに定義されたurlをフォーマットして返す
+	 * @param string $name
+	 * @return string
+	 */
+	function test_map_url($map_name){
+		$args = func_get_args();
+		if(strpos($args[0],'::') == false) $args[0] = \angela\Runner::current_entry().'::'.$args[0];
+		return call_user_func_array(array('\angela\Conf','map_url'),$args);
+	}
+	/**
+	 * Httpリクエスト
+	 * @return angela.Http
+	 */
+	function b($agent=null,$timeout=30,$redirect_max=20){
+		return new \angela\Http($agent,$timeout,$redirect_max);
+	}
+}
+if(count(debug_backtrace(false)) > 0){
+	return;
+}
 ini_set('display_errors','On');
 ini_set('html_errors','Off');
 ini_set('error_reporting',E_ALL);
@@ -1566,81 +1644,6 @@ if(is_file($f=$rootdir.'/bootstrap.php') || is_file($f=$rootdir.'/vendor/autoloa
 \angela\Conf::init($rootdir,$params,substr(__FILE__,0,-4).'.conf.php');
 \angela\Conf::info(isset($value));
 
-
-/**
- * 検証用メソッドの省略関数
- */
-{
-	/**
-	 * 失敗
-	 * @param string $msg
-	 */
-	function fail($msg='failure'){
-		$assert = new \angela\Assert();
-		$assert->failure($msg);
-	}
-	/**
-	 *　等しい
-	 * @param mixed $expectation 期待値
-	 * @param mixed $result 実行結果
-	 */
-	function eq($expectation,$result){
-		list($debug) = debug_backtrace(false);
-		$assert = new \angela\Assert();
-		$assert->equals($expectation,$result,$debug['file'],$debug['line']);
-		return true;
-	}
-	/**
-	 * 等しくない
-	 * @param mixed $expectation 期待値
-	 * @param mixed $result 実行結果
-	 */
-	function neq($expectation,$result){
-		list($debug) = debug_backtrace(false);
-		$assert = new \angela\Assert();
-		$assert->not_equals($expectation,$result,$debug['file'],$debug['line']);
-		return true;
-	}
-	/**
-	 *　文字列中に指定した文字列がすべて存在していれば成功
-	 * @param string|array $keyword
-	 * @param string $src
-	 */
-	function meq($keyword,$src){
-		list($debug) = debug_backtrace(false);
-		$assert = new \angela\Assert();
-		$assert->match_equals($keyword,$src,$debug['file'],$debug['line']);
-		return true;
-	}
-	/**
-	 *　文字列中に指定した文字列がすべて存在していなければ成功
-	 * @param string|array $keyword
-	 * @param string $src
-	 */
-	function mneq($keyword,$src){
-		list($debug) = debug_backtrace(false);
-		$assert = new \angela\Assert();
-		$assert->match_not_equals($keyword,$src,$debug['file'],$debug['line']);
-		return true;
-	}
-	/**
-	 * mapに定義されたurlをフォーマットして返す
-	 * @param string $name
-	 * @return string
-	 */
-	function test_map_url($map_name){
-		$args = func_get_args();
-		if(strpos($args[0],'::') == false) $args[0] = \angela\Runner::current_entry().'::'.$args[0];
-		return call_user_func_array(array('\angela\Conf','map_url'),$args);
-	}
-	/**
-	 * Httpリクエスト
-	 * @return angela.Http
-	 */
-	function b($agent=null,$timeout=30,$redirect_max=20){
-		return new \angela\Http($agent,$timeout,$redirect_max);
-	}	
-}
 /**
  * Help
  */
@@ -1654,7 +1657,7 @@ if(isset($params['h']) || isset($params['help'])){
 
 
 $value = (isset($params['t']) ? $params['t'] : $value);
-$coverage = isset($params['c']) ? \angela\Util::absolute(getcwd(),$params['c']) : null;
+$coverage = isset($params['c']) ? \angela\Util::absolute(getcwd(),(empty($params['c']) ? (__DIR__.'/coverage.xml') : $params['c'])) : null;
 
 if(!empty($coverage)){
 	if(!extension_loaded('xdebug')) die('xdebug extension not loaded'.PHP_EOL);

@@ -13,6 +13,17 @@
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
+		.code{ 
+			font-family: Consolas, 'Liberation Mono', Courier, monospace; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal;
+			width:100%; height: 16px; line-height: 0px; margin: 0; white-space: pre; padding-left: 10px; padding-right: 10px;		
+		}
+		.coverage-perfect{ color:#8fbc8f; }
+		.coverage-more{ color:#b8860b; }
+		.coverage-bad{ color:#ff6347; font-weight: bold; }
+		.code-covered{ background-color: #8fbc8f; }
+		.code-ignore{ background-color: #fafafa; }
+		.code-none{ background-color: #ff6347; }
+		.code-line{ padding: 1px 1px 1px 10px; line-height:12px; margin-left: 5px; margin-right: 5px; }
     </style>
     <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 
@@ -42,6 +53,11 @@
 				<li class="{$t.endswith_pattern_switch('class_list','active','inactive')}"><a href="{$t.package_method_url('class_list')}">Classes</a></li>
 				<li class="{$t.endswith_pattern_switch('model_list','active','inactive')}"><a href="{$t.package_method_url('model_list')}">Models</a></li>
 				<li class="{$t.endswith_pattern_switch('mail_list','active','inactive')}"><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
+
+				<rt:if param="{$has_coverage}">
+					<li class="{$t.endswith_pattern_switch('coverage','active','inactive')}"><a href="{$t.package_method_url('coverage')}">Coverage</a></li>
+				</rt:if>				
+
 
 				<rt:if param="{$t.is_login()}">
 					<li class="{$t.endswith_pattern_switch('do_logout','active','inactive')}"><a href="{$t.package_method_url('do_logout')}">Logout</a></li>

@@ -1,0 +1,24 @@
+<rt:extends href="base.html" />
+
+<rt:block name="content">
+<h2>Covered ({$percent}%) - {$filename}</h2>
+
+<span style="font-size: small;">
+	{$dir}
+	<rt:if param="{$modify_date}" value="{$coverage_modify_date}">
+		( {$modify_date} )
+	<rt:else />
+		( {$modify_date} / <span style="color:#ff0000;">{$coverage_modify_date}</span> )
+	</rt:if>
+</span>
+
+<table rt:param="{$source}" rt:var="line" class="" rt:counter="counter">
+<tbody>
+	<tr>
+		<td class="code-line code-{$status[$counter]}" style="text-align: right; margin-right: 30px; vertical-align: top;">{$counter}</td>
+		<td class="code code-line code-{$status[$counter]}">{$t.html($line)}</td>
+	</tr>
+</tbody>
+</table>
+</rt:block>
+

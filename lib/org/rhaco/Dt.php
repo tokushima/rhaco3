@@ -19,6 +19,10 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		
 		$this->vars('app_mode',\org\rhaco\Conf::appmode());
 		$this->vars('f',new Dt\Helper());
+		$this->vars('has_coverage',is_file($this->coverage_file()));
+	}
+	private function coverage_file(){
+		return getcwd().'/test/coverage.xml';
 	}
 	public function get_template_modules(){
 		return array(
@@ -631,5 +635,66 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			}
 		}
 		return $urls;
+	}
+	/**
+	 * @automap
+	 */
+	public function coverage(){
+		$covered_list = array();
+		$coverage = 0;
+		$time = null;
+	
+		if(is_file($this->coverage_file()) && \org\rhaco\Xml::set($xml,file_get_contents($this->coverage_file()),'coverage')){
+			$percent_total = 0;
+			$time = $xml->in_attr('time');
+				
+			foreach($xml->in('file') as $file){
+				$name = $file->in_attr('name');
+				$percent = $file->in_attr('percent');
+				$percent_total += $percent;
+				$covered_list[$name] = array('percent'=>$percent,'status'=>($percent == 100 ? 'perfect' : (($percent >= 50) ? 'more' : 'bad')));
+			}
+			$coverage = $percent_total/count($covered_list);
+		}
+		$this->vars('covered_list',$covered_list);
+		$this->vars('coverage',ceil($coverage));
+		$this->vars('time',$time);
+	}
+	/**
+	 * @automap
+	 */
+	public function covered(){
+		$filename = $this->in_vars('filename');
+		$source = file($filename);
+		$modify_date = date('Y/m/d H:i:s',filemtime($filename));
+		$status = array();
+		$coverage_modify_date = null;
+		$percent = 0;
+	
+		for($i=1;$i<=count($source);$i++){
+			$status[$i] = 'none';
+		}
+		if(is_file($this->coverage_file()) && \org\rhaco\Xml::set($xml,file_get_contents($this->coverage_file()),'coverage')){
+			foreach($xml->in('file') as $file){
+				if($file->in_attr('name') == $filename){
+					foreach(explode(',',$file->f('covered.value()')) as $line){
+						if(isset($status[$line])) $status[$line] = 'covered';
+					}
+					foreach(explode(',',$file->f('ignore.value()')) as $line){
+						if(isset($status[$line])) $status[$line] = 'ignore';
+					}
+					$coverage_modify_date = $file->in_attr('modify_date');
+					$percent = $file->in_attr('percent');
+					break;
+				}
+			}
+		}
+		$this->vars('source',$source);
+		$this->vars('filename',basename($filename));
+		$this->vars('dir',dirname($filename));
+		$this->vars('status',$status);
+		$this->vars('modify_date',$modify_date);
+		$this->vars('coverage_modify_date',$coverage_modify_date);
+		$this->vars('percent',$percent);
 	}
 }

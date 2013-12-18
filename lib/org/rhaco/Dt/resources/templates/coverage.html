@@ -1,0 +1,22 @@
+<rt:extends href="base.html" />
+
+<rt:block name="content">
+<h2>Coverage ({$coverage}%)</h2>
+{$time}
+
+<table rt:param="{$covered_list}" rt:var="coverage" rt:key="filename">
+<thead>
+	<tr>
+		<th class="span3">filename</th>
+		<th>covered</th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+		<td><a href="{$t.package_method_url('covered')}?filename={$filename}" class="coverage-{$coverage['status']}">{$filename}</a></td>
+		<td style="text-align: right;"><span class="coverage-{$coverage['status']}">{$coverage['percent']}%</span></td>
+	</tr>
+</tbody>
+</table>
+</rt:block>
+
