@@ -29,7 +29,7 @@ if(extension_loaded('xdebug')){
 							foreach($lines as $line => $status){
 								if($status == 1){
 									$covered_line[] = $line;
-								}else{
+								}else if($status != -2){
 									$uncovered_line[] = $line;
 								}
 							}

@@ -1154,7 +1154,6 @@ class Coverage{
 	 * 終了
 	 */
 	static public function stop(){
-		// TODO
 		if(is_file(self::$db) && $db = new \PDO('sqlite:'.self::$db)){
 			$db->query('begin');		
 			$target = array();
@@ -1173,7 +1172,7 @@ class Coverage{
 					foreach($lines as $line => $status){
 						if($status == 1){
 							$covered_line[] = $line;
-						}else{
+						}else if($status != -2){
 							$uncovered_line[] = $line;
 						}
 					}
@@ -1586,7 +1585,7 @@ if(extension_loaded('xdebug')){
 							foreach($lines as $line => $status){
 								if($status == 1){
 									$covered_line[] = $line;
-								}else{
+								}else if($status != -2){
 									$uncovered_line[] = $line;
 								}
 							}
