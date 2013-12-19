@@ -819,7 +819,7 @@ class Coverage{
 		if(is_file(self::$db) && $db = new \PDO('sqlite:'.self::$db)){
 			$db->query('begin');
 			foreach(xdebug_get_code_coverage() as $file_path => $lines){
-				$sql = 'select id,covered_line,ignore_line,active_len from coverage_info where file_path = ?';
+				$sql = 'select id,covered_line,ignore_line,active_len,lines from coverage_info where file_path = ?';
 				$ps = $db->prepare($sql);
 				$ps->execute(array($file_path));
 					
@@ -831,7 +831,12 @@ class Coverage{
 					$covered_line = array_merge(array_keys($lines),$covered_line);
 					$covered_line = array_unique($covered_line);
 					sort($covered_line);
-						
+
+					foreach($covered_line as $k => $line){
+						if($line > $resultset['lines'] || $line < 1){
+							unset($covered_line[$k]);
+						}
+					}
 					$covered_len = sizeof(array_diff($covered_line,$ignore_line));
 					$percent = (!empty($covered_line) && $active_len === 0) ? 100 : (($covered_len === 0) ? 0 : (floor($covered_len / $active_len * 100)));
 					if($percent > 100) $percent = 100;
@@ -1291,8 +1296,8 @@ class Output{
 			$f->addChild('covered',$resultset['covered_line']);
 			$f->addChild('ignore',$resultset['ignore_line']);
 			
-			$covered += count(explode(',',$resultset['covered_line'])) + count(explode(',',$resultset['ignore_line']));
-			$lines += $resultset['lines'];
+			$covered += count(explode(',',$resultset['covered_line']));
+			$lines += $resultset['lines'] - count(explode(',',$resultset['ignore_line']));
 		}
 		$xml->addAttribute('time',date('Y/m/d H:i:s'));
 		$xml->addAttribute('percent',ceil($covered/$lines*100));
