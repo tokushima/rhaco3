@@ -1074,6 +1074,7 @@ class Http{
 class Coverage{
 	static private $start = false;
 	static private $db;
+	static private $result = array();
 
 	/**
 	 * 実行中か
@@ -1094,14 +1095,6 @@ class Coverage{
 		return self::$db;
 	}
 	/**
-	 * dbファイルの削除
-	 */
-	static public function delete(){
-		if(is_file(self::$db)){
-			unlink(self::$db);
-		}
-	}
-	/**
 	 * 開始
 	 * @param string $savedb
 	 * @param string $lib_dir
@@ -1110,43 +1103,27 @@ class Coverage{
 	 */
 	static public function start($savedb,$lib_dir){
 		if(extension_loaded('xdebug')){
-			$exist = (is_file($savedb));
-			if(substr($lib_dir,-1) != '/') $lib_dir = $lib_dir.'/';
-				
-			if($db = new \PDO('sqlite:'.$savedb)){
-				self::$start = true;
-				self::$db = $savedb;
-
-				if(!$exist){
-					$db->query('begin');
-					$sql = 'create table coverage_info('.
-							'id integer not null primary key,'.
-							'covered_line text null,'.
-							'uncovered_line text null,'.
-							'file_path text null,'.
-							'exec integer null default 0'.
-							')';
-					if(false === $db->query($sql)) throw new \RuntimeException('failure create coverage_info table');
-					if(is_dir($lib_dir)){
-						foreach(new \RecursiveIteratorIterator(
-								new \RecursiveDirectoryIterator(
-										$lib_dir,
-										\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
-								),\RecursiveIteratorIterator::SELF_FIRST
-						) as $f){
-							if($f->isFile() &&
-							substr($f->getFilename(),-4) == '.php' &&
-							strpos($f->getPathname(),'/test/') === false &&
-							ctype_upper(substr($f->getFilename(),0,1))
-							){
-								$ps = $db->prepare('insert into coverage_info(file_path) values(?)');
-								$ps->execute(array($f->getPathname()));
-							}
-						}
+			self::$start = true;
+			self::$db = $savedb;
+			
+			$fp = fopen(self::$db.'.target','w');
+			if(is_dir($lib_dir)){
+				foreach(new \RecursiveIteratorIterator(
+						new \RecursiveDirectoryIterator(
+								$lib_dir,
+								\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+						),\RecursiveIteratorIterator::SELF_FIRST
+				) as $f){
+					if($f->isFile() &&
+					substr($f->getFilename(),-4) == '.php' &&
+					strpos($f->getPathname(),'/test/') === false &&
+					ctype_upper(substr($f->getFilename(),0,1))
+					){
+						fwrite($fp,$f->getPathname().PHP_EOL);
 					}
-					$db->query('commit');
 				}
 			}
+			fclose($fp);
 			xdebug_start_code_coverage(XDEBUG_CC_UNUSED|XDEBUG_CC_DEAD_CODE);
 		}
 	}
@@ -1154,57 +1131,55 @@ class Coverage{
 	 * 終了
 	 */
 	static public function stop(){
-		if(is_file(self::$db) && $db = new \PDO('sqlite:'.self::$db)){
-			$db->query('begin');		
-			$target = array();
-			$sql = 'select id,file_path,covered_line,uncovered_line from coverage_info';
-			$ps = $db->prepare($sql);
-			$ps->execute(array());
-			while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
-				$target[$resultset['file_path']] = $resultset;
-			}
+		if(is_file(self::$db.'.target')){
+			$target = explode(PHP_EOL,trim(file_get_contents(self::$db.'.target')));
+			$fp = fopen(self::$db.'.coverage','a');
+			
 			foreach(xdebug_get_code_coverage() as $file_path => $lines){
-				if(isset($target[$file_path])){
-					$t = $target[$file_path];
-					$covered_line = empty($t['covered_line']) ? array() : explode(',',$t['covered_line']);
-					$uncovered_line = empty($t['uncovered_line']) ? array() : explode(',',$t['uncovered_line']);
-						
-					foreach($lines as $line => $status){
-						if($status == 1){
-							$covered_line[] = $line;
-						}else if($status != -2){
-							$uncovered_line[] = $line;
-						}
-					}
-					$covered_line = array_unique($covered_line);
-					$uncovered_line = array_diff(array_unique($uncovered_line),$covered_line);
-						
-					$ps = $db->prepare('update coverage_info set covered_line=?,uncovered_line=?,exec=1 where id=?');
-					$ps->execute(array(implode(',',$covered_line),implode(',',$uncovered_line),$t['id']));
+				if(false !== ($i = array_search($file_path,$target))){
+					fwrite($fp,json_encode(array($i,$lines)).PHP_EOL);
 				}
 			}
-			$db->query('commit');
+			fclose($fp);
+			
+			foreach(explode(PHP_EOL,trim(file_get_contents(self::$db.'.coverage'))) as $json){
+				$cov = json_decode($json,true);
+				$filename = $target[$cov[0]];
+				
+				if(!isset(self::$result[$filename])){
+					self::$result[$filename] = array('covered_line_status'=>array(),'uncovered_line_status'=>array(),'exec'=>1);
+				}
+				foreach($cov[1] as $line => $status){
+					if($status == 1){
+						self::$result[$filename]['covered_line_status'][] = $line;
+					}else if($status != -2){
+						self::$result[$filename]['uncovered_line_status'][] = $line;						
+					}
+				}
+			}
+			foreach(self::$result as $filename => $cov){
+				self::$result[$filename]['covered_line'] = array_unique(self::$result[$filename]['covered_line_status']);
+				self::$result[$filename]['uncovered_line'] = array_diff(array_unique(self::$result[$filename]['uncovered_line_status']),self::$result[$filename]['covered_line']);
+				unset(self::$result[$filename]['covered_line_status']);
+				unset(self::$result[$filename]['uncovered_line_status']);
+			}
+			foreach($target as $filename){
+				if(!empty($filename) && !isset(self::$result)){
+					self::$result[$filename] = array('covered_line'=>array(),'uncovered_line'=>array(),'exec'=>0);
+				}
+			}				
 		}
 		xdebug_stop_code_coverage();
+		
+		if(is_file(self::$db.'.target')) unlink(self::$db.'.target');
+		if(is_file(self::$db.'.coverage')) unlink(self::$db.'.coverage');
 	}
 	/**
 	 * 結果取得
 	 * @return array
 	 */
 	static public function get(){
-		$list = array();
-		if(is_file(self::$db)){
-			if($db = new \PDO('sqlite:'.self::$db)){
-				$sql = 'select id,file_path,covered_line,uncovered_line,exec from coverage_info order by file_path';
-				$ps = $db->prepare($sql);
-				$ps->execute(array());
-
-				while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
-					$list[] = $resultset;
-				}
-			}
-		}
-		return $list;
+		return self::$result;
 	}
 }
 /**
@@ -1219,18 +1194,19 @@ class Output{
 		print(PHP_EOL);
 		print(\angela\Util::color_format('Coverage: '.PHP_EOL,'1;34'));
 		
-		foreach($coverage_list as $resultset){
-			$covered = count(explode(',',$resultset['covered_line']));
-			$uncovered = count(explode(',',$resultset['uncovered_line']));
-			$percent = ($resultset['exec'] == '1') ? ceil($covered / ($covered + $uncovered) * 100) : 1;
-			$color = ($resultset['exec'] == '1') ? '1;31' : '1;34';
+		foreach($coverage_list as $filename => $resultset){
+			$covered = count($resultset['covered_line']);
+			$uncovered = count($resultset['uncovered_line']);
 			
-			if($percent == 100){
+			$coverage = ($resultset['exec'] == 1) ? ceil($covered / ($covered + $uncovered) * 100) : 1;
+			$color = ($resultset['exec'] == 1) ? '1;31' : '1;34';
+			
+			if($coverage == 100){
 				$color = '1;32';
-			}else if($percent > 50){
+			}else if($coverage > 50){
 				$color = '1;33';
 			}
-			print(\angela\Util::color_format(sprintf(' %3d%% %s'.PHP_EOL,$percent,$resultset['file_path']),$color));
+			print(\angela\Util::color_format(sprintf(' %3d%% %s'.PHP_EOL,$coverage,$filename),$color));
 		}
 		print(PHP_EOL);
 	}
@@ -1243,18 +1219,17 @@ class Output{
 		$xml = new \SimpleXMLElement('<coverage></coverage>');
 		$total_covered = $total_lines = 0;
 
-		foreach($coverage_list as $resultset){
-			$covered = count(explode(',',$resultset['covered_line']));
-			$uncovered = count(explode(',',$resultset['uncovered_line']));
+		foreach($coverage_list as $filename => $resultset){
+			$covered = count($resultset['covered_line']);
+			$uncovered = count($resultset['uncovered_line']);
 			
 			$f = $xml->addChild('file');
-			$f->addAttribute('name',$resultset['file_path']);
+			$f->addAttribute('name',$filename);
 			
-			$f->addAttribute('covered',(($resultset['exec'] == '1') ? ceil($covered / ($covered + $uncovered) * 100) : 0));
-			$f->addAttribute('modify_date',date('Y/m/d H:i:s',filemtime($resultset['file_path'])));
-			
-			$f->addChild('covered_lines',$resultset['covered_line']);
-			$f->addChild('uncovered_lines',$resultset['uncovered_line']);
+			$f->addAttribute('covered',(($resultset['exec'] == 1) ? ceil($covered / ($covered + $uncovered) * 100) : 0));
+			$f->addAttribute('modify_date',date('Y/m/d H:i:s',filemtime($filename)));
+			$f->addChild('covered_lines',implode(',',$resultset['covered_line']));
+			$f->addChild('uncovered_lines',implode(',',$resultset['uncovered_line']));
 			
 			$total_covered += $covered;
 			$total_lines += $covered + $uncovered;
@@ -1265,7 +1240,6 @@ class Output{
 		$xml->addAttribute('covered_lines',$total_covered);
 		
 		return $xml->asXML();
-
 	}
 	/**
 	 * テスト結果
@@ -1514,6 +1488,34 @@ namespace{
 	}
 }
 if(count(debug_backtrace(false)) > 0){
+	if(extension_loaded('xdebug')){
+		$coverage_vars = isset($_POST['_coverage_vars_']) ? $_POST['_coverage_vars_'] : 
+							(isset($_GET['_coverage_vars_']) ? $_GET['_coverage_vars_'] : array());	
+		if(isset($_POST['_coverage_vars_'])) unset($_POST['_coverage_vars_']);
+		if(isset($_GET['_coverage_vars_'])) unset($_GET['_coverage_vars_']);
+	
+		if(isset($coverage_vars['savedb'])){
+			register_shutdown_function(function() use($coverage_vars){
+				register_shutdown_function(function() use($coverage_vars){
+					$savedb = $coverage_vars['savedb'];
+					
+					if(is_file($savedb.'.target')){
+						$target = explode(PHP_EOL,file_get_contents($savedb.'.target'));
+						$fp = fopen($savedb.'.coverage','a');
+							
+						foreach(xdebug_get_code_coverage() as $file_path => $lines){
+							if(false !== ($i = array_search($file_path,$target))){
+								fwrite($fp,json_encode(array($i,$lines)).PHP_EOL);
+							}
+						}
+						fclose($fp);
+					}				
+					xdebug_stop_code_coverage();			
+				});
+			});
+			xdebug_start_code_coverage();
+		}
+	}
 	return;
 }
 ini_set('display_errors','On');
@@ -1551,65 +1553,6 @@ for($i=0;$i<sizeof($argv);$i++){
 		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
 	}
 }
-if(isset($params['cc'])){
-	$out = substr(__FILE__,0,-4).'.cc.php';
-	file_put_contents($out,'<?'.'php'.PHP_EOL.
-<<< '_SRC_'
-if(extension_loaded('xdebug')){
-	$coverage_vars = isset($_POST['_coverage_vars_']) ? $_POST['_coverage_vars_'] : 
-						(isset($_GET['_coverage_vars_']) ? $_GET['_coverage_vars_'] : array());	
-	if(isset($_POST['_coverage_vars_'])) unset($_POST['_coverage_vars_']);
-	if(isset($_GET['_coverage_vars_'])) unset($_GET['_coverage_vars_']);
-
-	if(isset($coverage_vars['savedb']) && is_file($coverage_vars['savedb'])){
-		register_shutdown_function(function() use($coverage_vars){
-			register_shutdown_function(function() use($coverage_vars){
-				$savedb = $coverage_vars['savedb'];
-				
-				if(is_file($savedb) && $db = new \PDO('sqlite:'.$savedb)){
-					$db->query('begin');
-					$target = array();
-					$sql = 'select id,file_path,covered_line,uncovered_line from coverage_info';
-					$ps = $db->prepare($sql);
-					$ps->execute(array());
-					
-					while($resultset = $ps->fetch(\PDO::FETCH_ASSOC)){
-						$target[$resultset['file_path']] = $resultset;
-					}
-					foreach(xdebug_get_code_coverage() as $file_path => $lines){
-						if(isset($target[$file_path])){
-							$t = $target[$file_path];
-							$covered_line = empty($t['covered_line']) ? array() : explode(',',$t['covered_line']);
-							$uncovered_line = empty($t['uncovered_line']) ? array() : explode(',',$t['uncovered_line']);
-					
-							foreach($lines as $line => $status){
-								if($status == 1){
-									$covered_line[] = $line;
-								}else if($status != -2){
-									$uncovered_line[] = $line;
-								}
-							}
-							$covered_line = array_unique($covered_line);
-							$uncovered_line = array_diff(array_unique($uncovered_line),$covered_line);
-					
-							$ps = $db->prepare('update coverage_info set covered_line=?,uncovered_line=?,exec=1 where id=?');
-							$ps->execute(array(implode(',',$covered_line),implode(',',$uncovered_line),$t['id']));
-						}
-					}
-					$db->query('commit');
-				}
-				xdebug_stop_code_coverage();			
-			});
-		});
-		xdebug_start_code_coverage();
-	}
-}
-_SRC_
-	);
-	print('output: '.$out.PHP_EOL);
-	exit;
-}
-
 $rootdir = (basename(__DIR__) == 'test') ? dirname(__DIR__) : __DIR__;
 $conf = array();
 
@@ -1667,8 +1610,6 @@ if(!empty($coverage)){
 	$output_obj->coverage(\angela\Coverage::get());
 	file_put_contents($coverage, $output_obj->xml_coverage(\angela\Coverage::get()));
 	print(\angela\Util::color_format('Written XML: '.$coverage.' ','1;34').PHP_EOL);
-	
-	\angela\Coverage::delete();
 }
 exit(\angela\Runner::has_exception() ? 1 : 0);
 }
