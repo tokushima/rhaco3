@@ -4,12 +4,12 @@ date_default_timezone_set('Asia/Tokyo');
 \org\rhaco\Conf::set(array(
 	'org.rhaco.store.db.Dao'=>array(
 		'connection'=>array(
-			'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root'),
-			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root'),
-			'org.rhaco.store.queue.module.Dao.QueueDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root'),
+			'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
+			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
+			'org.rhaco.store.queue.module.Dao.QueueDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
 			'org.rhaco.store.db.Dao.CrossChild'=>array(),
-			'test.model.CrossChild'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root'),
-			'test.model'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'app','user'=>'root','password'=>'root'),
+			'test.model.CrossChild'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
+			'test.model'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
 				
 //			'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local_session.db','host'=>dirname(__DIR__)),
 //			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local.db','host'=>dirname(__DIR__)),

@@ -647,17 +647,17 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		if(is_file($this->coverage_file()) && \org\rhaco\Xml::set($xml,file_get_contents($this->coverage_file()),'coverage')){
 			$percent_total = 0;
 			$time = $xml->in_attr('time');
+			$coverage = $xml->in_attr('percent');
 				
 			foreach($xml->in('file') as $file){
 				$name = $file->in_attr('name');
 				$percent = $file->in_attr('percent');
 				$percent_total += $percent;
-				$covered_list[$name] = array('percent'=>$percent,'status'=>($percent == 100 ? 'perfect' : (($percent >= 50) ? 'more' : 'bad')));
+				$covered_list[$name] = array('percent'=>$percent,'status'=>($percent == 100 ? 'perfect' : (($percent >= 50) ? 'more' : (($percent == 0) ? 'zero' : 'bad'))));
 			}
-			$coverage = $percent_total/count($covered_list);
 		}
 		$this->vars('covered_list',$covered_list);
-		$this->vars('coverage',ceil($coverage));
+		$this->vars('coverage',$coverage);
 		$this->vars('time',$time);
 	}
 	/**

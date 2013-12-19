@@ -747,6 +747,7 @@ class Coverage{
 							'covered_line text null,'.
 							'ignore_line text,'.
 							'active_len integer,'.
+							'lines integer,'.
 							'file_path text null,'.
 							'percent integer'.
 							')';
@@ -797,10 +798,11 @@ class Coverage{
 								}
 								$ignore_line = array_unique($ignore_line);
 								sort($ignore_line);
-								$active_len = empty($src) ? 0 : (substr_count($src,PHP_EOL) - sizeof($ignore_line) + 1);
+								$lines = empty($src) ? 0 : substr_count($src,PHP_EOL) + 1;
+								$active_len = empty($src) ? 0 : ($lines - sizeof($ignore_line) + 1);
 									
-								$ps = $db->prepare('insert into coverage_info(file_path,ignore_line,active_len,percent) values(?,?,?,?)');
-								$ps->execute(array($f->getPathname(),implode(',',$ignore_line),$active_len,0));
+								$ps = $db->prepare('insert into coverage_info(file_path,ignore_line,active_len,lines,percent) values(?,?,?,?,?)');
+								$ps->execute(array($f->getPathname(),implode(',',$ignore_line),$active_len,$lines,0));
 							}
 						}
 					}
@@ -850,7 +852,7 @@ class Coverage{
 		$list = array();
 		if(is_file(self::$db)){
 			if($db = new \PDO('sqlite:'.self::$db)){
-				$sql = 'select file_path,percent,covered_line,ignore_line from coverage_info order by file_path';
+				$sql = 'select file_path,percent,covered_line,ignore_line,lines from coverage_info order by file_path';
 				$ps = $db->prepare($sql);
 				$ps->execute();
 	
@@ -1277,17 +1279,26 @@ class Output{
 	 */
 	public function xml_coverage($coverage_list){
 		$xml = new \SimpleXMLElement('<coverage></coverage>');
-		$xml->addAttribute('time',date('Y/m/d H:i:s'));
+		$covered = $lines = 0;
 
 		foreach($coverage_list as $resultset){
 			$f = $xml->addChild('file');
 			$f->addAttribute('name',$resultset['file_path']);
 			$f->addAttribute('percent',$resultset['percent']);
 			$f->addAttribute('modify_date',date('Y/m/d H:i:s',filemtime($resultset['file_path'])));
+			$f->addAttribute('lines',$resultset['lines']);			
 			
 			$f->addChild('covered',$resultset['covered_line']);
-			$f->addChild('ignore',$resultset['ignore_line']);			
+			$f->addChild('ignore',$resultset['ignore_line']);
+			
+			$covered += count(explode(',',$resultset['covered_line'])) + count(explode(',',$resultset['ignore_line']));
+			$lines += $resultset['lines'];
 		}
+		$xml->addAttribute('time',date('Y/m/d H:i:s'));
+		$xml->addAttribute('percent',ceil($covered/$lines*100));
+		$xml->addAttribute('lines',$lines);
+		$xml->addAttribute('covered',$covered);
+		
 		return $xml->asXML();
 	}
 	/**
