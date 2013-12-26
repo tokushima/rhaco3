@@ -19,10 +19,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		
 		$this->vars('app_mode',\org\rhaco\Conf::appmode());
 		$this->vars('f',new Dt\Helper());
-		$this->vars('has_coverage',is_file($this->coverage_file()));
-	}
-	private function coverage_file(){
-		return getcwd().'/test/coverage.xml';
+		$this->vars('has_coverage',function_exists('xdebug_get_code_coverage'));
+		$this->vars('has_profile',function_exists('xhprof_enable'));
 	}
 	public function get_template_modules(){
 		return array(
@@ -636,15 +634,42 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		return $urls;
 	}
+	
+	private function file_list($dir,$reg){
+		$result = array();		
+		if(is_dir($dir)){
+			$it = new \RecursiveDirectoryIterator($dir,
+					\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
+			);
+			$it = new \RecursiveIteratorIterator($it,\RecursiveIteratorIterator::SELF_FIRST);
+			$it = new \RegexIterator($it,$reg);
+		
+			foreach($it as $f){
+				$result[$f->getPathname()] = $f;
+			}
+		}
+		return $result;
+	}
 	/**
 	 * @automap
 	 */
 	public function coverage(){
+		$dir = \org\rhaco\Conf::get('test_result_dir',\org\rhaco\io\File::work_path('test_output'));
+		$target_list = $this->file_list($dir,'/\.coverage\.xml$/');
+		
+		$target = null;
 		$covered_list = array();
 		$total_covered = 0;
 		$time = null;
 	
-		if(is_file($this->coverage_file()) && \org\rhaco\Xml::set($xml,file_get_contents($this->coverage_file()),'coverage')){
+		$target = $this->in_vars('target');
+		if(empty($target)){
+			foreach($target_list as $path => $f){
+				$target = $path;
+				break;
+			}
+		}		
+		if(!empty($target) && is_file($target) && \org\rhaco\Xml::set($xml,file_get_contents($target),'coverage')){
 			$covered_total = 0;
 			$time = $xml->in_attr('time');
 			$total_covered = $xml->in_attr('covered');
@@ -655,6 +680,8 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 				$covered_list[$name] = array('covered'=>$covered,'status'=>($covered == 100 ? 'perfect' : (($covered >= 50) ? 'more' : (($covered == 0) ? 'zero' : 'bad'))));
 			}
 		}
+		$this->vars('target',$target);
+		$this->vars('target_list',$target_list);
 		$this->vars('covered_list',$covered_list);
 		$this->vars('covered',$total_covered);
 		$this->vars('time',$time);
@@ -663,6 +690,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function covered(){
+		$target = $this->in_vars('target');
 		$filename = $this->in_vars('filename');
 		$source = file($filename);
 		$modify_date = date('Y/m/d H:i:s',filemtime($filename));
@@ -673,7 +701,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		for($i=1;$i<=count($source);$i++){
 			$status[$i] = 'ignore';
 		}
-		if(is_file($this->coverage_file()) && \org\rhaco\Xml::set($xml,file_get_contents($this->coverage_file()),'coverage')){
+		if(is_file($target) && \org\rhaco\Xml::set($xml,file_get_contents($target),'coverage')){
 			foreach($xml->in('file') as $file){
 				if($file->in_attr('name') == $filename){
 					foreach(explode(',',$file->f('covered_lines.value()')) as $line){
@@ -695,5 +723,61 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('modify_date',$modify_date);
 		$this->vars('coverage_modify_date',$coverage_modify_date);
 		$this->vars('covered',$covered);
+	}
+	/**
+	 * @automap
+	 */
+	public function profile_list(){
+		$dir = \org\rhaco\Conf::get('test_output_dir',\org\rhaco\io\File::work_path('test_output'));
+		$profile_list = $this->file_list($dir,'/\.xhprof$/');
+		
+		usort($profile_list,function($a,$b){
+			return ($a->getMTime() > $b->getMTime()) ? -1 : 1;
+		});
+		$this->vars('profile_list',$profile_list);
+	}
+	/**
+	 * @automap
+	 */
+	public function profile(){
+		$result = $children = array();
+		$target = $this->in_vars('target');
+		$func = $this->in_vars('func','main()');
+		$total = 0;
+		$order = $this->in_vars('order','wt');
+		
+		if(is_file($target)){
+			$value = unserialize(file_get_contents($target));
+			foreach($value as $exe => $info){
+				if(strpos($exe,'==>') !== false){
+					list($base,$call) = explode('==>',$exe);
+					if($base == $func){
+						$result[$call] = $info;
+					}else{
+						if(!isset($children[$base])) $children[$base] = 0;
+						$children[$base] += $info['wt'];
+					}
+				}else{
+					if(!isset($children[$exe])) $children[$exe] = 0;
+					$children[$exe] += $info['wt'];
+				}
+			}
+			foreach($result as $call => $info){
+				$info['name'] = $call;
+				$info['time'] = round($info['wt'] / $info['ct']);
+				$info['children'] = isset($children[$call]);
+				$total += $info['wt'];
+				
+				$result[$call] = $info;
+			}
+		}
+		usort($result,function($a,$b) use($order){
+			return ($a[$order] > $b[$order]) ? -1 : 1;
+		});
+		
+		$this->vars('total',$total);
+		$this->vars('func',$func);
+		$this->vars('target',$target);
+		$this->vars('func_list',$result);
 	}
 }

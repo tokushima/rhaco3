@@ -9,8 +9,9 @@ class Conf{
 	static private $test_dir;
 	static private $lib_dir;
 
-	static private $urls;
+	static private $urls = array();
 	static private $setup_func;
+	static private $vars = array();
 
 	static private $ini_error_log = null;
 	static private $ini_error_log_start_size = 0;
@@ -82,6 +83,7 @@ class Conf{
 		if(isset($params['setup_func'])){
 			self::$setup_func = $params['setup_func'];
 		}
+		return $params;
 	}
 	/**
 	 * 設定情報表示
@@ -160,6 +162,14 @@ class Conf{
 		if(isset(self::$setup_func)){
 			call_user_func(self::$setup_func);
 		}
+	}
+	static public function has_vars(&$vars){
+		if(empty(self::$vars)) return false;
+		$vars = self::$vars;
+		return true;
+	}
+	static public function set_vars($key,$val){
+		self::$vars[$key] = $val;
 	}
 }
 /**
@@ -881,7 +891,8 @@ class Http{
 		if(!isset($this->resource)) $this->resource = curl_init();
 		$url_info = parse_url($url);
 		$cookie_base_domain = (isset($url_info['host']) ? $url_info['host'] : '').(isset($url_info['path']) ? $url_info['path'] : '');
-		if(\angela\Coverage::has_started($vars)) $this->request_vars['_coverage_vars_'] = $vars;
+		// TODO
+		if(\angela\Conf::has_vars($vars)) $this->request_vars['_angela_vars_'] = $vars;
 		
 		if(isset($url_info['query'])){
 			parse_str($url_info['query'],$vars);
@@ -1003,7 +1014,7 @@ class Http{
 			list($url,$query) = explode('?',$this->url,2);
 			if(!empty($query)){
 				parse_str($query,$vars);
-				if(isset($vars['_coverage_vars_'])) unset($vars['_coverage_vars_']);
+				if(isset($vars['_angela_vars_'])) unset($vars['_angela_vars_']);
 				if(!empty($vars)){
 					$url = $url.'?'.http_build_query($vars);
 				}
@@ -1077,18 +1088,6 @@ class Coverage{
 	static private $result = array();
 
 	/**
-	 * 実行中か
-	 * @param array $vars
-	 * @return boolean
-	 */
-	static public function has_started(&$vars){
-		if(self::$start){
-			$vars['savedb'] = self::$db;
-			return true;
-		}
-		return false;
-	}
-	/**
 	 * 実行中のdbファイルパス
 	 */
 	static public function db(){
@@ -1105,6 +1104,7 @@ class Coverage{
 		if(extension_loaded('xdebug')){
 			self::$start = true;
 			self::$db = $savedb;
+			\angela\Conf::set_vars('savedb',self::$db);
 			
 			$fp = fopen(self::$db.'.target','w');
 			if(is_dir($lib_dir)){
@@ -1413,6 +1413,77 @@ class Output{
  * main
  */
 namespace{
+if(count(debug_backtrace(false)) > 0){
+	$angela_vars = isset($_POST['_angela_vars_']) ?
+	$_POST['_angela_vars_'] :
+	(isset($_GET['_angela_vars_']) ? $_GET['_angela_vars_'] : array());
+	if(isset($_POST['_angela_vars_'])) unset($_POST['_angela_vars_']);
+	if(isset($_GET['_angela_vars_'])) unset($_GET['_angela_vars_']);
+
+	if(function_exists('xdebug_get_code_coverage') && isset($angela_vars['savedb'])){
+		register_shutdown_function(function() use($angela_vars){
+			register_shutdown_function(function() use($angela_vars){
+				$savedb = $angela_vars['savedb'];
+					
+				if(is_file($savedb.'.target')){
+					$target = explode(PHP_EOL,file_get_contents($savedb.'.target'));
+					$fp = fopen($savedb.'.coverage','a');
+
+					foreach(xdebug_get_code_coverage() as $file_path => $lines){
+						if(false !== ($i = array_search($file_path,$target))){
+							fwrite($fp,json_encode(array($i,$lines)).PHP_EOL);
+						}
+					}
+					fclose($fp);
+				}
+				xdebug_stop_code_coverage();
+			});
+		});
+		xdebug_start_code_coverage();
+	}
+	if(function_exists('xhprof_enable') && isset($angela_vars['profile_output'])){
+		register_shutdown_function(function() use($angela_vars){
+			$xhprof_data = xhprof_disable();
+			$prof_file = $angela_vars['profile_output'].'.'.str_replace('.','',str_replace('/','-',substr($_SERVER['PHP_SELF'],1))).'.xhprof';
+			file_put_contents($prof_file,serialize($xhprof_data));
+		});
+		xhprof_enable();
+	}
+	return;
+}
+$params = array();
+$argv = array_slice($_SERVER['argv'],1);
+$value = (empty($argv)) ? null : array_shift($argv);
+
+if(substr($value,0,1) == '-'){
+	array_unshift($argv,$value);
+	$value = null;
+}
+for($i=0;$i<sizeof($argv);$i++){
+	if($argv[$i][0] == '-'){
+		$k = str_replace('-','_',substr($argv[$i],($argv[$i][1] == '-') ? 2 : 1));
+		$v = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
+		if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
+		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
+	}
+}
+ini_set('display_errors','On');
+ini_set('html_errors','Off');
+ini_set('error_reporting',E_ALL);
+ini_set('xdebug.var_display_max_children',-1);
+ini_set('xdebug.var_display_max_data',-1);
+ini_set('xdebug.var_display_max_depth',-1);
+
+if(ini_get('date.timezone') == ''){
+	date_default_timezone_set('Asia/Tokyo');
+}
+if(extension_loaded('mbstring')){
+	if('neutral' == mb_language()) mb_language('Japanese');
+	mb_internal_encoding('UTF-8');
+}
+set_error_handler(function($n,$s,$f,$l){
+	throw new \ErrorException($s,0,$n,$f,$l);
+});
 /**
  * 検証用メソッドの省略関数
  */
@@ -1487,72 +1558,6 @@ namespace{
 		return new \angela\Http($agent,$timeout,$redirect_max);
 	}
 }
-if(count(debug_backtrace(false)) > 0){
-	if(extension_loaded('xdebug')){
-		$coverage_vars = isset($_POST['_coverage_vars_']) ? $_POST['_coverage_vars_'] : 
-							(isset($_GET['_coverage_vars_']) ? $_GET['_coverage_vars_'] : array());	
-		if(isset($_POST['_coverage_vars_'])) unset($_POST['_coverage_vars_']);
-		if(isset($_GET['_coverage_vars_'])) unset($_GET['_coverage_vars_']);
-	
-		if(isset($coverage_vars['savedb'])){
-			register_shutdown_function(function() use($coverage_vars){
-				register_shutdown_function(function() use($coverage_vars){
-					$savedb = $coverage_vars['savedb'];
-					
-					if(is_file($savedb.'.target')){
-						$target = explode(PHP_EOL,file_get_contents($savedb.'.target'));
-						$fp = fopen($savedb.'.coverage','a');
-							
-						foreach(xdebug_get_code_coverage() as $file_path => $lines){
-							if(false !== ($i = array_search($file_path,$target))){
-								fwrite($fp,json_encode(array($i,$lines)).PHP_EOL);
-							}
-						}
-						fclose($fp);
-					}				
-					xdebug_stop_code_coverage();			
-				});
-			});
-			xdebug_start_code_coverage();
-		}
-	}
-	return;
-}
-ini_set('display_errors','On');
-ini_set('html_errors','Off');
-ini_set('error_reporting',E_ALL);
-ini_set('xdebug.var_display_max_children',-1);
-ini_set('xdebug.var_display_max_data',-1);
-ini_set('xdebug.var_display_max_depth',-1);
-
-if(ini_get('date.timezone') == ''){
-	date_default_timezone_set('Asia/Tokyo');
-}
-if(extension_loaded('mbstring')){
-	if('neutral' == mb_language()) mb_language('Japanese');
-	mb_internal_encoding('UTF-8');
-}
-set_error_handler(function($n,$s,$f,$l){
-	throw new \ErrorException($s,0,$n,$f,$l);
-});
-
-$params = array();
-$conf = array();
-$argv = array_slice($_SERVER['argv'],1);
-$value = (empty($argv)) ? null : array_shift($argv);
-
-if(substr($value,0,1) == '-'){
-	array_unshift($argv,$value);
-	$value = null;
-}
-for($i=0;$i<sizeof($argv);$i++){
-	if($argv[$i][0] == '-'){
-		$k = str_replace('-','_',substr($argv[$i],($argv[$i][1] == '-') ? 2 : 1));
-		$v = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
-		if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
-		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
-	}
-}
 $rootdir = (basename(__DIR__) == 'test') ? dirname(__DIR__) : __DIR__;
 $conf = array();
 
@@ -1563,30 +1568,39 @@ if(is_file($f=$rootdir.'/bootstrap.php') || is_file($f=$rootdir.'/vendor/autoloa
 	ob_end_clean();
 }
 // test init
-\angela\Conf::init($rootdir,$params,substr(__FILE__,0,-4).'.conf.php');
-\angela\Conf::info(isset($value));
-
+$params = \angela\Conf::init($rootdir,$params,substr(__FILE__,0,-4).'.conf.php');
 /**
  * Help
  */
 if(isset($params['h']) || isset($params['help'])){
 	print('usage: php '.basename(__FILE__).' [-t target] [-m method] [-b block] [-c coverage.xml] [-o result.xml]'.PHP_EOL);
-	print('       php '.basename(__FILE__).' --cc'.PHP_EOL);
 	print('       php '.basename(__FILE__).' --help'.PHP_EOL);
 	print(PHP_EOL);
 	exit;
 }
 
-
 $value = (isset($params['t']) ? $params['t'] : $value);
-$coverage = isset($params['c']) ? \angela\Util::absolute(getcwd(),(empty($params['c']) ? (__DIR__.'/coverage.xml') : $params['c'])) : null;
+$uniqid = date('YmdHis');
+$basedir = isset($params['output_dir']) ? $params['output_dir'] : __DIR__;
+if(substr($basedir,0,-1) != '/') $basedir = $basedir.'/';
+
+$output = isset($params['o']) ? (empty($params['o']) ? ($basedir.$uniqid.'.result.xml') : \angela\Util::absolute(getcwd(),$params['o'])) : null;
+$coverage = isset($params['c']) ? (empty($params['c']) ? ($basedir.$uniqid.'.coverage.xml') : \angela\Util::absolute(getcwd(),$params['c'])) : null;
+$profile_dir = isset($params['p']) ? (empty($params['p']) ? $basedir : \angela\Util::absolute(getcwd(),$params['p'])) : null;
 
 if(!empty($coverage)){
-	if(!extension_loaded('xdebug')) die('xdebug extension not loaded'.PHP_EOL);
+	if(!function_exists('xdebug_get_code_coverage')) die('xdebug extension not loaded'.PHP_EOL);
+	if(!is_dir(dirname($coverage))) mkdir(dirname($coverage),0777,true);
+	
 	file_put_contents($coverage,'');
-	$db = dirname($coverage).'/'.microtime(true).'.coverage.db';
-	\angela\Coverage::start($db,\angela\Conf::lib_dir());
+	\angela\Coverage::start($coverage,\angela\Conf::lib_dir());
 }
+if(!empty($profile_dir)){
+	if(!function_exists('xhprof_enable')) die('xhprof extension not loaded'.PHP_EOL);
+	if(!is_dir($profile_dir)) mkdir($profile_dir,0777,true);
+	\angela\Conf::set_vars('profile_output',$profile_dir.$uniqid);
+}
+\angela\Conf::info(isset($value));
 if(!empty($value)){
 	\angela\Runner::varidate(
 			$value
@@ -1599,10 +1613,11 @@ if(!empty($value)){
 }
 $output_obj = new \angela\Output();
 $output_obj->result(\angela\Runner::get(),\angela\Conf::error_log());
-if(isset($params['o']) && !empty($params['o'])){
-	$filename = \angela\Util::absolute(getcwd(),$params['o']);
-	file_put_contents($filename, $output_obj->xml_result(\angela\Runner::get(),\angela\Conf::error_log()));
-	print(\angela\Util::color_format('Written XML: '.$filename.' ','1;34').PHP_EOL);
+
+if(!empty($output)){
+	if(!is_dir(dirname($output))) mkdir(dirname($output),0777,true);
+	file_put_contents($output,$output_obj->xml_result(\angela\Runner::get(),\angela\Conf::error_log()));
+	print(\angela\Util::color_format('Written XML: '.$output.' ','1;34').PHP_EOL);
 }
 if(!empty($coverage)){
 	\angela\Coverage::stop();

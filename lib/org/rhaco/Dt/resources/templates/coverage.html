@@ -2,7 +2,17 @@
 
 <rt:block name="content">
 <h2>Coverage ({$covered}%)</h2>
-{$time}
+<div>{$time}  {$target}</div>
+
+<form style="margin-top: 30px;">
+<div class="input-append">
+	<select name="target" class="span4">
+		<rt:loop param="target_list" var="target">
+			<option value="{$target.getPathname()}">{$target.getFilename()}</option>
+		</rt:loop>
+	</select>
+	<button class="btn" type="submit">Select</button>
+</div>
 
 <table rt:param="{$covered_list}" rt:var="coverage" rt:key="filename">
 <thead>
@@ -13,10 +23,12 @@
 </thead>
 <tbody>
 	<tr>
-		<td><a href="{$t.package_method_url('covered')}?filename={$filename}" class="coverage-{$coverage['status']}">{$filename}</a></td>
+		<td><a href="{$t.package_method_url('covered')}?filename={$filename}&target={$target}" class="coverage-{$coverage['status']}">{$filename}</a></td>
 		<td style="text-align: right;"><span class="coverage-{$coverage['status']}">{$coverage['covered']}%</span></td>
 	</tr>
 </tbody>
 </table>
+
+</form>
 </rt:block>
 

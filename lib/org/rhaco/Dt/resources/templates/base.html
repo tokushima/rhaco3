@@ -49,16 +49,20 @@
 
 			<ul class="nav">
 				<li class="{$t.endswith_pattern_switch('index','active','inactive')}"><a href="{$t.package_method_url('index')}">Urls</a></li>
+				<li class="{$t.endswith_pattern_switch('mail_list','active','inactive')}"><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
 				<li class="{$t.endswith_pattern_switch('explorer','active','inactive')}"><a href="{$t.package_method_url('explorer')}">Explorer</a></li>
 				
 				<li class="{$t.endswith_pattern_switch('class_list','active','inactive')}"><a href="{$t.package_method_url('class_list')}">Classes</a></li>
-				<li class="{$t.endswith_pattern_switch('model_list','active','inactive')}"><a href="{$t.package_method_url('model_list')}">Models</a></li>
-				<li class="{$t.endswith_pattern_switch('mail_list','active','inactive')}"><a href="{$t.package_method_url('mail_list')}">Mail</a></li>
 
+
+				<li class="{$t.endswith_pattern_switch('model_list','active','inactive')}"><a href="{$t.package_method_url('model_list')}">Models</a></li>
+				
 				<rt:if param="{$has_coverage}">
 					<li class="{$t.endswith_pattern_switch('coverage','active','inactive')}"><a href="{$t.package_method_url('coverage')}">Coverage</a></li>
-				</rt:if>				
-
+				</rt:if>
+				<rt:if param="{$has_profile}">
+					<li class="{$t.endswith_pattern_switch('profile_list','active','inactive')}"><a href="{$t.package_method_url('profile_list')}">Profile</a></li>
+				</rt:if>
 
 				<rt:if param="{$t.is_login()}">
 					<li class="{$t.endswith_pattern_switch('do_logout','active','inactive')}"><a href="{$t.package_method_url('do_logout')}">Logout</a></li>
