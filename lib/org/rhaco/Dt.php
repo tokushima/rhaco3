@@ -657,18 +657,14 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$dir = \org\rhaco\Conf::get('test_result_dir',\org\rhaco\io\File::work_path('test_output'));
 		$target_list = $this->file_list($dir,'/\.coverage\.xml$/');
 		
-		$target = null;
+		usort($target_list,function($a,$b){
+			return ($a->getMTime() > $b->getMTime()) ? -1 : 1;
+		});
 		$covered_list = array();
 		$total_covered = 0;
 		$time = null;
-	
-		$target = $this->in_vars('target');
-		if(empty($target)){
-			foreach($target_list as $path => $f){
-				$target = $path;
-				break;
-			}
-		}		
+		$target = (!$this->is_vars('target') && !empty($target_list)) ? $target_list[0] : $this->in_vars('target');
+
 		if(!empty($target) && is_file($target) && \org\rhaco\Xml::set($xml,file_get_contents($target),'coverage')){
 			$covered_total = 0;
 			$time = $xml->in_attr('time');

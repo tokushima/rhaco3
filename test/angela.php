@@ -891,7 +891,6 @@ class Http{
 		if(!isset($this->resource)) $this->resource = curl_init();
 		$url_info = parse_url($url);
 		$cookie_base_domain = (isset($url_info['host']) ? $url_info['host'] : '').(isset($url_info['path']) ? $url_info['path'] : '');
-		// TODO
 		if(\angela\Conf::has_vars($vars)) $this->request_vars['_angela_vars_'] = $vars;
 		
 		if(isset($url_info['query'])){
@@ -1463,6 +1462,11 @@ for($i=0;$i<sizeof($argv);$i++){
 	if($argv[$i][0] == '-'){
 		$k = str_replace('-','_',substr($argv[$i],($argv[$i][1] == '-') ? 2 : 1));
 		$v = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
+		if($v == '' && $argv[$i][1] != '-'){
+			for($j=0;$j<strlen($k);$j++){
+				if(!array_key_exists($k[$j],$params)) $params[$k[$j]] = $v;
+			}
+		}
 		if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
 		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
 	}
