@@ -667,7 +667,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 
 		if(!empty($target) && is_file($target) && \org\rhaco\Xml::set($xml,file_get_contents($target),'coverage')){
 			$covered_total = 0;
-			$time = $xml->in_attr('time');
+			$create_date = $xml->in_attr('create_date');
 			$total_covered = $xml->in_attr('covered');
 				
 			foreach($xml->in('file') as $file){
@@ -680,7 +680,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('target_list',$target_list);
 		$this->vars('covered_list',$covered_list);
 		$this->vars('covered',$total_covered);
-		$this->vars('time',$time);
+		$this->vars('create_date',$create_date);
 	}
 	/**
 	 * @automap

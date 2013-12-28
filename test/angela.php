@@ -182,7 +182,7 @@ class Util{
 	 * @param string $b
 	 * @return string
 	 */
-	static public function absolute($a,$b){
+	static public function absolute($a,$b=null){
 		$a = str_replace("\\",'/',$a);
 		if($b === '' || $b === null) return $a;
 		$b = str_replace("\\",'/',$b);
@@ -1233,7 +1233,7 @@ class Output{
 			$total_covered += $covered;
 			$total_lines += $covered + $uncovered;
 		}
-		$xml->addAttribute('time',date('Y/m/d H:i:s'));
+		$xml->addAttribute('create_date',date('Y/m/d H:i:s'));
 		$xml->addAttribute('covered',ceil($total_covered/$total_lines*100));
 		$xml->addAttribute('lines',$total_lines);
 		$xml->addAttribute('covered_lines',$total_covered);
@@ -1334,11 +1334,6 @@ class Output{
 		
 		$count = $success = $fail = $none = $exception = $alltime = 0;
 		foreach($result_list as $file => $f){
-			
-			$case = $xml->addChild('testsuite');
-			$case->addAttribute('name',$file);
-			$case->addAttribute('file',$file);
-		
 			foreach($f as $method => $info_list){
 				foreach($info_list as $info){
 					$time = $info[1];
@@ -1353,7 +1348,7 @@ class Output{
 						case 'success':
 							$success++;
 	
-							$x = $case->addChild('testcase');
+							$x = $xml->addChild('testcase');
 							$x->addAttribute('name',$method);
 							$x->addAttribute('file',$file);
 							$x->addAttribute('time',$time);
@@ -1365,7 +1360,7 @@ class Output{
 								var_dump($r2);
 							$failure_value = 'Line. '.$line.': '."\n".ob_get_clean();
 	
-							$x = $case->addChild('testcase');
+							$x = $xml->addChild('testcase');
 							$x->addAttribute('name',$method);
 							$x->addAttribute('file',$file);
 							$x->addAttribute('time',$time);
@@ -1379,7 +1374,7 @@ class Output{
 							list($file,$line,$pos,$msg) = $info[2];
 							$error_value = 'Line. '.$line.': '.$msg;
 	
-							$x = $case->addChild('testcase');
+							$x = $xml->addChild('testcase');
 							$x->addAttribute('name',$method);
 							$x->addAttribute('file',$file);
 							$x->addAttribute('time',$time);
@@ -1400,6 +1395,7 @@ class Output{
 		$xml->addAttribute('errors',$exception);
 		$xml->addAttribute('skipped',$none);
 		$xml->addAttribute('time',$alltime);
+		$xml->addAttribute('create_date',date('Y/m/d H:i:s'));
 		$xml->addChild('system-out');
 		$xml->addChild('system-err',$system_err);
 
@@ -1462,13 +1458,13 @@ for($i=0;$i<sizeof($argv);$i++){
 	if($argv[$i][0] == '-'){
 		$k = str_replace('-','_',substr($argv[$i],($argv[$i][1] == '-') ? 2 : 1));
 		$v = (isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : '';
+		if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
+		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
 		if($v == '' && $argv[$i][1] != '-'){
 			for($j=0;$j<strlen($k);$j++){
 				if(!array_key_exists($k[$j],$params)) $params[$k[$j]] = $v;
 			}
 		}
-		if(isset($params[$k]) && !is_array($params[$k])) $params[$k] = array($params[$k]);
-		$params[$k] = (isset($params[$k])) ? array_merge($params[$k],array($v)) : $v;
 	}
 }
 ini_set('display_errors','On');
