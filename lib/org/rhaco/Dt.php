@@ -156,7 +156,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			}
 			$c = new \org\rhaco\Object();
 			$c->summary = $summary;
-			$c->usemail = (strpos($src,'\org'.'\rhaco'.'\net'.'\mail'.'\Mail') !== false);
 			$libs[$package] = $c;
 		}
 		ksort($libs);

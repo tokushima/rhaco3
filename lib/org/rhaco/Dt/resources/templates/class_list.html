@@ -8,18 +8,12 @@
 	<tr>
 		<th class="span3">package</th>
 		<th>summary</th>
-		<th class="span1">&nbsp;</th>
 	</tr>
 </thead>
 <tbody>
 	<tr>
 		<td><a href="{$t.package_method_url('class_doc',$package)}">{$package}</a></td>
 		<td>{$t.html($c.summary())}</td>
-		<td>
-			<rt:if param="{$c.usemail()}">
-				<span class="label success">mail</span>
-			</rt:if>
-		</td>
 	</tr>
 </tbody>
 </table>
