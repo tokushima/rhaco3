@@ -1334,60 +1334,64 @@ class Output{
 	 */
 	static public function xml_result($result_list,$system_err){
 		$xml = new \SimpleXMLElement('<testsuites></testsuites>');
-		if(!empty($name)) $xml->addAttribute('name',$name);
-		
+		if(!empty($name)) $xml->addAttribute('name',$name);		
 		$count = $success = $fail = $none = $exception = $alltime = 0;
+		
+		$get_testsuite = function($file,&$testsuite) use($xml){
+			if(empty($testsuite)){
+				$testsuite = $xml->addChild('testsuite');
+				$testsuite->addAttribute('name',$file);				
+			}
+			return $testsuite;
+		};
 		foreach($result_list as $file => $f){
+			$testsuite = null;
+			$mcount = $msuccess = $mfail = $mnone = $mexception = $malltime = 0;
+						
 			foreach($f as $method => $info_list){
 				foreach($info_list as $info){
 					$time = $info[1];
 					$name = $info[3];
 					$start_line = $info[4];
-					$alltime += $time;
-					$count++;
-					
+					$mcount++;
+					$malltime += $time;
+										
 					switch($info[0]){
 						case 'none':
-							$none++;
+							$mnone++;
 							break;
 						case 'success':
-							$success++;
-	
-							$x = $xml->addChild('testcase');
-							$x->addAttribute('name',$method);
-							$x->addAttribute('file',$file);
+							$msuccess++;
+							
+							$x = $get_testsuite($file,$testsuite)->addChild('testcase');
+							$x->addAttribute('name',$method.(empty($start_line) ? '' : '#'.$start_line));
 							$x->addAttribute('time',$time);
-							$x->addAttribute('start_line',$start_line);
 							break;
 						case 'fail':
-							$fail++;
+							$mfail++;
 							list($file,$line,$r1,$r2) = $info[2];
-							ob_start();
-								var_dump($r2);
-							$failure_value = 'Line. '.$line.': '."\n".ob_get_clean();
-	
-							$x = $xml->addChild('testcase');
-							$x->addAttribute('name',$method);
-							$x->addAttribute('file',$file);
+							
+							$x = $get_testsuite($file,$testsuite)->addChild('testcase');
+							$x->addAttribute('name',$method.(empty($start_line) ? '' : '#'.$start_line));
 							$x->addAttribute('time',$time);
-							$x->addAttribute('start_line',$start_line);
 							$x->addAttribute('line',$line);
 							
+							ob_start();
+							var_dump($r2);
+							$failure_value = 'Line. '.$line.': '."\n".ob_get_clean();
 							$failure = dom_import_simplexml($x->addChild('failure'));
 							$failure->appendChild($failure->ownerDocument->createCDATASection($failure_value));
 							break;
 						case 'exception':
-							$exception++;
+							$mexception++;
 							list($file,$line,$pos,$msg) = $info[2];
-							$error_value = 'Line. '.$line.': '.$msg;
-	
-							$x = $xml->addChild('testcase');
-							$x->addAttribute('name',$method);
-							$x->addAttribute('file',$file);
+							
+							$x = $get_testsuite($file,$testsuite)->addChild('testcase');
+							$x->addAttribute('name',$method.(empty($start_line) ? '' : '#'.$start_line));
 							$x->addAttribute('time',$time);
-							$x->addAttribute('start_line',$start_line);
 							$x->addAttribute('line',$line);
-	
+							
+							$error_value = 'Line. '.$line.': '.$msg;
 							$error = $x->addChild('error');
 							$error->addAttribute('line',$line);
 							$error_node = dom_import_simplexml($error);
@@ -1397,6 +1401,19 @@ class Output{
 					}
 				}
 			}
+			if(!empty($testsuite)){
+				$testsuite->addAttribute('failures',$mfail);
+				$testsuite->addAttribute('tests',$mcount);
+				$testsuite->addAttribute('errors',$mexception);
+				$testsuite->addAttribute('skipped',$mnone);
+				$testsuite->addAttribute('time',$malltime);
+			}			
+			$alltime += $malltime;
+			$count += $mcount;
+			$success += $msuccess;
+			$fail += $mfail;
+			$none += $mnone;
+			$exception += $mexception;
 		}
 		$xml->addAttribute('failures',$fail);
 		$xml->addAttribute('tests',$count);
