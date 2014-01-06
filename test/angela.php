@@ -528,6 +528,7 @@ class Runner{
 											(round(microtime(true) - $current_block_start_time,3)),
 											array(),
 											$name,
+											$start_line,
 									);
 								}catch(\angela\AssertException $e){
 									self::$has_exception = true;
@@ -536,6 +537,7 @@ class Runner{
 											(round(microtime(true) - $current_block_start_time,3)),
 											\angela\Assert::failure_info(),
 											$name,
+											$start_line,
 									);
 								}catch(\Exception $e){
 									self::$has_exception = true;
@@ -573,6 +575,7 @@ class Runner{
 											(round(microtime(true) - $current_block_start_time,3)),
 											array(self::$current_execute_file,$exeline,sprintf('%s: %d',$file,$line),$message),
 											$name,
+											$start_line,
 									);
 								}
 								if($doctest['type'] == 3){
@@ -584,7 +587,7 @@ class Runner{
 							}
 						}
 					}else{
-						self::$result[self::$current_file][self::$current_execute_file][] = array('none',0,array(),null,null);
+						self::$result[self::$current_file][self::$current_execute_file][] = array('none',0,array(),null,null,null);
 					}
 				}
 			}
@@ -1259,6 +1262,7 @@ class Output{
 				foreach($info_list as $info){
 					$time = $info[1];
 					$name = $info[3];
+					$start_line = $info[4];
 					$total_time = (float)$total_time + (float)$time;
 
 					switch($info[0]){
@@ -1338,6 +1342,7 @@ class Output{
 				foreach($info_list as $info){
 					$time = $info[1];
 					$name = $info[3];
+					$start_line = $info[4];
 					$alltime += $time;
 					$count++;
 					
@@ -1352,6 +1357,7 @@ class Output{
 							$x->addAttribute('name',$method);
 							$x->addAttribute('file',$file);
 							$x->addAttribute('time',$time);
+							$x->addAttribute('start_line',$start_line);
 							break;
 						case 'fail':
 							$fail++;
@@ -1364,6 +1370,7 @@ class Output{
 							$x->addAttribute('name',$method);
 							$x->addAttribute('file',$file);
 							$x->addAttribute('time',$time);
+							$x->addAttribute('start_line',$start_line);
 							$x->addAttribute('line',$line);
 							
 							$failure = dom_import_simplexml($x->addChild('failure'));
@@ -1378,6 +1385,7 @@ class Output{
 							$x->addAttribute('name',$method);
 							$x->addAttribute('file',$file);
 							$x->addAttribute('time',$time);
+							$x->addAttribute('start_line',$start_line);
 							$x->addAttribute('line',$line);
 	
 							$error = $x->addChild('error');
