@@ -380,6 +380,7 @@ meq('<message group="" type="LogicException">error</message></error>',$b->body()
 $b = b();
 $b->do_post(test_map_url('dao/insert'));
 $b->do_post(test_map_url('dao/get'));
+meq('<string>abcdefg</string><text />',$b->body());
 eq(200,$b->status());
 meq('<string>abcdefg</string><text />',$b->body());
 

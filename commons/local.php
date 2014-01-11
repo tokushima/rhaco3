@@ -35,6 +35,9 @@ date_default_timezone_set('Asia/Tokyo');
 	
 	),
 	'org.rhaco.io.File'=>array('work_dir'=>dirname(__DIR__).'/work/'),
+	'test.WebTest'=>array(
+		'base_url'=>'http://localhost/'.basename(dirname(__DIR__)).'/',
+	)
 ));
 \org\rhaco\Object::set_module(array(
 	'org.rhaco.net.Session'=>array('org.rhaco.flow.module.SessionDao')

@@ -491,8 +491,6 @@ class Runner{
 			
 			foreach($doctest['tests'] as $test_method_name => $tests){
 				if($method_name === null || $method_name === $test_method_name){
-					self::$current_execute_file = $test_method_name;
-	
 					if(!empty($tests)){
 						foreach($tests as $test_block){
 							list($name,$block,$start_line) = $test_block;
@@ -505,13 +503,17 @@ class Runner{
 								try{
 									ob_start();
 									\angela\Conf::call_setup_func();
-	
+									
 									if($doctest['type'] == 3){
+										self::$current_execute_file = (string)$block;
 										self::include_setup_teardown($block,'__setup__.php');
 										include($block);
 									}else{
 										if($doctest['type'] == 2){
 											self::$current_entry = basename($test_method_name,'.php');
+											self::$current_execute_file = $test_method_name;
+										}else{
+											self::$current_execute_file = $filename.'::'.$test_method_name;
 										}
 										eval($block);
 									}
@@ -582,7 +584,6 @@ class Runner{
 									self::include_setup_teardown($block,'__teardown__.php');
 								}
 								print("\033[".strlen($exec_block_name).'D'."\033[0K");
-								
 								self::$result[self::$current_file][self::$current_execute_file][] = $test_result;
 							}
 						}
@@ -1277,7 +1278,7 @@ class Output{
 							list($file,$line,$r1,$r2) = $info[2];
 
 							$result .= "\n";
-							$result .= $file."\n";
+							$result .= $method."\n";
 							$result .= str_repeat("-",80)."\n";
 
 							$result .= "[".$line."]: ".\angela\Util::color_format("failure","1;31")."\n";
@@ -1299,7 +1300,7 @@ class Output{
 							list($file,$line,$pos,$msg) = $info[2];
 
 							$result .= "\n";
-							$result .= $file."\n";
+							$result .= $method."\n";
 							$result .= str_repeat("-",80)."\n";
 							
 							$result .= '['.$line.']: '.\angela\Util::color_format('error','1;31')."\n";
