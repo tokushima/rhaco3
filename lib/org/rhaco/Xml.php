@@ -518,52 +518,18 @@ class Xml implements \IteratorAggregate{
 					}
 					$f = false;
 				}
+				$r->escape(false);
 				$r->value(empty($rtag) ? $replace : str_replace($rtag->plain(),$replace,$r->value()));
 				$replace = $r->get();
 				$rtag = clone($ltag);
 			}
+			$pe = $this->esc;
+			$this->escape(false);
 			$this->value(str_replace($ltag->plain(),$replace,$this->value()));
+			$this->escape($pe);
 			return null;
 		}
 		return (!empty($last) && substr($last,0,2) == 'in') ? array() : null;
-		/***
-			$src = "<tag><abc><def var='123'><ghi selected>hoge</ghi></def></abc></tag>";
-			if(self::set($tag,$src,"tag")){
-				eq("hoge",$tag->f("abc.def.ghi.value()"));
-				eq("123",$tag->f("abc.def.attr(var)"));
-				eq("selected",$tag->f("abc.def.ghi.attr(selected)"));
-				eq("<def var='123'><ghi selected>hoge</ghi></def>",$tag->f("abc.def.plain()"));
-				eq(null,$tag->f("abc.def.xyz"));
-			}
-		 	$src = pre('
-						<tag>
-							<abc>
-								<def var="123">
-									<ghi selected>hoge</ghi>
-									<ghi>
-										<jkl>rails</jkl>
-									</ghi>
-									<ghi ab="true">django</ghi>
-								</def>
-							</abc>
-						</tag>
-					');
-			self::set($tag,$src,"tag");
-			eq("django",$tag->f("abc.def.ghi[2].value()"));
-			eq("rails",$tag->f("abc.def.ghi[1].jkl.value()"));
-			$tag->f("abc.def.ghi[2].value()","python");
-			eq("python",$tag->f("abc.def.ghi[2].value()"));
-
-			eq("123",$tag->f("abc.def.attr(var)"));
-			eq("true",$tag->f("abc.def.ghi[2].attr(ab)"));
-			$tag->f("abc.def.ghi[2].attr(cd)",456);
-			eq("456",$tag->f("abc.def.ghi[2].attr(cd)"));
-
-			eq('selected',$tag->f("abc.def.ghi[0].attr(selected)"));
-			eq(null,$tag->f("abc.def.ghi[1].attr(selected)"));
-			eq(array(),$tag->f("abc.def.in(xyz)"));
-			eq(array(),$tag->f("abc.opq.in(xyz)"));
-		*/
 	}
 	/**
 	 * idで検索する
