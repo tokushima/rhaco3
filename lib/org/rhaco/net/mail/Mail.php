@@ -41,62 +41,18 @@ class Mail extends \org\rhaco\Object{
 	}
 	protected function __set_to__($mail,$name=""){
 		$this->to[$mail] = $this->address($mail,$name);
-		/***
-			$mail = new self();
-			$mail->to("test1@rhaco.org","abc");
-			$mail->to("test2@rhaco.org");
-			$mail->to("test3@rhaco.org","ghi");
-			eq(array(
-				'test1@rhaco.org' => '"=?ISO-2022-JP?B?YWJj?=" <test1@rhaco.org>',
-				'test2@rhaco.org' => '"test2@rhaco.org" <test2@rhaco.org>',
-				'test3@rhaco.org' => '"=?ISO-2022-JP?B?Z2hp?=" <test3@rhaco.org>',
-			),$mail->to());
-		*/
 	}
 	protected function __set_cc__($mail,$name=""){
 		$this->cc[$mail] = $this->address($mail,$name);
-		/***
-			$mail = new self();
-			$mail->cc("test1@rhaco.org","abc");
-			$mail->cc("test2@rhaco.org");
-			$mail->cc("test3@rhaco.org","ghi");
-			eq(array(
-				'test1@rhaco.org' => '"=?ISO-2022-JP?B?YWJj?=" <test1@rhaco.org>',
-				'test2@rhaco.org' => '"test2@rhaco.org" <test2@rhaco.org>',
-				'test3@rhaco.org' => '"=?ISO-2022-JP?B?Z2hp?=" <test3@rhaco.org>',
-			),$mail->cc());
-		*/
 	}
 	protected function __set_bcc__($mail,$name=""){
 		$this->bcc[$mail] = $this->address($mail,$name);
-		/***
-			$mail = new self();
-			$mail->bcc("test1@rhaco.org","abc");
-			$mail->bcc("test2@rhaco.org");
-			$mail->bcc("test3@rhaco.org","ghi");
-			eq(array(
-				'test1@rhaco.org'=>'"=?ISO-2022-JP?B?YWJj?=" <test1@rhaco.org>',
-				'test2@rhaco.org'=>'"test2@rhaco.org" <test2@rhaco.org>',
-				'test3@rhaco.org'=>'"=?ISO-2022-JP?B?Z2hp?=" <test3@rhaco.org>',
-			),$mail->bcc());
-		*/
 	}
 	protected function __set_return_path__($mail){
 		$this->return_path = $mail;
-		/***
-			$mail = new self();
-			$mail->return_path("test1@rhaco.org");
-			$mail->return_path("test2@rhaco.org");
-			eq("test2@rhaco.org",$mail->return_path());
-		*/
 	}
 	protected function __set_subject__($subject){
 		$this->subject = str_replace("\n","",str_replace(array("\r\n","\r"),"\n",$subject));
-		/***
-			$mail = new self();
-			$mail->subject("改行は\r\n削除される");
-			eq("=?ISO-2022-JP?B?GyRCMn45VCRPOm89fCQ1JGwkaxsoQg==?=", $mail->subject());
-		 */
 	}
 	protected function __get_subject__(){
 		return $this->jis($this->subject);

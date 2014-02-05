@@ -86,22 +86,6 @@ class Zun{
 	 * @param $src
 	 */
 	public function f($src){
-		/***
-			$text = pre('
-						[[[
-							
-							ほげほげ
-						]]]
-					');
-			$result = pre('
-						<pre>
-							
-							ほげほげ
-						</pre>
-					');
-			$obj = new self();
-			eq($result,$obj->f($text));
-		 */
 		$escapes = array();
 		$htmls = array();
 

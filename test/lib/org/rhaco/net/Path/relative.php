@@ -1,0 +1,16 @@
+<?php
+eq("./overview.html",\org\rhaco\net\Path::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/doc/ja/overview.html"));
+eq("../overview.html",\org\rhaco\net\Path::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/doc/overview.html"));
+eq("../../overview.html",\org\rhaco\net\Path::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/overview.html"));
+eq("../en/overview.html",\org\rhaco\net\Path::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/doc/en/overview.html"));
+eq("./doc/ja/overview.html",\org\rhaco\net\Path::relative("http://www.rhaco.org/","http://www.rhaco.org/doc/ja/overview.html"));
+eq("./ja/overview.html",\org\rhaco\net\Path::relative("http://www.rhaco.org/doc/","http://www.rhaco.org/doc/ja/overview.html"));
+eq("http://www.goesby.com/user.php/rhaco",\org\rhaco\net\Path::relative("http://www.rhaco.org/doc/ja/","http://www.goesby.com/user.php/rhaco"));
+eq("./doc/ja/overview.html",\org\rhaco\net\Path::relative("/www.rhaco.org/","/www.rhaco.org/doc/ja/overview.html"));
+eq("./ja/overview.html",\org\rhaco\net\Path::relative("/www.rhaco.org/doc/","/www.rhaco.org/doc/ja/overview.html"));
+eq("/www.goesby.com/user.php/rhaco",\org\rhaco\net\Path::relative("/www.rhaco.org/doc/ja/","/www.goesby.com/user.php/rhaco"));
+eq("./ja/overview.html",\org\rhaco\net\Path::relative("c:/www.rhaco.org/doc/","c:/www.rhaco.org/doc/ja/overview.html"));
+eq("c:/www.goesby.com/user.php/rhaco",\org\rhaco\net\Path::relative("c:/www.rhaco.org/doc/ja/","c:/www.goesby.com/user.php/rhaco"));
+eq("./Documents/workspace/prhagger/__settings__.php",\org\rhaco\net\Path::relative("/Users/kaz/","/Users/kaz/Documents/workspace/prhagger/__settings__.php"));
+eq("./",\org\rhaco\net\Path::relative("C:/xampp/htdocs/rhaco/test/template/sub","C:/xampp/htdocs/rhaco/test/template/sub"));
+eq("./",\org\rhaco\net\Path::relative('C:\xampp\htdocs\rhaco\test\template\sub','C:\xampp\htdocs\rhaco\test\template\sub'));

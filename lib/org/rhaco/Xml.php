@@ -106,47 +106,6 @@ class Xml implements \IteratorAggregate{
 		if(func_num_args() > 0) $this->value = $this->get_value(func_get_arg(0));
 		if(strpos($this->value,'<![CDATA[') === 0) return substr($this->value,9,-3);
 		return $this->value;
-		/***
-			$xml = new self("test");
-			eq("hoge",$xml->value("hoge"));
-			eq("true",$xml->value(true));
-			eq("false",$xml->value(false));
-			eq("<abc>1</abc><def>2</def><ghi>3</ghi>",$xml->value(array("abc"=>1,"def"=>2,"ghi"=>3)));
-			eq(null,$xml->value(''));
-			eq(1,$xml->value('1'));
-			eq(null,$xml->value(null));
-			$xml->escape(true);
-			eq("<abc>123</abc>",$xml->value("<abc>123</abc>"));
-			eq("<b>123</b>",$xml->value(new self("b","123")));
-
-			$xml = new self("test");
-			$xml->escape(false);
-			eq("<abc>123</abc>",$xml->value("<abc>123</abc>",false));
-		 */
-		/***
-			$obj = new \org\rhaco\Request();
-			$obj->rm_vars();
-			$obj->vars('aaa','hoge');
-			$obj->vars('ccc',123);
-			$self = new self('abc',$obj);
-			eq('<abc><aaa>hoge</aaa><ccc>123</ccc></abc>',$self->get());
-		 */
-		/***
-			$xml = new self("test");
-			$add = new self("addxml","hoge");
-			$xml->add($add);
-			$xml->add($add->get());
-			$xml->add((string)$add);
-			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());
-		 */
-		/***
-			$xml = new self("test");
-			$add = new self("addxml","hoge");
-			$xml->add($add);
-			$xml->add($add->get());
-			$xml->add((string)$add);
-			eq('<test><addxml>hoge</addxml><![CDATA[<addxml>hoge</addxml>]]><![CDATA[<addxml>hoge</addxml>]]></test>',$xml->get());
-		 */
 	}
 	/**
 	 * 値を追加する
@@ -160,15 +119,6 @@ class Xml implements \IteratorAggregate{
 			$this->value .= $this->get_value(func_get_arg(0));
 		}
 		return $this;
-		/***
-			$x = new self("test");
-			$x->value("abc");
-			eq("abc",$x->value());
-			$x->add("def");
-			eq("abcdef",$x->value());
-			$x->add(new self("b","123"));
-			eq("abcdef<b>123</b>",$x->value());
-		 */
 	}
 	/**
 	 * アトリビュートを取得する
@@ -178,23 +128,6 @@ class Xml implements \IteratorAggregate{
 	 */
 	final public function in_attr($n,$d=null){
 		return isset($this->attr[strtolower($n)]) ? ($this->esc ? htmlentities($this->attr[strtolower($n)],ENT_QUOTES,'UTF-8') : $this->attr[strtolower($n)]) : (isset($d) ? (string)$d : null);
-		/***
-			$x = new self("test");
-			$x->attr("abc",123);
-			eq("123",$x->in_attr("abc"));
-			eq(null,$x->in_attr("def"));
-			eq("456",$x->in_attr("ghi",456));
-
-			$x->attr("def","'<>'");
-
-			$x->escape(true);
-			eq("&#039;&lt;&gt;&#039;",$x->in_attr("def"));
-			eq('<test abc="123" def="&#039;&lt;&gt;&#039;" />',$x->get());
-
-			$x->escape(false);
-			eq("'<>'",$x->in_attr("def"));
-			eq('<test abc="123" def="\'<>\'" />',$x->get());
-		 */
 	}
 	/**
 	 * アトリビュートから削除する
@@ -206,20 +139,6 @@ class Xml implements \IteratorAggregate{
 		}else{
 			foreach(func_get_args() as $n) unset($this->attr[$n]);
 		}
-		/***
-			$x = new self("test");
-			$x->attr("abc",123);
-			$x->attr("def",456);
-			$x->attr("ghi",789);
-			
-			eq(array("abc"=>123,"def"=>456,"ghi"=>789),iterator_to_array($x));
-			$x->rm_attr("def");
-			eq(array("abc"=>123,"ghi"=>789),iterator_to_array($x));
-			$x->attr("def",456);
-			eq(array("abc"=>123,"ghi"=>789,"def"=>456),iterator_to_array($x));
-			$x->rm_attr("abc","ghi");
-			eq(array("def"=>456),iterator_to_array($x));
-		 */
 	}
 	/**
 	 * アトリビュートがあるか
@@ -228,16 +147,6 @@ class Xml implements \IteratorAggregate{
 	 */
 	final public function is_attr($name){
 		return array_key_exists($name,$this->attr);
-		/***
-			$x = new self("test");
-			eq(false,$x->is_attr("abc"));
-			$x->attr("abc",123);
-			eq(true,$x->is_attr("abc"));
-			$x->attr("abc",null);
-			eq(true,$x->is_attr("abc"));
-			$x->rm_attr("abc");
-			eq(false,$x->is_attr("abc"));
-		 */
 	}
 	/**
 	 * アトリビュートを設定
@@ -246,31 +155,6 @@ class Xml implements \IteratorAggregate{
 	final public function attr($key,$value){
 		$this->attr[strtolower($key)] = is_bool($value) ? (($value) ? 'true' : 'false') : $value;
 		return $this;
-		/***
-			$x = new self("test");
-			$x->escape(true);
-			$x->attr("abc",123);
-			eq(123,$x->in_attr("abc"));
-			$x->attr("Abc",456);
-			eq(456,$x->in_attr("abc"));
-			$x->attr("DEf",555);
-			eq(555,$x->in_attr("def"));
-			eq(456,$x->in_attr("abc"));
-			$x->attr("Abc","<aaa>");
-			eq("&lt;aaa&gt;",$x->in_attr("abc"));
-			$x->attr("Abc",true);
-			eq("true",$x->in_attr("abc"));
-			$x->attr("Abc",false);
-			eq("false",$x->in_attr("abc"));
-			$x->attr("Abc",null);
-			eq(null,$x->in_attr("abc"));
-			$x->attr("ghi",null);
-			eq(null,$x->in_attr("ghi"));
-			eq(array("abc"=>null,"def"=>555,"ghi"=>null),iterator_to_array($x));
-
-			$x->attr("Jkl","Jkl");
-			eq(array("abc"=>null,"def"=>555,"ghi"=>null,"jkl"=>"Jkl"),iterator_to_array($x));
-		 */
 	}
 	/**
 	 * 値の無いアトリビュートを設定
@@ -291,28 +175,9 @@ class Xml implements \IteratorAggregate{
 				.('<'.$this->name.$attr.(implode(' ',$this->plain_attr)).(($this->close_empty && !isset($value)) ? ' /' : '').'>')
 				.$this->value
 				.((!$this->close_empty || isset($value)) ? sprintf('</%s>',$this->name) : '');
-		/***
-			$x = new self("test",123);
-			eq("<test>123</test>",$x->get());
-			$x = new self("test",new self("hoge","AAA"));
-			eq("<test><hoge>AAA</hoge></test>",$x->get());
-			$x = new self("test");
-			eq("<test />",$x->get());
-			$x = new self("test");
-			$x->close_empty(false);
-			eq("<test></test>",$x->get());
-			$x = new self("test");
-			$x->attr("abc",123);
-			$x->attr("def",456);
-			eq('<test abc="123" def="456" />',$x->get());
-		 */
 	}
 	public function __toString(){
 		return $this->get();
-		/***
-			$x = new self("test",123);
-			eq("<test>123</test>",(string)$x);
-		 */
 	}
 	/**
 	 * 文字列からXMLを探す
@@ -323,30 +188,6 @@ class Xml implements \IteratorAggregate{
 	 */
 	static public function set(&$x,$plain,$name=null){
 		return self::_set($x,$plain,$name);
-		/***
-			$p = "<abc><def>111</def></abc>";
-			if(eq(true,self::set($x,$p))){
-				eq("abc",$x->name());
-			}
-			$p = "<abc><def>111</def></abc>";
-			if(eq(true,self::set($x,$p,"def"))){
-				eq("def",$x->name());
-				eq(111,$x->value());
-			}
-			$p = "aaaa";
-			eq(false,self::set($x,$p));
-			$p = "<abc>sss</abc>";
-			eq(false,self::set($x,$p,"def"));
-			$p = "<abc>sss</a>";
-			if(eq(true,self::set($x,$p))){
-				eq("<abc />",$x->get());
-			}
-			$p = "<abc>0</abc>";
-			if(eq(true,self::set($x,$p))){
-				eq("abc",$x->name());
-				eq("0",$x->value());
-			}
-		 */
 	}
 	static private function _set(&$x,$plain,$name=null,$vtag=null){
 		$plain = (string)$plain;
@@ -407,48 +248,6 @@ class Xml implements \IteratorAggregate{
 	 */
 	public function in($name,$offset=0,$length=0){
 		return new Xml\XmlIterator($name,$this->value(),$offset,$length);
-		/***
-			$x = new self("abc","<def>123</def><def>456</def><def>789</def>");
-			$r = array(123,456,789);
-			$i = 0;
-			foreach($x->in("def") as $d){
-				eq($r[$i],$d->value());
-				$i++;
-			}
-			$x = new self("abc","<def>123</def><abc>ABC</abc><def>456</def><abc>DEF</abc><abc>GHI</abc><def>789</def>");
-			$r = array(123,456,789);
-			$i = 0;
-			foreach($x->in("def") as $d){
-				eq($r[$i],$d->value());
-				$i++;
-			}
-			$x = new self("abc","<def>123</def><abc>ABC</abc><def>456</def><abc>DEF</abc><abc>GHI</abc><def>789</def>");
-			$r = array(456,789);
-			$i = 0;
-			foreach($x->in("def",1) as $d){
-				eq($r[$i],$d->value());
-				$i++;
-			}
-			$x = new self("abc","<def>123</def><abc>ABC</abc><def>456</def><abc>DEF</abc><abc>GHI</abc><def>789</def>");
-			$r = array(456);
-			$i = 0;
-			foreach($x->in("def",1,1) as $d){
-				eq($r[$i],$d->value());
-				$i++;
-			}
-			$x = new self("abc","<def>123</def><abc>ABC</abc><def>456</def><abc>DEF</abc><abc>GHI</abc><def>789</def>");
-			$i = 0;
-			foreach($x->in(array("def","abc")) as $d){
-				$i++;
-			}
-			eq(6,$i);
-			$x = new self("abc","<def>123</def><abc>ABC</abc><def>456</def><abc>DEF</abc><ghi>000</ghi><abc>GHI</abc><def>789</def>");
-			$i = 0;
-			foreach($x->in(array("def","abc")) as $d){
-				$i++;
-			}
-			eq(6,$i);
-		 */
 	}
 	/**
 	 * パスで検索する
@@ -542,19 +341,6 @@ class Xml implements \IteratorAggregate{
 			if(self::set($tag,substr($this->value(),$match[0][1]))) return $tag;
 		}
 		return null;
-		/***
-			$src = pre('
-						<aaa>
-							<bbb id="DEF"></bbb>
-							<ccc id="ABC">
-								<ddd id="XYZ">hoge</ddd>
-							</ccc>
-						</aaa>
-					');
-			self::set($tag,$src);
-			eq("ddd",$tag->id("XYZ")->name());
-			eq(null,$tag->id("xyz"));
-		 */
 	}
 	/**
 	 * xmlとし出力する

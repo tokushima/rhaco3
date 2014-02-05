@@ -45,43 +45,6 @@ class Path{
 		$t = (!empty($d)) ? substr($t,1) : $t;
 		$d = (!empty($d) && $d[0] != '/' && substr($d,0,3) != '#T#' && !strpos($d,'#W#')) ? '/'.$d : $d;
 		return str_replace($p[4],$p[5],$r.$d.$t);
-		/***
-			eq("http://www.rhaco.org/doc/ja/index.html",self::absolute("http://www.rhaco.org/","/doc/ja/index.html"));
-			eq("http://www.rhaco.org/doc/ja/index.html",self::absolute("http://www.rhaco.org/","../doc/ja/index.html"));
-			eq("http://www.rhaco.org/doc/ja/index.html",self::absolute("http://www.rhaco.org/","./doc/ja/index.html"));
-			eq("http://www.rhaco.org/doc/ja/index.html",self::absolute("http://www.rhaco.org/doc/ja/","./index.html"));
-			eq("http://www.rhaco.org/doc/index.html",self::absolute("http://www.rhaco.org/doc/ja","./index.html"));
-			eq("http://www.rhaco.org/doc/index.html",self::absolute("http://www.rhaco.org/doc/ja/","../index.html"));
-			eq("http://www.rhaco.org/index.html",self::absolute("http://www.rhaco.org/doc/ja/","../../index.html"));
-			eq("http://www.rhaco.org/index.html",self::absolute("http://www.rhaco.org/doc/ja/","../././.././index.html"));
-			eq("/www/rhaco/index.html",self::absolute("/www/rhaco/","index.html"));
-			eq("/www.rhaco.org/doc/ja/index.html",self::absolute("/www.rhaco.org/doc/ja/","index.html"));
-			eq("/www.rhaco.org/doc/index.html",self::absolute("/www.rhaco.org/doc/ja/","../index.html"));
-			eq("/www.rhaco.org/doc/ja/action.html/index.html",self::absolute('/www.rhaco.org/doc/ja/action.html','index.html'));
-			eq("/www.rhaco.org/index.html",self::absolute("/www.rhaco.org/doc/ja/","../../index.html"));
-			eq("/www.rhaco.org/index.html",self::absolute("/www.rhaco.org/doc/ja/","../././.././index.html"));
-			eq("c:/www.rhaco.org/doc/index.html",self::absolute("c:/www.rhaco.org/doc/ja/","../index.html"));
-			eq("http://www.rhaco.org/index.html",self::absolute("http://www.rhaco.org/doc/ja","/index.html"));
-			eq("http://www.rhaco.org/doc/ja/index.html",self::absolute('http://www.rhaco.org/doc/ja/action.html','index.html'));
-			eq("http://www.rhaco.org/doc/ja/sample.cgi?param=test",self::absolute('http://www.rhaco.org/doc/ja/sample.cgi?query=key','?param=test'));
-			eq("http://www.rhaco.org/doc/index.html",self::absolute('http://www.rhaco.org/doc/ja/action.html', '../../index.html'));
-			eq("http://www.rhaco.org/?param=test",self::absolute('http://www.rhaco.org/doc/ja/sample.cgi?query=key', '../../../?param=test'));
-			eq("/doc/ja/index.html",self::absolute('/',"/doc/ja/index.html"));
-			eq("/index.html",self::absolute('/',"index.html"));
-			eq("http://www.rhaco.org/login",self::absolute("http://www.rhaco.org","/login"));
-			eq("http://www.rhaco.org/login",self::absolute("http://www.rhaco.org/login",""));
-			eq("http://www.rhaco.org/login.cgi",self::absolute("http://www.rhaco.org/logout.cgi","login.cgi"));
-			eq("http://www.rhaco.org/hoge/login.cgi",self::absolute("http://www.rhaco.org/hoge/logout.cgi","login.cgi"));
-			eq("http://www.rhaco.org/hoge/login.cgi",self::absolute("http://www.rhaco.org/hoge/#abc/aa","login.cgi"));
-			eq("http://www.rhaco.org/hoge/abc.html#login",self::absolute("http://www.rhaco.org/hoge/abc.html","#login"));
-			eq("http://www.rhaco.org/hoge/abc.html#login",self::absolute("http://www.rhaco.org/hoge/abc.html#logout","#login"));
-			eq("http://www.rhaco.org/hoge/abc.html?abc=aa#login",self::absolute("http://www.rhaco.org/hoge/abc.html?abc=aa#logout","#login"));
-			eq("javascript::alert('')",self::absolute("http://www.rhaco.org/hoge/abc.html","javascript::alert('')"));
-			eq("mailto::hoge@rhaco.org",self::absolute("http://www.rhaco.org/hoge/abc.html","mailto::hoge@rhaco.org"));
-			eq("http://www.rhaco.org/hoge/login.cgi",self::absolute("http://www.rhaco.org/hoge/?aa=bb/","login.cgi"));
-			eq("http://www.rhaco.org/login",self::absolute("http://rhaco.org/hoge/hoge","http://www.rhaco.org/login"));
-			eq("http://localhost:8888/spec/css/style.css",self::absolute("http://localhost:8888/spec/","./css/style.css"));
-		*/
 	}
 	/**
 	 * 相対パスを取得
@@ -90,23 +53,6 @@ class Path{
 	 * @return string
 	 */
 	static public function relative($baseUrl,$targetUrl){
-		/***
-			eq("./overview.html",self::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/doc/ja/overview.html"));
-			eq("../overview.html",self::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/doc/overview.html"));
-			eq("../../overview.html",self::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/overview.html"));
-			eq("../en/overview.html",self::relative("http://www.rhaco.org/doc/ja/","http://www.rhaco.org/doc/en/overview.html"));
-			eq("./doc/ja/overview.html",self::relative("http://www.rhaco.org/","http://www.rhaco.org/doc/ja/overview.html"));
-			eq("./ja/overview.html",self::relative("http://www.rhaco.org/doc/","http://www.rhaco.org/doc/ja/overview.html"));
-			eq("http://www.goesby.com/user.php/rhaco",self::relative("http://www.rhaco.org/doc/ja/","http://www.goesby.com/user.php/rhaco"));
-			eq("./doc/ja/overview.html",self::relative("/www.rhaco.org/","/www.rhaco.org/doc/ja/overview.html"));
-			eq("./ja/overview.html",self::relative("/www.rhaco.org/doc/","/www.rhaco.org/doc/ja/overview.html"));
-			eq("/www.goesby.com/user.php/rhaco",self::relative("/www.rhaco.org/doc/ja/","/www.goesby.com/user.php/rhaco"));
-			eq("./ja/overview.html",self::relative("c:/www.rhaco.org/doc/","c:/www.rhaco.org/doc/ja/overview.html"));
-			eq("c:/www.goesby.com/user.php/rhaco",self::relative("c:/www.rhaco.org/doc/ja/","c:/www.goesby.com/user.php/rhaco"));
-			eq("./Documents/workspace/prhagger/__settings__.php",self::relative("/Users/kaz/","/Users/kaz/Documents/workspace/prhagger/__settings__.php"));
-			eq("./",self::relative("C:/xampp/htdocs/rhaco/test/template/sub","C:/xampp/htdocs/rhaco/test/template/sub"));
-			eq("./",self::relative('C:\xampp\htdocs\rhaco\test\template\sub','C:\xampp\htdocs\rhaco\test\template\sub'));
-		 */
 		$rlist = array(array('://','/./','//'),array('#REMOTEPATH#','/','/')
 					,array("/^\/(.+)$/","/^(\w):\/(.+)$/"),array("#ROOT#\\1","\\1#WINPATH#\\2",'')
 					,array('#REMOTEPATH#','#ROOT#','#WINPATH#'),array('://','/',':/'));
@@ -154,14 +100,6 @@ class Path{
 			}
 		}
 		return $path;
-		/***
-			eq("/abc/",self::slash("/abc/",null,null));
-			eq("/abc/",self::slash("abc",true,true));
-			eq("/abc/",self::slash("/abc/",true,true));
-			eq("abc/",self::slash("/abc/",false,true));			
-			eq("/abc",self::slash("/abc/",true,false));
-			eq("abc",self::slash("/abc/",false,false));
-		 */
 	}
 	/**
 	 * ファイルパスからディレクトリ名部分を取得

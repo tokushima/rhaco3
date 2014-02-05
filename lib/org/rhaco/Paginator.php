@@ -27,13 +27,6 @@ class Paginator implements \IteratorAggregate{
 						,'total'=>$this->total()
 						,'order'=>$this->order()
 				));
-		/***
-			$p = new self(10,3);
-			$p->total(100);
-			$re = array();
-			foreach($p as $k => $v) $re[$k] = $v;
-			eq(array('current'=>3,'limit'=>10,'offset'=>20,'total'=>100,'order'=>null),$re);
-		 */
 	}
 	/**
 	 * pageを表すクエリの名前
@@ -187,100 +180,11 @@ class Paginator implements \IteratorAggregate{
 		$self->current = $marker;
 		$self->total = $self->first = $self->last = null;
 		return $self;
-		/***	
-			$p = self::dynamic_contents(2,'C');
-			$p->add('A');
-			$p->add('B');
-			$p->add('C');
-			$p->add('D');
-			$p->add('E');
-			$p->add('F');
-			$p->add('G');
-			eq('A',$p->prev());
-			eq('E',$p->next());
-			eq('page=A',$p->query_prev());
-			eq(array('C','D'),$p->contents());
-			eq(null,$p->first());
-			eq(null,$p->last());
-		 */
 	}
 	public function __construct($paginate_by=20,$current=1,$total=0){
 		$this->limit($paginate_by);
 		$this->total($total);
 		$this->current($current);
-		/***
-			$p = new self(10);
-			eq(10,$p->limit());
-			eq(1,$p->first());
-			$p->total(100);
-			eq(100,$p->total());
-			eq(10,$p->last());
-			eq(1,$p->which_first(3));
-			eq(3,$p->which_last(3));
-
-			$p->current(3);
-			eq(20,$p->offset());
-			eq(true,$p->is_next());
-			eq(true,$p->is_prev());
-			eq(4,$p->next());
-			eq(2,$p->prev());
-			eq(1,$p->first());
-			eq(10,$p->last());
-			eq(2,$p->which_first(3));
-			eq(4,$p->which_last(3));
-
-			$p->current(1);
-			eq(0,$p->offset());
-			eq(true,$p->is_next());
-			eq(false,$p->is_prev());
-
-			$p->current(6);
-			eq(5,$p->which_first(3));
-			eq(7,$p->which_last(3));
-
-			$p->current(10);
-			eq(90,$p->offset());
-			eq(false,$p->is_next());
-			eq(true,$p->is_prev());
-			eq(8,$p->which_first(3));
-			eq(10,$p->which_last(3));
-		 */
-		/***
-			$p = new self(3,2);
-			$list = array(1,2,3,4,5,6,7,8,9);
-			foreach($list as $v){
-				$p->add($v);
-			}
-			eq(array(4,5,6),$p->contents());
-			eq(2,$p->current());
-			eq(1,$p->first());
-			eq(3,$p->last());
-			eq(9,$p->total());
-		 */
-		/***
-			$p = new self(3,2);
-			$list = array(1,2,3,4,5);
-			foreach($list as $v){
-				$p->add($v);
-			}
-			eq(array(4,5),$p->contents());
-			eq(2,$p->current());
-			eq(1,$p->first());
-			eq(2,$p->last());
-			eq(5,$p->total());
-		 */
-		/***
-			$p = new self(3);
-			$list = array(1,2);
-			foreach($list as $v){
-				$p->add($v);
-			}
-			eq(array(1,2),$p->contents());
-			eq(1,$p->current());
-			eq(1,$p->first());
-			eq(1,$p->last());
-			eq(2,$p->total());
-		 */
 	}
 	/**
 	 * 
@@ -301,10 +205,6 @@ class Paginator implements \IteratorAggregate{
 	public function next(){
 		if($this->dynamic) return $this->tmp[0];
 		return $this->current + 1;
-		/***
-			$p = new self(10,1,100);
-			eq(2,$p->next());
-		*/
 	}
 	/**
 	 * 前のページ番号
@@ -316,10 +216,6 @@ class Paginator implements \IteratorAggregate{
 			return $this->tmp[1];
 		}
 		return $this->current - 1;
-		/***
-			$p = new self(10,2,100);
-			eq(1,$p->prev());
-		*/
 	}
 	/**
 	 * 次のページがあるか
@@ -328,14 +224,6 @@ class Paginator implements \IteratorAggregate{
 	public function is_next(){
 		if($this->dynamic) return isset($this->tmp[0]);
 		return ($this->last > $this->current);
-		/***
-			$p = new self(10,1,100);
-			eq(true,$p->is_next());
-			$p = new self(10,9,100);
-			eq(true,$p->is_next());
-			$p = new self(10,10,100);
-			eq(false,$p->is_next());
-		*/
 	}
 	/**
 	 * 前のページがあるか
@@ -344,14 +232,6 @@ class Paginator implements \IteratorAggregate{
 	public function is_prev(){
 		if($this->dynamic) return ($this->prev() !== null);
 		return ($this->current > 1);
-		/***
-			$p = new self(10,1,100);
-			eq(false,$p->is_prev());
-			$p = new self(10,9,100);
-			eq(true,$p->is_prev());
-			$p = new self(10,10,100);
-			eq(true,$p->is_prev());
-		*/
 	}
 	/**
 	 * 前のページを表すクエリ
@@ -362,12 +242,6 @@ class Paginator implements \IteratorAggregate{
 		$vars = array_merge($this->vars,array($this->query_name()=>($this->dynamic && isset($this->tmp[3]) ? (isset($prev[$this->tmp[3]]) ? $prev[$this->tmp[3]] : null) : $prev)));
 		if(isset($this->order)) $vars['order'] = $this->order;
 		return Query::get($vars);
-		/***
-			$p = new self(10,3,100);
-			$p->query_name("page");
-			$p->vars("abc","DEF");
-			eq("abc=DEF&page=2",$p->query_prev());
-		*/
 	}
 	/**
 	 * 次のページを表すクエリ
@@ -377,12 +251,6 @@ class Paginator implements \IteratorAggregate{
 		$vars = array_merge($this->vars,array($this->query_name()=>(($this->dynamic) ? $this->tmp[0] : $this->next())));
 		if(isset($this->order)) $vars['order'] = $this->order;
 		return Query::get($vars);
-		/***
-			$p = new self(10,3,100);
-			$p->query_name("page");
-			$p->vars("abc","DEF");
-			eq("abc=DEF&page=4",$p->query_next());
-		*/
 	}
 	/**
 	 * orderを変更するクエリ
@@ -399,19 +267,6 @@ class Paginator implements \IteratorAggregate{
 							$this->vars
 							,array('order'=>$order,'porder'=>$this->order())
 						));
-		/***
-			$p = new self(10,3,100);
-			$p->query_name("page");
-			$p->vars("abc","DEF");		
-			$p->order("bbb");
-			eq("abc=DEF&order=aaa&porder=bbb",$p->query_order("aaa"));
-			
-			$p = new self(10,3,100);
-			$p->query_name("page");
-			$p->vars("abc","DEF");
-			$p->vars("order","bbb");
-			eq("abc=DEF&order=aaa&porder=bbb",$p->query_order("aaa"));
-		*/
 	}
 	/**
 	 * 指定のページを表すクエリ
@@ -422,10 +277,6 @@ class Paginator implements \IteratorAggregate{
 		$vars = array_merge($this->vars,array($this->query_name()=>$current));
 		if(isset($this->order)) $vars['order'] = $this->order;
 		return Query::get($vars);
-		/***
-			$p = new self(10,1,100);
-			eq("page=3",$p->query(3));
-		 */
 	}
 	
 	/**
@@ -494,26 +345,5 @@ class Paginator implements \IteratorAggregate{
 	 */
 	public function has_range(){
 		return (!$this->dynamic && $this->last > 1);
-		/***
-			$p = new self(4,1,3);
-			eq(1,$p->first());
-			eq(1,$p->last());
-			eq(false,$p->has_range());
-			
-			$p = new self(4,2,3);
-			eq(1,$p->first());
-			eq(1,$p->last());
-			eq(false,$p->has_range());
-			
-			$p = new self(4,1,10);
-			eq(1,$p->first());
-			eq(3,$p->last());
-			eq(true,$p->has_range());
-			
-			$p = new self(4,2,10);
-			eq(1,$p->first());
-			eq(3,$p->last());
-			eq(true,$p->has_range());
-		 */
 	}
 }
