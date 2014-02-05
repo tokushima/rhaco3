@@ -154,19 +154,6 @@ class Helper{
 	 */
 	public function cond_switch($cond,$true='on',$false=''){
 		return ($cond !== false && !empty($cond)) ? $true : $false;
-		/***
-			$t = new self();
-			eq('on',$t->cond_switch(true,'on','off'));
-			eq('off',$t->cond_switch(false,'on','off'));			
-			eq('off',$t->cond_switch('','on','off'));
-			eq('off',$t->cond_switch(0,'on','off'));
-			eq('off',$t->cond_switch(false,'on','off'));
-			eq('off',$t->cond_switch(array(),'on','off'));
-			eq('on',$t->cond_switch('1','on','off'));
-			eq('on',$t->cond_switch(1,'on','off'));
-			eq('on',$t->cond_switch(true,'on','off'));
-			eq('on',$t->cond_switch(array(1),'on','off'));
-		*/
 	}
 	/**
 	 * アプリケーションのメディアのURLを返す
@@ -192,11 +179,6 @@ class Helper{
 	 */
 	public function zerofill($int,$dig=0){
 		return sprintf("%0".$dig."d",$int);
-		/***
-			$t = new self();
-			eq("00005",$t->zerofill(5,5));
-			eq("5",$t->zerofill(5));
-		 */
 	}
 	/**
 	 * 数字を千位毎にグループ化してフォーマットする
@@ -206,12 +188,6 @@ class Helper{
 	 */
 	public function number_format($number,$dec=0){
 		return number_format($number,$dec,".",",");
-		/***
-			$t = new self();
-			eq("123,456,789",$t->number_format("123456789"));
-			eq("123,456,789.020",$t->number_format("123456789.02",3));
-			eq("123,456,789",$t->number_format("123456789.02"));
-		 */
 	}
 	/**
 	 * フォーマットした日付を返す
@@ -222,11 +198,6 @@ class Helper{
 	public function df($format="Y/m/d H:i:s",$value=null){
 		if(empty($value)) $value = time();
 		return date($format,$value);
-		/***
-			$t = new self();
-			$time = time();
-			eq(date("YmdHis",$time),$t->df("YmdHis",$time));
-		 */
 	}
 	/**
 	 * 改行を削除(置換)する
@@ -237,12 +208,6 @@ class Helper{
 	 */
 	public function one_liner($value,$glue=" "){
 		return str_replace(array("\r\n","\r","\n","<br>","<br />"),$glue,$value);
-		/***
-			$t = new self();
-			eq("a bc    d ef  g ",$t->one_liner("a\nbc\r\n\r\n\n\rd<br>ef<br /><br />g<br>"));
-			eq("abcdefg",$t->one_liner("a\nbc\r\n\r\n\n\rd<br>ef<br /><br />g<br>",""));
-			eq("a-bc----d-ef--g-",$t->one_liner("a\nbc\r\n\r\n\n\rd<br>ef<br /><br />g<br>","-"));
-		 */
 	}
 	/**
 	 * 文字列を丸める
@@ -263,27 +228,6 @@ class Helper{
 		}
 		if($len > mb_strlen($rtn)) $rtn .= $postfix;
 		return $rtn;
-		/***
-			$t = new self();
-			$str = "あいうえお12345かきくけこ";
-			eq("あいう",$t->trim_width($str,7));
-			
-			$t = new self();
-			$str = "あいうえお12345かきくけこ";
-			eq("あいう...",$t->trim_width($str,7,"..."));
-			
-			$t = new self();
-			$str = "あいうえお12345かきくけこ";
-			eq("あいうえお123...",$t->trim_width($str,13,"..."));
-
-			$t = new self();
-			$str = "あいうえお12345かきくけこ";
-			eq("あいうえお12345かきくけこ",$t->trim_width($str,50,"..."));	
-			
-			$t = new self();
-			$str = "あいうえお12345かきくけこ";
-			eq("あいうえお12345かきくけこ",$t->trim_width($str,30,"..."));
-		 */
 	}
 	/**
 	 * 何もしない

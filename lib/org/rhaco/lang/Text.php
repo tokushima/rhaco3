@@ -21,21 +21,6 @@ class Text{
 			}
 		}
 		return $text;
-		/***
-			$text = self::plain('
-							aaa
-							bbb
-						');
-			eq("aaa\nbbb",$text);
-		 */
-		/***
-			$text = self::plain("hoge\nhoge");
-			eq("hoge\nhoge",$text);
-		 */
-		/***
-			$text = self::plain("hoge\nhoge\nhoge\nhoge");
-			eq("hoge\nhoge\nhoge\nhoge",$text);
-		 */
 	}
 	/**
 	 * HTMLデコードした文字列を返す
@@ -51,10 +36,6 @@ class Text{
 			$value = str_replace(array("\\\"","\\'","\\\\"),array("\"","\'","\\"),$value);
 		}
 		return $value;
-		/***
-		 * eq("ほげほげ",self::htmldecode("&#12411;&#12370;&#12411;&#12370;"));
-		 * eq("&gt;&lt;ほげ& ほげ",self::htmldecode("&amp;gt;&amp;lt;&#12411;&#12370;&amp; &#12411;&#12370;"));
-		 */
 	}
 	/**
 	 * htmlエンコードをする
@@ -67,9 +48,6 @@ class Text{
 			return htmlentities($value,ENT_QUOTES,"UTF-8");
 		}
 		return $value;
-		/***
-			eq("&lt;abc aa=&#039;123&#039; bb=&quot;ddd&quot;&gt;あいう&lt;/abc&gt;",self::htmlencode("<abc aa='123' bb=\"ddd\">あいう</abc>"));
-		 */
 	}
 	/**
 	 * 改行コードをLFに統一する
@@ -77,9 +55,6 @@ class Text{
 	 * @return string
 	 */
 	static public function uld($src){
-		/***
-		 * eq("a\nb\nc\n",self::uld("a\r\nb\rc\n"));
-		 */
 		return str_replace(array("\r\n","\r"),"\n",$src);
 	}
 	/**
@@ -97,10 +72,6 @@ class Text{
 			return $length;
 		}
 		return mb_strlen($str,empty($enc) ? mb_detect_encoding($str) : $enc);
-		/***
-			eq(3,self::length("abc"));
-			eq(5,self::length(array("abc","defgh","i")));
-		 */
 	}
 	/**
 	 * 文字列の部分を返す
@@ -112,9 +83,6 @@ class Text{
 	 */
 	final static public function substring($str,$start,$length=null,$enc=null){
 		return mb_substr($str,$start,empty($length) ? self::len($str) : $length,empty($enc) ? mb_detect_encoding($str) : $enc);
-		/***
-			eq("def",self::substring("abcdefg",3,3));
-		 */
 	}
 	/**
 	 * フォーマット文字列 $str に基づき生成された文字列を返します。
@@ -134,12 +102,6 @@ class Text{
 			}
 		}
 		return $str;
-		/***
-			$params = array("A","B","C");
-			eq("aAbBcCde",self::fstring("a{1}b{2}c{3}d{4}e",$params));
-			eq("aAbBcAde",self::fstring("a{1}b{2}c{1}d{4}e",$params));
-			eq("aAbBcAde",self::fstring("a{1}b{2}c{1}d{4}e","A","B","C"));
-		 */
 	}
 
 	/**

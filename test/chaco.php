@@ -35,7 +35,7 @@ namespace chaco{
 	class Runner{
 		static private $resultset = array();
 		static private $start_time;
-		
+
 		static private function include_setup_teardown($test_file,$include_file){
 			if(strpos($test_file,__DIR__) === 0){
 				$inc = array();
@@ -86,10 +86,16 @@ namespace chaco{
 		static private $start = false;
 		static private $db;
 		static private $result = array();
-	
+		static private $linkvars = array();
+		
+		static public function has_link(&$vars){
+			if(empty(self::$linkvars)) return false;
+			$vars = self::$linkvars;
+			return true;
+		}
 		/**
 		 * 実行中のdbファイルパス
-		*/
+		 */
 		static public function db(){
 			return self::$db;
 		}
@@ -104,8 +110,7 @@ namespace chaco{
 			if(extension_loaded('xdebug')){
 				self::$start = true;
 				self::$db = $savedb;
-				// TODO
-				//self::set_vars('savedb',self::$db);
+				self::$linkvars['savedb'] = self::$db;
 					
 				$fp = fopen(self::$db.'.target','w');
 				if(is_dir($lib_dir)){
@@ -374,8 +379,7 @@ namespace chaco{
 			$url_info = parse_url($url);
 			$host = isset($url_info['host']) ? $url_info['host'] : '';
 			$cookie_base_path = $host.(isset($url_info['path']) ? $url_info['path'] : '');
-			// TODO
-			//			if(\chaco\Conf::has_vars($vars)) $this->request_vars['_chaco_vars_'] = $vars;
+			if(\chaco\Coverage::has_link($vars)) $this->request_vars['Link'.md5(__FILE__)] = $vars;
 	
 			if(isset($url_info['query'])){
 				parse_str($url_info['query'],$vars);
@@ -568,6 +572,35 @@ namespace chaco{
 
 
 namespace{
+	if(count(debug_backtrace(false)) > 0){
+		$key = 'Link'.md5(__FILE__);
+		$linkvars = isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? $_GET[$key] : array());
+		if(isset($_POST[$key])) unset($_POST[$key]);
+		if(isset($_GET[$key])) unset($_GET[$key]);
+	
+		if(function_exists('xdebug_get_code_coverage') && isset($linkvars['savedb'])){
+			register_shutdown_function(function() use($linkvars){
+				register_shutdown_function(function() use($linkvars){
+					$savedb = $linkvars['savedb'];
+						
+					if(is_file($savedb.'.target')){
+						$target = explode(PHP_EOL,file_get_contents($savedb.'.target'));
+						$fp = fopen($savedb.'.coverage','a');
+	
+						foreach(xdebug_get_code_coverage() as $file_path => $lines){
+							if(false !== ($i = array_search($file_path,$target))){
+								fwrite($fp,json_encode(array($i,$lines)).PHP_EOL);
+							}
+						}
+						fclose($fp);
+					}
+					xdebug_stop_code_coverage();
+				});
+			});
+			xdebug_start_code_coverage();
+		}
+		return;
+	}
 	ini_set('display_errors','On');
 	ini_set('html_errors','Off');
 	ini_set('error_reporting',E_ALL);
@@ -738,7 +771,7 @@ namespace{
 		if(!is_dir(dirname($coverage_output))) mkdir(dirname($coverage_output),0777,true);
 		file_put_contents($coverage_output,'');
 		
-		\chaco\Coverage::start(realpath($coverage_output),\chaco\Conf::get('lib_dir',dirname(__DIR__).'/lib'));
+		\chaco\Coverage::start(realpath($coverage_output),\chaco\Conf::get('libs',dirname(__DIR__).'/lib'));
 	}
 	
 	foreach($test_list as $test_path){

@@ -1,0 +1,11 @@
+<?php
+eq(3661,\org\rhaco\lang\Date::parse_time("01:01:01"));
+eq(3661,\org\rhaco\lang\Date::parse_time("1:1:1"));
+eq(61,\org\rhaco\lang\Date::parse_time("0:1:1"));
+eq(null,\org\rhaco\lang\Date::parse_time("0/1/1"));
+eq(0,\org\rhaco\lang\Date::parse_time("00:00:00"));
+eq(0,\org\rhaco\lang\Date::parse_time("0"));
+eq(null,\org\rhaco\lang\Date::parse_time(""));
+eq(null,\org\rhaco\lang\Date::parse_time(null));
+eq(null,\org\rhaco\lang\Date::parse_time("00/00/00"));
+eq(726.4,\org\rhaco\lang\Date::parse_time("00:12:06.40"));

@@ -20,6 +20,5 @@ function xml(&$xml,$src,$name=null){
 
 return array(
 	'urls'=>\org\rhaco\Dt::get_urls(),
-	'output_dir'=>dirname(__DIR__).'/work/test_output',
 );
 

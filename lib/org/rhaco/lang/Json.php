@@ -11,44 +11,6 @@ class Json{
 	 * @return string
 	 */
 	static public function encode($v){
-		/***
-		 * $variable = array(1,2,3);
-		 * eq("[1,2,3]",self::encode($variable));
-		 * $variable = "ABC";
-		 * eq("\"ABC\"",self::encode($variable));
-		 * $variable = 10;
-		 * eq(10,self::encode($variable));
-		 * $variable = 10.123;
-		 * eq(10.123,self::encode($variable));
-		 * $variable = true;
-		 * eq("true",self::encode($variable));
-		 *
-		 * $variable = array('foo', 'bar', array(1, 2, 'baz'), array(3, array(4)));
-		 * eq('["foo","bar",[1,2,"baz"],[3,[4]]]',self::encode($variable));
-		 *
-		 * $variable = array("foo"=>"bar",'baz'=>1,3=>4);
-		 * eq('{"foo":"bar","baz":1,"3":4}',self::encode($variable));
-		 *
-		 * $variable = array("type"=>"hoge","name"=>"fuga");
-		 * eq('{"type":"hoge","name":"fuga"}',self::encode($variable));
-		 */
-		/***
-		 * # array
-		 * $variable = array("name"=>"hoge","type"=>"fuga");
-		 * eq('{"name":"hoge","type":"fuga"}',self::encode($variable));
-		 *
-		 * $variable = array("aa","name"=>"hoge","type"=>"fuga");
-		 * eq('{"0":"aa","name":"hoge","type":"fuga"}',self::encode($variable));
-		 *
-		 * $variable = array("aa","hoge","fuga");
-		 * eq('["aa","hoge","fuga"]',self::encode($variable));
-		 *
-		 * $variable = array("aa","hoge","fuga");
-		 * eq('["aa","hoge","fuga"]',self::encode($variable));
-		 * 
-		 * $variable = array(array("aa"=>1),array("aa"=>2),array("aa"=>3));
-		 * eq('[{"aa":1},{"aa":2},{"aa":3}]',self::encode($variable));
-		 */
 		switch(gettype($v)){
 			case 'boolean': return ($v) ? 'true' : 'false';
 			case 'integer': return intval(sprintf('%d',$v));
@@ -137,72 +99,6 @@ class Json{
 			return $list;
 		}
 		return null;
-		/***
-			$variable = "ABC";
-			eq($variable,self::decode('"ABC"'));
-			$variable = 10;
-			eq($variable,self::decode(10));
-			$variable = 10.123;
-			eq($variable,self::decode(10.123));
-			$variable = true;
-			eq($variable,self::decode("true"));
-			$variable = false;
-			eq($variable,self::decode("false"));
-			$variable = null;
-			eq($variable,self::decode("null"));
-			$variable = array(1,2,3);
-			eq($variable,self::decode("[1,2,3]"));
-			$variable = array(1,2,array(9,8,7));
-			eq($variable,self::decode("[1,2,[9,8,7]]"));
-			$variable = array(1,2,array(9,array(10,11),7));
-			eq($variable,self::decode("[1,2,[9,[10,11],7]]"));
-			
-			$variable = array("A"=>"a","B"=>"b","C"=>"c");
-			eq($variable,self::decode('{"A":"a","B":"b","C":"c"}'));
-			$variable = array("A"=>"a","B"=>"b","C"=>array("E"=>"e","F"=>"f","G"=>"g"));
-			eq($variable,self::decode('{"A":"a","B":"b","C":{"E":"e","F":"f","G":"g"}}'));
-			$variable = array("A"=>"a","B"=>"b","C"=>array("E"=>"e","F"=>array("H"=>"h","I"=>"i"),"G"=>"g"));
-			eq($variable,self::decode('{"A":"a","B":"b","C":{"E":"e","F":{"H":"h","I":"i"},"G":"g"}}'));
-			
-			$variable = array("A"=>"a","B"=>array(1,2,3),"C"=>"c");
-			eq($variable,self::decode('{"A":"a","B":[1,2,3],"C":"c"}'));
-			$variable = array("A"=>"a","B"=>array(1,array("C"=>"c","D"=>"d"),3),"C"=>"c");
-			eq($variable,self::decode('{"A":"a","B":[1,{"C":"c","D":"d"},3],"C":"c"}'));
-			
-			$variable = array(array("a"=>1,"b"=>array("a","b",1)),array(null,false,true));
-			eq($variable,self::decode('[ {"a" : 1, "b" : ["a", "b", 1] }, [ null, false, true ] ]'));
-			
-			eq(null,self::decode("[1,2,3,]"));
-			eq(null,self::decode("[1,2,3,,,]"));
-			
-			if(extension_loaded("json")) eq(null,json_decode("[1,[1,2,],3]"));
-			eq(array(1,null,3),self::decode("[1,[1,2,],3]"));
-			eq(null,self::decode('{"A":"a","B":"b","C":"c",}'));
-			
-			eq(array("hoge"=>"123,456"),self::decode('{"hoge":"123,456"}'));
-		*/
-		/***
-			# quote
-			eq(array("hoge"=>'123,"456'),self::decode('{"hoge":"123,\\"456"}'));
-			eq(array("hoge"=>"123,'456"),self::decode('{"hoge":"123,\'456"}'));
-			eq(array("hoge"=>'123,\\"456'),self::decode('{"hoge":"123,\\\\\\"456"}'));
-			eq(array("hoge"=>"123,\\'456"),self::decode('{"hoge":"123,\\\\\'456"}'));
-		 */
-		/***
-			# escape
-			eq(array("hoge"=>"\\"),self::decode('{"hoge":"\\\\"}'));
-			eq(array("hoge"=>"a\\"),self::decode('{"hoge":"a\\\\"}'));
-			eq(array("hoge"=>"t\\t"),self::decode('{"hoge":"t\\\\t"}'));
-			eq(array("hoge"=>"\tA"),self::decode('{"hoge":"\\tA"}'));
-		 */
-		/***
-		 	# value_error
-		 	try{
-			 	self::decode("{'hoge':'123,456'}");
-			 	fail();
-			 }catch(\InvalidArgumentException $e){
-			 }
-		 */
 	}
 	static private function block($src,$start,$end){
 		$eq = ($start == $end);
