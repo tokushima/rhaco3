@@ -93,6 +93,9 @@ namespace chaco{
 			$vars = self::$linkvars;
 			return true;
 		}
+		static public function link(){
+			return 'Link'.md5(__FILE__);
+		}
 		/**
 		 * 実行中のdbファイルパス
 		 */
@@ -379,7 +382,7 @@ namespace chaco{
 			$url_info = parse_url($url);
 			$host = isset($url_info['host']) ? $url_info['host'] : '';
 			$cookie_base_path = $host.(isset($url_info['path']) ? $url_info['path'] : '');
-			if(\chaco\Coverage::has_link($vars)) $this->request_vars['Link'.md5(__FILE__)] = $vars;
+			if(\chaco\Coverage::has_link($vars)) $this->request_vars[\chaco\Coverage::link()] = $vars;
 	
 			if(isset($url_info['query'])){
 				parse_str($url_info['query'],$vars);
@@ -503,7 +506,7 @@ namespace chaco{
 				list($url,$query) = explode('?',$this->url,2);
 				if(!empty($query)){
 					parse_str($query,$vars);
-					if(isset($vars['_chaco_vars_'])) unset($vars['_chaco_vars_']);
+					if(isset($vars[\chaco\Coverage::link()])) unset($vars[\chaco\Coverage::link()]);
 					if(!empty($vars)){
 						$url = $url.'?'.http_build_query($vars);
 					}
@@ -573,16 +576,16 @@ namespace chaco{
 
 namespace{
 	if(count(debug_backtrace(false)) > 0){
-		$key = 'Link'.md5(__FILE__);
+		$key = \chaco\Coverage::link();
 		$linkvars = isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? $_GET[$key] : array());
 		if(isset($_POST[$key])) unset($_POST[$key]);
 		if(isset($_GET[$key])) unset($_GET[$key]);
-	
+		
 		if(function_exists('xdebug_get_code_coverage') && isset($linkvars['savedb'])){
 			register_shutdown_function(function() use($linkvars){
 				register_shutdown_function(function() use($linkvars){
 					$savedb = $linkvars['savedb'];
-						
+					
 					if(is_file($savedb.'.target')){
 						$target = explode(PHP_EOL,file_get_contents($savedb.'.target'));
 						$fp = fopen($savedb.'.coverage','a');
@@ -607,6 +610,7 @@ namespace{
 	ini_set('xdebug.var_display_max_children',-1);
 	ini_set('xdebug.var_display_max_data',-1);
 	ini_set('xdebug.var_display_max_depth',-1);
+	ini_set('memory_limit',-1);
 	
 	if(ini_get('date.timezone') == ''){
 		date_default_timezone_set('Asia/Tokyo');
@@ -650,8 +654,8 @@ namespace{
 		if(is_numeric($var)) return strval($var);
 		if(is_object($var)) $var = get_object_vars($var);
 		if(is_array($var)){
-			foreach($var as $k => $v){
-				$var[$k] = expvar($v);
+			foreach($var as $key => $v){
+				$var[$key] = expvar($v);
 			}
 		}
 		return $var;
@@ -728,9 +732,9 @@ namespace{
 	
 	$path = realpath($value);
 	if($path === false) die($value.' found'.PHP_EOL);
-	
+		
 	$tab = '  ';
-	$success = $fail = $exception = 0;
+	$success = $fail = $exception = $exe_time = $use_memory = 0;
 	$test_list = array();
 	$println = function($msg='',$color=30){
 		print("\033[".$color."m");
@@ -755,11 +759,9 @@ namespace{
 	$test_list = array_keys($test_list);
 	
 	$println('Progress:','1;33');
-
-	foreach($test_list as $test_path){
-		print('*');
-	}
-	print("\033[".sizeof($test_list)."D");
+	print(" ");
+	print(str_repeat('+',sizeof($test_list)));
+	print("\033[".(sizeof($test_list)+1)."D");
 	
 	if(is_file($fixture_file=substr(__FILE__,0,-4).'.fixture.php')){
 		include_once($fixture_file);
@@ -774,14 +776,18 @@ namespace{
 		\chaco\Coverage::start(realpath($coverage_output),\chaco\Conf::get('libs',dirname(__DIR__).'/lib'));
 	}
 	
+	print(" ");
+	$start_time = microtime(true);
+	$start_mem = round(number_format((memory_get_usage() / 1024 / 1024),3),4);
 	foreach($test_list as $test_path){
+		print("/\033[1D");
 		$status = \chaco\Runner::exec($test_path);
-		
-		print("\033[".(($status == 1) ? 32 : 31)."m");
-		print('*');
-		print("\033[0m");
+		print("\033[".(($status == 1) ? 32 : 31)."m*\033[0m");
 	}
 	print(PHP_EOL);
+	$exe_time = round((microtime(true) - (float)$start_time),4);
+	$use_memory = round(number_format((memory_get_usage() / 1024 / 1024),3),4);
+	
 	
 	if(\chaco\Conf::get('coverage') != null){
 		\chaco\Coverage::stop();
@@ -810,8 +816,6 @@ namespace{
 		$println(str_repeat('-',70));
 		$println(sprintf(' Covered %s%%',round($total/sizeof(\chaco\Coverage::get()),3)),'1;35');
 
-		
-		
 		// output
 		$xml = new \SimpleXMLElement('<coverage></coverage>');
 		$total_covered = $total_lines = 0;
@@ -837,10 +841,8 @@ namespace{
 		$xml->addAttribute('covered_lines',$total_covered);
 		
 		file_put_contents($coverage_output,$xml->asXML());
-		$println('Written XML: '.realpath($coverage_output),'34');
+		$println('  Written XML: '.realpath($coverage_output),'34');
 	}
-	
-	
 	
 	$println();
 	$println('Results:','1;33');
@@ -880,7 +882,7 @@ namespace{
 		}
 	}
 	$println(str_repeat('=',80));
-	$println(sprintf('success %d, failures %d, errors %d',$success,$fail,$exception),'35');
+	$println(sprintf('success %d, failures %d, errors %d (%.05f sec / %s MByte)',$success,$fail,$exception,$exe_time,$use_memory),'35');
 	
 	
 	if(\chaco\Conf::get('output') != null){
