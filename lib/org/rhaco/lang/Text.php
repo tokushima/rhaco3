@@ -13,7 +13,8 @@ class Text{
 	 */
 	final public static function plain($text){
 		if(!empty($text)){
-			$lines = explode("\n",$text);
+			$text = str_replace(array("\r\n","\r","\n"), PHP_EOL, $text);
+			$lines = explode(PHP_EOL,$text);
 			if(sizeof($lines) > 2){
 				if(trim($lines[0]) == '') array_shift($lines);
 				if(trim($lines[sizeof($lines)-1]) == '') array_pop($lines);

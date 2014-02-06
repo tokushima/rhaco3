@@ -12,10 +12,10 @@ class Yaml{
 	 */
 	static public function decode($src){
 		$src = preg_replace_callback("/([\"\'])(.+)\\1/m",function($m){return str_replace(array("#",":"),array("__SHAPE__","__COLON__"),$m[0]);},$src);
-		$src = preg_replace_callback("/^([\t]+)/m",function($m){return str_replace("\t"," ",$m[1]);},str_replace(array("\r\n","\r","\n"),"\n",$src));
+		$src = preg_replace_callback("/^([\t]+)/m",function($m){return str_replace("\t"," ",$m[1]);},str_replace(array("\r\n","\r","\n"),PHP_EOL,$src));
 		$src = preg_replace("/#.+$/m","",$src);
 		$stream = array();
-
+		
 		if(!preg_match("/^[\040]*---(.*)$/m",$src)) $src = "---\n".$src;
 		if(preg_match_all("/^[\040]*---(.*)$/m",$src,$match,PREG_OFFSET_CAPTURE | PREG_SET_ORDER)){
 			$blocks = array();

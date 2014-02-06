@@ -2,12 +2,14 @@
 $b = b();
 $b->vars('value1','abcd');
 $b->do_post(test_map_url('test_index::upload_value'));
-xml($xml,$b->body(),'result');
+\org\rhaco\Xml::set($xml,$b->body(),'result');
+
+
 eq('abcd',$xml->f('get_data1.value()'));
 
 $b->file_vars('upfile1',__FILE__);
 $b->do_post(test_map_url('test_index::upload_file'));
-xml($xml,$b->body(),'result');
+\org\rhaco\Xml::set($xml,$b->body(),'result');
 eq(basename(__FILE__),$xml->f('original_name1.value()'));
 eq(filesize(__FILE__),(int)$xml->f('size1.value()'));
 eq('true',$xml->f('mv1.value()'));
@@ -20,7 +22,7 @@ $b->file_vars('upfile1',__FILE__);
 $b->vars('value2','efg');
 $b->file_vars('upfile2',__FILE__);
 $b->do_post(test_map_url('test_index::upload_multi'));
-xml($xml,$b->body(),'result');
+\org\rhaco\Xml::set($xml,$b->body(),'result');
 eq(basename(__FILE__),$xml->f('original_name1.value()'));
 eq(filesize(__FILE__),(int)$xml->f('size1.value()'));
 eq('true',$xml->f('mv1.value()'));

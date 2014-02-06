@@ -1,20 +1,20 @@
 <?php
-$src = pre('
- 		<form rt:ref="true" rt:param="data">
- 		<input type="text" name="aaa" />
- 		</form>
- 		');
-$result = pre('
+$src = <<< PRE
+		<form rt:ref="true" rt:param="data">
+		<input type="text" name="aaa" />
+		</form>
+PRE;
+$result = <<< PRE
 		<form>
 		<input type="text" name="aaa" value="hogehoge" />
 		</form>
-		');
+PRE;
 $t = new \org\rhaco\Template();
 $t->vars("data",array("aaa"=>"hogehoge"));
 eq($result,$t->get($src));
 
 //input
-$src = pre('
+$src = <<< PRE
 		<form rt:ref="true">
 		<input type="text" name="aaa" />
 		<input type="text" name="ttt" />
@@ -33,8 +33,8 @@ $src = pre('
 		</select>
 		<select name="XYZ" rt:param="xyz"></select>
 		</form>
-		');
-$result = pre('
+PRE;
+$result = <<< PRE
 		<form>
 		<input type="text" name="aaa" value="hogehoge" />
 		<input type="text" name="ttt" value="&lt;tag&gt;ttt&lt;/tag&gt;" />
@@ -53,7 +53,7 @@ $result = pre('
 		</select>
 		<select name="XYZ"><option value="A">456</option><option value="B" selected="selected">789</option><option value="C">010</option></select>
 		</form>
-		');
+PRE;
 $t = new \org\rhaco\Template();
 $t->vars("aaa","hogehoge");
 $t->vars("ttt","<tag>ttt</tag>");
@@ -65,36 +65,36 @@ $t->vars("eee",true);
 $t->vars("fff",false);
 eq($result,$t->get($src));
 
-$src = pre('
+$src = <<< PRE
 		<form rt:ref="true">
 		<select name="ddd" rt:param="abc">
 		</select>
 		</form>
-		');
-$result = pre('
+PRE;
+$result = <<< PRE
 		<form>
 		<select name="ddd"><option value="123">123</option><option value="456" selected="selected">456</option><option value="789">789</option></select>
 		</form>
-		');
+PRE;
 $t = new \org\rhaco\Template();
 $t->vars("abc",array(123=>123,456=>456,789=>789));
 $t->vars("ddd","456");
 eq($result,$t->get($src));
 
-$src = pre('
-		<form rt:ref="true">
-		<rt:loop param="abc" var="v">
-		<input type="checkbox" name="ddd" value="{$v}" />
-		</rt:loop>
-		</form>
-		');
-$result = pre('
-		<form>
-		<input type="checkbox" name="ddd[]" value="123" />
-		<input type="checkbox" name="ddd[]" value="456" checked="checked" />
-		<input type="checkbox" name="ddd[]" value="789" />
-		</form>
-		');
+$src = <<< 'PRE'
+<form rt:ref="true">
+<rt:loop param="abc" var="v">
+<input type="checkbox" name="ddd" value="{$v}" />
+</rt:loop>
+</form>
+PRE;
+$result = <<< PRE
+<form>
+<input type="checkbox" name="ddd[]" value="123" />
+<input type="checkbox" name="ddd[]" value="456" checked="checked" />
+<input type="checkbox" name="ddd[]" value="789" />
+</form>
+PRE;
 $t = new \org\rhaco\Template();
 $t->vars("abc",array(123=>123,456=>456,789=>789));
 $t->vars("ddd","456");
@@ -102,7 +102,7 @@ eq($result,$t->get($src));
 
 
 // reform
-$src = pre('
+$src = <<< 'PRE'
 		<form rt:aref="true">
 		<input type="text" name="{$aaa_name}" />
 		<input type="checkbox" name="{$bbb_name}" value="hoge" />hoge
@@ -119,8 +119,8 @@ $src = pre('
 		</select>
 		<select name="{$XYZ_name}" rt:param="xyz"></select>
 		</form>
-		');
-$result = pre('
+PRE;
+$result = <<< PRE
 		<form>
 		<input type="text" name="aaa" value="hogehoge" />
 		<input type="checkbox" name="bbb[]" value="hoge" checked="checked" />hoge
@@ -137,7 +137,7 @@ $result = pre('
 		</select>
 		<select name="XYZ"><option value="A">456</option><option value="B" selected="selected">789</option><option value="C">010</option></select>
 		</form>
-		');
+PRE;
 $t = new \org\rhaco\Template();
 $t->vars("aaa_name","aaa");
 $t->vars("bbb_name","bbb");
@@ -157,11 +157,11 @@ $t->vars("fff",false);
 eq($result,$t->get($src));
 
 // textarea
-$src = pre('
+$src = <<< PRE
 		<form>
 		<textarea name="hoge"></textarea>
 		</form>
-		');
+PRE;
 $t = new \org\rhaco\Template();
 eq($src,$t->get($src));
 
@@ -182,37 +182,37 @@ $t = new \org\rhaco\Template();
 eq('<form><input name="abc" type="checkbox" /></form>',$t->get($src));
 
 // input_exception
-$src = pre('<form rt:ref="true"><input type="text" name="hoge" /></form>');
+$src = '<form rt:ref="true"><input type="text" name="hoge" /></form>';
 $t = new \org\rhaco\Template();
 eq('<form><input type="text" name="hoge" value="" /></form>',$t->get($src));
 
-$src = pre('<form rt:ref="true"><input type="password" name="hoge" /></form>');
+$src = '<form rt:ref="true"><input type="password" name="hoge" /></form>';
 $t = new \org\rhaco\Template();
 eq('<form><input type="password" name="hoge" value="" /></form>',$t->get($src));
 
-$src = pre('<form rt:ref="true"><input type="hidden" name="hoge" /></form>');
+$src = '<form rt:ref="true"><input type="hidden" name="hoge" /></form>';
 $t = new \org\rhaco\Template();
 eq('<form><input type="hidden" name="hoge" value="" /></form>',$t->get($src));
 
-$src = pre('<form rt:ref="true"><input type="checkbox" name="hoge" /></form>');
+$src = '<form rt:ref="true"><input type="checkbox" name="hoge" /></form>';
 $t = new \org\rhaco\Template();
 eq('<form><input type="checkbox" name="hoge[]" /></form>',$t->get($src));
 
-$src = pre('<form rt:ref="true"><input type="radio" name="hoge" /></form>');
+$src = '<form rt:ref="true"><input type="radio" name="hoge" /></form>';
 $t = new \org\rhaco\Template();
 eq('<form><input type="radio" name="hoge" /></form>',$t->get($src));
 
-$src = pre('<form rt:ref="true"><textarea name="hoge"></textarea></form>');
+$src = '<form rt:ref="true"><textarea name="hoge"></textarea></form>';
 $t = new \org\rhaco\Template();
 eq('<form><textarea name="hoge"></textarea></form>',$t->get($src));
 
-$src = pre('<form rt:ref="true"><select name="hoge"><option value="1">1</option><option value="2">2</option></select></form>');
+$src = '<form rt:ref="true"><select name="hoge"><option value="1">1</option><option value="2">2</option></select></form>';
 $t = new \org\rhaco\Template();
 eq('<form><select name="hoge"><option value="1">1</option><option value="2">2</option></select></form>',$t->get($src));
 
 
 // html5
-$src = pre('
+$src = <<< PRE
 		<form rt:ref="true">
 		<input type="search" name="search" />
 		<input type="tel" name="tel" />
@@ -228,8 +228,8 @@ $src = pre('
 		<input type="range" name="range" />
 		<input type="color" name="color" />
 		</form>
-		');
-$rslt = pre('
+PRE;
+$rslt = <<< PRE
 		<form>
 		<input type="search" name="search" value="hoge" />
 		<input type="tel" name="tel" value="000-000-0000" />
@@ -245,7 +245,7 @@ $rslt = pre('
 		<input type="range" name="range" value="7" />
 		<input type="color" name="color" value="#ff0000" />
 		</form>
-		');
+PRE;
 $t = new \org\rhaco\Template();
 $t->vars("search","hoge");
 $t->vars("tel","000-000-0000");

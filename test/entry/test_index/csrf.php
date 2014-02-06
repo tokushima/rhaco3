@@ -16,7 +16,7 @@ eq(200,$b->status());
 meq('<result>',$b->body());
 
 $no = null;
-if(xml($xml,$b->body(),'csrftoken')){
+if(\org\rhaco\Xml::set($xml,$b->body(),'csrftoken')){
 	$no = $xml->value();
 }
 neq(null,$no);
