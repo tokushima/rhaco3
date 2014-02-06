@@ -12,10 +12,10 @@ namespace chaco{
 			}
 			return $default;
 		}
+		static public function has($name){
+			return array_key_exists($name,self::$conf);
+		}
 	}
-	/**
-	 * テスト失敗時
-	 */
 	class AssertFailure extends \Exception{		
 		private $expectation;
 		private $result;
@@ -96,19 +96,6 @@ namespace chaco{
 		static public function link(){
 			return 'Link'.md5(__FILE__);
 		}
-		/**
-		 * 実行中のdbファイルパス
-		 */
-		static public function db(){
-			return self::$db;
-		}
-		/**
-		 * 開始
-		 * @param string $savedb
-		 * @param string $lib_dir
-		 * @throws \RuntimeException
-		 * @return multitype:
-		 */
 		static public function start($savedb,$lib_dir){
 			if(extension_loaded('xdebug')){
 				self::$start = true;
@@ -136,14 +123,11 @@ namespace chaco{
 				xdebug_start_code_coverage(XDEBUG_CC_UNUSED|XDEBUG_CC_DEAD_CODE);
 			}
 		}
-		/**
-		 * 終了
-		 */
 		static public function stop(){
 			if(is_file(self::$db.'.target')){
 				$target = explode(PHP_EOL,trim(file_get_contents(self::$db.'.target')));
 				$fp = fopen(self::$db.'.coverage','a');
-					
+
 				foreach(xdebug_get_code_coverage() as $file_path => $lines){
 					if(false !== ($i = array_search($file_path,$target))){
 						fwrite($fp,json_encode(array($i,$lines)).PHP_EOL);
@@ -152,17 +136,21 @@ namespace chaco{
 				fclose($fp);
 					
 				foreach(explode(PHP_EOL,trim(file_get_contents(self::$db.'.coverage'))) as $json){
-					$cov = json_decode($json,true);
-					$filename = $target[$cov[0]];
-	
-					if(!isset(self::$result[$filename])){
-						self::$result[$filename] = array('covered_line_status'=>array(),'uncovered_line_status'=>array(),'exec'=>1);
-					}
-					foreach($cov[1] as $line => $status){
-						if($status == 1){
-							self::$result[$filename]['covered_line_status'][] = $line;
-						}else if($status != -2){
-							self::$result[$filename]['uncovered_line_status'][] = $line;
+					if(!empty($json)){
+						$cov = json_decode($json,true);
+						if($cov !== false){
+							$filename = $target[$cov[0]];
+			
+							if(!isset(self::$result[$filename])){
+								self::$result[$filename] = array('covered_line_status'=>array(),'uncovered_line_status'=>array(),'exec'=>1);
+							}
+							foreach($cov[1] as $line => $status){
+								if($status == 1){
+									self::$result[$filename]['covered_line_status'][] = $line;
+								}else if($status != -2){
+									self::$result[$filename]['uncovered_line_status'][] = $line;
+								}
+							}
 						}
 					}
 				}
@@ -183,17 +171,10 @@ namespace chaco{
 			if(is_file(self::$db.'.target')) unlink(self::$db.'.target');
 			if(is_file(self::$db.'.coverage')) unlink(self::$db.'.coverage');
 		}
-		/**
-		 * 結果取得
-		 * @return array
-		 */
 		static public function get(){
 			return self::$result;
 		}
 	}
-	/**
-	 * HTTPリクエスト
-	 */
 	class Http{
 		private $resource;
 		private $agent;
@@ -621,35 +602,7 @@ namespace{
 	}
 	set_error_handler(function($n,$s,$f,$l){
 		throw new \ErrorException($s,0,$n,$f,$l);
-	});	
-	
-	
-	$opt = $conf = array();
-	$argv = array_slice($_SERVER['argv'],1);
-	
-	$value = is_dir(__DIR__.'/test') ? __DIR__.'/test' : __DIR__;
-	for($i=0;$i<sizeof($argv);$i++){
-		if(substr($argv[$i],0,2) == '--'){
-			$opt[substr($argv[$i],2)] = (isset($argv[$i+1]) ? $argv[$i+1] : null);
-			$i++;
-		}else if(substr($argv[$i],0,1) == '-'){
-			$opt = array_merge($opt,array_fill_keys(str_split(substr($argv[$i],1),1),true));
-		}else{
-			$value = $argv[$i];
-		}
-	}	
-	if(is_file($f=getcwd().'/bootstrap.php') || is_file($f=getcwd().'/vendor/autoload.php')){
-		ob_start();
-			include_once($f);
-		ob_end_clean();
-	}	
-	$conf_file = substr(__FILE__,0,-4).'.conf.php';
-	if(is_file($conf_file)){
-		$conf = include($conf_file);
-		if(!is_array($conf)) throw new \RuntimeException('invalid '.$conf_file);
-	}
-	\chaco\Conf::set(array_merge($conf,$opt));
-	
+	});
 	function expvar($var){
 		if(is_numeric($var)) return strval($var);
 		if(is_object($var)) $var = get_object_vars($var);
@@ -712,7 +665,7 @@ namespace{
 	 */
 	function test_map_url($map_name){
 		$urls = \chaco\Conf::get('urls',array());
-		if(empty($urls)) throw new \RuntimeException('urls empty');
+		if(empty($urls) || !is_array($urls)) throw new \RuntimeException('urls empty');
 		$args = func_get_args();
 		array_shift($args);
 	
@@ -730,12 +683,42 @@ namespace{
 		return new \chaco\Http($agent,$timeout,$redirect_max);
 	}
 	
+	$opt = $conf = array();
+	$argv = array_slice($_SERVER['argv'],1);
+	
+	$value = is_dir(__DIR__.'/test') ? __DIR__.'/test' : __DIR__;
+	for($i=0;$i<sizeof($argv);$i++){
+		if(substr($argv[$i],0,2) == '--'){
+			$opt[substr($argv[$i],2)] = (isset($argv[$i+1]) ? $argv[$i+1] : null);
+			$i++;
+		}else if(substr($argv[$i],0,1) == '-'){
+			$opt = array_merge($opt,array_fill_keys(str_split(substr($argv[$i],1),1),true));
+		}else{
+			$value = $argv[$i];
+		}
+	}
+	
+	if(is_file($f=getcwd().'/bootstrap.php') || is_file($f=getcwd().'/vendor/autoload.php')){
+		ob_start();
+			include_once($f);
+		ob_end_clean();
+	}	
+	$conf_file = substr(__FILE__,0,-4).'.conf.php';
+	if(is_file($conf_file)){
+		$conf = include($conf_file);
+		if(!is_array($conf)) throw new \RuntimeException('invalid '.$conf_file);
+	}
+	\chaco\Conf::set(array_merge($conf,$opt));
+	
 	$path = realpath($value);
 	if($path === false) die($value.' found'.PHP_EOL);
 		
 	$tab = '  ';
 	$success = $fail = $exception = $exe_time = $use_memory = 0;
 	$test_list = array();
+	$output_dir = \chaco\Conf::get('outputdir',getcwd());
+	if(substr($output_dir,-1) != '/') $output_dir = $output_dir.'/';
+	
 	$println = function($msg='',$color=30){
 		print("\033[".$color."m");
 		print($msg.PHP_EOL);
@@ -759,7 +742,7 @@ namespace{
 	$test_list = array_keys($test_list);
 	
 	$println('Progress:','1;33');
-	print(" ");
+	print(' ');
 	print(str_repeat('+',sizeof($test_list)));
 	print("\033[".(sizeof($test_list)+1)."D");
 	
@@ -767,16 +750,17 @@ namespace{
 		include_once($fixture_file);
 	}
 	
-	if(\chaco\Conf::get('coverage') != null){
-		$coverage_output = \chaco\Conf::get('coverage');
+	$coverage_output = null;
+	if(\chaco\Conf::has('coverage') || \chaco\Conf::has('c')){
+		$coverage_output = \chaco\Conf::get('coverage',$output_dir.date('YmdHis').'.coverage.xml');
 		if(!function_exists('xdebug_get_code_coverage')) die('xdebug extension not loaded'.PHP_EOL);
 		if(!is_dir(dirname($coverage_output))) mkdir(dirname($coverage_output),0777,true);
 		file_put_contents($coverage_output,'');
-		
-		\chaco\Coverage::start(realpath($coverage_output),\chaco\Conf::get('libs',dirname(__DIR__).'/lib'));
+		$coverage_output = realpath($coverage_output);
+		\chaco\Coverage::start($coverage_output,\chaco\Conf::get('libdir',dirname(__DIR__).'/lib'));
 	}
 	
-	print(" ");
+	print(' ');
 	$start_time = microtime(true);
 	$start_mem = round(number_format((memory_get_usage() / 1024 / 1024),3),4);
 	foreach($test_list as $test_path){
@@ -788,10 +772,8 @@ namespace{
 	$exe_time = round((microtime(true) - (float)$start_time),4);
 	$use_memory = round(number_format((memory_get_usage() / 1024 / 1024),3),4);
 	
-	
-	if(\chaco\Conf::get('coverage') != null){
+	if(!empty($coverage_output) && is_file($coverage_output)){
 		\chaco\Coverage::stop();
-		$coverage_output = realpath(\chaco\Conf::get('coverage'));
 
 		// view
 		$println();
@@ -814,7 +796,7 @@ namespace{
 			$total += $coverage;
 		}
 		$println(str_repeat('-',70));
-		$println(sprintf(' Covered %s%%',round($total/sizeof(\chaco\Coverage::get()),3)),'1;35');
+		$println(sprintf(' Covered %s%%',($total == 0) ? 0 : round($total/sizeof(\chaco\Coverage::get()),3)),'1;35');
 
 		// output
 		$xml = new \SimpleXMLElement('<coverage></coverage>');
@@ -836,12 +818,12 @@ namespace{
 			$total_lines += $covered + $uncovered;
 		}
 		$xml->addAttribute('create_date',date('Y/m/d H:i:s'));
-		$xml->addAttribute('covered',ceil($total_covered/$total_lines*100));
+		$xml->addAttribute('covered',($total_covered == 0) ? 0 : ceil($total_covered/$total_lines*100));
 		$xml->addAttribute('lines',$total_lines);
 		$xml->addAttribute('covered_lines',$total_covered);
 		
 		file_put_contents($coverage_output,$xml->asXML());
-		$println('  Written XML: '.realpath($coverage_output),'34');
+		$println('  Written XML: '.$coverage_output,'34');
 	}
 	
 	$println();
@@ -884,9 +866,8 @@ namespace{
 	$println(str_repeat('=',80));
 	$println(sprintf('success %d, failures %d, errors %d (%.05f sec / %s MByte)',$success,$fail,$exception,$exe_time,$use_memory),'35');
 	
-	
-	if(\chaco\Conf::get('output') != null){
-		$output = \chaco\Conf::get('output');
+	if(\chaco\Conf::has('output') || \chaco\Conf::has('o')){
+		$output = \chaco\Conf::get('output',$output_dir.date('YmdHis').'.result.xml');
 		if(!is_dir(dirname($output))) mkdir(dirname($output),0777,true);
 		
 		$xml = new \SimpleXMLElement('<testsuites></testsuites>');
@@ -936,7 +917,7 @@ namespace{
 						$dir_time += $time;
 						break;
 					case -2:
-						list(,$time,$file,$line,$msg,$r1,$r2) = $info;
+						list(,$time,$file,$line,$msg) = $info;
 						$dir_errors++;
 							
 						$x = $get_testsuite($dir,$testsuite)->addChild('testcase');
@@ -970,7 +951,7 @@ namespace{
 		$xml->addAttribute('time',$times);
 		$xml->addAttribute('create_date',date('Y/m/d H:i:s'));
 		$xml->addChild('system-out');
-		$xml->addChild('system-err',$system_err);
+		$xml->addChild('system-err');
 		
 		file_put_contents($output,$xml->asXML());
 		$println('Written XML: '.realpath($output).' ','1;34');

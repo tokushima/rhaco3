@@ -60,9 +60,6 @@
 				<rt:if param="{$has_coverage}">
 					<li class="{$t.endswith_pattern_switch('coverage','active','inactive')}"><a href="{$t.package_method_url('coverage')}">Coverage</a></li>
 				</rt:if>
-				<rt:if param="{$has_profile}">
-					<li class="{$t.endswith_pattern_switch('profile_list','active','inactive')}"><a href="{$t.package_method_url('profile_list')}">Profile</a></li>
-				</rt:if>
 
 				<rt:if param="{$t.is_login()}">
 					<li class="{$t.endswith_pattern_switch('do_logout','active','inactive')}"><a href="{$t.package_method_url('do_logout')}">Logout</a></li>

@@ -20,7 +20,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('app_mode',\org\rhaco\Conf::appmode());
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_coverage',function_exists('xdebug_get_code_coverage'));
-		$this->vars('has_profile',function_exists('xhprof_enable'));
 	}
 	public function get_template_modules(){
 		return array(
@@ -718,61 +717,5 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('modify_date',$modify_date);
 		$this->vars('coverage_modify_date',$coverage_modify_date);
 		$this->vars('covered',$covered);
-	}
-	/**
-	 * @automap
-	 */
-	public function profile_list(){
-		$dir = \org\rhaco\Conf::get('test_output_dir',\org\rhaco\io\File::work_path('test_output'));
-		$profile_list = $this->file_list($dir,'/\.xhprof$/');
-		
-		usort($profile_list,function($a,$b){
-			return ($a->getMTime() > $b->getMTime()) ? -1 : 1;
-		});
-		$this->vars('profile_list',$profile_list);
-	}
-	/**
-	 * @automap
-	 */
-	public function profile(){
-		$result = $children = array();
-		$target = $this->in_vars('target');
-		$func = $this->in_vars('func','main()');
-		$total = 0;
-		$order = $this->in_vars('order','wt');
-		
-		if(is_file($target)){
-			$value = unserialize(file_get_contents($target));
-			foreach($value as $exe => $info){
-				if(strpos($exe,'==>') !== false){
-					list($base,$call) = explode('==>',$exe);
-					if($base == $func){
-						$result[$call] = $info;
-					}else{
-						if(!isset($children[$base])) $children[$base] = 0;
-						$children[$base] += $info['wt'];
-					}
-				}else{
-					if(!isset($children[$exe])) $children[$exe] = 0;
-					$children[$exe] += $info['wt'];
-				}
-			}
-			foreach($result as $call => $info){
-				$info['name'] = $call;
-				$info['time'] = round($info['wt'] / $info['ct']);
-				$info['children'] = isset($children[$call]);
-				$total += $info['wt'];
-				
-				$result[$call] = $info;
-			}
-		}
-		usort($result,function($a,$b) use($order){
-			return ($a[$order] > $b[$order]) ? -1 : 1;
-		});
-		
-		$this->vars('total',$total);
-		$this->vars('func',$func);
-		$this->vars('target',$target);
-		$this->vars('func_list',$result);
 	}
 }
