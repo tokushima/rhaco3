@@ -175,7 +175,7 @@ namespace chaco{
 			return self::$result;
 		}
 	}
-	class Http{
+	class Browser{
 		private $resource;
 		private $agent;
 		private $timeout = 30;
@@ -496,12 +496,13 @@ namespace chaco{
 			}
 			if(preg_match_all('/Set-Cookie:[\s]*(.+)/i',$this->head,$match)){
 				$unsetcookie = $setcookie = array();
+				
 				foreach($match[1] as $cookies){
 					$cookie_name = $cookie_value = $cookie_domain = $cookie_path = $cookie_expires = null;
 					$cookie_domain = $host;
 					$cookie_path = '/';
 					$secure = false;
-	
+					
 					foreach(explode(';',$cookies) as $cookie){
 						$cookie = trim($cookie);
 						if(strpos($cookie,'=') !== false){
@@ -513,15 +514,17 @@ namespace chaco{
 								case 'domain': $cookie_domain = preg_replace('/^[\w]+:\/\/(.+)$/','\\1',$v); break;
 								case 'path': $cookie_path = $v; break;
 								default:
-									$cookie_name = $k;
-									$cookie_value = $v;
+									if(!isset($cookie_name)){
+										$cookie_name = $k;
+										$cookie_value = $v;
+									}
 							}
 						}else if(strtolower($cookie) == 'secure'){
 							$secure = true;
 						}
 					}
 					$cookie_domain = $cookie_domain.$cookie_path;
-						
+					
 					if($cookie_expires !== null && $cookie_expires < time()){
 						if(isset($this->cookie[$cookie_domain][$cookie_name])) unset($this->cookie[$cookie_domain][$cookie_name]);
 					}else{
@@ -636,7 +639,7 @@ namespace{
 		}
 	}
 	/**
-	 *　文字列中に指定した文字列がすべて存在していれば成功
+	 *　文字列中に指定の文字列が存在する
 	 * @param string|array $keyword
 	 * @param string $src
 	 */
@@ -647,7 +650,7 @@ namespace{
 		}
 	}
 	/**
-	 * 文字列中に指定の文字列がすべて存在しない
+	 * 文字列中に指定の文字列が存在しない
 	 * @param string $keyword
 	 * @param string $src
 	 */
@@ -659,7 +662,7 @@ namespace{
 	}
 	/**
 	 * mapに定義されたurlをフォーマットして返す
-	 * @param unknown $map_name
+	 * @param string $map_name
 	 * @throws \RuntimeException
 	 * @return string
 	 */
@@ -673,20 +676,20 @@ namespace{
 		throw new \RuntimeException($map_name.(isset($urls[$map_name]) ? '['.sizeof($args).']' : '').' not found');
 	}
 	/**
-	 * Httpリクエスト
+	 * Browser
 	 * @param string $agent
 	 * @param number $timeout
 	 * @param number $redirect_max
-	 * @return \chaco\Http
+	 * @return \chaco\Browser
 	 */
 	function b($agent=null,$timeout=30,$redirect_max=20){
-		return new \chaco\Http($agent,$timeout,$redirect_max);
+		return new \chaco\Browser($agent,$timeout,$redirect_max);
 	}
 	
 	$opt = $conf = array();
 	$argv = array_slice($_SERVER['argv'],1);
-	
 	$value = is_dir(__DIR__.'/test') ? __DIR__.'/test' : __DIR__;
+	
 	for($i=0;$i<sizeof($argv);$i++){
 		if(substr($argv[$i],0,2) == '--'){
 			$opt[substr($argv[$i],2)] = (isset($argv[$i+1]) ? $argv[$i+1] : null);

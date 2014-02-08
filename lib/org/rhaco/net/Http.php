@@ -372,8 +372,10 @@ class Http{
 							case 'domain': $cookie_domain = preg_replace('/^[\w]+:\/\/(.+)$/','\\1',$v); break;
 							case 'path': $cookie_path = $v; break;
 							default:
-								$cookie_name = $k;
-								$cookie_value = $v;
+								if(!isset($cookie_name)){
+									$cookie_name = $k;
+									$cookie_value = $v;
+								}
 						}
 					}else if(strtolower($cookie) == 'secure'){
 						$secure = true;
