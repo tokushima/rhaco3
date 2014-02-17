@@ -725,7 +725,6 @@ namespace{
 	function b($agent=null,$timeout=30,$redirect_max=20){
 		return new \chaco\Browser($agent,$timeout,$redirect_max);
 	}
-	var_dump(getcwd().'/bootstrap.php');
 	if(is_file($f=getcwd().'/bootstrap.php') || is_file($f=getcwd().'/vendor/autoload.php')){
 		ob_start();
 			include_once($f);
