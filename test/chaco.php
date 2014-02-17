@@ -3,8 +3,8 @@ namespace chaco{
 	class Conf{
 		static private $conf = array();
 		
-		static public function set($array){
-			self::$conf = $array;
+		static public function set($k,$v){
+			self::$conf[$k] = $v;
 		}
 		static public function get($name,$default=null){
 			if(isset(self::$conf[$name])){
@@ -60,7 +60,7 @@ namespace chaco{
 				ob_start();
 				include($test_path);
 				$res = ob_get_clean();
-			
+				
 				if(preg_match('/(Parse|Fatal) error:.+/',$res,$m)){
 					$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$res,$line) ?
 							'Parse error: syntax error '.$test_path.' code on line '.$line[1]
@@ -555,6 +555,46 @@ namespace chaco{
 			if(isset($this->resource)) curl_close($this->resource);
 		}
 	}
+	class Args{
+		static private $opt = array();
+		static private $value = array();
+	
+		static public function init(){
+			$opt = $value = array();
+			$argv = array_slice((isset($_SERVER['argv']) ? $_SERVER['argv'] : array()),1);
+				
+			for($i=0;$i<sizeof($argv);$i++){
+				if(substr($argv[$i],0,2) == '--'){
+					$opt[substr($argv[$i],2)][] = ((isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : true);
+				}else if(substr($argv[$i],0,1) == '-'){
+					$keys = str_split(substr($argv[$i],1),1);
+					if(count($keys) == 1){
+						$opt[$keys[0]][] = ((isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : true);
+					}else{
+						foreach($keys as $k){
+							$opt[$k][] = true;
+						}
+					}
+				}else{
+					$value[] = $argv[$i];
+				}
+			}
+			self::$opt = $opt;
+			self::$value = $value;
+		}
+		static public function opt($name,$default=false){
+			return array_key_exists($name,self::$opt) ? self::$opt[$name][0] : $default;
+		}
+		static public function value($default=null){
+			return isset(self::$value[0]) ? self::$value[0] : $default;
+		}
+		static public function opts($name){
+			return array_key_exists($name,self::$opt) ? self::$opt[$name] : array();
+		}
+		static public function values(){
+			return self::$value;
+		}
+	}
 }
 
 
@@ -685,37 +725,31 @@ namespace{
 	function b($agent=null,$timeout=30,$redirect_max=20){
 		return new \chaco\Browser($agent,$timeout,$redirect_max);
 	}
-	
-	$opt = $conf = array();
-	$argv = array_slice($_SERVER['argv'],1);
-	$value = is_dir(__DIR__.'/test') ? __DIR__.'/test' : __DIR__;
-	
-	for($i=0;$i<sizeof($argv);$i++){
-		if(substr($argv[$i],0,2) == '--'){
-			$opt[substr($argv[$i],2)] = (isset($argv[$i+1]) ? $argv[$i+1] : null);
-			$i++;
-		}else if(substr($argv[$i],0,1) == '-'){
-			$opt = array_merge($opt,array_fill_keys(str_split(substr($argv[$i],1),1),true));
-		}else{
-			$value = $argv[$i];
-		}
-	}
-	
 	if(is_file($f=getcwd().'/bootstrap.php') || is_file($f=getcwd().'/vendor/autoload.php')){
 		ob_start();
 			include_once($f);
 		ob_end_clean();
-	}	
-	$conf_file = substr(__FILE__,0,-4).'.conf.php';
-	if(is_file($conf_file)){
-		$conf = include($conf_file);
-		if(!is_array($conf)) throw new \RuntimeException('invalid '.$conf_file);
 	}
-	\chaco\Conf::set(array_merge($conf,$opt));
+	if(is_file($inc=substr(__FILE__,0,-4).'.lib.php')){
+		include_once($inc);
+	}
+	if(is_file($inc=substr(__FILE__,0,-4).'.conf.php')){
+		$conf = include($inc);
+		if(!is_array($conf)) throw new \RuntimeException('invalid '.$inc);
+		foreach($conf as $k => $v){
+			\chaco\Conf::set($k,$v);
+		}
+	}
+	\chaco\Args::init();
+	foreach(array('coverage','c','output','o','libdir','outputdir') as $k){
+		if(($v = \chaco\Args::opt($k,null)) !== null){
+			\chaco\Conf::set($k,$v);
+		}
+	}
 	
-	$path = realpath($value);
-	if($path === false) die($value.' found'.PHP_EOL);
-		
+	$path = realpath(\chaco\Args::value(__DIR__));
+	if($path === false) die(\chaco\Args::value().' found'.PHP_EOL);
+	
 	$tab = '  ';
 	$success = $fail = $exception = $exe_time = $use_memory = 0;
 	$test_list = array();
@@ -749,8 +783,8 @@ namespace{
 	print(str_repeat('+',sizeof($test_list)));
 	print("\033[".(sizeof($test_list)+1)."D");
 	
-	if(is_file($fixture_file=substr(__FILE__,0,-4).'.fixture.php')){
-		include_once($fixture_file);
+	if(is_file($inc=substr(__FILE__,0,-4).'.fixture.php')){
+		include_once($inc);
 	}
 	
 	$coverage_output = null;
