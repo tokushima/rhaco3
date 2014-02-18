@@ -101,7 +101,7 @@ class Helper{
 				}
 			}			
 			return sprintf('<select name="%s">%s</select>',$name,implode('',$options));
-		}else if($obj->anon($name,'save',true)){
+		}else if($obj->prop_anon($name,'save',true)){
 			switch($obj->prop_anon($name,'type')){
 				case 'serial': return sprintf('<input name="%s" type="text" disabled="disabled" /><input name="%s" type="hidden" />',$name,$name);
 				case 'text': return sprintf('<textarea name="%s"></textarea>',$name);
