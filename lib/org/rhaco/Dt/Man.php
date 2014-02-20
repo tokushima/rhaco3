@@ -196,12 +196,21 @@ class Man{
 						$args[$match[2][$k]] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 					}
 				}
-			}			
-			if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\(([\"\'])(.+)\\2/",$src,$match)){
-				foreach($match[1] as $k => $n) $throws[md5($n.$match[3][$k])] = array($n,trim($match[3][$k]));
 			}
 			if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$document,$match)){
 				foreach($match[1] as $k => $n) $throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
+			}
+			if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\((.*)\)/",$src,$match)){
+				foreach($match[1] as $k => $n){
+					if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
+					$throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
+				}
+			}
+			if(preg_match_all("/\\\\rhaco\\\\Exceptions::add\(\s*new\s+([\\\\\w]+)\((.*)\)/",$src,$match)){
+				foreach($match[1] as $k => $n){
+					if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
+					$throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
+				}
 			}
 			ksort($throws);
 	
