@@ -19,11 +19,16 @@ namespace chaco{
 	class AssertFailure extends \Exception{		
 		private $expectation;
 		private $result;
+		private $has = false;
 		
 		public function ab($expectation,$result){
 			$this->expectation = $expectation;
 			$this->result = $result;
+			$this->has = true;
 			return $this;
+		}
+		public function has(){
+			return $this->has;
 		}
 		public function expectation(){
 			return $this->expectation;
@@ -54,24 +59,32 @@ namespace chaco{
 		}
 		static public function exec($test_path){
 			self::include_setup_teardown($test_path,'__setup__.php');
-			
 			self::$start_time = microtime(true);
 			try{
 				ob_start();
-				include($test_path);
-				$res = ob_get_clean();
+					include($test_path);
+				$rtn = ob_get_clean();
 				
-				if(preg_match('/(Parse|Fatal) error:.+/',$res,$m)){
-					$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$res,$line) ?
+				if(preg_match('/(Parse|Fatal) error:.+/',$rtn,$m)){
+					$err = (preg_match('/syntax error.+code on line\s*(\d+)/',$rtn,$line) ?
 							'Parse error: syntax error '.$test_path.' code on line '.$line[1]
 							: $m[0]);
 				}
 				$res = array(1,0);
 			}catch(\chaco\AssertFailure $e){
 				list($debug) = $e->getTrace();
-				$res = array(-1,0,$debug['file'],$debug['line'],$e->getMessage(),$e->expectation(),$e->result());
+				$res = array(-1,0,$debug['file'],$debug['line'],$e->getMessage(),$e->expectation(),$e->result(),$e->has());
 			}catch(\Exception $e){
-				$res = array(-2,0,$e->getFile(),$e->getLine(),$e->getMessage());
+				$trace = $e->getTrace();
+				for($i=sizeof($trace);$i>=0;$i--){
+					if(isset($trace[$i]['file']) && $trace[$i]['file'] != __FILE__){
+						$res = array(-2,0,$trace[$i]['file'],$trace[$i]['line'],(string)$e);
+						break;
+					}
+				}
+				if(!isset($res)){
+					$res = array(-2,0,$e->getFile(),$e->getLine(),(string)$e);
+				}
 			}
 			$res[1] = (round(microtime(true) - self::$start_time,3));
 			self::include_setup_teardown($test_path,'__teardown__.php');
@@ -447,14 +460,14 @@ namespace chaco{
 				$this->request_header['Accept-Charset'] = $_SERVER['HTTP_ACCEPT_CHARSET'];
 			}
 			curl_setopt($this->resource,
-			CURLOPT_HTTPHEADER,
-			array_map(
-			function($k,$v){
-				return $k.': '.$v;
-			},
-			array_keys($this->request_header),
-			$this->request_header
-			)
+				CURLOPT_HTTPHEADER,
+				array_map(
+					function($k,$v){
+						return $k.': '.$v;
+					},
+					array_keys($this->request_header),
+					$this->request_header
+				)
 			);
 			curl_setopt($this->resource,CURLOPT_HEADERFUNCTION,array($this,'callback_head'));
 	
@@ -477,7 +490,7 @@ namespace chaco{
 			}
 			if(($err_code = curl_errno($this->resource)) > 0){
 				if($err_code == 47) return $this;
-				throw new \RuntimeException($err_code.': '.curl_error($this->resource));
+				throw new \RuntimeException($err_code.': '.curl_error($this->resource).', ['.$method.'] '.$url);
 			}
 	
 			$this->status = curl_getinfo($this->resource,CURLINFO_HTTP_CODE);
@@ -597,7 +610,6 @@ namespace chaco{
 	}
 }
 
-
 namespace{
 	if(count(debug_backtrace(false)) > 0){
 		$key = \chaco\Coverage::link();
@@ -657,13 +669,22 @@ namespace{
 		return $var;
 	}
 	/**
+	 * 失敗とする
+	 * @param string $msg 失敗時メッセージ
+	 * @throws \chaco\AssertFailure
+	 */
+	function failure($msg='failure'){
+		throw new \chaco\AssertFailure($msg);
+	}
+	/**
 	 *　等しい
 	 * @param mixed $expectation 期待値
 	 * @param mixed $result 実行結果
+	 * @param string $msg 失敗時メッセージ
 	 */
-	function eq($expectation,$result){
+	function eq($expectation,$result,$msg='failure equals'){
 		if(expvar($expectation) !== expvar($result)){
-			$failure = new \chaco\AssertFailure('failure equals');
+			$failure = new \chaco\AssertFailure($msg);
 			throw $failure->ab($expectation, $result);
 		}
 	}
@@ -671,10 +692,11 @@ namespace{
 	 * 等しくない
 	 * @param mixed $expectation 期待値
 	 * @param mixed $result 実行結果
+	 * @param string $msg 失敗時メッセージ
 	 */
-	function neq($expectation,$result){
+	function neq($expectation,$result,$msg='failure not equals'){
 		if(expvar($expectation) === expvar($result)){
-			$failure = new \chaco\AssertFailure('failure not equals');
+			$failure = new \chaco\AssertFailure($msg);
 			throw $failure->ab($expectation, $result);
 		}
 	}
@@ -682,11 +704,11 @@ namespace{
 	 *　文字列中に指定の文字列が存在する
 	 * @param string|array $keyword
 	 * @param string $src
+	 * @param string $msg 失敗時メッセージ
 	 */
-	function meq($keyword,$src){
+	function meq($keyword,$src,$msg='failure match'){
 		if(mb_strpos($src,$keyword) === false){
-			$failure = new \chaco\AssertFailure('failure match');
-			throw $failure->ab($keyword,$src);
+			throw new \chaco\AssertFailure($msg);
 		}
 	}
 	/**
@@ -694,10 +716,9 @@ namespace{
 	 * @param string $keyword
 	 * @param string $src
 	 */
-	function mneq($keyword,$src){
+	function mneq($keyword,$src,$msg='failure not match'){
 		if(mb_strpos($src,$keyword) !== false){
-			$failure = new \chaco\AssertFailure('failure not match');
-			throw $failure->ab($keyword,$src);
+			throw new \chaco\AssertFailure($msg);
 		}
 	}
 	/**
@@ -872,23 +893,23 @@ namespace{
 				break;
 			case -1:
 				$fail++;
-				list(,$time,$file,$line,$msg,$r1,$r2) = $info;
+				list(,$time,$file,$line,$msg,$r1,$r2,$has) = $info;
 	
 				$println();
 				$println($file,'1;34');
 				$println('['.$line.']: '.$msg,'1;31');
-				$println($tab.str_repeat('-',70));
 				
-				ob_start();
-					var_dump($r1);
-				$println($tab.str_replace(PHP_EOL,PHP_EOL.$tab,ob_get_clean()));
-				
-				$println($tab.str_repeat('-',70));
-	
-				ob_start();
-					var_dump($r2);
-				$println($tab.str_replace(PHP_EOL,PHP_EOL.$tab,ob_get_clean()));
-				
+				if($has){
+					$println($tab.str_repeat('-',70));
+					ob_start();
+						var_dump($r1);
+					$println($tab.str_replace(PHP_EOL,PHP_EOL.$tab,ob_get_clean()));
+					
+					$println($tab.str_repeat('-',70));
+					ob_start();
+						var_dump($r2);
+					$println($tab.str_replace(PHP_EOL,PHP_EOL.$tab,ob_get_clean()));
+				}				
 				break;
 			case -2:
 				$exception++;
@@ -937,7 +958,7 @@ namespace{
 						$dir_time += $time;
 						break;
 					case -1:
-						list(,$time,$file,$line,$msg,$r1,$r2) = $info;
+						list(,$time,$file,$line,$msg,$r1,$r2,$has) = $info;
 						$dir_failures++;
 							
 						$x = $get_testsuite($dir,$testsuite)->addChild('testcase');
@@ -945,12 +966,13 @@ namespace{
 						$x->addAttribute('time',$time);
 						$x->addAttribute('line',$line);
 	
-						ob_start();
-						var_dump($r2);
-						$failure_value = 'Line. '.$line.': '."\n".ob_get_clean();
-						$failure = dom_import_simplexml($x->addChild('failure'));
-						$failure->appendChild($failure->ownerDocument->createCDATASection($failure_value));
-							
+						if($has){
+							ob_start();
+								var_dump($r2);
+							$failure_value = 'Line. '.$line.': '."\n".ob_get_clean();
+							$failure = dom_import_simplexml($x->addChild('failure'));
+							$failure->appendChild($failure->ownerDocument->createCDATASection($failure_value));
+						}							
 						$dir_time += $time;
 						break;
 					case -2:
