@@ -199,7 +199,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function method_doc($class,$method){
-		foreach(Dt\Man::method_info($class,$method) as $k => $v){
+		foreach(Dt\Man::method_info($class,$method,true) as $k => $v){
 			$this->vars($k,$v);
 		}
 	}

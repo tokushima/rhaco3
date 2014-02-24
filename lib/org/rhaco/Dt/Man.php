@@ -122,16 +122,20 @@ class Man{
 	 * @param string $class
 	 * @param string $method
 	 */
-	static public function method_info($class,$method){
+	static public function method_info($class,$method,$deep=false){
 		$ref = new \ReflectionMethod('\\'.str_replace(array('.','/'),array('\\','\\'),$class),$method);
 		$params = $return = $modules = $see_class = $see_method = $see_url = $request = $context = $args = $throws =array();
 		$document = $src = null;
 		$deprecated = false;
+		$is_request_flow = is_subclass_of($ref->getName(),'\org\rhaco\flow\parts\RequestFlow');
 		
 		if(is_file($ref->getDeclaringClass()->getFileName())){
-			$src = implode(array_slice(file($ref->getDeclaringClass()->getFileName()),$ref->getStartLine(),($ref->getEndLine()-$ref->getStartLine()-1)));
+			$src = self::method_src($ref);
 			$document = trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$ref->getDocComment())));
 			$deprecated = (strpos($ref->getDocComment(),'@deprecated') !== false);
+			
+			$use_method_list = ($deep) ? self::use_method_list($ref->getDeclaringClass()->getName(),$ref->getName()) : 
+											array($ref->getDeclaringClass().'::'.$method);
 			
 			if(preg_match("/@return\s+([^\s]+)(.*)/",$document,$match)){
 				// type, summary
@@ -155,17 +159,22 @@ class Man{
 					}
 				}
 			}
+			// TODO
 			if(preg_match_all('/->in_vars\((["\'])(.+?)\\1/',$src,$match)){
-				foreach($match[2] as $n) $request[$n] = $context[$n] = array("mixed",null);
+				foreach($match[2] as $n){
+					$request[$n] = array("mixed",null);
+					if($is_request_flow) $context[$n] = $request[$n];
+				}
 			}
-			if(preg_match_all('/\$this->rm_vars\((["\'])(.+?)\\1/',$src,$match)){
+			if($is_request_flow && preg_match_all('/\$this->rm_vars\((["\'])(.+?)\\1/',$src,$match)){
 				foreach($match[2] as $n){
 					if(isset($context[$n])) unset($context[$n]);
 				}
 			}
-			if(strpos($src,'$this->rm_vars()') !== false){
+			if($is_request_flow && strpos($src,'$this->rm_vars()') !== false){
 				$context = array();
 			}
+
 			if(preg_match_all('/\$this->vars\((["\'])(.+?)\\1/',$src,$match)){				
 				foreach($match[2] as $n) $context[$n] = array("mixed",null);
 			}
@@ -175,7 +184,8 @@ class Man{
 						$request[$match[2][$k]][0] = self::type($match[1][$k],$class);
 						$request[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 					}
-					if(isset($context[$match[2][$k]])){
+					
+					if($is_request_flow && isset($context[$match[2][$k]])){
 						$context[$match[2][$k]][0] = self::type($match[1][$k],$class);
 						$context[$match[2][$k]][1] = (isset($match[3][$k]) ? $match[3][$k] : 'null');
 					}
@@ -190,6 +200,7 @@ class Man{
 			if(preg_match_all('/\$this->(map_arg)\((["\'])(.+?)\\2/',$src,$match)){
 				foreach($match[3] as $n) $args[$n] = "";
 			}
+			
 			if(preg_match_all("/@arg\s+([^\s]+)\s+\\$(\w+)(.*)/",$document,$match)){
 				foreach($match[0] as $k => $v){
 					if(isset($args[$match[2][$k]])){
@@ -197,21 +208,32 @@ class Man{
 					}
 				}
 			}
-			if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$document,$match)){
-				foreach($match[1] as $k => $n) $throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
+
+			foreach($use_method_list as $class_method){
+				list($uclass,$umethod) = explode('::',$class_method);
+				try{
+					$ref = new \ReflectionMethod($uclass,$umethod);
+					$use_method_src = self::method_src($ref);
+					$use_method_doc = self::method_doc($ref);
+					
+					if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\((.*)\)/",$use_method_src,$match)){
+						foreach($match[1] as $k => $n){
+							if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
+							$throws[$n] = array($n,trim((strpos($match[2][$k],'$') ? '#variable message' : $match[2][$k])));
+						}
+					}
+					if(preg_match_all("/\\\\rhaco\\\\Exceptions::add\(\s*new\s+([\\\\\w]+)\((.*)\)/",$use_method_src,$match)){
+						foreach($match[1] as $k => $n){
+							if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
+							$throws[$n] = array($n,trim((strpos($match[2][$k],'$') ? '#variable message' : $match[2][$k])));
+						}
+					}					
+					if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$use_method_doc,$match)){
+						foreach($match[1] as $k => $n) $throws[$n.$match[2][$k]] = array($n,trim($match[2][$k]));
+					}					
+				}catch(\ReflectionException $e){}
 			}
-			if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\((.*)\)/",$src,$match)){
-				foreach($match[1] as $k => $n){
-					if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
-					$throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
-				}
-			}
-			if(preg_match_all("/\\\\rhaco\\\\Exceptions::add\(\s*new\s+([\\\\\w]+)\((.*)\)/",$src,$match)){
-				foreach($match[1] as $k => $n){
-					if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
-					$throws[md5($n.$match[2][$k])] = array($n,trim($match[2][$k]));
-				}
-			}
+
 			ksort($throws);
 	
 			if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$document,$match)){
@@ -270,5 +292,64 @@ class Man{
 			$modules[$name][0] = trim(preg_replace('/@.+/','',$doc));
 		}
 		return $modules;
+	}
+	static public function method_src(\ReflectionMethod $ref){
+		if(is_file($ref->getDeclaringClass()->getFileName())){
+			return implode(array_slice(file($ref->getDeclaringClass()->getFileName()),$ref->getStartLine(),($ref->getEndLine()-$ref->getStartLine()-1)));
+		}
+		return '';
+	}
+	static public function method_doc(\ReflectionMethod $ref){
+		return trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$ref->getDocComment())));
+	}
+	
+
+	static private function use_method_list($class,$method,&$loaded_method_src=array()){
+		$list = array();
+		
+		try{
+			$ref = new \ReflectionMethod($class,$method);
+			$kname = $ref->getDeclaringClass()->getName().'::'.$ref->getName();
+			if(isset($loaded_method_src[$kname])) return array();
+			$loaded_method_src[$kname] = true;
+			$list[$kname] = true;
+
+			if(is_file($ref->getDeclaringClass()->getFileName())){
+				$src = self::method_src($ref);
+				$vars = array('$this'=>$class);
+				
+				if(preg_match_all('/(\$\w+)\s*=\s*new\s+([\\\\\w]+)/',$src,$m)){
+					foreach($m[1] as $k => $v){
+						$vars[$v] = $m[2][$k];
+					}
+				}
+				if(preg_match_all('/(\$\w+)->(\w+)/',$src,$m)){
+					foreach($m[1] as $k => $v){
+						if(isset($vars[$v])){
+							$list[$vars[$v].'::'.$m[2][$k]] = true;
+						}
+					}
+				}
+				if(preg_match_all('/([\\\\\w]+)::(\w+)/',$src,$m)){
+					foreach($m[1] as $k => $v){
+						if($v == 'self' || $v == 'static'){
+							$v = $class;
+						}
+						$list[$v.'::'.$m[2][$k]] = true;
+					}
+				}
+				foreach($list as $mcm => $b){
+					if(!isset($loaded_method_src[$mcm])){
+						list($c,$m) = explode('::',$mcm);
+						
+						foreach(self::use_method_list($c,$m,$loaded_method_src) as $k){
+							$list[$k] = true;
+						}
+					}
+				}
+			}
+		}catch(\ReflectionException $e){
+		}
+		return array_keys($list);		
 	}
 }
