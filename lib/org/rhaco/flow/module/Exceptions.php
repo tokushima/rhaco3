@@ -26,7 +26,7 @@ class Exceptions{
 				$src = str_replace(
 							$tag->plain(),
 							sprintf("<?php if(\\org\\rhaco\\Exceptions::has(%s)){ ?>"
-										."<?php \$%s = \\org\\rhaco\\Exceptions::gets(%s); ?>" // TODO 暫定
+										."<?php \$%s = \\org\\rhaco\\Exceptions::gets(%s); ?>"
 										.preg_replace("/<rt\:else[\s]*.*?>/i","<?php }else{ ?>",$value)
 									."<?php } ?>"
 									,$param
