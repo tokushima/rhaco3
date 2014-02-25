@@ -159,7 +159,6 @@ class Man{
 					}
 				}
 			}
-			// TODO
 			if(preg_match_all('/->in_vars\((["\'])(.+?)\\1/',$src,$match)){
 				foreach($match[2] as $n){
 					$request[$n] = array("mixed",null);
@@ -174,7 +173,6 @@ class Man{
 			if($is_request_flow && strpos($src,'$this->rm_vars()') !== false){
 				$context = array();
 			}
-
 			if(preg_match_all('/\$this->vars\((["\'])(.+?)\\1/',$src,$match)){				
 				foreach($match[2] as $n) $context[$n] = array("mixed",null);
 			}
@@ -208,7 +206,6 @@ class Man{
 					}
 				}
 			}
-
 			foreach($use_method_list as $class_method){
 				list($uclass,$umethod) = explode('::',$class_method);
 				try{
@@ -233,7 +230,6 @@ class Man{
 					}					
 				}catch(\ReflectionException $e){}
 			}
-
 			ksort($throws);
 	
 			if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$document,$match)){
@@ -302,8 +298,6 @@ class Man{
 	static public function method_doc(\ReflectionMethod $ref){
 		return trim(preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$ref->getDocComment())));
 	}
-	
-
 	static private function use_method_list($class,$method,&$loaded_method_src=array()){
 		$list = array();
 		
