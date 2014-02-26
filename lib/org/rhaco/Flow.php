@@ -329,9 +329,11 @@ class Flow{
 						}
 						if(isset($apps[$k]['post_after']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST' && !\org\rhaco\Exceptions::has()){
 							$this->after_redirect($apps[$k]['post_after'],$apps[$k],$apps,$obj);
-						}else if(isset($apps[$k]['after']) && !\org\rhaco\Exceptions::has()){
+						}
+						if(isset($apps[$k]['after']) && !\org\rhaco\Exceptions::has()){
 							$this->after_redirect($apps[$k]['after'],$apps[$k],$apps,$obj);
-						}else if(isset($apps[$k]['template'])){
+						}
+						if(isset($apps[$k]['template'])){
 							$this->print_template($this->template_path,$apps[$k]['template'],$this->media_url,$put_block,$obj,$apps,$k);
 						}else if(isset($apps[$k]['@']) && is_file($t = $apps[$k]['@'].'/resources/templates/'.$apps[$k]['method'].'.html')){
 							$this->print_template(dirname($t).'/',basename($t),$this->branch_url.$this->package_media_url.'/'.$idx,$put_block,$obj,$apps,$k,false);
@@ -441,7 +443,9 @@ class Flow{
 					break;
 				}
 			}
-			if(!$bool) throw new \InvalidArgumentException('key not found');
+			if(!$bool){
+				return;
+			}
 		}
 		$name = is_string($after) ? $after : (is_array($after) ? array_shift($after) : null);
 		$var_names = (!empty($after) && is_array($after)) ? $after : array();
