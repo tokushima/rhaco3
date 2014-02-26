@@ -127,7 +127,7 @@ class Man{
 		$params = $return = $modules = $see_class = $see_method = $see_url = $request = $context = $args = $throws =array();
 		$document = $src = null;
 		$deprecated = false;
-		$is_request_flow = is_subclass_of($ref->getName(),'\org\rhaco\flow\parts\RequestFlow');
+		$is_request_flow = $ref->getDeclaringClass()->isSubclassOf('\org\rhaco\flow\parts\RequestFlow');
 		
 		if(is_file($ref->getDeclaringClass()->getFileName())){
 			$src = self::method_src($ref);
