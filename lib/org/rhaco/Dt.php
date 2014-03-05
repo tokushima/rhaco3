@@ -560,7 +560,12 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			if(substr($model,0,1) !== '\\') $model = '\\'.$model;
 			$model_list = array($model=>array('class'=>$model));
 		}else{
-			$model_list = self::classes('\org\rhaco\store\db\Dao');
+			foreach(self::classes('\org\rhaco\store\db\Dao') as $class_info){
+				$r = new \ReflectionClass($class_info['class']);
+				if($r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'){
+					$model_list[] = $class_info;
+				}
+			}
 		}
 		foreach($model_list as $class_info){
 			$r = new \ReflectionClass($class_info['class']);
