@@ -564,15 +564,16 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		foreach($model_list as $class_info){
 			$r = new \ReflectionClass($class_info['class']);
-	
-			if($r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'){
-				if($drop && call_user_func(array($r->getName(),'drop_table'))){
-					$result[] = array(-1,$r->getName());
-				}
-				if(call_user_func(array($r->getName(),'create_table'))){
-					$result[] = array(1,$r->getName());
-				}
-				}
+
+			if($r->getParentClass() === false || $r->getParentClass()->getName() == 'org\rhaco\store\db\Dao'){
+				throw new \InvalidArgumentException('not inherit the \org\rhaco\store\db\Dao');
+			}
+			if($drop && call_user_func(array($r->getName(),'drop_table'))){
+				$result[] = array(-1,$r->getName());
+			}
+			if(call_user_func(array($r->getName(),'create_table'))){
+				$result[] = array(1,$r->getName());
+			}
 		}
 		return $result;
 	}
