@@ -219,7 +219,7 @@ class Man{
 							$throws[$n] = array($n,trim((strpos($match[2][$k],'$') ? '#variable message' : $match[2][$k])));
 						}
 					}
-					if(preg_match_all("/\\\\rhaco\\\\Exceptions::add\(\s*new\s+([\\\\\w]+)\((.*)\)/",$use_method_src,$match)){
+					if(preg_match_all("/\\\\rhaco\\\\Exceptions::add\(\s*new\s+([\\\\\w]+)\((.*?)\)/",$use_method_src,$match)){
 						foreach($match[1] as $k => $n){
 							if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
 							$throws[$n] = array($n,trim((strpos($match[2][$k],'$') ? '#variable message' : $match[2][$k])));

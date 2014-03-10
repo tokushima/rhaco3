@@ -23,7 +23,9 @@ class Http{
 	
 	private $user;
 	private $password;
-
+	
+	private $raw;
+	
 	public function __construct($agent=null,$timeout=30,$redirect_max=20){
 		$this->agent = $agent;
 		$this->timeout = (int)$timeout;
@@ -163,6 +165,14 @@ class Http{
 		return $this->request('POST',$url);
 	}
 	/**
+	 * POSTリクエスト(RAW)
+	 * @param string $url
+	 */
+	public function do_raw($url,$value){
+		$this->raw = $value;
+		return $this->request('RAW',$url);
+	}
+	/**
 	 * GETリクエストでダウンロードする
 	 * @param string $url
 	 * @param string $filename
@@ -241,6 +251,7 @@ class Http{
 			list($url) = explode('?',$url,2);
 		}
 		switch($method){
+			case 'RAW';
 			case 'POST': curl_setopt($this->resource,CURLOPT_POST,true); break;
 			case 'GET': curl_setopt($this->resource,CURLOPT_HTTPGET,true); break;
 			case 'HEAD': curl_setopt($this->resource,CURLOPT_NOBODY,true); break;
@@ -268,6 +279,10 @@ class Http{
 				}else{
 					curl_setopt($this->resource,CURLOPT_POSTFIELDS,http_build_query($this->request_vars));
 				}
+				break;
+			case 'RAW':
+				$this->request_header['Content-Type'] = 'text/plain';
+				curl_setopt($this->resource,CURLOPT_POSTFIELDS,$this->raw);
 				break;
 			case 'GET':
 			case 'HEAD':
@@ -340,7 +355,7 @@ class Http{
 			});
 		}
 		$this->request_header = $this->request_vars = array();
-		$this->head = $this->body = '';
+		$this->head = $this->body = $this->raw = '';
 		curl_exec($this->resource);
 		if(!empty($download_path) && $fp){
 			fclose($fp);
