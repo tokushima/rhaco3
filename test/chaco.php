@@ -391,8 +391,15 @@ namespace chaco{
 			if(is_string($name) && strpos($name,'/') !== false){
 				list($name,$path) = explode('/',$name,2);
 				foreach(new \chaco\XmlIterator($name,$this->value(),0,0) as $t){
-					return $t->find_all($path,$offset,$length);
+					try{
+						$it = $t->find_all($path,$offset,$length);
+						if($it->valid()){
+							reset($it);
+							return $it;
+						}
+					}catch(\chaco\NotFoundException $e){}
 				}
+				throw new \chaco\NotFoundException();
 			}
 			return new \chaco\XmlIterator($name,$this->value(),$offset,$length);
 		}
@@ -401,7 +408,7 @@ namespace chaco{
 		 * @param string $name
 		 * @param integer $offset
 		 * @throws \chaco\NotFoundException
-		 * @return $this
+		 * @return \chaco\Xml
 		 */
 		public function find_get($name,$offset=0){
 			foreach($this->find_all($name,$offset,1) as $x){
@@ -412,7 +419,7 @@ namespace chaco{
 		/**
 		 * 匿名タグとしてインスタンス生成
 		 * @param string $value
-		 * @return self
+		 * @return \chaco\Xml
 		 */
 		static public function anonymous($value){
 			$xml = new self('XML'.uniqid());
@@ -426,7 +433,7 @@ namespace chaco{
 		 * @param string $plain
 		 * @param string $name
 		 * @throws \chaco\NotFoundException
-		 * @return self
+		 * @return \chaco\Xml
 		 */
 		static public function extract($plain,$name=null){
 			if(!(!empty($name) && strpos($plain,$name) === false) && self::find_extract($x,$plain,$name)){
@@ -539,8 +546,9 @@ namespace chaco{
 		}
 		public function rewind(){
 			for($i=0;$i<$this->offset;$i++){
-				$this->valid();
-				$this->current();
+				if($this->valid()){
+					$this->current();
+				}
 			}
 		}
 	}
@@ -922,6 +930,13 @@ namespace chaco{
 		}
 		public function __destruct(){
 			if(isset($this->resource)) curl_close($this->resource);
+		}
+		/**
+		 * XMLオブジェクトとして返す
+		 * @return \chaco\Xml
+		 */
+		public function xml(){
+			return \chaco\Xml::extract($this->body());
 		}
 	}
 	class Args{
