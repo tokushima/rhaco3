@@ -1,5 +1,5 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->vars('user_name','aaaa');
 $b->vars('password','bbbb');
 $b->do_get(test_map_url('test_login::login'));

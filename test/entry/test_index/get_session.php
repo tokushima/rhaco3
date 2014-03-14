@@ -1,5 +1,5 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_index::get_session'));
 eq('<result><abc /></result>',$b->body());
 
@@ -10,7 +10,7 @@ $b->do_get(test_map_url('test_index::get_session'));
 eq('<result><abc>hoge</abc></result>',$b->body());
 
 
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_index::get_session'));
 eq('<result><abc /></result>',$b->body());
 
@@ -21,7 +21,7 @@ eq('<result><abc>hoge</abc></result>',$b->body());
 eq(test_map_url('test_index::get_session'),$b->url());
 
 
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_index::get_session'));
 eq('<result><abc /></result>',$b->body());
 

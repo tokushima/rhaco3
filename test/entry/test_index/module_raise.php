@@ -1,5 +1,5 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_index::module_raise'));
 eq(403,$b->status());
 mneq('INDEX',$b->body());

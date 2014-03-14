@@ -1,5 +1,5 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_index::under_var'));
 eq(200,$b->status());
 meq('hogehoge',$b->body());

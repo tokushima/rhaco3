@@ -1093,16 +1093,6 @@ namespace{
 		if(isset($urls[$map_name]) && substr_count($urls[$map_name],'%s') == sizeof($args)) return vsprintf($urls[$map_name],$args);
 		throw new \RuntimeException($map_name.(isset($urls[$map_name]) ? '['.sizeof($args).']' : '').' not found');
 	}
-	/**
-	 * Browser
-	 * @param string $agent
-	 * @param number $timeout
-	 * @param number $redirect_max
-	 * @return \chaco\Browser
-	 */
-	function b($agent=null,$timeout=30,$redirect_max=20){
-		return new \chaco\Browser($agent,$timeout,$redirect_max);
-	}
 	if(is_file($f=getcwd().'/bootstrap.php') || is_file($f=getcwd().'/vendor/autoload.php')){
 		ob_start();
 			include_once($f);

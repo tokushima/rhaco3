@@ -1,5 +1,5 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_login::aaa'));
 eq(401,$b->status());
 eq(test_map_url('test_login::login'),$b->url());

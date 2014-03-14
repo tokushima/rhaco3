@@ -1,5 +1,5 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->vars('value1','abcd');
 $b->do_post(test_map_url('test_index::upload_value'));
 \org\rhaco\Xml::set($xml,$b->body(),'result');

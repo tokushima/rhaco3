@@ -1,12 +1,12 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_login::login'));
 eq(401,$b->status());
 eq(test_map_url('test_login::login'),$b->url());
 meq('<message group="do_login" type="LogicException">Unauthorized</message>',$b->body());
 
 
-$b = b();
+$b = new \chaco\Browser();
 $b->vars('user_name','hogeuser');
 $b->vars('password','hogehoge');
 $b->do_post(test_map_url('test_login::login'));

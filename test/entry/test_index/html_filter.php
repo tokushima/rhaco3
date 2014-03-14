@@ -1,5 +1,5 @@
 <?php
-$b = b();
+$b = new \chaco\Browser();
 $b->do_get(test_map_url('test_index::html_filter'));
 meq('PPPPP',$b->body());
 meq('&lt;tag&gt;QQQ&lt;/tag&gt;',$b->body());
