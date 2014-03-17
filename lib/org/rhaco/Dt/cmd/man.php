@@ -1,19 +1,17 @@
 <?php
 /**
  * Class descriptions
- * @param string $value package path
+ * @arg package
  * @param string $m method name
+ * @param string $module
  */
-
-$value = $_ENV['value'];
-$params = $_ENV['params'];
 try{
-	$rtn = \org\rhaco\Dt::class_info($value);
+	$rtn = \org\rhaco\Dt::class_info($arg);
 }catch(\Exception $e){
 	$libs = array();
 	$len = 0;
 	foreach(\org\rhaco\Dt::classes() as $k => $v){
-		if(empty($value) || strpos(strtolower($k),strtolower($value)) !== false){
+		if(empty($arg) || strpos(strtolower($k),strtolower($arg)) !== false){
 			$info = \org\rhaco\Dt::class_info($k);
 			list($libs[$k]) = explode("\n",$info['description']);
 			if(strlen($k) > $len) $len = strlen($k);
@@ -25,9 +23,9 @@ try{
 	}
 	exit;
 }
-if(isset($params['m'])){
-	$rtn = \org\rhaco\Dt::method_info($value,$params['m']);
-	print("\n".'class '.$value.' in method '.$rtn['method_name'].':'.PHP_EOL);
+if(!empty($m)){
+	$rtn = \org\rhaco\Dt::method_info($arg,$m);
+	print("\n".'class '.$arg.' in method '.$rtn['method_name'].':'.PHP_EOL);
 	print(' Description:'.PHP_EOL);
 	print('   '.str_replace("\n","\n   ",$rtn['description']).PHP_EOL);
 	print("\n".' Parameter:'.PHP_EOL);
@@ -39,21 +37,21 @@ if(isset($params['m'])){
 	if(!empty($rtn['return'])){
 		print(sprintf('   %s %s',$rtn['return'][0],$rtn['return'][1]).PHP_EOL);
 	}
-}else if(isset($params['module'])){
-	$rtn = \org\rhaco\Dt::class_info($value);
-	if(!isset($rtn['modules'][$params['module']])) throw new \RuntimeException('module `'.$params['module'].'` not found');
-	$module = $rtn['modules'][$params['module']];
+}else if(!empty($module)){
+	$rtn = \org\rhaco\Dt::class_info($arg);
+	if(!isset($rtn['modules'][$module])) throw new \RuntimeException('module `'.$module.'` not found');
+	$module_info = $rtn['modules'][$module];
 	
-	print("\n".'class '.$value.' in module '.$params['module'].':'.PHP_EOL);
+	print("\n".'class '.$arg.' in module '.$module.':'.PHP_EOL);
 	print(' Description:'.PHP_EOL);
-	print('   '.str_replace("\n","\n   ",$module[0]).PHP_EOL);
+	print('   '.str_replace("\n","\n   ",$module_info[0]).PHP_EOL);
 	print("\n".' Parameter:'.PHP_EOL);
-	$len = \org\rhaco\lang\Text::length(array_keys($module[1]));
-	foreach($module[1] as $p){
+	$len = \org\rhaco\lang\Text::length(array_keys($module_info[1]));
+	foreach($module_info[1] as $p){
 		print('    '.str_pad('',$len).'    ('.$p[1].') '.$p[0].' : '.$p[2].PHP_EOL);
 	}	
 }else{
-	$rtn = \org\rhaco\Dt::class_info($value);
+	$rtn = \org\rhaco\Dt::class_info($arg);
 	print("\n".'class '.$rtn['package'].':'.PHP_EOL);
 	print('  Version: '.$rtn['version'].PHP_EOL.PHP_EOL);
 	print('  Description:'.PHP_EOL);

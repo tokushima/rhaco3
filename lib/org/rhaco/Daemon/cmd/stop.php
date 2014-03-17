@@ -1,13 +1,14 @@
 <?php
 /**
  * stop daemon
- * @param string $d pid file path
+ * @param string $pid
+ * @param string $parent
+ * @param string $exec
+ * @param string $name
  */
-$pid = isset($params['d']) ? $params['d'] : '';
-$parent = isset($params['parent']) ? $params['parent'] : null;
 $opt = array(
-			'exec_php'=>(isset($params['exec']) ? $params['exec'] : null),
-			'name'=>(isset($params['name']) ? $params['name'] : null),
+			'exec_php'=>$exec,
+			'name'=>$name,
 		);
 if(!empty($parent)){
 	$r = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$parent));

@@ -4,9 +4,6 @@
  * @param string $model
  * @param boolean $drop
  */
-$drop = $has('drop');
-$model = $in_value('model');
-
 foreach(\org\rhaco\Dt::create_talbe($model,$drop) as $result){
 	if($result[0] == -1){
 		print('dropped '.$result[1].PHP_EOL);

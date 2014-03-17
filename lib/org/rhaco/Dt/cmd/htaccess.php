@@ -3,7 +3,7 @@
  * .htaccessを書き出す
  * @param string $base 
  */
-$base = $has('base') ? $in_value('base') : '/'.basename(getcwd());
+if(empty($base)) $base = '/'.basename(getcwd());
 if(substr($base,0,1) !== '/') $base = '/'.$base;
 $rules = "RewriteEngine On\nRewriteBase ".$base."\n\n";
 foreach(new DirectoryIterator(getcwd()) as $f){

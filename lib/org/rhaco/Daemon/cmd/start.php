@@ -1,20 +1,29 @@
 <?php
 /**
  * start daemon
+ * @param string $exec
+ * @param string $pid
+ * @param string $parent
+ * @param string $exec
+ * @param string $name
+ * @param integer $clients
+ * @param integer $sleep
+ * @param string $dir
+ * @param string $uid
+ * @param string $euid
+ * @param string $egid
  * @param string $php execute php file
  */
-$pid = isset($params['d']) ? $params['d'] : null;
-$parent = isset($params['parent']) ? $params['parent'] : null;
 $opt = array(
-			'exec_php'=>(isset($params['exec']) ? $params['exec'] : null),
-			'name'=>(isset($params['name']) ? $params['name'] : null),
-			'clients'=>(isset($params['clients']) ? $params['clients'] : 1),
-			'sleep'=>(isset($params['sleep']) ? $params['sleep'] : null),
-			'dir'=>(isset($params['dir']) ? $params['dir'] : null),
-			'uid'=>(isset($params['uid']) ? $params['uid'] : null),
-			'euid'=>(isset($params['euid']) ? $params['euid'] : null),
-			'gid'=>(isset($params['gid']) ? $params['gid'] : null),
-			'egid'=>(isset($params['egid']) ? $params['egid'] : null),
+			'exec_php'=>$exec,
+			'name'=>$name,
+			'clients'=>(empty($clients) ? 1 : $clients),
+			'sleep'=>$sleep,
+			'dir'=>$dir,
+			'uid'=>$uid,
+			'euid'=>$euid,
+			'gid'=>$gid,
+			'egid'=>$egid,
 		);
 if(!empty($parent)){
 	$r = new \ReflectionClass('\\'.str_replace(array('.','/'),array('\\','\\'),$parent));

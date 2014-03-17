@@ -1,16 +1,15 @@
 <?php
 /**
  * ファイルを監視し更新時に通知する
- * @param string $value 
- * @param null $error
+ * @param boolean $error
  */
-if(empty($value)){
+if(empty($arg)){
 	if(isset($params['error'])){
 		$error_log = ini_get('error_log');
 		if(empty($error_log)) throw new \RuntimeException('undefined error_log');
-		$value = $error_log;
+		$arg = $error_log;
 	}else{
-		$value = getcwd();
+		$arg = getcwd();
 	}
 }
-$self = new \org\rhaco\io\FileChangedLog($value);
+$self = new \org\rhaco\io\FileChangedLog($arg);
