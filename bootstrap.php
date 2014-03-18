@@ -42,4 +42,4 @@ if(is_file($dir.'/__settings__.php')) include_once($dir.'/__settings__.php');
 if(!defined('COMMONDIR') && is_dir($dir.'/commons')) define('COMMONDIR',$dir.'/commons');
 if(!defined('APPMODE')) define('APPMODE','local');
 if(defined('COMMONDIR') && is_file($f=(constant('COMMONDIR').'/'.constant('APPMODE').'.php'))) include_once($f);
-if(!defined('KATE_EXCEPTION_FUNC')) define('KATE_EXCEPTION_FUNC','\\org\\rhaco\\Log::error');
+if(!defined('BREV_ERROR_CALLBACK')) define('BREV_ERROR_CALLBACK','\\org\\rhaco\\Log::error');
