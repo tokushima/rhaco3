@@ -387,12 +387,12 @@ namespace chaco{
 		 * @param integer $length
 		 * @return \chaco\XmlIterator
 		 */
-		public function find_all($name,$offset=0,$length=0){
+		public function find($name,$offset=0,$length=0){
 			if(is_string($name) && strpos($name,'/') !== false){
 				list($name,$path) = explode('/',$name,2);
 				foreach(new \chaco\XmlIterator($name,$this->value(),0,0) as $t){
 					try{
-						$it = $t->find_all($path,$offset,$length);
+						$it = $t->find($path,$offset,$length);
 						if($it->valid()){
 							reset($it);
 							return $it;
@@ -411,7 +411,7 @@ namespace chaco{
 		 * @return \chaco\Xml
 		 */
 		public function find_get($name,$offset=0){
-			foreach($this->find_all($name,$offset,1) as $x){
+			foreach($this->find($name,$offset,1) as $x){
 				return $x;
 			}
 			throw new \chaco\NotFoundException($name.' not found');
