@@ -331,6 +331,18 @@ class Xml implements \IteratorAggregate{
 		return (!empty($last) && substr($last,0,2) == 'in') ? array() : null;
 	}
 	/**
+	 * 置換して新規のインスタンスを返す
+	 * @param string $path
+	 * @param string $value
+	 * @return self
+	 */
+	public function replace($path,$value){
+		$path = str_replace('/','.',$path);
+		$xml = clone($this);
+		$xml->f($path.'.value()',$value);
+		return $xml;
+	}
+	/**
 	 * idで検索する
 	 *
 	 * @param string $name 指定のID
