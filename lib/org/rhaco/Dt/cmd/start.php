@@ -29,7 +29,7 @@ file_put_contents(getcwd().'/__settings__.php',
 );
 \brev\Std::println_success('Written: '.realpath(getcwd().'/__settings__.php'));
 
-if(\brev\Std::read('create .htaccess?','n',['y','n']) == 'y'){
+if(\brev\Std::read('create .htaccess?','n',array('y','n')) == 'y'){
 	$base = \brev\Std::read('base path?','/'.basename(getcwd()));
 	
 	list($path,$rules) = \org\rhaco\Dt::htaccess($base);
