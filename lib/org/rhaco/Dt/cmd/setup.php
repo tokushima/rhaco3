@@ -51,12 +51,9 @@ if(is_dir($cmddir)){
 		}
 	}
 }
-if(empty($mode_list)){
-	$mode_list[] = 'local';
-}
 $default = (empty($appmode) || array_search($appmode,$mode_list) !== false) ? $appmode : 'local';
 
-$mode = \brev\Std::read('app mode?',$default,$mode_list);
+$mode = \brev\Std::read('Application mode',$default,$mode_list);
 
 $settings_file = getcwd().'/__settings__.php';
 file_put_contents($settings_file,
@@ -67,7 +64,7 @@ file_put_contents($settings_file,
 );
 \brev\Std::println_success('Written: '.realpath($settings_file));
 
-if($default != $appmode){
+if($mode != $appmode){
 	\brev\Std::println_info('Application mode changed.');
 	exit;
 }
