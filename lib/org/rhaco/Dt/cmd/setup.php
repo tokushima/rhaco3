@@ -75,7 +75,7 @@ if(\brev\Std::read('create .htaccess?','n',array('y','n')) == 'y'){
 	$base = \brev\Std::read('base path?','/'.basename(getcwd()));
 	
 	list($path,$rules) = \org\rhaco\Dt::htaccess($base);
-	\brev\Std::println_success('Written: '.realpath($path));
+	\brev\Std::println_success('Written '.realpath($path));
 }
 $setup_cmd = substr(\org\rhaco\Dt::setup_file(),0,-4).'.cmd.php';
 if(is_file($setup_cmd)){
