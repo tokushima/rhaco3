@@ -662,7 +662,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		});
 		$covered_list = array();
 		$total_covered = 0;
-		$time = null;
+		$time = $create_date = null;
 		$target = (!$this->is_vars('target') && !empty($target_list)) ? $target_list[0] : $this->in_vars('target');
 
 		if(!empty($target) && is_file($target) && \org\rhaco\Xml::set($xml,file_get_contents($target),'coverage')){
