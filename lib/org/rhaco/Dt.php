@@ -741,4 +741,23 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		
 		return array(realpath('.htaccess'),$rules);
 	}
+	/**
+	 * アプリケーションモードに従い初期処理を行うファイルのパス
+	 * @return string
+	 */
+	static public function setup_file(){
+		$dir = defined('COMMONDIR') ? dirname(constant('COMMONDIR')) : getcwd();
+		return $dir.'/setup/'.(defined('APPMODE') ? constant('APPMODE') : 'local').'.php';
+	}
+	/**
+	 * アプリケーションモードに従い初期処理を実行する
+	 * setup/[APPMODE].phpの実行
+	 */
+	static public function setup(){
+		if(is_file($f=self::setup_file())){
+			include($f);
+			return true;
+		}
+		return false;
+	}
 }
