@@ -82,7 +82,7 @@ if(is_file($setup_cmd)){
 	include($setup_cmd);
 }
 if(is_file($f=\org\rhaco\Dt::setup_file())){
-	\brev\Std::println_success('Loading .'.$f);
+	\brev\Std::println_success('Loading '.$f);
 	\org\rhaco\Dt::setup();
 }
 
