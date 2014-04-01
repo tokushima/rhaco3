@@ -81,8 +81,8 @@ $setup_cmd = substr(\org\rhaco\Dt::setup_file(),0,-4).'.cmd.php';
 if(is_file($setup_cmd)){
 	include($setup_cmd);
 }
-if(\org\rhaco\Dt::setup()){
-	\brev\Std::println_success('Setup executed.');
+if(is_file($f=\org\rhaco\Dt::setup_file())){
+	\brev\Std::println_success('Loading .'.$f);
+	\org\rhaco\Dt::setup();
 }
-
 
