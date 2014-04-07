@@ -40,6 +40,8 @@ date_default_timezone_set('Asia/Tokyo');
 	)
 ));
 \org\rhaco\Object::set_module(array(
-	'org.rhaco.net.Session'=>array('org.rhaco.flow.module.SessionDao')
+	'org.rhaco.net.Session'=>array('org.rhaco.flow.module.SessionDao'),
+	'org.rhaco.store.queue.Queue'=>array('org.rhaco.store.queue.module.Dao'),
+	'org.rhaco.net.mail.Mail'=>array('org.rhaco.net.mail.module.SmtpBlackholeDao'),
 ));
 

@@ -25,6 +25,9 @@ class Mail extends \org\rhaco\Object{
 	protected $from;
 	protected $name;
 	protected $return_path;
+	protected $reply_to;
+	protected $errors_to;
+	
 	protected $notification;
 	protected $encode = "jis";
 
@@ -93,8 +96,9 @@ class Mail extends \org\rhaco\Object{
 		if(!empty($this->cc)) $send .= $this->line("Cc: ".$this->implode_address($this->cc));
 		if(!empty($this->bcc)) $send .= $this->line("Bcc: ".$this->implode_address($this->bcc));
 		if(!empty($this->return_path)) $send .= $this->line("Return-Path: ".$this->return_path);
+		if(!empty($this->reply_to)) $send .= $this->line("Reply-To: ".$this->reply_to);
+		if(!empty($this->errors_to)) $send .= $this->line("Errors-To: ".$this->errors_to);
 		if(!empty($this->notification)) $send .= $this->line("Disposition-Notification-To: ".$this->notification);
-		
 		$send .= $this->line("Date: ".date("D, d M Y H:i:s O",time()));
 		$send .= $this->line("Subject: ".$this->subject());
 
@@ -301,10 +305,31 @@ class Mail extends \org\rhaco\Object{
 		if(!is_file($template_path)) throw new \InvalidArgumentException($template_path.' not found');
 		if(\org\rhaco\Xml::set($xml,file_get_contents($template_path),'mail')){
 			$from = $xml->f('from');
-			if($from !== null) $this->from($from->in_attr('address'),$from->in_attr('name'));
-			foreach($xml->in('to') as $to) $this->to($to->in_attr('address'),$to->in_attr('name'));
+			if($from !== null){
+				$this->from($from->in_attr('address'),$from->in_attr('name'));
+			}
+			foreach($xml->in('to') as $to){
+				$this->to($to->in_attr('address'),$to->in_attr('name'));
+			}
+			$return_path = $xml->f('return_path');
+			if($return_path !== null){
+				$this->return_path($return_path->in_attr('address'));
+			}
+			$notification = $xml->f('notification');
+			if($notification !== null){
+				$this->notification($notification->in_attr('address'));
+			}
+			$reply_to = $xml->f('reply_to');
+			if($reply_to !== null){
+				$this->reply_to($reply_to->in_attr('address'));
+			}
+			$errors_to = $xml->f('errors_to');
+			if($errors_to !== null){
+				$this->errors_to($errors_to->in_attr('address'));
+			}
 			$subject = trim(str_replace(array("\r\n","\r","\n"),'',$xml->f('subject.value()')));
 			$body = $xml->f('body.value()');
+			
 			$template = new \org\rhaco\Template();
 			$template->cp($vars);
 			$template->vars('t',new \org\rhaco\flow\module\Helper());
