@@ -34,7 +34,7 @@ class Json{
 				}
 				return sprintf('{%s}',implode(',',$list));
 			case 'string':
-				return sprintf("\"%s\"",addslashes($v));
+				return sprintf("\"%s\"",str_replace("\n","\\n",addslashes($v)));
 			default:
 		}
 		return 'null';
