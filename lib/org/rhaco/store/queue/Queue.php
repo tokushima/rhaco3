@@ -125,13 +125,16 @@ class Queue extends \org\rhaco\Object{
 	 * 終了したものを削除する
 	 * @param string $type キューの種類
 	 * @param timestamp $fin 終了時間の秒
+	 * @param integer $paginate_by 一度に削除する数
 	 */
-	static public function clean($type,$fin=null){
+	static public function clean($type,$fin=null,$paginate_by=100){
+		if(empty($fin)) $fin = time();
+		$paginator = new \org\rhaco\Paginator($paginate_by);
 		/**
 		 * 終了したものを削除する
 		 * @param string  $type キューの種類
 		 * @param integer $fin この時間未満のものを対象とする
 		 */
-		static::module('clean',$type,$fin);
+		static::module('clean',$type,$fin,$paginator);
 	}
 }

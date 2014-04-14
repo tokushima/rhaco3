@@ -1,0 +1,8 @@
+
+0.4.1
+	Mail
+		added: errors_to()
+		added: reply_to()
+	Queue
+		specifying: Queue::clean($type,$fin,$paginate_by)
+0.4.0 (2014/04/01)

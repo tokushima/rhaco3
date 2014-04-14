@@ -126,11 +126,15 @@ class Dao{
 	 * @param string $type
 	 * @param timestamp $fin
 	 */
-	public function clean($type,$fin){
-		foreach(\org\rhaco\store\queue\module\Dao\QueueDao::find(Q::eq('type',$type),Q::neq('fin',null),Q::lte('fin',$fin)) as $obj){
-			try{
-				$obj->delete();
-			}catch(\BadMethodCallException $e){}
+	public function clean($type,$fin,\org\rhaco\Paginator $paginator){
+		foreach(\org\rhaco\store\queue\module\Dao\QueueDao::find(
+				Q::eq('type',$type),
+				Q::neq('fin',null),
+				Q::lte('fin',$fin),
+				Q::order('id'),
+				$paginator
+		) as $obj){
+			$obj->delete();
 		}
 		\org\rhaco\store\queue\module\Dao\QueueDao::commit();
 	}
