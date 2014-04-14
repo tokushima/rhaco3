@@ -157,6 +157,8 @@ class Helper{
 	}
 	/**
 	 * アプリケーションのメディアのURLを返す
+	 * メディアファイルは別ドメインの場合もあるのでsecure=trueが指定されていても、あえてhttpsへは置換されません。
+	 * httpsである必要な場合はFlowの設定media_path等でhttpsを含むURLを設定してください。
 	 * @param string $url ベースのURLに続く相対パス
 	 * @return string
 	 */
