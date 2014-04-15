@@ -1,4 +1,9 @@
 <?php
+/**
+ * Testing Framework
+ * PHP 5 >= 5.3.0 
+ * @author tokushima
+ */
 namespace chaco{
 	class Conf{
 		static private $conf = array();
@@ -55,6 +60,13 @@ namespace chaco{
 		static private $resultset = array();
 		static private $start_time;
 
+		static public function fixture(){
+			if(is_file($inc=substr(__FILE__,0,-4).'.fixture.php')){
+				include_once($inc);
+				return true;
+			}
+			return false;
+		}		
 		static private function include_setup_teardown($test_file,$include_file){
 			if(strpos($test_file,__DIR__) === 0){
 				$inc = array();
@@ -792,6 +804,10 @@ namespace chaco{
 			curl_setopt($this->resource,CURLOPT_FAILONERROR,false);
 			curl_setopt($this->resource,CURLOPT_TIMEOUT,$this->timeout);
 	
+			if(\chaco\Conf::get('ssl_verify',true) === false){
+				curl_setopt($this->resource, CURLOPT_SSL_VERIFYHOST,false);
+				curl_setopt($this->resource, CURLOPT_SSL_VERIFYPEER,false);
+			}			
 			if(!isset($this->request_header['Expect'])){
 				$this->request_header['Expect'] = null;
 			}
@@ -946,14 +962,18 @@ namespace chaco{
 		static public function init(){
 			$opt = $value = array();
 			$argv = array_slice((isset($_SERVER['argv']) ? $_SERVER['argv'] : array()),1);
-				
+			
 			for($i=0;$i<sizeof($argv);$i++){
 				if(substr($argv[$i],0,2) == '--'){
 					$opt[substr($argv[$i],2)][] = ((isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : true);
 				}else if(substr($argv[$i],0,1) == '-'){
 					$keys = str_split(substr($argv[$i],1),1);
-					foreach($keys as $k){
-						$opt[$k][] = true;
+					if(count($keys) == 1){
+						$opt[$keys[0]][] = ((isset($argv[$i+1]) && $argv[$i+1][0] != '-') ? $argv[++$i] : true);
+					}else{
+						foreach($keys as $k){
+							$opt[$k][] = true;
+						}
 					}
 				}else{
 					$value[] = $argv[$i];
@@ -976,7 +996,6 @@ namespace chaco{
 		}
 	}
 }
-
 namespace{
 	if(count(debug_backtrace(false)) > 0){
 		$key = \chaco\Coverage::link();
@@ -1108,28 +1127,48 @@ namespace{
 			\chaco\Conf::set($k,$v);
 		}
 	}
-	\chaco\Args::init();
-	foreach(array('coverage','c','output','o','libdir','outputdir') as $k){
-		if(($v = \chaco\Args::opt($k,null)) !== null){
-			\chaco\Conf::set($k,$v);
-		}
-	}
-	
-	$path = realpath(\chaco\Args::value(__DIR__));
-	if($path === false) die(\chaco\Args::value().' found'.PHP_EOL);
-	
-	$tab = '  ';
-	$success = $fail = $exception = $exe_time = $use_memory = 0;
-	$test_list = array();
-	$output_dir = \chaco\Conf::get('outputdir',getcwd());
-	if(substr($output_dir,-1) != '/') $output_dir = $output_dir.'/';
-	
 	$println = function($msg='',$color=30){
 		print("\033[".$color."m");
 		print($msg.PHP_EOL);
 		print("\033[0m");
 	};
 	
+	\chaco\Args::init();
+	if(\chaco\Args::opt('help')){
+		$println('chaco 0.4.2-dev'); // version
+		$println('Usage: php '.basename(__FILE__).' [options] [dir/ | dir/file.php]');
+		$println();
+		$println('Options:');
+		$println('  -c|--coverage <file>   Generate code coverage report in XML format.');
+		$println('  -o|--output <file>     Log test execution in XML format to file');
+		$println('  --d <dir>         Library path of coverage.');
+		exit;
+	}
+	foreach(array('coverage','c','output','o','libdir','outputdir','ssl_verify') as $k){
+		if(($v = \chaco\Args::opt($k,null)) !== null){
+			\chaco\Conf::set($k,$v);
+		}
+	}
+	$println('Progress:','1;33');
+	
+	$path = realpath(\chaco\Args::value(__DIR__));
+	if($path === false) die(\chaco\Args::value().' found'.PHP_EOL);
+
+	$tab = '  ';
+	$success = $fail = $exception = $exe_time = $use_memory = 0;
+	$test_list = array();
+	$output_dir = \chaco\Conf::get('outputdir',getcwd());
+	if(substr($output_dir,-1) != '/') $output_dir = $output_dir.'/';
+	
+	$coverage_output = null;
+	if(\chaco\Conf::has('coverage') || \chaco\Conf::has('c')){
+		$coverage_output = \chaco\Conf::get('coverage',$output_dir.date('YmdHis').'.coverage.xml');
+		if(!function_exists('xdebug_get_code_coverage')) die('xdebug extension not loaded'.PHP_EOL);
+		if(!is_dir(dirname($coverage_output))) mkdir(dirname($coverage_output),0777,true);
+		file_put_contents($coverage_output,'');
+		$coverage_output = realpath($coverage_output);
+		\chaco\Coverage::start($coverage_output,\chaco\Conf::get('libdir',dirname(__DIR__).'/lib'));
+	}
 	if(is_dir($path)){
 		foreach(new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path,
 				\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
@@ -1146,26 +1185,12 @@ namespace{
 	ksort($test_list);
 	$test_list = array_keys($test_list);
 	
-	$println('Progress:','1;33');
 	print(' ');
 	print(str_repeat('+',sizeof($test_list)));
-	print("\033[".(sizeof($test_list)+1)."D");
-	
-	if(is_file($inc=substr(__FILE__,0,-4).'.fixture.php')){
-		include_once($inc);
-	}
-	
-	$coverage_output = null;
-	if(\chaco\Conf::has('coverage') || \chaco\Conf::has('c')){
-		$coverage_output = \chaco\Conf::get('coverage',$output_dir.date('YmdHis').'.coverage.xml');
-		if(!function_exists('xdebug_get_code_coverage')) die('xdebug extension not loaded'.PHP_EOL);
-		if(!is_dir(dirname($coverage_output))) mkdir(dirname($coverage_output),0777,true);
-		file_put_contents($coverage_output,'');
-		$coverage_output = realpath($coverage_output);
-		\chaco\Coverage::start($coverage_output,\chaco\Conf::get('libdir',dirname(__DIR__).'/lib'));
-	}
-	
+	print("\033[".(sizeof($test_list)+2)."D");
+	print(\chaco\Runner::fixture() ? "\033[32m@\033[0m" : '@');
 	print(' ');
+
 	$start_time = microtime(true);
 	$start_mem = round(number_format((memory_get_usage() / 1024 / 1024),3),4);
 	foreach($test_list as $test_path){

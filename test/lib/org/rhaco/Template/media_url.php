@@ -82,6 +82,6 @@ PRE;
 $t = new \org\rhaco\Template();
 $t->secure(true);
 $t->vars('link',$link);
-eq($result_secure,$t->get($src)); // httpsにはならない
+eq($result_secure,$t->get($src)); // httpsには置換されない
 
 

@@ -117,5 +117,11 @@ array(
 		'modules'=>array('org.rhaco.flow.module.Csrf'),
 		'template'=>'csrf.html',
 	),
+		
+	'secure'=>array(
+		'secure'=>true,
+		'name'=>'secure',
+		'template'=>'secure.html',
+	),
 )));
 

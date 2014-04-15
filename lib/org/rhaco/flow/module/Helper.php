@@ -27,9 +27,14 @@ class Helper{
 
 		foreach($map as $p => $m){
 			$this->url_pattern[$this->current_entry][$m['name'].'#'.$m['num']] = $m;
-			if($m['name'] === $this->name) $secure = $m['secure'];
+			if($m['name'] === $this->name){
+				$secure = $m['secure'];
+			}
 		}
-		if($secure) $this->app_url = str_replace('http://','https://',$this->app_url);
+		if($secure){
+			$this->app_url = str_replace('http://','https://',$this->app_url);
+			$this->media_url = str_replace('http://','https://',$this->media_url);
+		}
 		if($obj instanceof \org\rhaco\flow\parts\RequestFlow){
 			$this->is_login = $obj->is_login();
 			$this->user = $obj->user();
@@ -157,8 +162,6 @@ class Helper{
 	}
 	/**
 	 * アプリケーションのメディアのURLを返す
-	 * メディアファイルは別ドメインの場合もあるのでsecure=trueが指定されていても、あえてhttpsへは置換されません。
-	 * httpsである必要な場合はFlowの設定media_path等でhttpsを含むURLを設定してください。
 	 * @param string $url ベースのURLに続く相対パス
 	 * @return string
 	 */

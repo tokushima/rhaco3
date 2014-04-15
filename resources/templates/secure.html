@@ -1,0 +1,11 @@
+<html>
+<body>
+	<a href="http://rhaco.org">no</a>
+	<a href="{$t.map_url('test_index::index')}">no</a>
+	<a href="{$t.map_url('test_index::secure')}">yes</a>
+	<a href="{$t.map_url('test_login::secure')}">yes</a>
+	<img src="http://localhost/images/abc.jpg" />no
+	<img src="{$t.media('images/def.jpg')}" />yes
+	<img src="images/def.jpg" />yes
+</body>
+</html>
