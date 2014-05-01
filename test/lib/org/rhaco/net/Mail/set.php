@@ -45,3 +45,4 @@ $mail->subject("改行は\r\n削除される");
 eq("=?ISO-2022-JP?B?GyRCMn45VCRPOm89fCQ1JGwkaxsoQg==?=", $mail->subject());
 
 
+

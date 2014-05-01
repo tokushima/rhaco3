@@ -3,6 +3,7 @@
 	Mail
 		added: errors_to()
 		added: reply_to()
+		specifying: set_template
 	Queue
 		specifying: Queue::clean($type,$fin,$paginate_by)
 	flow\module\Helper

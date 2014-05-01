@@ -100,6 +100,7 @@ namespace chaco{
 			}catch(\chaco\AssertFailure $e){
 				list($debug) = $e->getTrace();
 				$res = array(-1,0,$debug['file'],$debug['line'],$e->getMessage(),$e->expectation(),$e->result(),$e->has());
+				ob_end_clean();
 			}catch(\Exception $e){
 				$trace = $e->getTrace();
 				for($i=sizeof($trace);$i>=0;$i--){
@@ -111,6 +112,7 @@ namespace chaco{
 				if(!isset($res)){
 					$res = array(-2,0,$e->getFile(),$e->getLine(),(string)$e);
 				}
+				ob_end_clean();
 			}
 			$res[1] = (round(microtime(true) - self::$start_time,3));
 			self::include_setup_teardown($test_path,'__teardown__.php');
@@ -1127,15 +1129,20 @@ namespace{
 			\chaco\Conf::set($k,$v);
 		}
 	}
-	$println = function($msg='',$color=30){
-		print("\033[".$color."m");
-		print($msg.PHP_EOL);
-		print("\033[0m");
+	$println = function($msg='',$color='0'){
+		if(substr(PHP_OS,0,3) != 'WIN'){
+			print("\033[".$color."m");
+			print($msg.PHP_EOL);
+			print("\033[0m");
+		}else{
+			print($msg.PHP_EOL);
+		}
 	};
 	
 	\chaco\Args::init();
+	$println('chaco 0.4.2 (PHP '.phpversion().')'); // version
+	
 	if(\chaco\Args::opt('help')){
-		$println('chaco 0.4.2-dev'); // version
 		$println('Usage: php '.basename(__FILE__).' [options] [dir/ | dir/file.php]');
 		$println();
 		$println('Options:');
@@ -1209,49 +1216,41 @@ namespace{
 		$println();
 		$println('Coverage: ','1;33');
 		
-		$total = 0;
-		foreach(\chaco\Coverage::get() as $filename => $resultset){
-			$covered = count($resultset['covered_line']);
-			$uncovered = count($resultset['uncovered_line']);
-				
-			$coverage = ($resultset['exec'] == 1) ? ceil($covered / ($covered + $uncovered) * 100) : 1;
-			$color = ($resultset['exec'] == 1) ? '1;31' : '1;34';
-				
-			if($coverage == 100){
-				$color = '32';
-			}else if($coverage > 50){
-				$color = '33';
-			}
-			$println(sprintf(' %3d%% %s',$coverage,$filename),$color);
-			$total += $coverage;
-		}
-		$println(str_repeat('-',70));
-		$println(sprintf(' Covered %s%%',($total == 0) ? 0 : round($total/sizeof(\chaco\Coverage::get()),3)),'1;35');
-
 		// output
 		$xml = new \SimpleXMLElement('<coverage></coverage>');
-		$total_covered = $total_lines = 0;
 		
+		$total_covered = $total_lines = 0;
 		foreach(\chaco\Coverage::get() as $filename => $resultset){
 			$covered = count($resultset['covered_line']);
 			$uncovered = count($resultset['uncovered_line']);
-				
+			$total_covered += $covered;
+			$total_lines += $covered + $uncovered;
+			$covered = (($resultset['exec'] == 1) ? ceil($covered / ($covered + $uncovered) * 100) : 0);
+			
 			$f = $xml->addChild('file');
 			$f->addAttribute('name',$filename);
-				
-			$f->addAttribute('covered',(($resultset['exec'] == 1) ? ceil($covered / ($covered + $uncovered) * 100) : 0));
+			$f->addAttribute('covered',$covered);
 			$f->addAttribute('modify_date',date('Y/m/d H:i:s',filemtime($filename)));
 			$f->addChild('covered_lines',implode(',',$resultset['covered_line']));
 			$f->addChild('uncovered_lines',implode(',',$resultset['uncovered_line']));
-				
-			$total_covered += $covered;
-			$total_lines += $covered + $uncovered;
+			
+			$color = ($resultset['exec'] == 1) ? '1;31' : '1;34';
+			if($covered == 100){
+				$color = '32';
+			}else if($covered > 50){
+				$color = '33';
+			}
+			$println(sprintf(' %3d%% %s',$covered,$filename),$color);			
 		}
+		$covered_sum = ($total_covered == 0) ? 0 : ceil($total_covered/$total_lines*100);
+		
+		$println(str_repeat('-',70));
+		$println(sprintf(' Covered %s%%',$covered_sum),'1;35');
+
 		$xml->addAttribute('create_date',date('Y/m/d H:i:s'));
-		$xml->addAttribute('covered',($total_covered == 0) ? 0 : ceil($total_covered/$total_lines*100));
+		$xml->addAttribute('covered',$covered_sum);
 		$xml->addAttribute('lines',$total_lines);
 		$xml->addAttribute('covered_lines',$total_covered);
-		
 		file_put_contents($coverage_output,$xml->asXML());
 		$println('  Written XML: '.$coverage_output,'34');
 	}
@@ -1295,6 +1294,7 @@ namespace{
 	}
 	$println(str_repeat('=',80));
 	$println(sprintf('success %d, failures %d, errors %d (%.05f sec / %s MByte)',$success,$fail,$exception,$exe_time,$use_memory),'35');
+	$println();
 	
 	if(\chaco\Conf::has('output') || \chaco\Conf::has('o')){
 		$output = \chaco\Conf::get('output',$output_dir.date('YmdHis').'.result.xml');

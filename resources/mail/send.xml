@@ -1,0 +1,6 @@
+<mail>
+<subject>テストサブジェクト</subject>
+<body>
+ボディーテスト{$abc}
+</body>
+</mail>

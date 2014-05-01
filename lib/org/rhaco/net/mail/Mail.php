@@ -212,9 +212,9 @@ class Mail extends \org\rhaco\Object{
 	private function attach_string($list,$id=false){
 		list($file,$type) = $list;
 		$send = "";
-		$send .= $this->line(sprintf("Content-Type: %s; name=\"%s\"",(empty($type) ? "application/octet-stream" : $type),$file->name()));
+		$send .= $this->line(sprintf("Content-Type: %s; name=\"%s\"",(empty($type) ? "application/octet-stream" : $type),$file->fullname()));
 		$send .= $this->line(sprintf("Content-Transfer-Encoding: base64"));
-		if($id) $send .= $this->line(sprintf("Content-ID: <%s>", $file->name()));
+		if($id) $send .= $this->line(sprintf("Content-ID: <%s>", $file->fullname()));
 		$send .= $this->line();
 		$send .= $this->line(trim(chunk_split(base64_encode($file->get()),76,$this->eol)));
 		return $send;
@@ -301,7 +301,8 @@ class Mail extends \org\rhaco\Object{
 	 * @return $this
 	 */
 	public function set_template($template_path,$vars=array()){
-		$template_path = \org\rhaco\net\Path::absolute(\org\rhaco\Conf::get('template_base_path',\org\rhaco\io\File::resource_path('mail')),$template_path);		
+		$template_base = \org\rhaco\Conf::get('template_base_path',\org\rhaco\io\File::resource_path('mail'));
+		$template_path = \org\rhaco\net\Path::absolute($template_base,$template_path);
 		if(!is_file($template_path)) throw new \InvalidArgumentException($template_path.' not found');
 		if(\org\rhaco\Xml::set($xml,file_get_contents($template_path),'mail')){
 			$from = $xml->f('from');
@@ -328,12 +329,29 @@ class Mail extends \org\rhaco\Object{
 				$this->errors_to($errors_to->in_attr('address'));
 			}
 			$subject = trim(str_replace(array("\r\n","\r","\n"),'',$xml->f('subject.value()')));
-			$body = $xml->f('body.value()');
 			
+			$body = $xml->f('body.value()');
 			$template = new \org\rhaco\Template();
 			$template->cp($vars);
 			$template->vars('t',new \org\rhaco\flow\module\Helper());
 			$this->message(\org\rhaco\lang\Text::plain("\n".$template->get($body)."\n"));
+			
+			$html = $xml->f('html');
+			if($html !== null){
+				$html_path = \org\rhaco\net\Path::absolute($template_base,$html->in_attr('src'));
+				
+				foreach($html->in('media') as $media){
+					$file = \org\rhaco\net\Path::absolute($template_base,$media->in_attr('src'));
+					if(!is_file($file)){
+						throw new \InvalidArgumentException($media->in_attr('src').' invalid media');
+					}
+					$this->media($media->in_attr('src'),file_get_contents($file));
+				}
+				$template = new \org\rhaco\Template();
+				$template->cp($vars);
+				$template->vars('t',new \org\rhaco\flow\module\Helper());
+				$this->html($template->read($html_path));
+			}
 			$this->subject($template->get($subject));
 			return $this;
 		}
