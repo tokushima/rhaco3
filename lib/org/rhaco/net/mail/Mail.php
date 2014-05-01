@@ -212,7 +212,7 @@ class Mail extends \org\rhaco\Object{
 	private function attach_string($list,$id=false){
 		list($file,$type) = $list;
 		$send = "";
-		$send .= $this->line(sprintf("Content-Type: %s; name=\"%s\"",(empty($type) ? "application/octet-stream" : $type),$file->fullname()));
+		$send .= $this->line(sprintf("Content-Type: %s; name=\"%s\"",(empty($type) ? "application/octet-stream" : $type),$file->name()));
 		$send .= $this->line(sprintf("Content-Transfer-Encoding: base64"));
 		if($id) $send .= $this->line(sprintf("Content-ID: <%s>", $file->fullname()));
 		$send .= $this->line();
