@@ -61,10 +61,10 @@ class Mail extends \org\rhaco\Object{
 		return $this->jis($this->subject);
 	}
 	protected function __set_attach__($filename,$src,$type="application/octet-stream"){
-		$this->attach[] = array(new File($filename,$src),$type);
+		$this->attach[] = array(new File(basename($filename),$src),$type);
 	}
 	protected function __set_media__($filename,$src,$type="application/octet-stream"){
-		$this->media[$filename] = array(new File($filename,$src),$type);
+		$this->media[$filename] = array(new File(basename($filename),$src),$type);
 	}
 	protected function __set_message__($message){
 		$this->message = $this->encode($message);
@@ -155,11 +155,11 @@ class Mail extends \org\rhaco\Object{
 		foreach(array_keys($this->media) as $name){
 			// tags
 			$preg = '/(\s)(src|href)\s*=\s*(["\']?)' . preg_quote($name) . '\3/';
-			$replace = sprintf('\1\2=\3cid:%s\3', $name);
+			$replace = sprintf('\1\2=\3cid:%s\3', md5($name));
 			$html = mb_eregi_replace(substr($preg,1,-1),$replace,$html);
 			// css
 			$preg = '/url\(\s*(["\']?)' . preg_quote($name) . '\1\s*\)/';
-			$replace = sprintf('url(\1cid:%s\1)', $name);
+			$replace = sprintf('url(\1cid:%s\1)', md5($name));
 			$html = mb_eregi_replace(substr($preg,1,-1),$replace,$html);
 		}
 		if($html != $this->html){
@@ -171,9 +171,9 @@ class Mail extends \org\rhaco\Object{
 			$send .= $this->line();
 			$send .= $this->line($this->encode($html));
 
-			foreach($this->media as $media){
+			foreach($this->media as $name => $media){
 				$send .= $this->line("--".$this->boundary["related"]);
-				$send .= $this->attach_string($media,true);
+				$send .= $this->attach_string($media,md5($name));
 			}
 			$send .= $this->line("--".$this->boundary["related"]."--");
 		}
@@ -209,12 +209,14 @@ class Mail extends \org\rhaco\Object{
 	protected function line($value=""){
 		return $value.$this->eol;
 	}
-	private function attach_string($list,$id=false){
+	private function attach_string($list,$id=null){
 		list($file,$type) = $list;
-		$send = "";
+		$send = '';
 		$send .= $this->line(sprintf("Content-Type: %s; name=\"%s\"",(empty($type) ? "application/octet-stream" : $type),$file->name()));
 		$send .= $this->line(sprintf("Content-Transfer-Encoding: base64"));
-		if($id) $send .= $this->line(sprintf("Content-ID: <%s>", $file->fullname()));
+		if(!empty($id)){
+			$send .= $this->line(sprintf("Content-ID: <%s>",$id));
+		}
 		$send .= $this->line();
 		$send .= $this->line(trim(chunk_split(base64_encode($file->get()),76,$this->eol)));
 		return $send;
@@ -334,6 +336,8 @@ class Mail extends \org\rhaco\Object{
 			$template = new \org\rhaco\Template();
 			$template->cp($vars);
 			$template->vars('t',new \org\rhaco\flow\module\Helper());
+			
+			$this->subject($template->get($subject));
 			$this->message(\org\rhaco\lang\Text::plain("\n".$template->get($body)."\n"));
 			
 			$html = $xml->f('html');
@@ -352,7 +356,13 @@ class Mail extends \org\rhaco\Object{
 				$template->vars('t',new \org\rhaco\flow\module\Helper());
 				$this->html($template->read($html_path));
 			}
-			$this->subject($template->get($subject));
+			foreach($xml->in('attach') as $attach){
+				$file = \org\rhaco\net\Path::absolute($template_base,$attach->in_attr('src'));
+				if(!is_file($file)){
+					throw new \InvalidArgumentException($attach->in_attr('src').' invalid media');
+				}
+				$this->attach($attach->in_attr('name',$attach->in_attr('src')),file_get_contents($file));				
+			}
 			return $this;
 		}
 		throw new \InvalidArgumentException($template_path.' invalid data');
