@@ -33,6 +33,7 @@ class Mail extends \org\rhaco\Object{
 
 	private $eol = "\n";
 	private $boundary = array('mixed'=>'mixed','alternative'=>'alternative','related'=>'related');
+	private $resource_path;
 
 	protected function __init__(){
 		$this->boundary = array('mixed'=>'----=_Part_'.uniqid('mixed'),'alternative'=>'----=_Part_'.uniqid('alternative'),'related'=>'----=_Part_'.uniqid('related'));
@@ -87,6 +88,9 @@ class Mail extends \org\rhaco\Object{
 	}
 	protected function __fm_message__(){
 		return mb_convert_encoding($this->message(),'UTF-8','JIS');
+	}
+	public function resource_path($path){
+		$this->resource_path = $path;
 	}
 	public function header(){
 		$send = '';
@@ -297,15 +301,17 @@ class Mail extends \org\rhaco\Object{
 	 * </body>
 	 * </mail>
 	 * 
-	 * @conf string $template_base_path テンプレートファイルのベースパス
 	 * @param string　$template_path テンプレートファイルパス
 	 * @param mixed{} $vars テンプレートへ渡す変数
 	 * @return $this
 	 */
 	public function set_template($template_path,$vars=array()){
-		$template_base = \org\rhaco\Conf::get('template_base_path',\org\rhaco\io\File::resource_path('mail'));
-		$template_path = \org\rhaco\net\Path::absolute($template_base,$template_path);
-		if(!is_file($template_path)) throw new \InvalidArgumentException($template_path.' not found');
+		$resource_path = empty($this->resource_path) ? \org\rhaco\Conf::get('resource_path',\org\rhaco\io\File::resource_path('mail')) : $this->resource_path;
+		$template_path = \org\rhaco\net\Path::absolute($resource_path,$template_path);
+		
+		if(!is_file($template_path)){
+			throw new \InvalidArgumentException($template_path.' not found');
+		}
 		if(\org\rhaco\Xml::set($xml,file_get_contents($template_path),'mail')){
 			$from = $xml->f('from');
 			if($from !== null){
@@ -342,10 +348,10 @@ class Mail extends \org\rhaco\Object{
 			
 			$html = $xml->f('html');
 			if($html !== null){
-				$html_path = \org\rhaco\net\Path::absolute($template_base,$html->in_attr('src'));
+				$html_path = \org\rhaco\net\Path::absolute($resource_path,$html->in_attr('src'));
 				
 				foreach($html->in('media') as $media){
-					$file = \org\rhaco\net\Path::absolute($template_base,$media->in_attr('src'));
+					$file = \org\rhaco\net\Path::absolute($resource_path,$media->in_attr('src'));
 					if(!is_file($file)){
 						throw new \InvalidArgumentException($media->in_attr('src').' invalid media');
 					}
@@ -357,7 +363,7 @@ class Mail extends \org\rhaco\Object{
 				$this->html($template->read($html_path));
 			}
 			foreach($xml->in('attach') as $attach){
-				$file = \org\rhaco\net\Path::absolute($template_base,$attach->in_attr('src'));
+				$file = \org\rhaco\net\Path::absolute($resource_path,$attach->in_attr('src'));
 				if(!is_file($file)){
 					throw new \InvalidArgumentException($attach->in_attr('src').' invalid media');
 				}
