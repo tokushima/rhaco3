@@ -1,5 +1,5 @@
 
-0.4.1
+0.4.5
 	Mail
 		added: errors_to()
 		added: reply_to()
