@@ -1,5 +1,5 @@
 <?php
 include_once('bootstrap.php');
 
-(new \rhaco\Flow())->execute('rhaco.flow.Pages');
+(new \ebi\Flow())->execute('ebi.flow.Pages');
 
