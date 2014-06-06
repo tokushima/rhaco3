@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>rhaco.org</title>
+
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">rhaco.org</a>
+          </div>
+          
+          <div class="navbar-collapse collapse">          
+            <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">rhaco3 <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li>ドキュメント</li>
+                  <li class="divider"></li>
+                  <li><a href="../../contents/rhaco3/entry.html">エントリー</a></li>
+                  <li><a href="../../contents/rhaco3/dao.html">O/Rマッパー</a></li>
+                  <li><a href="../../contents/rhaco3/template.html">テンプレートエンジン</a></li>
+                  <li><a href="../../contents/rhaco3/object.html">オブジェクト</a></li>
+                </ul>
+              </li>              
+            </ul>
+          </div>
+        </div>    
+    </div>
+
+    <div class="jumbotron">
+      <div class="container">
+      	
+	<h2>ログイン処理</h2>
+	<div>
+		ログインが必要なアクションを定義する
+	</div>
+
+      </div>
+    </div>
+
+    <div class="container">
+   	  
+<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">アクションにユーザモデルを定義する</div><pre class="prettyprint">&lt;?php
+/**
+ * <span class="label label-danger">@login ユーザモデルの定義 @[&#039;require&#039;=&gt;&#039;test.model.Member&#039;]</span>
+ */
+class LoginRequestAction extends <span class="label label-danger">\rhaco\flow\Request</span>{
+&nbsp;&nbsp;public function aaa(){
+&nbsp;&nbsp;&nbsp;&nbsp;return [&#039;abc&#039;=&gt;123];
+&nbsp;&nbsp;}
+}</pre>
+
+	
+<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">エントリにログイン、ログアウトの挙動を定義する</div><pre class="prettyprint">include_once(&#039;bootstrap.php&#039;);
+
+$flow = new \rhaco\Flow();
+$flow->execute([
+&nbsp;&nbsp;&#039;plugins&#039;=&gt;&#039;test.flow.plugin.Login&#039;, // ログイン処理のプラグインをセット
+&nbsp;&nbsp;&#039;patterns&#039;=&gt;[
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;login_url&#039;=&gt;[
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="label label-danger">&#039;name&#039;=&gt;&#039;login&#039;,  // nameをloginにすると自動でログイン画面にリダイレクトします</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="label label-danger">&#039;action&#039;=&gt;&#039;rhaco.flow.Request::do_login&#039;, // ログイン処理のアクション</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="label label-danger">&#039;args&#039;=&gt;[&#039;login_redirect&#039;=&gt;&#039;aaa&#039;], // ログイン成功時のリダイレクト先</span>
+&nbsp;&nbsp;&nbsp;&nbsp;],
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;logout_url&#039;=&gt;[
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#039;name&#039;=&gt;&#039;logout&#039;,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="label label-danger">&#039;action&#039;=&gt;&#039;login_redirect::do_logout&#039;, // ログイン処理のアクション</span>
+&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;,&#039;aaa&#039;=&gt;[
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#039;name&#039;=&gt;&#039;aaa&#039;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,&#039;action&#039;=&gt;&#039;test.flow.LoginRequestAction::aaa&#039;
+&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;]
+]);</pre>	
+
+      </div>
+      
+      <hr>
+
+      <footer>
+      </footer>
+    </div> <!-- /container -->
+</rt:block>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
+

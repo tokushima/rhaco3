@@ -21,7 +21,7 @@
           
           <div class="navbar-collapse collapse">          
             <ul class="nav navbar-nav navbar-right">
-              <li class="dropdown active">
+              <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">rhaco3 <b class="caret"></b></a>
                 <ul class="dropdown-menu">
                   <li>ドキュメント</li>
@@ -190,18 +190,6 @@
 			<td>select時の追加条件</td>
 		</tr>
 		<tr>
-			<td>__create_verify__</td>
-			<td>新規追加時に行う検証</td>
-		</tr>
-		<tr>
-			<td>__update_verify__</td>
-			<td>更新時に行う検証</td>
-		</tr>
-		<tr>
-			<td>__delete_verify__</td>
-			<td>削除時に行う検証</td>
-		</tr>
-		<tr>
 			<td>__before_save__</td>
 			<td>追加/更新の前に行う処理</td>
 		</tr>
@@ -271,9 +259,9 @@ require(&#039;bootstrap.php&#039;);
 use \org\rhaco\store\db\Q;
 
 // 接続情報の記述
-\org\rhaco\Conf::set(&#039;org.rhaco.store.db.Dao&#039;,&#039;connection&#039;,array(
+\rhaco\Conf::set(&#039;rhaco.Dao&#039;,&#039;connection&#039;,array(
 &#039;Entry&#039;=&gt;array(
-&#039;type&#039;=&gt;&#039;org.rhaco.store.db.module.Sqlite&#039;,&#039;host&#039;=&gt;__DIR__,&#039;dbname&#039;=&gt;&#039;sample.db&#039;,&#039;user&#039;=&gt;&#039;&#039;,&#039;password&#039;=&gt;&#039;&#039;,&#039;port&#039;=&gt;&#039;&#039;,&#039;encode&#039;=&gt;&#039;utf8&#039;
+&#039;type&#039;=&gt;&#039;rhaco.DbConnector&#039;,&#039;host&#039;=&gt;__DIR__,&#039;dbname&#039;=&gt;&#039;sample.db&#039;,&#039;user&#039;=&gt;&#039;&#039;,&#039;password&#039;=&gt;&#039;&#039;,&#039;port&#039;=&gt;&#039;&#039;,&#039;encode&#039;=&gt;&#039;utf8&#039;
 )));
 
 /**

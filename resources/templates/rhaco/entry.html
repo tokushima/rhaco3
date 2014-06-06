@@ -13,17 +13,17 @@
 		<php>
 		include_once('bootstrap.php');
 		
-		\org\rhaco\Flow::out(array(
-			'modules'=>array('org.rhaco.flow.module.Exceptions')
-			,'patterns'=>array(
-				''=>array('name'=>'index','template'=>'index.html')
-				,'abc'=>array('name'=>'a','template'=>'abc.html')
-				,'def'=>array('name'=>'b','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop')
-				,'ghi'=>array('name'=>'c','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','after'=>'b')
-				,'jkl'=>array('name'=>'d','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','post_after'=>'b')
+		(new \rhaco\Flow())->execute([
+			'patterns'=>[
+				''=>['name'=>'index','template'=>'index.html'],
+				'abc'=>['name'=>'a','template'=>'abc.html'],
+				'def'=>['name'=>'b','template'=>'def.html','action'=>'rhaco.flow.Request::noop'],
+				'ghi'=>['name'=>'c','template'=>'def.html','action'=>'rhaco.flow.Request::noop','after'=>'b'],
+				'jkl'=>['name'=>'d','template'=>'def.html','action'=>'rhaco.flow.Request::noop','post_after'=>'b'],
 
-				,'dev'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
-		)));
+				'dev'=>['action'=>'rhaco.Dt','mode'=>'local'],
+			],
+		]);
 	</pre>
 	
 	<table>
@@ -89,17 +89,12 @@
 		<tr>
 			<td></td>
 			<td>template</td>
-			<td>出力するテンプレートを指定します テンプレートが指定されず、かつモジュールメソッドflow_outputがない場合はXMLが出力されます</td>
+			<td>出力するテンプレートを指定します テンプレートが指定されず、かつモジュールメソッドflow_outputがない場合はJSONが出力されます</td>
 		</tr>
 		<tr>
 			<td></td>
 			<td>action</td>
 			<td>実行するアクションを指定します クラス名::メソッド名の形で定義します</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td>class</td>
-			<td>展開するクラスを指定します クラス内のメソッドが展開されマッピングされます</td>
 		</tr>
 		<tr>
 			<td></td>
@@ -128,18 +123,13 @@
 		</tr>
 		<tr>
 			<td></td>
-			<td>modules</td>
-			<td>actionに差し込むモジュールを配列形式で指定します</td>
+			<td>plugins</td>
+			<td>actionに差し込むプラグインを配列形式で指定します</td>
 		</tr>
 		<tr>
 			<td></td>
 			<td>secure</td>
 			<td>URLをhttpsにする場合は(boolean)trueを指定します</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td>theme_path</td>
-			<td>テーマテンプレートのパスを指定します Confのtemplate_pathからの相対パスとなります</td>
 		</tr>
 		<tr>
 			<td></td>

@@ -21,7 +21,7 @@
           
           <div class="navbar-collapse collapse">          
             <ul class="nav navbar-nav navbar-right">
-              <li class="dropdown active">
+              <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">rhaco3 <b class="caret"></b></a>
                 <ul class="dropdown-menu">
                   <li>ドキュメント</li>
@@ -40,9 +40,9 @@
     <div class="jumbotron">
       <div class="container">
       	
-	<h2>オブジェクト</h2>	
+	<h2>オブジェクト</h2>
 	<div>
-		org.rhaco.Objectを基底クラスにすることでプロパティやアクセサの挙動を容易に変更できます。
+		rhaco.Objectを基底クラスにすることでプロパティやアクセサの挙動を容易に変更できます。
 	</div>
 
       </div>
@@ -82,18 +82,14 @@
 			<td>__str__</td>
 			<td>オブジェクトの文字列表現を拡張する</td>
 		</tr>
-		<tr>
-			<td>__hash__</td>
-			<td>オブジェクトの連想配列表現を拡張する</td>
-		</tr>
 		</tbody>
 	</table>
 	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">作成例</div><pre class="prettyprint">&lt;?php
-namespace org\rhaco;
+namespace abc;
 /**
  * @var integer $abc 数値
  */
-class Hoge extends \org\rhaco\Object{
+class Hoge extends \rhaco\Object{
 &nbsp;&nbsp;protected $abc;
 &nbsp;&nbsp;
 &nbsp;&nbsp;protected function __new__($i){
@@ -109,7 +105,7 @@ class Hoge extends \org\rhaco\Object{
 	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">使用例</div><pre class="prettyprint">&lt;?php
 include(&#039;bootstrap.php&#039;);
 
-$obj = new \org\rhaco\Hoge(10);
+$obj = new \rhaco\Hoge(10);
 var_dump($obj->abc());
 var_dump((string)$obj);</pre>
 	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">結果</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">int(20)
@@ -121,12 +117,12 @@ string(4) &quot;[20]&quot;</pre>
 		protectedまたはpublicで定義されたプロパティは自動的に同名のメソッドをGetter,Setterとして扱う事ができます。
 	</p>
 	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">作成例</div><pre class="prettyprint">&lt;?php
-namespace org\rhaco;
+namespace abc;
 /**
  * @var integer $abc 数値
  * @var string $def 文字列
  */
-class Hoge extends \org\rhaco\Object{
+class Hoge extends \rhaco\Object{
 &nbsp;&nbsp;protected $abc;
 &nbsp;&nbsp;protected $def;
 &nbsp;&nbsp;
@@ -135,7 +131,7 @@ class Hoge extends \org\rhaco\Object{
 &nbsp;&nbsp;}
 }</pre>
 	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">使用例</div><pre class="prettyprint">&lt;?php
-$obj = new \org\rhaco\Hoge();
+$obj = new \abc\Hoge();
 $obj->abc(&#039;warn&#039;);
 var_dump($obj->abc());</pre>
 	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">結果</div><pre style="background-color:#fff; color:#000; border-color:#000; padding:5px;">int(123)</pre>
@@ -187,14 +183,6 @@ var_dump($obj->abc());</pre>
 			<td>alnum</td>
 			<td>英数値型 0-9,A-Z,a-z,_</td>
 		</tr>
-		<tr>
-			<td>choice</td>
-			<td>選択型 アノテーションchoicesで定義します</td>
-		</tr>
-		<tr>
-			<td>mixed</td>
-			<td>未指定と同様</td>
-		</tr>
 		</tbody>
 	</table>
 	
@@ -237,10 +225,6 @@ var_dump($obj->abc());</pre>
 		<tr>
 			<td>__rm_abc__</td>
 			<td>rmを拡張します</td>
-		</tr>
-		<tr>
-			<td>__choices_abc__</td>
-			<td>choices型を拡張します</td>
 		</tr>
 		</tbody>
 	</table>

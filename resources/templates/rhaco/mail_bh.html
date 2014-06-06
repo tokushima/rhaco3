@@ -1,0 +1,31 @@
+<rt:extends href="./base.html" />
+
+<rt:block name="header">
+	<h2>メール送信のテスト(SmtpBlackhole)</h2>
+	<div>
+		メール送信処理でsmtpサーバには送らずDBに保存する
+	</div>
+</rt:block>
+
+<rt:block name="body">
+
+<pre caption="\rhaco\Confで設定する">
+	<php>
+	\rhaco\Conf::set([
+		'rhaco.Dao'=>[
+			!!'connection'=>[ // DBの接続設定!!
+				!!'rhaco.SmtpBlackholeDao'=>['type'=>'rhaco.DbConnector','dbname'=>'local.db','host'=>dirname(__DIR__)],!!
+			]
+		]
+	]);
+	
+	\rhaco\Conf::set_class_plugin([
+		!!'rhaco.Mail'=>['rhaco.SmtpBlackholeDao'] // プラグインを設定する!!
+	]);
+</pre>
+
+<pre caption="テーブルを作成する">
+php brev.php rhaco.Dt::create_table --model rhaco.SmtpBlackholeDao
+</pre>
+
+</rt:block>

@@ -1,2 +1,2 @@
 <?php
-include_once('libs/vendor/autoload.php');
+include_once('vendor/autoload.php');

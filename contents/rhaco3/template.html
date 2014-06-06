@@ -1,41 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>rhaco.org</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="">
-	<meta name="author" content="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<link href="../../resources/media/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-	<style>
-		body{ padding-top: 60px; }
-	</style>
-	<link href="../../resources/media/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
-</head>
-<body>
-	<!-- github -->
-	<div class="navbar navbar-inverse navbar-fixed-top">
-		<div class="navbar-inner">
-			<div class="container">
-				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="brand" href="../../index.html">rhaco.org</a>
-				<div class="nav-collapse collapse">
-					<ul class="nav">
-					</ul>
-				</div>
-			</div>
-		</div>
+    <title>rhaco.org</title>
+
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">rhaco.org</a>
+          </div>
+          
+          <div class="navbar-collapse collapse">          
+            <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown active">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">rhaco3 <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li>ドキュメント</li>
+                  <li class="divider"></li>
+                  <li><a href="../../contents/rhaco3/entry.html">エントリー</a></li>
+                  <li><a href="../../contents/rhaco3/dao.html">O/Rマッパー</a></li>
+                  <li><a href="../../contents/rhaco3/template.html">テンプレートエンジン</a></li>
+                  <li><a href="../../contents/rhaco3/object.html">オブジェクト</a></li>
+                </ul>
+              </li>              
+            </ul>
+          </div>
+        </div>    
+    </div>
+
+    <div class="jumbotron">
+      <div class="container">
+      	
+	<h2>テンプレートエンジン</h2>
+	<div>
+		テンプレートエンジンで出来る事は、テンプレートのXML拡張による操作と変数の展開です。
 	</div>
 
-	<div class="container">
-		
-	<h2>テンプレートエンジン</h2>
-	<pre class="prettyprint" style="margin-top: 20px; ">テンプレートエンジンで出来る事は、テンプレートのXML拡張による操作と変数の展開です。</pre>
+      </div>
+    </div>
+
+    <div class="container">
+   	  
 	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">変数の書式</div><pre class="prettyprint">{$abc}
 {$t.html($abc)}</pre>
 
@@ -81,7 +95,7 @@ $template->output(__FILE__);
 		<tbody>
 		<tr>
 			<td>$t</td>
-			<td><classdoc map="rhaco3_document" class="org.rhaco.flow.module.Helper" /> (<classdoc map="rhaco3_document" class="org.rhaco.Flow" /> を利用した場合)</td>
+			<td>org.rhaco.flow.module.Helper (org.rhaco.Flowを利用した場合)</td>
 		</tr>
 		</tbody>
 	</table>
@@ -491,7 +505,6 @@ def</pre>
 			</tbody>
 		</table>
 		
-		<p></p>
 		<pre class="prettyprint" style="margin-top: 20px; ">&lt;table rt:param=&quot;object_list&quot; rt:var=&quot;obj&quot; rt:evenodd=&quot;eo&quot;&gt;
 &lt;thead&gt;
 &nbsp;&nbsp;&lt;th&gt;name&lt;/th&gt;
@@ -507,7 +520,21 @@ def</pre>
 	</div>
 	
 
-	</div>
-</body>
+      </div>
+      
+      <hr>
+
+      <footer>
+      </footer>
+    </div> <!-- /container -->
+</rt:block>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  </body>
 </html>
+
 

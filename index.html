@@ -1,65 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>rhaco.org</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="">
-	<meta name="author" content="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<link href="./resources/media/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-	<style>
-		body{ padding-top: 60px; }
-	</style>
-	<link href="./resources/media/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
-</head>
-<body>
-	<!-- github -->
-	<div class="navbar navbar-inverse navbar-fixed-top">
-		<div class="navbar-inner">
-			<div class="container">
-				<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="brand" href="index.html">rhaco.org</a>
-				<div class="nav-collapse collapse">
-					<ul class="nav">
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
+    <title>rhaco.org</title>
 
-	<div class="container">
-		
-	
-		<table class="table table-condensed">
-		<thead>
-		<tr>
-			<th>Product</th>
-			<th>PHP version</th>
-			<th>License</th>
-			<th>Start date</th>
-			<th>Type</th>			
-			<th>Download </th>
-		</tr>
-		</thead>
-		<tbody>
-		<tr>
-			<td><a href="contents/rhaco3/index.html">rhaco3</a></td>
-			<td>PHP 5 &gt;= 5.3</td>
-			<td>BSD</td>
-			<td>2010-11-11</td>
-			<td>Framework</td>
-			<td><a href="http://github.com/tokushima/rhaco3">github</a></td>
-		</tr>
-		</tbody>
-		</table>
-		
-		
-	</div>
-</body>
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">rhaco.org</a>
+          </div>
+          
+          <div class="navbar-collapse collapse">          
+            <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">rhaco3 <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li>ドキュメント</li>
+                  <li class="divider"></li>
+                  <li><a href="contents/rhaco3/entry.html">エントリー</a></li>
+                  <li><a href="contents/rhaco3/dao.html">O/Rマッパー</a></li>
+                  <li><a href="contents/rhaco3/template.html">テンプレートエンジン</a></li>
+                  <li><a href="contents/rhaco3/object.html">オブジェクト</a></li>
+                </ul>
+              </li>              
+            </ul>
+          </div>
+        </div>    
+    </div>
+
+    <div class="jumbotron">
+      <div class="container">
+      	
+	        <h1>Meet rhaco3</h1>
+	        <p>rhaco3 is a PHP Web framework that encourages clean, pragmatic design.</p>
+	        <p><a class="btn btn-primary btn-lg" role="button" href="https://github.com/tokushima/rhaco3/releases/tag/0.4.5">Latest release: 0.4.5 &raquo;</a></p>
+	    
+      </div>
+    </div>
+
+    <div class="container">
+   	  
+      <div class="row">
+        <div class="col-md-4">
+          <h2>rhaco1</h2>
+          <p>PHP 4 >= 4.3.0 Web Framework</p>
+          <p><a class="btn btn-default" href="https://github.com/tokushima/rhaco1" role="button">View details &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+          <h2>rhaco2</h2>
+          <p>PHP 5 >= 5.2.5 Web Framework</p>
+          <p><a class="btn btn-default" href="https://github.com/tokushima/rhaco2" role="button">View details &raquo;</a></p>
+       </div>
+        <div class="col-md-4">
+          <h2>rhaco3</h2>
+          <p>PHP 5 >= 5.3.0 Web Framework</p>
+          <p><a class="btn btn-default" href="https://github.com/tokushima/rhaco3" role="button">View details &raquo;</a></p>
+        </div>
+        
+      </div>
+      
+      <hr>
+
+      <footer>
+      </footer>
+    </div> <!-- /container -->
+</rt:block>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  </body>
 </html>
+
 

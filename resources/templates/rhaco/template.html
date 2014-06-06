@@ -18,7 +18,7 @@
 		&lt;?php&gt
 		include_once('bootstrap.php');
 
-		$template = new \org\rhaco\Template();
+		$template = new \rhaco\Template();
 		$template->vars('name','Sample');
 		$template->vars('data_array',array('ABC','DEF','GHI'));
 		$template->output(__FILE__);
@@ -59,7 +59,7 @@
 		<tbody>
 		<tr>
 			<td>$t</td>
-			<td>org.rhaco.flow.module.Helper (org.rhaco.Flowを利用した場合)</td>
+			<td>rhaco.FlowHelper (rhaco.Flow を利用した場合)</td>
 		</tr>
 		</tbody>
 	</table>
@@ -141,6 +141,32 @@
 			&lt;rt:block name="def"&gt;
 				DEF
 			&lt;/rt:block&gt;
+		</pre>
+	</div>
+
+	<div>
+		<a name="template_rt_blockvar"></a>
+		<h4>&lt;rt:blockvar&gt;</h4>
+		<p>
+			ブロックファイルで変数を定義する
+		</p>
+		<table>
+			<thead>
+			<tr>
+				<th>属性</th>
+				<th>説明</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>name</td>
+				<td>変数名</td>
+			</tr>
+			</tbody>
+		</table>
+		<pre>
+			&lt;rt:extends href="index.html" /&gt;
+			&lt;rt:blockvar name="abc"&gt;ABC&lt;/rt:blockvar&gt;
 		</pre>
 	</div>
 	

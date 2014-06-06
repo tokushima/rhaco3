@@ -148,18 +148,6 @@
 			<td>select時の追加条件</td>
 		</tr>
 		<tr>
-			<td>__create_verify__</td>
-			<td>新規追加時に行う検証</td>
-		</tr>
-		<tr>
-			<td>__update_verify__</td>
-			<td>更新時に行う検証</td>
-		</tr>
-		<tr>
-			<td>__delete_verify__</td>
-			<td>削除時に行う検証</td>
-		</tr>
-		<tr>
 			<td>__before_save__</td>
 			<td>追加/更新の前に行う処理</td>
 		</tr>
@@ -232,9 +220,9 @@
 		use \org\rhaco\store\db\Q;
 		
 		// 接続情報の記述
-		\org\rhaco\Conf::set('org.rhaco.store.db.Dao','connection',array(
+		\rhaco\Conf::set('rhaco.Dao','connection',array(
 		'Entry'=>array(
-		'type'=>'org.rhaco.store.db.module.Sqlite','host'=>__DIR__,'dbname'=>'sample.db','user'=>'','password'=>'','port'=>'','encode'=>'utf8'
+		'type'=>'rhaco.DbConnector','host'=>__DIR__,'dbname'=>'sample.db','user'=>'','password'=>'','port'=>'','encode'=>'utf8'
 		)));
 		
 		/**

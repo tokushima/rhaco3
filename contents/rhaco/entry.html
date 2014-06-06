@@ -1,32 +1,72 @@
-<rt:extends href="./base.html" />
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<rt:block name="header">
+    <title>rhaco.org</title>
+
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">rhaco.org</a>
+          </div>
+          
+          <div class="navbar-collapse collapse">          
+            <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">rhaco3 <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li>ドキュメント</li>
+                  <li class="divider"></li>
+                  <li><a href="../../contents/rhaco3/entry.html">エントリー</a></li>
+                  <li><a href="../../contents/rhaco3/dao.html">O/Rマッパー</a></li>
+                  <li><a href="../../contents/rhaco3/template.html">テンプレートエンジン</a></li>
+                  <li><a href="../../contents/rhaco3/object.html">オブジェクト</a></li>
+                </ul>
+              </li>              
+            </ul>
+          </div>
+        </div>    
+    </div>
+
+    <div class="jumbotron">
+      <div class="container">
+      	
 	<h2>エントリーポイント</h2>
 	<div>
 		アプリケーションの入り口がエントリポイントです。<br />
 		エントリポイントにはどのURLからどのアクションがよばれ、どのテンプレートで出力するかを定義します。
 	</div>
-</rt:block>
 
-<rt:block name="body">
-	<pre caption="基本的な例" style="font-size: small;">
-		<php>
-		include_once('bootstrap.php');
-		
-		\org\rhaco\Flow::out(array(
-			'modules'=>array('org.rhaco.flow.module.Exceptions')
-			,'patterns'=>array(
-				''=>array('name'=>'index','template'=>'index.html')
-				,'abc'=>array('name'=>'a','template'=>'abc.html')
-				,'def'=>array('name'=>'b','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop')
-				,'ghi'=>array('name'=>'c','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','after'=>'b')
-				,'jkl'=>array('name'=>'d','template'=>'def.html','action'=>'org.rhaco.flow.parts.RequestFlow::noop','post_after'=>'b')
+      </div>
+    </div>
 
-				,'dev'=>array('action'=>'org.rhaco.Dt','mode'=>'local')
-		)));
-	</pre>
+    <div class="container">
+   	  
+	<div style="margin-top:20px; color:#7a43b6; font-weight: bold;">基本的な例</div><pre style="font-size: small;" class="prettyprint">&lt;?php
+include_once(&#039;bootstrap.php&#039;);
+
+(new \rhaco\Flow())-&gt;execute([
+&nbsp;&nbsp;&#039;patterns&#039;=&gt;[
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;&#039;=&gt;[&#039;name&#039;=&gt;&#039;index&#039;,&#039;template&#039;=&gt;&#039;index.html&#039;],
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;abc&#039;=&gt;[&#039;name&#039;=&gt;&#039;a&#039;,&#039;template&#039;=&gt;&#039;abc.html&#039;],
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;def&#039;=&gt;[&#039;name&#039;=&gt;&#039;b&#039;,&#039;template&#039;=&gt;&#039;def.html&#039;,&#039;action&#039;=&gt;&#039;rhaco.flow.Request::noop&#039;],
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;ghi&#039;=&gt;[&#039;name&#039;=&gt;&#039;c&#039;,&#039;template&#039;=&gt;&#039;def.html&#039;,&#039;action&#039;=&gt;&#039;rhaco.flow.Request::noop&#039;,&#039;after&#039;=&gt;&#039;b&#039;],
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;jkl&#039;=&gt;[&#039;name&#039;=&gt;&#039;d&#039;,&#039;template&#039;=&gt;&#039;def.html&#039;,&#039;action&#039;=&gt;&#039;rhaco.flow.Request::noop&#039;,&#039;post_after&#039;=&gt;&#039;b&#039;],
+
+&nbsp;&nbsp;&nbsp;&nbsp;&#039;dev&#039;=&gt;[&#039;action&#039;=&gt;&#039;rhaco.Dt&#039;,&#039;mode&#039;=&gt;&#039;local&#039;],
+&nbsp;&nbsp;],
+]);</pre>
 	
-	<table>
+	<table class="table table-striped table-bordered table-condensed">
 	<thead>
 		<tr>
 			<th>定義名</th>
@@ -89,17 +129,12 @@
 		<tr>
 			<td></td>
 			<td>template</td>
-			<td>出力するテンプレートを指定します テンプレートが指定されず、かつモジュールメソッドflow_outputがない場合はXMLが出力されます</td>
+			<td>出力するテンプレートを指定します テンプレートが指定されず、かつモジュールメソッドflow_outputがない場合はJSONが出力されます</td>
 		</tr>
 		<tr>
 			<td></td>
 			<td>action</td>
 			<td>実行するアクションを指定します クラス名::メソッド名の形で定義します</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td>class</td>
-			<td>展開するクラスを指定します クラス内のメソッドが展開されマッピングされます</td>
 		</tr>
 		<tr>
 			<td></td>
@@ -128,18 +163,13 @@
 		</tr>
 		<tr>
 			<td></td>
-			<td>modules</td>
-			<td>actionに差し込むモジュールを配列形式で指定します</td>
+			<td>plugins</td>
+			<td>actionに差し込むプラグインを配列形式で指定します</td>
 		</tr>
 		<tr>
 			<td></td>
 			<td>secure</td>
 			<td>URLをhttpsにする場合は(boolean)trueを指定します</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td>theme_path</td>
-			<td>テーマテンプレートのパスを指定します Confのtemplate_pathからの相対パスとなります</td>
 		</tr>
 		<tr>
 			<td></td>
@@ -163,4 +193,22 @@
 		</tr>
 	</tbody>
 	</table>
+
+      </div>
+      
+      <hr>
+
+      <footer>
+      </footer>
+    </div> <!-- /container -->
 </rt:block>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
+

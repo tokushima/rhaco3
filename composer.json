@@ -1,0 +1,5 @@
+{
+    "require": {
+        "tokushima/rhaco":"master-dev"
+    }
+}
