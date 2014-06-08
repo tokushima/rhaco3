@@ -503,7 +503,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 				) as $e){
 					if(strpos($e->getPathname(),'/.') === false 
 							&& strpos($e->getPathname(),'/_') === false 
-							&& strpos(strtolower($e->getPathname()),'/test') === false					
 							&& ctype_upper(substr($e->getFilename(),0,1)) 
 							&& substr($e->getFilename(),-4) == '.php'
 					){
