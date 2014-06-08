@@ -1,5 +1,7 @@
-
-0.4.5
+0.4.6
+	brev.php -> cmdman.php
+	
+0.4.5 (2014/05/06)
 	Mail
 		added: errors_to()
 		added: reply_to()
@@ -9,4 +11,5 @@
 		specifying: Queue::clean($type,$fin,$paginate_by)
 	flow\module\Helper
 		specifying: Helper.media()
+
 0.4.0 (2014/04/01)

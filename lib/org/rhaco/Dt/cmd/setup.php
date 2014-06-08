@@ -8,23 +8,23 @@ if($create){
 	
 	if(!is_dir($f=$path.'/lib')){
 		mkdir($f,0777,true);
-		\brev\Std::println_success('Written dir '.$f);
+		\cmdman\Std::println_success('Written dir '.$f);
 	}
 	if(!is_dir($f=$path.'/resources/media')){
 		mkdir($f,0777,true);
-		\brev\Std::println_success('Written dir '.$f);
+		\cmdman\Std::println_success('Written dir '.$f);
 	}
 	if(!is_dir($f=$path.'/resources/templates')){
 		mkdir($f,0777,true);
-		\brev\Std::println_success('Written dir '.$f);
+		\cmdman\Std::println_success('Written dir '.$f);
 	}
 	if(!is_file($f=$path.'/resources/templates/index.html')){
 		copy(__DIR__.'/create/index.html',$f);
-		\brev\Std::println_success('Written file '.$f);
+		\cmdman\Std::println_success('Written file '.$f);
 	}
 	if(!is_file($f=$path.'/index.php')){
 		copy(__DIR__.'/create/index.php',$f);
-		\brev\Std::println_success('Written file '.$f);
+		\cmdman\Std::println_success('Written file '.$f);
 	}
 	if(!is_file($f=$path.'/bootstrap.php')){
 		$autoload_file = 'vendor/autoload.php';
@@ -37,7 +37,7 @@ if($create){
 			}
 		}
 		file_put_contents($f,'<?php'.PHP_EOL.'include_once(\''.$autoload_file.'\');');
-		\brev\Std::println_success('Written file '.$f.PHP_EOL);
+		\cmdman\Std::println_success('Written file '.$f.PHP_EOL);
 	}
 }
 $appmode = defined('APPMODE') ? constant('APPMODE') : null;
@@ -53,7 +53,7 @@ if(is_dir($cmddir)){
 }
 $default = (empty($appmode) || array_search($appmode,$mode_list) !== false) ? $appmode : 'local';
 
-$mode = \brev\Std::read('Application mode',$default,$mode_list);
+$mode = \cmdman\Std::read('Application mode',$default,$mode_list);
 
 $settings_file = getcwd().'/__settings__.php';
 file_put_contents($settings_file,
@@ -62,24 +62,24 @@ file_put_contents($settings_file,
 	.PHP_EOL.'define(\'COMMONDIR\',\''.$cmddir.'\');'
 	.PHP_EOL
 );
-\brev\Std::println_success('Written: '.realpath($settings_file));
+\cmdman\Std::println_success('Written: '.realpath($settings_file));
 
 if($mode != $appmode){
-	\brev\Std::println_info('Application mode changed.');
+	\cmdman\Std::println_info('Application mode changed.');
 	exit;
 }
-if(\brev\Std::read('create .htaccess?','n',array('y','n')) == 'y'){
-	$base = \brev\Std::read('base path?','/'.basename(getcwd()));
+if(\cmdman\Std::read('create .htaccess?','n',array('y','n')) == 'y'){
+	$base = \cmdman\Std::read('base path?','/'.basename(getcwd()));
 	
 	list($path,$rules) = \org\rhaco\Dt::htaccess($base);
-	\brev\Std::println_success('Written '.realpath($path));
+	\cmdman\Std::println_success('Written '.realpath($path));
 }
 $setup_cmd = substr(\org\rhaco\Dt::setup_file(),0,-4).'.cmd.php';
 if(is_file($setup_cmd)){
 	include($setup_cmd);
 }
 if(is_file($f=\org\rhaco\Dt::setup_file())){
-	\brev\Std::println_success('Loading '.$f);
+	\cmdman\Std::println_success('Loading '.$f);
 	\org\rhaco\Dt::setup();
 }
 

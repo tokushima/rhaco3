@@ -22,9 +22,9 @@ Web framework (PHP 5 >= 5.3.0)
 ### rhaco install
 	$ php composer.phar install
 
-### brev install
-	$ curl -LO http://raw.github.com/tokushima/brev/master/brev.php
+### cmdman install
+	$ curl -LO http://raw.github.com/tokushima/cmdman/master/cmdman.php
 
 ### create start file
-	$ php brev.php org.rhaco.Dt::setup --create
+	$ php cmdman.php org.rhaco.Dt::setup --create
 

@@ -1,3 +1,3 @@
 <?php
-$run = \brev\Std::read('install','y',array('y','n'));
-\brev\Std::println_success($run);
+$run = \cmdman\Std::read('install','y',array('y','n'));
+\cmdman\Std::println_success($run);
