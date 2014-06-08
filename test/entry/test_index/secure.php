@@ -15,14 +15,14 @@ $pre = <<< PRE
 PRE;
 
 
-$b = new \chaco\Browser();
+$b = new \testman\Browser();
 $b->do_get(test_map_url('test_login::secure'));
 eq(200,$b->status());
 meq('https://',$b->url());
 eq($pre,$b->body());
 
 
-$b = new \chaco\Browser();
+$b = new \testman\Browser();
 $b->do_get(test_map_url('test_index::secure'));
 eq(200,$b->status());
 meq('https://',$b->url());

@@ -1,5 +1,5 @@
 <?php
-$b = new \chaco\Browser();
+$b = new \testman\Browser();
 $b->do_get(test_map_url('test_index::redirect_by_map_method_a'));
 eq(200,$b->status());
 eq('REDIRECT_A',$b->body());

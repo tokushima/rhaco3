@@ -1,5 +1,7 @@
 0.4.6
 	brev.php -> cmdman.php
+	chaco.php -> testman.php
+	mv lib/rhaco -> src/rhaco
 	
 0.4.5 (2014/05/06)
 	Mail

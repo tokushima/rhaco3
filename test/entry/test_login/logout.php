@@ -1,5 +1,5 @@
 <?php
-$b = new \chaco\Browser();
+$b = new \testman\Browser();
 
 $b->vars('user_name','hogeuser');
 $b->vars('password','hogehoge');
