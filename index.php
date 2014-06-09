@@ -6,6 +6,6 @@ include_once('bootstrap.php');
  */
 \org\rhaco\Flow::out(array(
 'patterns'=>array(
-	''=>array('action'=>'org.rhaco.Dt','mode'=>'test')
+	''=>array('action'=>'org.rhaco.Dt','mode'=>'local')
 )));
 
