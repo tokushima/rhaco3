@@ -34,7 +34,7 @@ date_default_timezone_set('Asia/Tokyo');
 		'level'=>'warn',
 		'file'=>dirname(__DIR__).'/work/rhaco3.log',
 		'stdout'=>true,
-		'br2str'=>'<br />',	
+		'nl2str'=>'<br />',	
 	),
 	'org.rhaco.io.File'=>array('work_dir'=>dirname(__DIR__).'/work/'),
 	'test.WebTest'=>array(
