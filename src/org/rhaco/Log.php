@@ -129,8 +129,19 @@ class Log extends \org\rhaco\Object{
 						 */
 						self::module('trace',$log,self::$id);
 					}
-					if(!empty(self::$logfile) && is_file(self::$logfile)) file_put_contents(self::$logfile,((string)$log).PHP_EOL,FILE_APPEND);
-					if(self::$disp === true && $stdout) print(((string)$log).PHP_EOL);
+					if(!empty(self::$logfile) && is_file(self::$logfile)){
+						file_put_contents(
+							self::$logfile,
+							((\org\rhaco\Conf::get('br2str') !== null) ?
+								str_replace(array("\r\n","\r","\n"),\org\rhaco\Conf::get('br2str'),((string)$log)) :
+								(string)$log								
+							).PHP_EOL,
+							FILE_APPEND
+						);
+					}
+					if(self::$disp === true && $stdout){
+						print(((string)$log).PHP_EOL);
+					}
 				}
 			}
 			/**
