@@ -6,3 +6,5 @@
 /cmdman.php
 *.db
 
+/cmdman.phar
+/testman.phar
