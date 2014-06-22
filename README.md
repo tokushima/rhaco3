@@ -23,8 +23,8 @@ Web framework (PHP 5 >= 5.3.0)
 	$ php composer.phar install
 
 ### cmdman install
-	$ curl -LO http://raw.github.com/tokushima/cmdman/master/cmdman.php
+	$ curl -LO http://git.io/cmdman.phar
 
 ### create start file
-	$ php cmdman.php org.rhaco.Dt::setup --create
+	$ php cmdman.phar org.rhaco.Dt::setup --create
 
