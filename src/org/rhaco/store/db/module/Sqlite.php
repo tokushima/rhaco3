@@ -20,11 +20,19 @@ class Sqlite extends Base{
 	public function connect($name,$host,$port,$user,$password,$sock){
 		if(!extension_loaded('pdo_sqlite')) throw new \RuntimeException('pdo_sqlite not supported');
 		if(empty($host) && empty($name)) throw new \InvalidArgumentException('undef connection name');
-		$con = null;
-		if(empty($host)) $host = getcwd();
+		$con = $path = null;
+		
+		if(empty($host)){
+			$host = \org\rhaco\Conf::get('host');
+			if(empty($host)){
+				$host = ':memory:';
+			}
+		}
 		if($host != ':memory:'){
 			$host = str_replace('\\','/',$host);
 			if(substr($host,-1) != '/') $host = $host.'/';
+			$path = \org\rhaco\net\Path::absolute($host,$name);
+			\org\rhaco\io\File::mkdir(dirname($path));
 		}
 		try{
 			$con = new \PDO(sprintf('sqlite:%s',($host == ':memory:') ? ':memory:' : $host.$name));

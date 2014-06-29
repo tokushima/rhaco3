@@ -2,7 +2,12 @@
 namespace test;
 
 class WebTest{
-	static public function get_url($url=null){
-		return \org\rhaco\Conf::get('base_url').$url;
+	public function get(){
+		if(isset($_GET)){
+			foreach($_GET as $k => $v){
+				print($k.'=>'.$v.PHP_EOL);
+			}
+			exit;
+		}
 	}
 }

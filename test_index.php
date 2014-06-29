@@ -118,6 +118,14 @@ array(
 		'template'=>'csrf.html',
 	),
 		
+	'webtest'=>array(
+		'name'=>'webtest',
+		'action'=>'test.WebTest::get',
+	),
+	'to_secure'=>array(
+		'name'=>'to_secure',
+		'template'=>'secure.html',
+	),
 	'secure'=>array(
 		'secure'=>true,
 		'name'=>'secure',

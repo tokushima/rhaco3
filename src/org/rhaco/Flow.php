@@ -31,14 +31,18 @@ class Flow{
 		$f = str_replace("\\",'/',$this->entry_file());
 		$this->app_url = Conf::get('app_url',(isset($app_url) ? $app_url : (isset($_ENV['APP_URL']) ? $_ENV['APP_URL'] : null)));
 
-		if(empty($this->app_url)) $this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
-		if(substr($this->app_url,-1) != '/') $this->app_url .= '/';
+		if(empty($this->app_url)){
+			$this->app_url = dirname('http://localhost:8000/'.basename($f,'.php'));
+		}
+		if(substr($this->app_url,-1) != '/'){
+			$this->app_url .= '/';
+		}
 		$this->template_path = str_replace("\\",'/',Conf::get('template_path',\org\rhaco\io\File::resource_path('templates')));
 		if(substr($this->template_path,-1) != '/') $this->template_path .= '/';
 		$this->media_url = str_replace("\\",'/',Conf::get('media_url',$this->app_url.'resources/media/'));
 		if(substr($this->media_url,-1) != '/') $this->media_url .= '/';		
 		$this->branch_url = $this->app_url.((($branch = substr(basename($f),0,-4)) !== 'index') ? $branch.'/' : '');
-		$this->template = new Template();
+		$this->template = new \org\rhaco\Template();
 	}
 	/**
 	 * パッケージメディアのURLを設定する

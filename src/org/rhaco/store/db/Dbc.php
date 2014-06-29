@@ -31,7 +31,6 @@ class Dbc implements \Iterator{
 		}
 		if(empty($this->type)){
 			$this->type = 'org.rhaco.store.db.module.Sqlite';
-			if(empty($this->host)) $this->host = ':memory:';
 		}
 		if(empty($this->encode)) $this->encode = 'utf8';
 		$this->type = str_replace('.','\\',$this->type);

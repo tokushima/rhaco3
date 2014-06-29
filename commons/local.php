@@ -6,20 +6,16 @@ date_default_timezone_set('Asia/Tokyo');
 \org\rhaco\Conf::set(array(
 	'org.rhaco.store.db.Dao'=>array(
 		'connection'=>array(
-			'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
-			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
-			'org.rhaco.store.queue.module.Dao.QueueDao'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
-			'org.rhaco.store.db.Dao.CrossChild'=>array(),
-			'test.model.CrossChild'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
-			'test.model'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test','user'=>'root','password'=>'root'),
-				
-//			'org.rhaco.flow.module.SessionDao'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local_session.db','host'=>dirname(__DIR__)),
-//			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local.db','host'=>dirname(__DIR__)),
-//			'org.rhaco.store.queue.module.Dao.QueueDao'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local.db','host'=>dirname(__DIR__)),
-//			'org.rhaco.store.db.Dao.CrossChild'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local.db','host'=>dirname(__DIR__)),
-//			'test.model.CrossChild'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local.db','host'=>dirname(__DIR__)),
-//			'test.model'=>array('type'=>'org.rhaco.store.db.module.Sqlite','dbname'=>'local.db','host'=>dirname(__DIR__)),
+			'org.rhaco.flow.module.SessionDao'=>array('dbname'=>'local_session.db'),
+			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('dbname'=>'local1.db'),
+			'org.rhaco.store.queue.module.Dao.QueueDao'=>array('dbname'=>'local2.db'),
+			'org.rhaco.store.db.Dao.CrossChild'=>array('dbname'=>'local3.db'),
+			'test.model.CrossChild'=>array('dbname'=>'local4.db'),
+			'test.model'=>array('dbname'=>'local5.db'),
 		)
+	),
+	'org.rhaco.store.db.module.Sqlite'=>array(
+		'host'=>dirname(__DIR__).'/work/db'
 	),
 	'org.rhaco.Flow'=>array(
 		'exception_log_level'=>'warn',
@@ -37,9 +33,6 @@ date_default_timezone_set('Asia/Tokyo');
 		'nl2str'=>'<br />',	
 	),
 	'org.rhaco.io.File'=>array('work_dir'=>dirname(__DIR__).'/work/'),
-	'test.WebTest'=>array(
-		'base_url'=>'http://localhost/'.basename(dirname(__DIR__)).'/',
-	)
 ));
 \org\rhaco\Object::set_module(array(
 	'org.rhaco.net.Session'=>array('org.rhaco.flow.module.SessionDao'),
