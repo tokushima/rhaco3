@@ -550,7 +550,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @reutrn array 処理されたモデル
 	 * @throws \Exception
 	 */
-	static public function create_talbe($model=null,$drop=false){
+	static public function create_table($model=null,$drop=false){
 		$model_list = array();
 		$result = array();
 		
