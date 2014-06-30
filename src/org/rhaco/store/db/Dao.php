@@ -942,12 +942,10 @@ abstract class Dao extends \org\rhaco\Object{
 		$dao = new static();
 		$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
 		$count = current($dao->func_query($daq));
-		static::commit();
 		
 		if($count == 0){
 			$daq = new \org\rhaco\store\db\Daq(static::module('create_table_sql',$dao));
 			$dao->func_query($daq);
-			static::commit();
 			return true;
 		}
 		return false;
@@ -960,12 +958,10 @@ abstract class Dao extends \org\rhaco\Object{
 		$dao = new static();
 		$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
 		$count = current($dao->func_query($daq));
-		static::commit();
 		
 		if($count == 1){
 			$daq = new \org\rhaco\store\db\Daq(static::module('drop_table_sql',$dao));
 			$dao->func_query($daq);
-			static::commit();
 			return true;
 		}
 		return false;
