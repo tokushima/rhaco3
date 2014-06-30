@@ -33,12 +33,9 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * アプリケーションのマップ一覧
 	 */
 	private function get_flow_output_maps(){
-		if(empty($this->flow_output_maps)){
-			$trace = debug_backtrace(false);
-			$entry = array_pop($trace);
-		
+		if(empty($this->flow_output_maps)){		
 			foreach(new \RecursiveDirectoryIterator(
-					dirname($entry['file']),
+					getcwd(),
 					\FilesystemIterator::CURRENT_AS_FILEINFO|\FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS
 			) as $e){
 				if(substr($e->getFilename(),-4) == '.php' &&
