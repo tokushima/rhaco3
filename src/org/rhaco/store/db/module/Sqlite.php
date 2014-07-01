@@ -25,7 +25,7 @@ class Sqlite extends Base{
 		if(empty($host)){
 			$host = \org\rhaco\Conf::get('host');
 			if(empty($host)){
-				$host = ':memory:';
+				$host = empty($dbname) ? ':memory:' : getcwd();
 			}
 		}
 		if($host != ':memory:'){
