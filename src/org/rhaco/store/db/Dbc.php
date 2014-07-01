@@ -14,7 +14,6 @@ class Dbc implements \Iterator{
 	private $sock;
 	private $encode;
 	private $timezone;
-	private $transaction = true;
 
 	private $connection;
 	private $statement;
@@ -27,7 +26,7 @@ class Dbc implements \Iterator{
 	 * @param string{} $def 接続情報の配列
 	 */
 	public function __construct(array $def=array()){
-		foreach(array('type','host','dbname','user','password','port','sock','encode','timezone','transaction') as $k){
+		foreach(array('type','host','dbname','user','password','port','sock','encode','timezone') as $k){
 			if(isset($def[$k])) $this->{$k} = $def[$k];
 		}
 		if(empty($this->type)){
@@ -43,7 +42,7 @@ class Dbc implements \Iterator{
 			$this->connection = $this->connection_module->connect($this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
 		}
 		if(empty($this->connection)) throw new \RuntimeException('connection fail '.$this->dbname);
-		if($this->transaction) $this->connection->beginTransaction();
+		$this->connection->beginTransaction();
 	}
 	/**
 	 * 接続DB名
@@ -68,19 +67,15 @@ class Dbc implements \Iterator{
 	 * コミットする
 	 */
 	public function commit(){
-		if($this->transaction){
-			$this->connection->commit();
-			$this->connection->beginTransaction();
-		}
+		$this->connection->commit();
+		$this->connection->beginTransaction();
 	}
 	/**
 	 * ロールバックする
 	 */
 	public function rollback(){
-		if($this->transaction){
-			$this->connection->rollBack();
-			$this->connection->beginTransaction();
-		}
+		$this->connection->rollBack();
+		$this->connection->beginTransaction();
 	}
 	/**
 	 * 文を実行する準備を行う

@@ -6,14 +6,14 @@ date_default_timezone_set('Asia/Tokyo');
 \org\rhaco\Conf::set(array(
 	'org.rhaco.store.db.Dao'=>array(
 		'connection'=>array(
-			'org.rhaco.flow.module.SessionDao'=>array('dbname'=>'local_session.db','transaction'=>false),
-			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('dbname'=>'local1.db','transaction'=>false),
-			'org.rhaco.store.queue.module.Dao.QueueDao'=>array('dbname'=>'local2.db','transaction'=>false),
-			'org.rhaco.store.db.Dao.CrossChild'=>array('dbname'=>'local3.db','transaction'=>false),
+			'org.rhaco.flow.module.SessionDao'=>array('dbname'=>'local_session.db'),
+			'org.rhaco.net.mail.module.SmtpBlackholeDao'=>array('dbname'=>'local1.db'),
+			'org.rhaco.store.queue.module.Dao.QueueDao'=>array('dbname'=>'local2.db'),
+			'org.rhaco.store.db.Dao.CrossChild'=>array('dbname'=>'local3.db'),
 
-			'test.model.CrossChild'=>array('dbname'=>'local4.db','transaction'=>false),
-			'test.model'=>array('dbname'=>'local5.db','transaction'=>false),
-			'*'=>array('dbname'=>'local6.db','transaction'=>false),
+			'test.model.CrossChild'=>array('dbname'=>'local4.db'),
+			'test.model'=>array('dbname'=>'local5.db'),
+			'*'=>array('dbname'=>'local6.db'),
 		)
 	),
 	'org.rhaco.store.db.module.Sqlite'=>array(
