@@ -5,8 +5,7 @@ namespace org\rhaco\store\db;
  * @author tokushima
  */
 class Dbc implements \Iterator{
-	static private $autocommit = false;
-	static private $transaction = false;
+	static private $autocommit;
 	
 	private $type;
 	private $host;
@@ -25,15 +24,6 @@ class Dbc implements \Iterator{
 	private $connection_module;
 	
 	/**
-	 * オートコミットを有効にする
-	 * すでに接続済みの場合は無視される
-	 */
-	public static function autocommit(){
-		if(!self::$transaction){
-			self::$autocommit = true;
-		}
-	}	
-	/**
 	 * コンストラクタ
 	 * @param string{} $def 接続情報の配列
 	 */
@@ -51,13 +41,15 @@ class Dbc implements \Iterator{
 		$r = new \ReflectionClass($this->type);
 		$this->connection_module = $r->newInstanceArgs(array($this->encode,$this->timezone));
 		if($this->connection_module instanceof \org\rhaco\store\db\module\Base){
-			$this->connection = $this->connection_module->connect($this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock);
+			if(self::$autocommit === null){
+				self::$autocommit = \org\rhaco\Conf::get('autocommit',false);
+			}
+			$this->connection = $this->connection_module->connect($this->dbname,$this->host,$this->port,$this->user,$this->password,$this->sock,self::$autocommit);
 		}
 		if(empty($this->connection)){
 			throw new \RuntimeException('connection fail '.$this->dbname);
 		}
-		if(!self::$autocommit){
-			self::$transaction = true;
+		if(self::$autocommit !== true){
 			$this->connection->beginTransaction();
 		}
 	}
@@ -84,7 +76,7 @@ class Dbc implements \Iterator{
 	 * コミットする
 	 */
 	public function commit(){
-		if(!self::$autocommit){
+		if(self::$autocommit !== true){
 			$this->connection->commit();
 			$this->connection->beginTransaction();
 		}
@@ -93,7 +85,7 @@ class Dbc implements \Iterator{
 	 * ロールバックする
 	 */
 	public function rollback(){
-		if(!self::$autocommit){
+		if(self::$autocommit !== true){
 			$this->connection->rollBack();
 			$this->connection->beginTransaction();
 		}

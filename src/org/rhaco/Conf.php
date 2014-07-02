@@ -29,7 +29,9 @@ class Conf{
 				array_shift($value);
 				array_shift($value);
 			}
-			if(!isset(self::$value[$class]) || !array_key_exists($key,self::$value[$class])) self::$value[$class][$key] = $value;
+			if(!isset(self::$value[$class]) || !array_key_exists($key,self::$value[$class])){
+				self::$value[$class][$key] = $value;
+			}
 		}
 	}
 	/**

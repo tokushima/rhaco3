@@ -13,9 +13,10 @@ class Mysql extends Base{
 	 * @param string $user
 	 * @param string $password
 	 * @param string $sock
+	 * @param boolean $autocommit
 	 * @see org\rhaco\store\db\module.Base::connect()
 	 */
-	public function connect($name,$host,$port,$user,$password,$sock){
+	public function connect($name,$host,$port,$user,$password,$sock,$autocommit){
 		if(!extension_loaded('pdo_mysql')) throw new \RuntimeException('pdo_mysql not supported');
 		$con = null;
 		if(empty($host)) $host = 'localhost';

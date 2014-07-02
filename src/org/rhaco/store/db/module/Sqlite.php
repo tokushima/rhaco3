@@ -15,26 +15,27 @@ class Sqlite extends Base{
 	 * @param string $user
 	 * @param string $password
 	 * @param string $sock
+	 * @param boolean $autocommit
 	 * @see org\rhaco\store\db\module.Base::connect()
 	 */
-	public function connect($dbname,$host,$port,$user,$password,$sock){
+	public function connect($name,$host,$port,$user,$password,$sock,$autocommit){
 		if(!extension_loaded('pdo_sqlite')) throw new \RuntimeException('pdo_sqlite not supported');
 		$con = $path = null;
 		
 		if(empty($host)){
 			$host = \org\rhaco\Conf::get('host');
 			if(empty($host)){
-				$host = empty($dbname) ? ':memory:' : getcwd();
+				$host = empty($name) ? ':memory:' : getcwd();
 			}
 		}
 		if($host != ':memory:'){
 			$host = str_replace('\\','/',$host);
 			if(substr($host,-1) != '/') $host = $host.'/';
-			$path = \org\rhaco\net\Path::absolute($host,$dbname);
+			$path = \org\rhaco\net\Path::absolute($host,$name);
 			\org\rhaco\io\File::mkdir(dirname($path));
 		}
 		try{
-			$con = new \PDO(sprintf('sqlite:%s',($host == ':memory:') ? ':memory:' : $host.$dbname));
+			$con = new \PDO(sprintf('sqlite:%s',($host == ':memory:') ? ':memory:' : $host.$name));
 		}catch(\PDOException $e){
 			throw new \org\rhaco\store\db\exception\ConnectionException($e->getMessage());
 		}

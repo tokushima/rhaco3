@@ -27,9 +27,10 @@ abstract class Base{
 	 * @param string $user
 	 * @param string $password
 	 * @param string $sock
+	 * @param boolean $autocommit
 	 * @return PDO
 	 */
-	public function connect($name,$host,$port,$user,$password,$sock){
+	public function connect($name,$host,$port,$user,$password,$sock,$autocommit){
 		throw new \org\rhaco\store\db\exception\DaoBadMethodCallException('undef');
 	}
 	/**
