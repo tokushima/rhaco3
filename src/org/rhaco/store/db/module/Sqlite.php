@@ -19,7 +19,6 @@ class Sqlite extends Base{
 	 */
 	public function connect($dbname,$host,$port,$user,$password,$sock){
 		if(!extension_loaded('pdo_sqlite')) throw new \RuntimeException('pdo_sqlite not supported');
-		if(empty($host) && empty($dbname)) throw new \InvalidArgumentException('undef connection name');
 		$con = $path = null;
 		
 		if(empty($host)){
