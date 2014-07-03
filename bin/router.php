@@ -24,10 +24,7 @@ $include_php = function($filename,$subdir){
 };
 	
 	
-	
-if(ini_get('date.timezone') == ''){
-	date_default_timezone_set('Asia/Tokyo');
-}
+
 $dir = getcwd();
 $subdir = '';
 $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';

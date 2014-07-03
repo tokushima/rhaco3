@@ -79,9 +79,25 @@ class Request implements \IteratorAggregate{
 	}
 	/**
 	 * 現在のURLを返す
+	 * @param number $port_https
+	 * @param number $port_http
 	 * @return string
 	 */
 	static public function current_url($port_https=443,$port_http=80){
+		$server = self::host($port_https,$port_http);
+		if(empty($server)) return null;
+		$path = isset($_SERVER['REQUEST_URI']) ?
+					preg_replace("/^(.+)\?.*$/","\\1",$_SERVER['REQUEST_URI']) :
+					(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'].(isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '') : '');
+		return $server.$path;
+	}
+	/**
+	 * 現在のホスト
+	 * @param number $port_https
+	 * @param number $port_http
+	 * @return string
+	 */
+	static public function host($port_https=443,$port_http=80){
 		$port = $port_http;
 		if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'){
 			$port = $port_https;
@@ -98,12 +114,9 @@ class Request implements \IteratorAggregate{
 						isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] :
 						(isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '')
 					));
-		$path = isset($_SERVER['REQUEST_URI']) ?
-					preg_replace("/^(.+)\?.*$/","\\1",$_SERVER['REQUEST_URI']) :
-					(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'].(isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '') : '');
 		if($port != $port_http && $port != $port_https) $server = $server.':'.$port;
 		if(empty($server)) return null;
-		return (($port == $port_https) ? 'https' : 'http').'://'.preg_replace("/^(.+?)\?.*/","\\1",$server).$path;
+		return (($port == $port_https) ? 'https' : 'http').'://'.preg_replace("/^(.+?)\?.*/","\\1",$server);
 	}
 	/**
 	 * 現在のリクエストクエリを返す

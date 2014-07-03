@@ -24,7 +24,7 @@ date_default_timezone_set('Asia/Tokyo');
 		'exception_log_ignore'=>array(
 			'Unauthorized.+RequestFlow'
 		),
-		//'app_url'=>'http://localhost/rhaco3',
+//		'app_url'=>'http://localhost:8000',
 	),
 	'org.rhaco.Template'=>array('display_exception'=>true),
 	'org.rhaco.flow.module.SimpleAuth'=>array('auth'=>array('user_name'=>md5(sha1('password')))),
