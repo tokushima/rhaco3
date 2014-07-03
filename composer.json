@@ -17,6 +17,9 @@
 	    "files": [
 	    	"bootstrap.php"
 	   	]
-	}
+	},
+	"bin": [
+		"bin/router.php"
+	]
 }
 
