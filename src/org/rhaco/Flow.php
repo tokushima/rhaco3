@@ -28,33 +28,17 @@ class Flow{
 		throw new \RuntimeException('no entry file');
 	}
 	public function __construct($app_url=null){
-// TODO MAMP ベース
-		$f = str_replace("\\",'/',$this->entry_file());
-		$this->app_url = Conf::get('app_url',(isset($app_url) ? $app_url : (isset($_ENV['APP_URL']) ? $_ENV['APP_URL'] : null)));
-
-		if(empty($this->app_url)){
-			$this->app_url = dirname('http://localhost/'.preg_replace("/.+\/workspace\/(.+)/","\\1",$f));
-		}
-		if(substr($this->app_url,-1) != '/'){
-			$this->app_url .= '/';
-		}
-		$this->template_path = str_replace("\\",'/',Conf::get('template_path',\org\rhaco\io\File::resource_path('templates')));
-		if(substr($this->template_path,-1) != '/') $this->template_path .= '/';
-		$this->media_url = str_replace("\\",'/',Conf::get('media_url',$this->app_url.'resources/media/'));
-		if(substr($this->media_url,-1) != '/') $this->media_url .= '/';		
-		$this->branch_url = $this->app_url.((($branch = substr(basename($f),0,-4)) !== 'index') ? $branch.'/' : '');
-		$this->template = new \org\rhaco\Template();
-
-/*
-// bis ベース
 		$entry_file = str_replace("\\",'/',$this->entry_file());
 		$branch_url = '';
+		$rewrite = \org\rhaco\Conf::get('rewrite_entry');
 		$this->app_url = \org\rhaco\Conf::get('app_url');
 		$this->media_url = \org\rhaco\Conf::get('media_url');
 
 		$path = function($url){
-			$url = str_replace('\\','/',$url);
-			if(substr($url,-1) != '/') $url .= '/';
+			if(!empty($url)){
+				$url = str_replace('\\','/',$url);
+				if(substr($url,-1) != '/') $url .= '/';
+			}
 			return $url;
 		};		
 		if(empty($this->app_url)){
@@ -75,10 +59,16 @@ class Flow{
 						}
 					}
 				}
-				$this->app_url = $host;
+				$hasport = (boolean)preg_match('/:\d+/',$host);
+				$this->app_url = $host.($hasport ? '' : '/'.dirname(preg_replace("/.+\/workspace\/(.+)/","\\1",$entry_file)));
 				$branch_url = $script.'.php';
+				
+				if(!isset($rewrite)){
+					$rewrite = ($hasport) ? false : true;
+				}
 			}else{
 				$this->app_url = 'http://localhost:8000/';
+				$rewrite = false;
 			}
 			$this->app_url = str_replace('https://','http://',$this->app_url);
 			if(empty($this->media_url)){
@@ -88,14 +78,20 @@ class Flow{
 		if(empty($branch_url)){
 			$branch_url = basename($entry_file);
 		}
+		if(substr($branch_url,0,1) == '/'){
+			$branch_url = substr($branch_url,1);
+		}
+		if($rewrite === null || $rewrite === true){
+			$branch_url = basename($branch_url,'.php');
+			if($branch_url == 'index'){
+				$branch_url = '';
+			}
+		}
 		$this->app_url = $path($this->app_url);
-		//		$this->branch_url = $this->app_url.((($branch = basename($entry_file)) === 'index.php') ? '' : $branch.'/');
-		$this->branch_url = $this->app_url.(empty($this->branch_url) ? basename($entry_file).'/' : $this->branch_url);
-
+		$this->branch_url = $this->app_url.$path($branch_url);
 		$this->media_url = $path(empty($this->media_url) ? $this->app_url.'resources/media/' : $this->media_url);
 		$this->template_path = $path(\org\rhaco\Conf::get('template_path',\org\rhaco\io\File::resource_path('templates')));
 		$this->template = new \org\rhaco\Template();
-*/
 	}
 	/**
 	 * パッケージメディアのURLを設定する
