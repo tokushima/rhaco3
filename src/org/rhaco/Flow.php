@@ -23,17 +23,17 @@ class Flow{
 	
 	private function entry_file(){
 		foreach(debug_backtrace(false) as $d){
-			if($d['file'] !== __FILE__) return $d['file'];
+			if($d['file'] !== __FILE__) return str_replace("\\",'/',$d['file']);
 		}
 		throw new \RuntimeException('no entry file');
 	}
 	public function __construct($app_url=null){
-		$entry_file = str_replace("\\",'/',$this->entry_file());
+		$entry_file = $this->entry_file();
 		$branch_url = '';
 		$rewrite = \org\rhaco\Conf::get('rewrite_entry');
 		$this->app_url = \org\rhaco\Conf::get('app_url');
 		$this->media_url = \org\rhaco\Conf::get('media_url');
-
+		
 		$path = function($url){
 			if(!empty($url)){
 				$url = str_replace('\\','/',$url);
@@ -43,25 +43,10 @@ class Flow{
 		};		
 		if(empty($this->app_url)){
 			$host = \org\rhaco\Request::host();
-
+			
 			if(!empty($host)){
-				list($script) = explode('.php',isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF']);
-				if(!empty($script)){
-					$url = '';
-					foreach(explode('/',$script) as $u){
-						if(!empty($u)){
-							$url .= '/'.$u;
-		
-							if(is_file(getcwd().$url.'.php')){
-								$script = $url;
-								break;
-							}
-						}
-					}
-				}
 				$hasport = (boolean)preg_match('/:\d+/',$host);
 				$this->app_url = $host.($hasport ? '' : '/'.dirname(preg_replace("/.+\/workspace\/(.+)/","\\1",$entry_file)));
-				$branch_url = $script.'.php';
 				
 				if(!isset($rewrite)){
 					$rewrite = ($hasport) ? false : true;
@@ -71,9 +56,6 @@ class Flow{
 				$rewrite = false;
 			}
 			$this->app_url = str_replace('https://','http://',$this->app_url);
-			if(empty($this->media_url)){
-				$this->media_url = dirname($this->app_url).'/resources/media/';
-			}
 		}
 		if(empty($branch_url)){
 			$branch_url = basename($entry_file);
@@ -140,6 +122,7 @@ class Flow{
 		if(!isset(self::$output_maps[$key])){
 			self::$get_maps = true;
 			self::$output_maps[$key] = array();
+			
 			try{
 				ob_start();
 					include($file);

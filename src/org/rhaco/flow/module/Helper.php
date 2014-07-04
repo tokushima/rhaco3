@@ -59,7 +59,7 @@ class Helper{
 			foreach(\org\rhaco\Flow::get_maps($f) as $m){
 				$this->url_pattern[$entry][$m['name'].'#'.$m['num']] = $m;
 			}
-		}		
+		}
 		$n = $name.'#'.sizeof($args);
 		if(isset($this->url_pattern[$entry][$n])){
 			return vsprintf($this->url_pattern[$entry][$n]['pattern'],$args);
