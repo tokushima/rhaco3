@@ -26,10 +26,16 @@ class Mysql extends Base{
 					sprintf('mysql:dbname=%s;unix_socket=%s',$name,$sock);
 		try{
 			$con = new \PDO($dsn,$user,$password);
-			$this->prepare_execute($con,'set autocommit=0');
-			$this->prepare_execute($con,'set session transaction isolation level read committed');
-			if(!empty($this->encode)) $this->prepare_execute($con,'set names \''.$this->encode.'\'');
-			if(!empty($this->timezone)) $this->prepare_execute($con,'set time_zone=\''.$this->timezone.'\'');
+			if(!$autocommit){
+				$this->prepare_execute($con,'set autocommit=0');
+				$this->prepare_execute($con,'set session transaction isolation level read committed');
+			}
+			if(!empty($this->encode)){
+				$this->prepare_execute($con,'set names \''.$this->encode.'\'');
+			}
+			if(!empty($this->timezone)){
+				$this->prepare_execute($con,'set time_zone=\''.$this->timezone.'\'');
+			}
 		}catch(\PDOException $e){
 			throw new \org\rhaco\store\db\exception\ConnectionException((strpos($e->getMessage(),'SQLSTATE[HY000]') === false) ? $e->getMessage() : 'not supported '.__CLASS__);
 		}
