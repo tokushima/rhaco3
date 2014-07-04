@@ -1,5 +1,6 @@
 <?php
 namespace org\rhaco\store\db\module;
+use \org\rhaco\store\db\Dao;
 /**
  * SQLiteモジュール
  * @author tokushima
@@ -98,5 +99,14 @@ class Sqlite extends Base{
 	}
 	protected function create_table_prop_cond(\org\rhaco\store\db\Dao $dao,$prop_name){
 		return ($dao->prop_anon($prop_name,'extra') !== true && $dao->prop_anon($prop_name,'cond') === null);
+	}
+	protected function column_value(Dao $dao,$name,$value){
+		if($value === null) return null;
+		try{
+			switch($dao->prop_anon($name,'type')){
+				case 'boolean': return (int)$value;
+			}
+		}catch(\Exception $e){}
+		return parent::column_value($dao, $name, $value);
 	}
 }
