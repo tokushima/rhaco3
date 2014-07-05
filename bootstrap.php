@@ -47,8 +47,13 @@ if(!defined('COMMONDIR') && is_dir($dir.'/commons')){
 if(!defined('APPMODE')){
 	define('APPMODE','local');
 }
-if(defined('COMMONDIR') && is_file($f=(constant('COMMONDIR').'/'.constant('APPMODE').'.php'))){
-	include_once($f);
+if(defined('COMMONDIR')){
+	if(is_file($f=(constant('COMMONDIR').'/common.php'))){
+		include_once($f);
+	}
+	if(is_file($f=(constant('COMMONDIR').'/'.constant('APPMODE').'.php'))){
+		include_once($f);
+	}
 }
 if(!defined('CMDMAN_ERROR_CALLBACK')){
 	define('CMDMAN_ERROR_CALLBACK','\\org\\rhaco\\Log::error');

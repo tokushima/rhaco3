@@ -29,7 +29,7 @@ class Flow{
 	}
 	public function __construct($app_url=null){
 		$entry_file = $this->entry_file();
-		$branch_url = '';
+		$branch_url = basename($entry_file);
 		$rewrite = \org\rhaco\Conf::get('rewrite_entry');
 		$this->app_url = \org\rhaco\Conf::get('app_url');
 		$this->media_url = \org\rhaco\Conf::get('media_url');
@@ -55,10 +55,6 @@ class Flow{
 				$this->app_url = 'http://localhost:8000/';
 				$rewrite = false;
 			}
-			$this->app_url = str_replace('https://','http://',$this->app_url);
-		}
-		if(empty($branch_url)){
-			$branch_url = basename($entry_file);
 		}
 		if(substr($branch_url,0,1) == '/'){
 			$branch_url = substr($branch_url,1);
@@ -69,7 +65,7 @@ class Flow{
 				$branch_url = '';
 			}
 		}
-		$this->app_url = $path($this->app_url);
+		$this->app_url = str_replace('https://','http://',$path($this->app_url));
 		$this->branch_url = $this->app_url.$path($branch_url);
 		$this->media_url = $path(empty($this->media_url) ? $this->app_url.'resources/media/' : $this->media_url);
 		$this->template_path = $path(\org\rhaco\Conf::get('template_path',\org\rhaco\io\File::resource_path('templates')));

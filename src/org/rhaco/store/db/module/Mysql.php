@@ -19,8 +19,16 @@ class Mysql extends Base{
 	public function connect($name,$host,$port,$user,$password,$sock,$autocommit){
 		if(!extension_loaded('pdo_mysql')) throw new \RuntimeException('pdo_mysql not supported');
 		$con = null;
-		if(empty($host)) $host = 'localhost';
-		if(empty($name)) throw new \InvalidArgumentException('undef connection name');
+		if(empty($name)){
+			throw new \InvalidArgumentException('undef connection name');
+		}
+		if(empty($host)){
+			$host = 'localhost';
+		}
+		if(!isset($user) && !isset($password)){
+			$user = 'root';
+			$password = 'root';
+		}		
 		$dsn = empty($sock) ?
 					sprintf('mysql:dbname=%s;host=%s;port=%d',$name,$host,((empty($port) ? 3306 : $port))) :
 					sprintf('mysql:dbname=%s;unix_socket=%s',$name,$sock);
