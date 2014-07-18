@@ -11,4 +11,6 @@ class RefFind extends \org\rhaco\store\db\Dao{
 	protected $parent_id;
 	protected $value;
 	protected $value2;
+
+	private $private_value;
 }

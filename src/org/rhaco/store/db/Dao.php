@@ -128,7 +128,7 @@ abstract class Dao extends \org\rhaco\Object{
 
 		$prop = array();
 		$ref = new \ReflectionClass($this);
-		foreach($ref->getProperties() as $prop){
+		foreach($ref->getProperties(\ReflectionProperty::IS_PUBLIC|\ReflectionProperty::IS_PROTECTED) as $prop){
 			$props[] = $prop->getName();
 		}
 		foreach($props as $k => $name){
