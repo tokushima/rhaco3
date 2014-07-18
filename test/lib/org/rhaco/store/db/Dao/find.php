@@ -27,8 +27,20 @@ $ccc = $ref(new \test\model\Find())->order(2)->value1("ccc")->value2("aaa")->sav
 $mno = $ref(new \test\model\Find())->order(2)->value1("mno")->value2(null)->save();
 
 
-$ref1 = $ref(new \test\model\RefFind())->parent_id($jkl->id())->save();
-$ref2 = $ref(new \test\model\RefFind())->parent_id($ccc->id())->save();
+$ref1 = $ref(new \test\model\RefFind())->parent_id($abc->id())->save();
+$ref2 = $ref(new \test\model\RefFind())->parent_id($def->id())->save();
+$ref3 = $ref(new \test\model\RefFind())->parent_id($ghi->id())->save();
+$ref4 = $ref(new \test\model\RefFind())->parent_id($jkl->id())->save();
+
+
+eq(4,sizeof(\test\model\RefFind::find_all()));
+eq(1,sizeof(\test\model\RefFind::find_all(Q::eq('value','def'))));
+eq(1,sizeof(\test\model\RefFind::find_all(Q::eq('value2','EDC'))));
+
+eq(1,sizeof(\test\model\RefFindExt::find_all(Q::eq('value','def'))));
+eq(1,sizeof(\test\model\RefFindExt::find_all(Q::eq('value2','EDC'))));
+
+
 
 $refref1 = $ref(new \test\model\RefRefFind())->parent_id($ref1->id())->save();
 
@@ -212,15 +224,15 @@ eq(2,sizeof($result));
 eq("EDC",\test\model\Find::find_get(Q::eq("value1","jkl"))->value2());
 
 $i = 0;
-$r = array("jkl","ccc");
+$r = array("abc","def","ghi","jkl");
 foreach(\test\model\RefFind::find() as $obj){
 	eq(isset($r[$i]) ? $r[$i] : null,$obj->value());
 	$i++;
 }
-eq(2,$i);
+eq(4,$i);
 
 $i = 0;
-$r = array("jkl");
+$r = array("abc");
 foreach(\test\model\RefRefFind::find() as $obj){
 	eq(isset($r[$i]) ? $r[$i] : null,$obj->value());
 	$i++;
@@ -229,12 +241,12 @@ eq(1,$i);
 
 
 $i = 0;
-$r = array("jkl","ccc");
+$r = array("abc","def","ghi","jkl");
 foreach(\test\model\HasFind::find() as $obj){
 	eq(isset($r[$i]) ? $r[$i] : null,$obj->parent()->value1());
 	$i++;
 }
-eq(2,$i);
+eq(4,$i);
 
 
 $result = \test\model\Find::find_all(Q::in("value1",\test\model\SubFind::find_sub("value")));
