@@ -39,7 +39,7 @@ eq(1,sizeof(\test\model\RefFind::find_all(Q::eq('value2','EDC'))));
 
 eq(1,sizeof(\test\model\RefFindExt::find_all(Q::eq('value','def'))));
 eq(1,sizeof(\test\model\RefFindExt::find_all(Q::eq('value2','EDC'))));
-
+eq(1,sizeof(\test\model\RefFindExt::find_all(Q::eq('order',3))));
 
 
 $refref1 = $ref(new \test\model\RefRefFind())->parent_id($ref1->id())->save();

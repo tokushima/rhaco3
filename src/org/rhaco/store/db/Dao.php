@@ -131,7 +131,9 @@ abstract class Dao extends \org\rhaco\Object{
 		foreach($ref->getProperties(\ReflectionProperty::IS_PUBLIC|\ReflectionProperty::IS_PROTECTED) as $prop){
 			$props[] = $prop->getName();
 		}
-		foreach($props as $k => $name){
+		while(!empty($props)){
+			$name = array_shift($props);
+			
 			if($name[0] != '_' && $this->prop_anon($name,'extra') !== true){
 				$anon_cond = $this->prop_anon($name,'cond');
 				$column_type = $this->prop_anon($name,'type');
@@ -228,16 +230,11 @@ abstract class Dao extends \org\rhaco\Object{
 					}
 				}else if($anon_cond[0] === '@'){
 					$cond_name = substr($anon_cond,1);
-					try{
-						$c = $this->base_column($_columns_,substr($anon_cond,1));
-					}catch(\RuntimeException $e){
-						if(!in_array($cond_name,$props)){
-							throw $e;
-						}
-						unset($props[$k]);
-						$props[] = $cond_name;
+					if(in_array($cond_name,$props)){
+						$props[] = $name;
 						continue;
 					}
+					$c = $this->base_column($_columns_,substr($anon_cond,1));
 					$column->table($c->table());
 					$column->table_alias($c->table_alias());
 					$_columns_[] = $column;
