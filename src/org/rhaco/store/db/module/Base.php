@@ -125,7 +125,6 @@ abstract class Base{
 	 */
 	public function select_sql(Dao $dao,Q $query,$paginator,$name=null){
 		$select = $from = array();
-		$self_columns = $dao->self_columns();
 
 		if(empty($name)){
 			foreach($dao->columns() as $column){
@@ -145,7 +144,7 @@ abstract class Base{
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(true),$this->where_cond_columns($dao->conds(),$from));
 		return new Daq(('select '.implode(',',$select).' from '.implode(',',$from)
 										.(empty($where_sql) ? '' : ' where '.$where_sql)
-										.$this->select_option_sql($paginator,$this->select_order($query,$self_columns))
+										.$this->select_option_sql($paginator,$this->select_order($query,$dao->self_columns(true)))
 							)
 							,$where_vars
 				);
