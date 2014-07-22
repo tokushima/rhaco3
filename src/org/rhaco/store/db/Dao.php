@@ -85,11 +85,12 @@ abstract class Dao extends \org\rhaco\Object{
 			return;
 		}
 		if(!isset(self::$_co_anon_[$p])){
+			$readonly = static::anon('readonly',false);
 			$anon = array(static::anon('database')
 							,static::anon('table')
-							,(static::anon('create',true) === true)
-							,(static::anon('update',true) === true)
-							,(static::anon('delete',true) === true)
+							,(static::anon('create',!$readonly) === true)
+							,(static::anon('update',!$readonly) === true)
+							,(static::anon('delete',!$readonly) === true)
 							,null,false,false
 						);
 			if(empty($anon[0])){
@@ -952,13 +953,17 @@ abstract class Dao extends \org\rhaco\Object{
 	 */
 	static public function create_table(){
 		$dao = new static();
-		$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
-		$count = current($dao->func_query($daq));
+		$class_name = get_class($dao);
 		
-		if($count == 0){
-			$daq = new \org\rhaco\store\db\Daq(static::module('create_table_sql',$dao));
-			$dao->func_query($daq);
-			return true;
+		if(!self::$_co_anon_[$class_name][2] && !self::$_co_anon_[$class_name][3] && !self::$_co_anon_[$class_name][4]){
+			$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
+			$count = current($dao->func_query($daq));
+			
+			if($count == 0){
+				$daq = new \org\rhaco\store\db\Daq(static::module('create_table_sql',$dao));
+				$dao->func_query($daq);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -968,13 +973,18 @@ abstract class Dao extends \org\rhaco\Object{
 	 */
 	static public function drop_table(){
 		$dao = new static();
-		$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
-		$count = current($dao->func_query($daq));
 		
-		if($count == 1){
-			$daq = new \org\rhaco\store\db\Daq(static::module('drop_table_sql',$dao));
-			$dao->func_query($daq);
-			return true;
+		$class_name = get_class($dao);
+		
+		if(!self::$_co_anon_[$class_name][2] && !self::$_co_anon_[$class_name][3] && !self::$_co_anon_[$class_name][4]){
+			$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
+			$count = current($dao->func_query($daq));
+			
+			if($count == 1){
+				$daq = new \org\rhaco\store\db\Daq(static::module('drop_table_sql',$dao));
+				$dao->func_query($daq);
+				return true;
+			}
 		}
 		return false;
 	}
