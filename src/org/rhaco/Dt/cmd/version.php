@@ -2,5 +2,5 @@
 /**
  * Prints the version
  */
-\cmdman\Std::println('rhaco3 0.4.6');
+\cmdman\Std::println('rhaco3 0.4.8');
 
