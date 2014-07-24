@@ -1,5 +1,20 @@
 <?php
 
+if(\org\rhaco\Conf::appmode() == 'mamp'){
+$pre = <<< PRE
+<html>
+<body>
+	<a href="http://rhaco.org"></a>
+	<a href="http://localhost/rhaco3/test_index/"></a>
+	<a href="https://localhost/rhaco3/test_index/secure"></a>
+	<a href="https://localhost/rhaco3/test_login/secure"></a>
+	<img src="http://localhost/images/abc.jpg" />
+	<img src="http://localhost/rhaco3/resources/media/images/def.jpg" />
+	<img src="http://localhost/rhaco3/resources/media/images/def.jpg" />
+</body>
+</html>
+PRE;
+}else{
 $pre = <<< PRE
 <html>
 <body>
@@ -13,6 +28,7 @@ $pre = <<< PRE
 </body>
 </html>
 PRE;
+}
 
 meq('https://',test_map_url('test_login::secure'));
 

@@ -14,4 +14,7 @@
 	)
 ));
 
+\org\rhaco\Conf::set('org.rhaco.Flow','app_url','http://localhost/rhaco3');
+\org\rhaco\Conf::set('org.rhaco.Flow','rewrite_entry',true);
+
 include('local.php');
