@@ -20,6 +20,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('app_mode',\org\rhaco\Conf::appmode());
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_coverage',function_exists('xdebug_get_code_coverage'));
+		$this->vars('media_url',\org\rhaco\net\Path::slash(\org\rhaco\Conf::get('media_url'),null,false));
 	}
 	public function get_template_modules(){
 		return array(

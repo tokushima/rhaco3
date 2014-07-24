@@ -18,3 +18,5 @@
 \org\rhaco\Conf::set('org.rhaco.Flow','rewrite_entry',true);
 
 include('local.php');
+
+//\org\rhaco\Conf::set('org.rhaco.Dt','media_url','http://localhost/work/media2');
