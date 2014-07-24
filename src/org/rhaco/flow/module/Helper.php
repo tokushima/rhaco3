@@ -260,7 +260,10 @@ class Helper{
 		if($lines > 0){
 			$ln = array();
 			$l = explode("\n",$value);
-			for($i=0;$i<$lines;$i++) $ln[] = $l[$i];
+			for($i=0;$i<$lines;$i++){
+				if(!isset($l[$i])) break;
+				$ln[] = $l[$i];
+			}
 			$value = implode("\n",$ln).((sizeof($l) > $lines) ? $postfix : null);
 		}
 		$value = str_replace(array("<",">","'","\""),array("&lt;","&gt;","&#039;","&quot;"),$value);
