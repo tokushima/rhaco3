@@ -210,7 +210,7 @@ class Template extends \org\rhaco\TemplateVariable{
 		return $src;
 	}
 	private function replace_parse_url($src,$base,$dep,$rep){
-		if(!preg_match("/(^[\w]+:\/\/)|(^__PHP_TAG_START)|(^\{\\$)|(^\w+:)|(^[#\?])/",$rep)){
+		if(!preg_match("/(^\/\/)|(^[\w]+:\/\/)|(^__PHP_TAG_START)|(^\{\\$)|(^\w+:)|(^[#\?])/",$rep)){
 			$src = str_replace($dep,str_replace($rep,$this->ab_path($base,$rep),$dep),$src);
 		}
 		return $src;
