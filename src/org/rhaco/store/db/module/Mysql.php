@@ -52,8 +52,11 @@ class Mysql extends Base{
 	protected function prepare_execute($con,$sql){
 		$st = $con->prepare($sql);
 		$st->execute();
-		$error = $st->errorInfo();
-		if((int)$error[0] !== 0) throw new \InvalidArgumentException($error[2]);
+		
+		$errors = $st->errorInfo();
+		if(isset($errors[1])){
+			throw new \InvalidArgumentException('['.$errors[1].'] '.(isset($errors[2]) ? $errors[2] : '').PHP_EOL.'( '.$sql.' )');
+		}
 	}
 	/**
 	 * @module org.rhaco.store.db.Dbc
