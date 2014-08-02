@@ -49,7 +49,7 @@ class Mysql extends Base{
 		}
 		return $con;
 	}
-	private function prepare_execute($con,$sql){
+	protected function prepare_execute($con,$sql){
 		$st = $con->prepare($sql);
 		$st->execute();
 		$error = $st->errorInfo();
