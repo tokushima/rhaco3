@@ -12,6 +12,7 @@
 					'*'=>array('type'=>'org.rhaco.store.db.module.Mysql','dbname'=>'rhaco3test'),
 					
 					'test.model.ReplicationSlave'=>array('type'=>'org.rhaco.store.db.module.MysqlUnbuffered','dbname'=>'rhaco3test'),
+					'test.model.Unbuffered'=>array('type'=>'org.rhaco.store.db.module.MysqlUnbuffered','dbname'=>'rhaco3test'),
 			)
 	)
 ));
