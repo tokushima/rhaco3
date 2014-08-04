@@ -993,7 +993,7 @@ abstract class Dao extends \org\rhaco\Object{
 		$dao = new static();
 		$class_name = get_class($dao);
 		
-		if(self::$_co_anon_[$class_name][2] && self::$_co_anon_[$class_name][3] && self::$_co_anon_[$class_name][4]){
+		if(self::$_co_anon_[$class_name][2] && self::$_co_anon_[$class_name][3]){
 			$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
 			$count = current($dao->func_query($daq));
 			
@@ -1014,7 +1014,7 @@ abstract class Dao extends \org\rhaco\Object{
 		
 		$class_name = get_class($dao);
 		
-		if(self::$_co_anon_[$class_name][2] && self::$_co_anon_[$class_name][3] && self::$_co_anon_[$class_name][4]){
+		if(self::$_co_anon_[$class_name][2] && self::$_co_anon_[$class_name][3]){
 			$daq = new \org\rhaco\store\db\Daq(static::module('exists_table_sql',$dao));
 			$count = current($dao->func_query($daq));
 			
