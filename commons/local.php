@@ -31,7 +31,16 @@
 		'stdout'=>true,
 //		'nl2str'=>'<br />',	
 	),
-	'org.rhaco.io.File'=>array('work_dir'=>dirname(__DIR__).'/work/'),
+	'org.rhaco.io.File'=>array(
+		'work_dir'=>dirname(__DIR__).'/work/'
+	),
+	'org.rhaco.Dt'=>array(
+		'use_vendor'=>array(
+			'org.rhaco.store.queue.module.Dao.QueueDao',
+			'org.rhaco.net.mail.module.SmtpBlackholeDao',
+			'org.rhaco.flow.module.SessionDao',
+		)
+	),
 ));
 \org\rhaco\Object::set_module(array(
 	'org.rhaco.net.Session'=>array('org.rhaco.flow.module.SessionDao'),

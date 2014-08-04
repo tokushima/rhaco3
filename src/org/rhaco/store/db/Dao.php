@@ -127,7 +127,7 @@ abstract class Dao extends \org\rhaco\Object{
 		$root_table_alias = 't'.self::$_cnt_++;
 		$_columns_ = $_self_columns_ = $_where_columns_ = $_conds_ = $_join_conds_ = $_alias_ = $_has_many_conds_ = $_has_dao_ = array();
 
-		$prop = array();
+		$prop = $last_cond_column = array();
 		$ref = new \ReflectionClass($this);
 		foreach($ref->getProperties(\ReflectionProperty::IS_PUBLIC|\ReflectionProperty::IS_PROTECTED) as $prop){
 			$props[] = $prop->getName();
@@ -194,9 +194,12 @@ abstract class Dao extends \org\rhaco\Object{
 						}else{
 							$self_db = true;
 							if($is_has){
-								if(empty($has_var)) throw new \LogicException('annotation error : `'.$name.'`');
+								if(empty($has_var)){
+									throw new \LogicException('annotation error : `'.$name.'`');
+								}
 								$dao = new $column_type(array('_class_id_'=>($p.'___'.self::$_cnt_++),'_hierarchy_'=>$has_hierarchy));
 								$this->{$name}($dao);
+								
 								if($dao->table() == $this->table()){
 									$_has_dao_[$name] = $dao;
 									$_columns_ = array_merge($_columns_,$dao->columns());
@@ -205,27 +208,62 @@ abstract class Dao extends \org\rhaco\Object{
 									foreach($dao->columns() as $column) $_alias_[$column->column_alias()] = $name;
 									$has_column = $dao->base_column($dao->columns(),$has_var);
 									$conds[] = Column::cond_instance($has_column->column(),'c'.self::$_cnt_++,$has_column->table(),$has_column->table_alias());
+									
+									array_unshift($conds,Column::cond_instance($self_var,'c'.self::$_cnt_++,$this->table(),$root_table_alias));
 								}else{
 									$_has_many_conds_[$name] = array($dao,$has_var,$self_var);
 									$self_db = false;
 								}
 							}else{
+								if($self_var[0] == '@'){
+									$cond_var = null;
+									$cond_name = substr($self_var,1);
+									if(strpos($cond_name,'.') !== false){
+										list($cond_name,$cond_var) = explode('.',$cond_name);
+									}
+									if(!isset($last_cond_column[$cond_name])){
+										$props[] = $name;
+										continue;
+									}
+									$cond_column = clone($last_cond_column[$cond_name]);
+									if(isset($cond_var)){
+										$cond_column->column($cond_var);
+										$cond_column->column_alias('c'.self::$_cnt_++);
+									}
+									array_unshift($conds,$cond_column);
+								}else{
+									array_unshift($conds,
+										Column::cond_instance($self_var,'c'.self::$_cnt_++,$this->table(),$root_table_alias)
+									);
+								}								
+								
 								$column->table($ref_table);
 								$column->table_alias($ref_table_alias);
-								if(!$this->prop_anon($name,'join',false)) $_columns_[] = $column;
-								$_where_columns_[$name] = $column;
 								$_alias_[$column->column_alias()] = $name;
+								
+								if(!$this->prop_anon($name,'join',false)){
+									$_columns_[] = $column;
+								}
+								$_where_columns_[$name] = $column;
 							}
 							if($self_db){
-								array_unshift($conds,Column::cond_instance($self_var,'c'.self::$_cnt_++,$this->table(),$root_table_alias));
-								if(sizeof($conds) % 2 != 0) throw new \RuntimeException($name.'['.$column_type.'] is illegal condition');
+								if(sizeof($conds) % 2 != 0){
+									throw new \RuntimeException($name.'['.$column_type.'] is illegal condition');
+								}
 								if($this->prop_anon($name,'join',false)){
 									$this->prop_anon($name,'get',false,true);
 									$this->prop_anon($name,'set',false,true);
-									for($i=0;$i<sizeof($conds);$i+=2) $_join_conds_[$name][] = array($conds[$i],$conds[$i+1]);
+									for($i=0;$i<sizeof($conds);$i+=2){
+										$_join_conds_[$name][] = array($conds[$i],$conds[$i+1]);
+									}
 								}else{
-									for($i=0;$i<sizeof($conds);$i+=2) $_conds_[] = array($conds[$i],$conds[$i+1]);
+									for($i=0;$i<sizeof($conds);$i+=2){
+										$_conds_[] = array($conds[$i],$conds[$i+1]);
+									}
 								}
+							}
+							if(!empty($conds)){
+								$last_cond_column[$name] = $conds[sizeof($conds)-1];
 							}
 						}
 					}
