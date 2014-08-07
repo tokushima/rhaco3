@@ -19,7 +19,7 @@ class Request implements \IteratorAggregate{
 			if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST'){
 				if(isset($_POST) && is_array($_POST)){
 					if(isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json'){
-						$json = json_decode(file_get_content('php://input'),true);
+						$json = json_decode(file_get_contents('php://input'),true);
 						if(is_array($json)){
 							foreach($json as $k => $v){
 								$this->vars[$k] = $v;
