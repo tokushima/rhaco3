@@ -154,6 +154,13 @@ class Request implements \IteratorAggregate{
 		return (($sep && !empty($query)) ? '?' : '').$query;
 	}
 	/**
+	 * GET
+	 * @return boolean
+	 */
+	public function is_get(){
+		return ($this->_method == 'GET');
+	}
+	/**
 	 * POST
 	 * @return boolean
 	 */
