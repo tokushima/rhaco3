@@ -832,21 +832,37 @@ abstract class Dao extends \org\rhaco\Object{
 		$code = '';
 		$max = (!empty($size)) ? $size : $this->prop_anon($prop_name,'max',32);
 		$ctype = $this->prop_anon($prop_name,'ctype','alnum');
-		if($ctype != 'alnum' && $ctype != 'alpha' && $ctype != 'digit') throw new \LogicException('unexpected ctype');
-		$char = '';
-		if($ctype == 'alnum' || $ctype == 'digit') $char .= '0123456789';
-		if($ctype != 'digit'){
-		 	if($this->prop_anon($prop_name,'upper',false) === true) $char .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-		 	if($this->prop_anon($prop_name,'lower',true) === true) $char .= 'abcdefghijklmnopqrstuvwxyz';
+		if($ctype != 'alnum' && $ctype != 'alpha' && $ctype != 'digit'){
+			throw new \LogicException('unexpected ctype');
 		}
-		$charl = strlen($char) - 1;
+		$char = '';
+		if($ctype == 'alnum' || $ctype == 'digit'){
+			$char .= '0123456789';
+		}
+		if($ctype != 'digit'){
+		 	if($this->prop_anon($prop_name,'upper',false) === true){
+		 		$char .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		 	}
+		 	if($this->prop_anon($prop_name,'lower',true) === true){
+		 		$char .= 'abcdefghijklmnopqrstuvwxyz';
+		 	}
+		}
 		$ignores = $this->prop_anon($prop_name,'ignore_auto_code');
-		if(!is_array($ignores)) $ignores = array($ignores);
-		while($code == '' || static::find_count(Q::eq($prop_name,$code)) > 0){
-			for($code='',$i=0;$i<$max;$i++) $code .= $char[mt_rand(0,$charl)];
-			if(!empty($ignores)){
+		$ignores = is_array($ignores) ? $ignores : array($ignores);
+		
+		while(true){
+			if(static::find_count(Q::eq($prop_name,($code = \org\rhaco\lang\Code::rand($char, $max)))) == 0){
+				if(empty($ignores)){
+					break;
+				}
+				$c=0;
 				foreach($ignores as $ignore){
-					if(preg_match('/^'.$ignore.'$/',$code)) $code = '';
+					if(!preg_match('/^'.$ignore.'$/',$code)){
+						$c++;
+					}
+				}
+				if($c == sizeof($ignores)){
+					break;
 				}
 			}
 		}
