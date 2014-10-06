@@ -850,23 +850,23 @@ abstract class Dao extends \org\rhaco\Object{
 		$ignores = $this->prop_anon($prop_name,'ignore_auto_code');
 		$ignores = is_array($ignores) ? $ignores : array($ignores);
 		
-		while(true){
+		$code = '';
+		while($code == ''){
 			if(static::find_count(Q::eq($prop_name,($code = \org\rhaco\lang\Code::rand($char, $max)))) == 0){
-				if(empty($ignores)){
-					break;
-				}
-				$c=0;
-				foreach($ignores as $ignore){
-					if(!preg_match('/^'.$ignore.'$/',$code)){
-						$c++;
+				$this->{$prop_name}($code);
+				
+				if($this->{'verify_'.$prop_name}() === false){
+					$code = '';
+				}else{
+					foreach($ignores as $ignore){
+						if(preg_match('/^'.$ignore.'$/',$code)){
+							$code = '';
+							break;
+						}
 					}
-				}
-				if($c == sizeof($ignores)){
-					break;
 				}
 			}
 		}
-		$this->{$prop_name}($code);
 		return $code;
 	}
 	/**
