@@ -160,7 +160,6 @@ $obj = new \test\model\LimitVerify();
 $obj->value1("1234");
 $obj->value2(0);
 
-// TODO
 try{
 	$obj->save();
 	fail();
@@ -172,7 +171,6 @@ $obj = new \test\model\LimitVerify();
 $obj->value1("1");
 $obj->value2(1);
 
-// TODO
 try{
 	$obj->save();
 	fail();
@@ -191,7 +189,6 @@ $obj->u1(2);
 $obj->u2(3);
 $obj->save();
 
-// TODO
 $obj = new \test\model\UniqueVerify();
 $obj->u1(2);
 $obj->u2(3);
@@ -217,7 +214,6 @@ $obj->u2(3);
 $obj->u3(4);
 $obj->save();
 
-// TODO
 $obj = new \test\model\UniqueTripleVerify();
 $obj->u1(2);
 $obj->u2(3);
