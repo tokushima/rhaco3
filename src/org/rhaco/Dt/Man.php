@@ -215,18 +215,26 @@ class Man{
 					
 					if(preg_match_all("/throw\s+new\s+([\\\\\w]+)\((.*)\)/",$use_method_src,$match)){
 						foreach($match[1] as $k => $n){
-							if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
+							if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)){
+								$match[2][$k] = $m[2];
+							}
 							$throws[$n] = array($n,trim((strpos($match[2][$k],'$') ? '#variable message' : $match[2][$k])));
 						}
 					}
 					if(preg_match_all("/\\\\rhaco\\\\Exceptions::add\(\s*new\s+([\\\\\w]+)\((.*?)\)/",$use_method_src,$match)){
 						foreach($match[1] as $k => $n){
-							if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)) $match[2][$k] = $m[2];
+							if(preg_match("/([\"\'])(.+)\\1/",$match[2][$k],$m)){
+								$match[2][$k] = $m[2];
+							}else if(preg_match("/^(.+?)\(/",$match[2][$k],$m)){
+								$match[2][$k] = $m[1];
+							}
 							$throws[$n] = array($n,trim((strpos($match[2][$k],'$') ? '#variable message' : $match[2][$k])));
 						}
 					}					
 					if(preg_match_all("/@throws\s+([^\s]+)(.*)/",$use_method_doc,$match)){
-						foreach($match[1] as $k => $n) $throws[$n.$match[2][$k]] = array($n,trim($match[2][$k]));
+						foreach($match[1] as $k => $n){
+							$throws[$n.$match[2][$k]] = array($n,trim($match[2][$k]));
+						}
 					}					
 				}catch(\ReflectionException $e){}
 			}
@@ -317,6 +325,21 @@ class Man{
 						$vars[$v] = $m[2][$k];
 					}
 				}
+				if(preg_match_all('/(\$\w+)\s*=\s*([\\\\\w]+)::(\w+)/',$src,$m)){
+					foreach($m[1] as $k => $v){
+						try{
+							$ref = new \ReflectionMethod($m[2][$k],$m[3][$k]);
+							if(preg_match("/@return\s+([^\s]+)(.*)/",self::method_doc($ref),$r)){
+								if(preg_match('/A-Z/',$r[1])){
+									$vars[$v] = $r[1];
+								}else{
+									$vars[$v] = $m[2][$k];
+								}
+							}
+						}catch(\ReflectionException $e){
+						}
+					}
+				}
 				if(preg_match_all('/(\$\w+)->(\w+)/',$src,$m)){
 					foreach($m[1] as $k => $v){
 						if(isset($vars[$v])){
@@ -344,6 +367,6 @@ class Man{
 			}
 		}catch(\ReflectionException $e){
 		}
-		return array_keys($list);		
+		return array_keys($list);
 	}
 }
