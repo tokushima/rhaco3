@@ -1,6 +1,0 @@
-{
-    "require": {
-        "tokushima/ebi":"master-dev",
-        "tokushima/cmdman":"master-dev"
-    }
-}
