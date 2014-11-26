@@ -30,7 +30,8 @@ while(!feof($fp)){
 			$class = preg_replace('/\[\[(.+)\]\]/','\\1',trim($line));
 			
 			if(in_array($class, $dao_list)){
-				$current = (new \ReflectionClass($class))->newInstance();
+				$ref = new \ReflectionClass($class);
+				$current = $ref->newInstance();
 				\cmdman\Std::println_success('Update '.get_class($current));
 			}
 		}else if($line[0] == '{' && !empty($current)){
@@ -40,9 +41,11 @@ while(!feof($fp)){
 			try{
 				foreach($obj->props() as $k => $v){
 					if(array_key_exists($k,$arr)){
+						$func = call_user_func_array(array($obj,$k),array($arr[$k]));
+						
 						if($obj->prop_anon($k,'cond') == null && $obj->prop_anon($k,'extra',false) === false){
 							$obj->prop_anon($k,'auto_now',false,true);
-							call_user_func_array([$obj,$k],[$arr[$k]]);
+							$func;
 						}
 					}
 				}
