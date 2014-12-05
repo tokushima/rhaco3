@@ -478,15 +478,15 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		}
 		if(class_exists('Composer\Autoload\ClassLoader')){
 			$r = new \ReflectionClass('Composer\Autoload\ClassLoader');
-			$composer_dir = dirname($r->getFileName());
-			$json_file = dirname(dirname($composer_dir)).'/composer.json';
-			
-			if(is_file($json_file)){
-				$json = json_decode(file_get_contents($json_file),true);
-				if(isset($json['autoload']['psr-0'])){
-					foreach($json['autoload']['psr-0'] as $path){
-						$p = realpath(dirname($json_file).'/'.$path);
-						if($p !== false) $include_path[] = $p;
+			$vendor_dir = dirname(dirname($r->getFileName()));
+			if(is_file($loader_php=$vendor_dir.'/autoload.php')){
+				$loader = include($loader_php);
+				// vendor以外の定義されているパスを探す
+				foreach($loader->getPrefixes() as $ns){
+					foreach($ns as $path){
+						if(strpos($path,$vendor_dir) === false){
+							$include_path[] = $path;
+						}
 					}
 				}
 			}
