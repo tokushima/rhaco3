@@ -1,0 +1,12 @@
+<rt:extends href="base.html" />
+
+<rt:block name="search_form" />
+
+<rt:block name="content">
+<h2 class="title">{$name}</h2>
+
+<pre format="plain" class="prettyprint linenums" style="margin-top: 20px;">
+{$f.htmlspecialchars($src)}
+</pre>
+
+</rt:block>

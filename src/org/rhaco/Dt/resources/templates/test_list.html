@@ -1,0 +1,21 @@
+<rt:extends href="base.html" />
+
+<rt:block name="content">
+<h2>Test</h2>
+
+<table rt:param="{$test_list}" rt:var="summary" rt:key="test">
+<thead>
+	<tr>
+		<th class="span3">test</th>
+		<th>summary</th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+		<td><a href="{$t.package_method_url('test_src',$test)}">{$test}</a></td>
+		<td>{$t.html($summary)}</td>
+	</tr>
+</tbody>
+</table>
+</rt:block>
+

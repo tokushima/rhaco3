@@ -20,6 +20,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('app_mode',\org\rhaco\Conf::appmode());
 		$this->vars('f',new Dt\Helper());
 		$this->vars('has_coverage',function_exists('xdebug_get_code_coverage'));
+		$this->vars('has_test',is_dir(getcwd().'/test'));
 		$this->vars('media_url',\org\rhaco\net\Path::slash(\org\rhaco\Conf::get('media_url'),null,false));
 	}
 	public function get_template_modules(){
@@ -678,6 +679,51 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$this->vars('covered_list',$covered_list);
 		$this->vars('covered',$total_covered);
 		$this->vars('create_date',$create_date);
+	}
+	/**
+	 * @automap
+	 * @return multitype:multitype:NULL
+	 */
+	public function test_list(){
+		$test_list = array();
+	
+		if(is_dir($dir=getcwd().'/test')){
+			$dir = realpath($dir);
+				
+			foreach($this->file_list($dir,'/\.php$/') as $f){
+				if(
+					strpos($f->getPathname(),'testman')  === false &&
+					strpos($f->getPathname(),'/_')  === false
+				){
+					$file = str_replace(dirname($dir).'/','',$f->getPathname());
+					$src = file_get_contents($f->getPathname());
+					$summary = '';
+						
+					if(preg_match('/\/\*.+?\*\//s',$src,$m)){
+						list($summary) = explode(PHP_EOL,trim(
+								preg_replace('/@.+/','',
+										preg_replace("/^[\s]*\*[\s]{0,1}/m","",str_replace(array("/"."**","*"."/"),"",$m[0]))
+								)
+						));
+					}
+					$test_list[$file] = $summary;
+				}
+			}
+		}
+		$this->vars('test_list',$test_list);
+	}
+	/**
+	 * テストのソース表示
+	 * @param string $class
+	 * @automap
+	 */
+	public function test_src($test){
+		$src = '';
+		if(is_file($f=getcwd().'/'.$test)){
+			$src = file_get_contents($f);
+		}
+		$this->vars('src',$src);
+		$this->vars('name',$test);
 	}
 	/**
 	 * @automap
