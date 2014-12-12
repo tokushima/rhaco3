@@ -851,6 +851,8 @@ abstract class Dao extends \org\rhaco\Object{
 		$ignores = is_array($ignores) ? $ignores : array($ignores);
 		
 		$code = '';
+		$challenge = 0;		
+		
 		while($code == ''){
 			if(static::find_count(Q::eq($prop_name,($code = \org\rhaco\lang\Code::rand($char, $max)))) == 0){
 				$this->{$prop_name}($code);
@@ -868,6 +870,10 @@ abstract class Dao extends \org\rhaco\Object{
 			}else{
 				$code = '';
 			}
+			if($challenge++ > 5){
+				throw new \org\rhaco\store\db\exception\GenerateUniqueCodeRetryLimitOverException($prop_name.': generate unique code retry limit over');
+			}
+			usleep(1000); // 1ms
 		}
 		return $code;
 	}

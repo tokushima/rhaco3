@@ -128,10 +128,20 @@ foreach(\test\model\UniqueCodeAlpha::find() as $o){
 
 \test\model\UniqueCodeIgnore::create_table();
 \test\model\UniqueCodeIgnore::find_delete();
-$obj = new \test\model\UniqueCodeIgnore();
-eq(null,$obj->code1());
-$obj->save();
 
+$i=0;
+while(true){
+	try{
+		$obj = new \test\model\UniqueCodeIgnore();
+		eq(null,$obj->code1());
+		$obj->save();
+		break;
+	}catch(\org\rhaco\store\db\exception\GenerateUniqueCodeRetryLimitOverException $e){
+		if($i++ > 1000){
+			throw $e;
+		}
+	}
+}				
 foreach(\test\model\UniqueCodeIgnore::find() as $o){
 	neq(null,$o->code1());
 	eq(1,strlen($o->code1()));
