@@ -71,9 +71,9 @@ class Code{
 	 */
 	public static function rand($codebase,$length){
 		$cl = strlen($codebase) - 1;
-		$r = $codebase[rand(1,$cl)];
+		$r = $codebase[mt_rand(1,$cl)];
 		for($i=1;$i<$length;$i++){
-			$r = $r.$codebase[rand(0,$cl)];
+			$r = $r.$codebase[mt_rand(0,$cl)];
 		}
 		return $r;
 	}	

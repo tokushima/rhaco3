@@ -870,10 +870,12 @@ abstract class Dao extends \org\rhaco\Object{
 			}else{
 				$code = '';
 			}
-			if($challenge++ > 5){
-				throw new \org\rhaco\store\db\exception\GenerateUniqueCodeRetryLimitOverException($prop_name.': generate unique code retry limit over');
+			if($code == ''){
+				if($challenge++ > \org\rhaco\Conf::get('generate_code_challenge',100)){
+					throw new \org\rhaco\store\db\exception\GenerateUniqueCodeRetryLimitOverException($prop_name.': generate unique code retry limit over');
+				}
+				usleep(\org\rhaco\Conf::get('generate_code_retry_wait',100000)); // 100ms
 			}
-			usleep(1000); // 1ms
 		}
 		return $code;
 	}
