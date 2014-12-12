@@ -851,31 +851,39 @@ abstract class Dao extends \org\rhaco\Object{
 		$ignores = is_array($ignores) ? $ignores : array($ignores);
 		
 		$code = '';
-		$challenge = 0;		
+		$challenge = 0;
+		$challenge_max = \org\rhaco\Conf::get('generate_code_challenge',100);
+		$bool = true;
 		
 		while($code == ''){
-			if(static::find_count(Q::eq($prop_name,($code = \org\rhaco\lang\Code::rand($char, $max)))) == 0){
+			for($i=0;$i<=$challenge_max;$i++){
+				$code = \org\rhaco\lang\Code::rand($char, $max);
 				$this->{$prop_name}($code);
+				$bool = true;
 				
 				if($this->{'verify_'.$prop_name}() === false){
-					$code = '';
+					$bool = false;
 				}else{
 					foreach($ignores as $ignore){
 						if(preg_match('/^'.$ignore.'$/',$code)){
-							$code = '';
+							$bool = false;
 							break;
 						}
 					}
 				}
-			}else{
-				$code = '';
+				if($bool){
+					break;
+				}		
 			}
-			if($code == ''){
-				if($challenge++ > \org\rhaco\Conf::get('generate_code_challenge',100)){
-					throw new \org\rhaco\store\db\exception\GenerateUniqueCodeRetryLimitOverException($prop_name.': generate unique code retry limit over');
-				}
-				usleep(\org\rhaco\Conf::get('generate_code_retry_wait',100000)); // 100ms
+			if($bool && static::find_count(Q::eq($prop_name,$code)) == 0){
+				break;
 			}
+			if($challenge++ > $challenge_max){
+				throw new \org\rhaco\store\db\exception\GenerateUniqueCodeRetryLimitOverException($prop_name.': generate unique code retry limit over');
+			}
+			$code = '';
+			$this->{$prop_name}($code);
+			usleep(\org\rhaco\Conf::get('generate_code_retry_wait',10000)); // 10ms
 		}
 		return $code;
 	}
