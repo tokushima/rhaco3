@@ -865,6 +865,8 @@ abstract class Dao extends \org\rhaco\Object{
 						}
 					}
 				}
+			}else{
+				$code = '';
 			}
 		}
 		return $code;
