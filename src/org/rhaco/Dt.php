@@ -652,8 +652,7 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 	 * @automap
 	 */
 	public function coverage(){
-		$dir = \org\rhaco\Conf::get('test_result_dir',\org\rhaco\io\File::work_path('test_output'));
-		$target_list = $this->file_list($dir,'/\.coverage\.xml$/');
+		$target_list = $this->file_list(getcwd(),'/coverage\.xml$/');
 		
 		usort($target_list,function($a,$b){
 			return ($a->getMTime() > $b->getMTime()) ? -1 : 1;
@@ -675,7 +674,6 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 			}
 		}
 		$this->vars('target',$target);
-		$this->vars('target_list',$target_list);
 		$this->vars('covered_list',$covered_list);
 		$this->vars('covered',$total_covered);
 		$this->vars('create_date',$create_date);

@@ -4,16 +4,6 @@
 <h2>Coverage ({$covered}%)</h2>
 <div>{$create_date}  {$target}</div>
 
-<form style="margin-top: 30px;" rt:aref="true">
-<div class="input-append">
-	<select name="target" class="span4" onchange="this.form.submit()">
-		<rt:loop param="target_list" var="file">
-			<option value="{$file.getPathname()}">{$file.getFilename()}</option>
-		</rt:loop>
-	</select>
-</div>
-</form>
-
 <table rt:param="{$covered_list}" rt:var="coverage" rt:key="filename">
 <thead>
 	<tr>
