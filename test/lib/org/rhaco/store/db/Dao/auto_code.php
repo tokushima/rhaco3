@@ -10,6 +10,6 @@ try{
 		$obj = new \test\model\AutoCode();
 		$obj->save();
 	}
-	failure($i);
+	fail($i);
 }catch(\org\rhaco\store\db\exception\GenerateUniqueCodeRetryLimitOverException $e){
 }

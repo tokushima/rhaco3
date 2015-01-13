@@ -1,6 +1,6 @@
 <?php
 $b = new \testman\Browser();
-$b->do_get(test_map_url('test_index::module_request_flow'));
+$b->do_get(url('test_index::module_request_flow'));
 eq(200,$b->status());
 meq('INDEX',$b->body());
 meq('BEFORE_FLOW_HANDLE',$b->body());

@@ -30,10 +30,10 @@ $pre = <<< PRE
 PRE;
 }
 
-meq('https://',test_map_url('test_login::secure'));
+meq('https://',url('test_login::secure'));
 
 $b = new \testman\Browser();
-$b->do_get(test_map_url('test_index::to_secure'));
+$b->do_get(url('test_index::to_secure'));
 eq(200,$b->status());
 eq($pre,$b->body());
 

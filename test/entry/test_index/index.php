@@ -1,6 +1,6 @@
 <?php
 $b = new \testman\Browser();
-$b->do_get(test_map_url('test_index::index'));
+$b->do_get(url('test_index::index'));
 eq(200,$b->status());
 meq('INDEX',$b->body());
 meq('hogehoge_xml_var',$b->body());

@@ -1,6 +1,6 @@
 <?php
 $b = new \testman\Browser();
-$b->do_get(test_map_url('test_index::map_url'));
+$b->do_get(url('test_index::map_url'));
 
 if(\org\rhaco\Conf::appmode() == 'mamp'){
 	meq('test_index/noop',$b->body());

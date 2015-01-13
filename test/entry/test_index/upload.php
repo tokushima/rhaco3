@@ -1,7 +1,7 @@
 <?php
 $b = new \testman\Browser();
 $b->vars('value1','abcd');
-$b->do_post(test_map_url('test_index::upload_value'));
+$b->do_post(url('test_index::upload_value'));
 if(!\org\rhaco\Xml::set($xml,$b->body(),'result')){
 	throw new \LogicException('no result');
 }
@@ -10,7 +10,7 @@ if(!\org\rhaco\Xml::set($xml,$b->body(),'result')){
 eq('abcd',$xml->f('get_data1.value()'));
 
 $b->file_vars('upfile1',__FILE__);
-$b->do_post(test_map_url('test_index::upload_file'));
+$b->do_post(url('test_index::upload_file'));
 \org\rhaco\Xml::set($xml,$b->body(),'result');
 eq(basename(__FILE__),$xml->f('original_name1.value()'));
 eq(filesize(__FILE__),(int)$xml->f('size1.value()'));
@@ -23,7 +23,7 @@ $b->vars('value1','abcd');
 $b->file_vars('upfile1',__FILE__);
 $b->vars('value2','efg');
 $b->file_vars('upfile2',__FILE__);
-$b->do_post(test_map_url('test_index::upload_multi'));
+$b->do_post(url('test_index::upload_multi'));
 \org\rhaco\Xml::set($xml,$b->body(),'result');
 eq(basename(__FILE__),$xml->f('original_name1.value()'));
 eq(filesize(__FILE__),(int)$xml->f('size1.value()'));
