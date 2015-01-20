@@ -119,13 +119,9 @@ class Flow{
 			self::$get_maps = true;
 			self::$output_maps[$key] = array();
 			
-			try{
-				ob_start();
-					include($file);
-				ob_end_clean();
-			}catch(\Exception $e){
-				\org\rhaco\Log::error($e);
-			}
+			ob_start();
+				include($file);
+			ob_end_clean();
 		}
 		return self::$output_maps[$key];
 	}
