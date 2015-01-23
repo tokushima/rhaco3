@@ -101,6 +101,7 @@ class Dbc implements \Iterator{
 	/**
 	 * SQL ステートメントを実行する
 	 * @param string $sql 実行するSQL
+	 * @return \org\rhaco\store\db\Dbc
 	 */
 	public function query($sql){
 		$args = func_get_args();

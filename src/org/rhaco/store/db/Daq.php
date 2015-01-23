@@ -13,8 +13,11 @@ class Daq{
 
 	public function __construct($sql=null,array $vars=array(),$id_name=null){
 		$this->sql = $sql;
-		$this->vars = $vars;
 		$this->id = $id_name;
+		
+		foreach($vars as $k => $v){
+			$this->vars[$k] = is_bool($v) ? (($v === true) ? 1 : 0) : $v;
+		}
 	}
 	public function id(){
 		return $this->id;
