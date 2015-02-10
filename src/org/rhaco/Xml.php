@@ -187,7 +187,7 @@ class Xml implements \IteratorAggregate{
 	 * @return boolean
 	 */
 	static public function set(&$x,$plain,$name=null){
-		return self::_set($x,$plain,$name);
+		return static::_set($x,$plain,$name);
 	}
 	static private function _set(&$x,$plain,$name=null,$vtag=null){
 		$plain = (string)$plain;
@@ -197,7 +197,7 @@ class Xml implements \IteratorAggregate{
 		}
 		$qname = preg_quote($name,'/');
 		if(!preg_match("/<(".$qname.")([\s][^>]*?)>|<(".$qname.")>/is",$plain,$parse,PREG_OFFSET_CAPTURE)) return false;
-		$x = new self();
+		$x = new static();
 		$x->pos = $parse[0][1];
 		$balance = 0;
 		$attrs = '';
@@ -222,7 +222,7 @@ class Xml implements \IteratorAggregate{
 				}
 			}
 			if(!isset($x->plain)){
-				return self::_set($x,preg_replace('/'.preg_quote($list[0][0][0],'/').'/',substr($list[0][0][0],0,-1).' />',$plain,1),$name,$list[0][0][0]);
+				return static::_set($x,preg_replace('/'.preg_quote($list[0][0][0],'/').'/',substr($list[0][0][0],0,-1).' />',$plain,1),$name,$list[0][0][0]);
 			}
 		}
 		if(!isset($x->plain)) return false;
@@ -350,7 +350,7 @@ class Xml implements \IteratorAggregate{
 	 */
 	public function id($name){
 		if(preg_match("/<.+[\s]*id[\s]*=[\s]*([\"\'])".preg_quote($name)."\\1/",$this->value(),$match,PREG_OFFSET_CAPTURE)){
-			if(self::set($tag,substr($this->value(),$match[0][1]))) return $tag;
+			if(static::set($tag,substr($this->value(),$match[0][1]))) return $tag;
 		}
 		return null;
 	}
