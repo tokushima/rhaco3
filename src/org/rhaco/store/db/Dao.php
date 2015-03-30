@@ -36,7 +36,7 @@ abstract class Dao extends \org\rhaco\Object{
 	 * @return \org\rhaco\store\db\Dbc
 	 */
 	final static public function connection($class){
-		if(!isset(self::$_connections_[self::$_co_anon_[$class][0]])){
+		if(!isset(self::$_co_anon_[$class][0]) || !isset(self::$_connections_[self::$_co_anon_[$class][0]])){
 			throw new \RuntimeException('unable to connect to '.$class);
 		}
 		return self::$_connections_[self::$_co_anon_[$class][0]];
