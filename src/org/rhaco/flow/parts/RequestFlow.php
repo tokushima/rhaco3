@@ -159,7 +159,7 @@ class RequestFlow extends \org\rhaco\Object implements \IteratorAggregate, \org\
 				$this->object_module('before_login_required',$this);
 			}
 			if(!$this->is_login()){
-				if(!$this->is_sessions('logined_redirect_to')){
+				if($this->select_map['method'] != 'do_logout'){
 					$this->set_login_redirect(\org\rhaco\Request::current_url().\org\rhaco\Request::request_string(true));
 				}
 				$req = new \org\rhaco\Request();
