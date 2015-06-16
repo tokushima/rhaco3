@@ -23,6 +23,7 @@ class Q{
 
 	const OR_BLOCK = 16;
 	const AND_BLOCK = 17;
+	const DATE_FORMAT = 18;
 
 	const IGNORE = 2;
 	const NOT = 4;
@@ -35,6 +36,7 @@ class Q{
 	private $or_block = array();
 	private $paginator;
 	private $order_by = array();
+	private $date_format = array();
 
 	public function __construct($type=self::AND_BLOCK,$arg1=null,$arg2=null,$param=null){
 		if($type === self::AND_BLOCK){
@@ -128,6 +130,8 @@ class Q{
 								$this->add(new self(self::ORDER_ASC,$column));
 							}
 						}
+					}else if($arg->type() == self::DATE_FORMAT){
+						$this->date_format[$arg->arg1] = $arg->arg2;
 					}else if($arg->type() == self::AND_BLOCK){
 						if(!$arg->none()){
 							call_user_func_array(array($this,'add'),$arg->ar_and_block());
@@ -340,5 +344,18 @@ class Q{
 	static public function b(){
 		$args = func_get_args();
 		return new self(self::AND_BLOCK,$args);
+	}
+	/**
+	 * 日付型で有効とするフォーマットを指定する
+	 *
+	 * @param string $column_str
+	 * @param string $require YmdHis
+	 * @return \ebi\Q
+	 */
+	public static function date_format($column_str,$require){
+		return new self(self::DATE_FORMAT,$column_str,$require);
+	}
+	public function ar_date_format(){
+		return $this->ar_value($this->date_format);
 	}
 }

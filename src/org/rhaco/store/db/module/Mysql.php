@@ -116,4 +116,14 @@ class Mysql extends Base{
 		$dbc = \org\rhaco\store\db\Dao::connection(get_class($dao));
 		return sprintf('select count(*) from information_schema.tables where table_name=\'%s\' and table_schema=\'%s\'',$dao->table(),$dbc->name());
 	}
+	protected function date_format($table_column,$require){
+		$fmt = array();
+		$sql = array('Y'=>'%Y','m'=>'%m','d'=>'%d','H'=>'%H','i'=>'%i','s'=>'%s');
+	
+		foreach(array('Y'=>'2000','m'=>'01','d'=>'01','H'=>'00','i'=>'00','s'=>'00') as $f => $d){
+			$fmt[] = (strpos($require,$f) === false) ? $d : $sql[$f];
+		}
+		$f = $fmt[0].'/'.$fmt[1].'/'.$fmt[2].' '.$fmt[3].':'.$fmt[4].':'.$fmt[5];
+		return 'DATE_FORMAT('.$table_column.',\''.$f.'\')';
+	}
 }

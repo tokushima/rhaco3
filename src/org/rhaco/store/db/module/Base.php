@@ -125,22 +125,27 @@ abstract class Base{
 	 */
 	public function select_sql(Dao $dao,Q $query,$paginator,$name=null){
 		$select = $from = array();
-
-		if(empty($name)){
-			foreach($dao->columns() as $column){
-				$select[] = $column->table_alias().'.'.$this->quotation($column->column()).' '.$column->column_alias();
+		$break = false;
+		$date_format = $query->ar_date_format();
+		
+		foreach($dao->columns() as $column){
+			if($name === null || ($break = ($column->name() == $name))){
+				$column_map = $column->table_alias().'.'.$this->quotation($column->column());
+				
+				if(isset($date_format[$column->name()])){
+					$column_map = $this->date_format($column_map,$date_format[$column->name()]);
+				}				
+				$select[] = $column_map.' '.$column->column_alias();
 				$from[$column->table_alias()] = $column->table().' '.$column->table_alias();
-			}
-		}else{
-			foreach($dao->columns() as $column){
-				if($column->name() == $name){
-					$select[] = $column->table_alias().'.'.$this->quotation($column->column()).' '.$column->column_alias();
-					$from[$column->table_alias()] = $column->table().' '.$column->table_alias();
+				
+				if($break){
 					break;
 				}
 			}
 		}
-		if(empty($select)) throw new \org\rhaco\store\db\exception\QueryException('select invalid');
+		if(empty($select)){
+			throw new \org\rhaco\store\db\exception\QueryException('select invalid');
+		}
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(true),$this->where_cond_columns($dao->conds(),$from));
 		return new Daq(('select '.implode(',',$select).' from '.implode(',',$from)
 										.(empty($where_sql) ? '' : ' where '.$where_sql)
@@ -245,10 +250,18 @@ abstract class Base{
 		}else{
 			$target_column = $this->get_column($target_name,$dao->columns());
 		}
-		if(empty($target_column)) throw new \org\rhaco\store\db\exception\QueryException('undef primary');
+		if(empty($target_column)){
+			throw new \org\rhaco\store\db\exception\QueryException('undef primary');
+		}
 		if(!empty($gorup_name)){
+			$date_format = $query->ar_date_format();
 			$group_column = $this->get_column($gorup_name,$dao->columns());
-			$select[] = $group_column->table_alias().'.'.$this->quotation($group_column->column()).' key_column';
+			$column_map = $group_column->table_alias().'.'.$this->quotation($group_column->column());
+			
+			if(isset($date_format[$group_column->name()])){
+				$column_map = $this->date_format($column_map,$date_format[$group_column->name()]);
+			}			
+			$select[] = $column_map.' key_column';
 		}
 		foreach($dao->columns() as $column){
 			$from[$column->table_alias()] = $column->table().' '.$column->table_alias();
@@ -398,6 +411,16 @@ abstract class Base{
 			}
 		}catch(\Exception $e){}
 		return $value;
+	}
+	protected function date_format($table_column,$require){
+		$fmt = array();
+		$sql = array('Y'=>'%Y','m'=>'%m','d'=>'%d','H'=>'%H','i'=>'%M','s'=>'%S');
+	
+		foreach(array('Y'=>'2000','m'=>'01','d'=>'01','H'=>'00','i'=>'00','s'=>'00') as $f => $d){
+			$fmt[] = (strpos($require,$f) === false) ? $d : $sql[$f];
+		}
+		$f = $fmt[0].'/'.$fmt[1].'/'.$fmt[2].' '.$fmt[3].':'.$fmt[4].':'.$fmt[5];
+		return 'strftime(\''.$f.'\',replace('.$table_column.',\'/\',\'-\'))';
 	}
 	protected function update_value(Dao $dao,$name){
 		return $this->column_value($dao,$name,$dao->{$name}());
