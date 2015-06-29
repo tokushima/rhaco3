@@ -6,7 +6,7 @@
 <h2 class="title"><a href="{$t.package_method_url('class_doc',$package)}">{$f.package_name($package)}</a></h2>
 
 <pre format="plain" class="prettyprint linenums" style="margin-top: 20px;">
-{$f.htmlspecialchars($class_src)}
+{$t.html($class_src,0,0,null,false)}
 </pre>
 
 </rt:block>
