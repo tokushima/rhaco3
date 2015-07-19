@@ -253,6 +253,12 @@ abstract class Base{
 		if(empty($target_column)){
 			throw new \org\rhaco\store\db\exception\QueryException('undef primary');
 		}
+		$date_format = $query->ar_date_format();
+		$exec_map = $target_column->table_alias().'.'.$this->quotation($target_column->column());
+		
+		if(isset($date_format[$target_column->name()])){
+			$exec_map = $this->date_format($exec_map,$date_format[$target_column->name()]);
+		}		
 		if(!empty($gorup_name)){
 			$date_format = $query->ar_date_format();
 			$group_column = $this->get_column($gorup_name,$dao->columns());
@@ -260,14 +266,14 @@ abstract class Base{
 			
 			if(isset($date_format[$group_column->name()])){
 				$column_map = $this->date_format($column_map,$date_format[$group_column->name()]);
-			}			
+			}
 			$select[] = $column_map.' key_column';
 		}
 		foreach($dao->columns() as $column){
 			$from[$column->table_alias()] = $column->table().' '.$column->table_alias();
 		}
 		list($where_sql,$where_vars) = $this->where_sql($dao,$from,$query,$dao->self_columns(true),$this->where_cond_columns($dao->conds(),$from));
-		return new Daq(('select '.$exe.'('.$target_column->table_alias().'.'.$this->quotation($target_column->column()).') target_column'
+		return new Daq(('select '.$exe.'('.$exec_map.') target_column'
 										.(empty($select) ? '' : ','.implode(',',$select))
 										.' from '.implode(',',$from)
 										.(empty($where_sql) ? '' : ' where '.$where_sql)
