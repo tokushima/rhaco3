@@ -66,7 +66,7 @@ class Request implements \IteratorAggregate{
 				$this->_method = $_SERVER['REQUEST_METHOD'];
 			}
 			if(
-				isset($_SERVER['HTTP_CONTENT_TYPE']) && strpos($_SERVER['HTTP_CONTENT_TYPE'],'application/json') === 0  &&
+				(isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'],'application/json') === 0) &&
 				($this->_method == 'PUT' || $this->_method == 'DELETE' || $this->_method == 'POST')
 			){
 				$json = json_decode(file_get_contents('php://input'),true);
