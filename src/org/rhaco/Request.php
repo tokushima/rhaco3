@@ -16,8 +16,9 @@ class Request implements \IteratorAggregate{
 			$this->args = preg_replace("/(.*?)\?.*/","\\1",$pathinfo);
 		}
 		if(isset($_SERVER['REQUEST_METHOD'])){
-			$args = func_get_args();
-			if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST'){
+			$this->_method = $_SERVER['REQUEST_METHOD'];
+			
+			if($_SERVER['REQUEST_METHOD'] == 'POST'){
 				if(isset($_POST) && is_array($_POST)){
 					if(isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])){
 						$this->_method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
@@ -62,12 +63,12 @@ class Request implements \IteratorAggregate{
 				}
 				unset($this->vars['_method']);
 			}
-			if(empty($this->_method)){
-				$this->_method = $_SERVER['REQUEST_METHOD'];
-			}
 			if(
-				(isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'],'application/json') === 0) &&
-				($this->_method == 'PUT' || $this->_method == 'DELETE' || $this->_method == 'POST')
+				($this->_method == 'PUT' || $this->_method == 'DELETE' || $this->_method == 'POST') &&
+				(
+					(isset($_SERVER['HTTP_CONTENT_TYPE']) && strpos($_SERVER['HTTP_CONTENT_TYPE'],'application/json') === 0) ||
+					(isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'],'application/json') === 0)						
+				)
 			){
 				$json = json_decode(file_get_contents('php://input'),true);
 				if(is_array($json)){
