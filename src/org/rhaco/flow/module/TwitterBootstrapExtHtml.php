@@ -11,7 +11,7 @@ class TwitterBootstrapExtHtml{
 	/**
 	 * @module org.rhaco.Template
 	 */
-	public function before_template(\org\rhaco\lang\String $obj){
+	public function before_template(\org\rhaco\lang\Str $obj){
 		$src = $obj->get();
 
 		if(\org\rhaco\Xml::set($tag,$src,'body')){			
@@ -82,7 +82,7 @@ class TwitterBootstrapExtHtml{
 	/**
 	 * @module org.rhaco.Template
 	 */
-	public function after_exec_template(\org\rhaco\lang\String $obj){
+	public function after_exec_template(\org\rhaco\lang\Str $obj){
 		$src = $obj->get();
 		$src = preg_replace("/<alert>(.+?)<\/alert>/ms",'<p class="alert alert-error">\\1</p>',$src);
 		$src = preg_replace("/<information>(.+?)<\/information>/ms",'<p class="alert alert-info">\\1</p>',$src);

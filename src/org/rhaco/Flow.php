@@ -513,9 +513,9 @@ class Flow{
 		$src = $this->template->read(\org\rhaco\net\Path::absolute($template_path,$template));
 		/**
 		 * テンプレートの出力
-		 * @param org.rhaco.lang.String $obj
+		 * @param org.rhaco.lang.Str $obj
 		 */
-		$this->object_module('before_flow_print_template',\org\rhaco\lang\String::ref($obj,$src));
+		$this->object_module('before_flow_print_template',\org\rhaco\lang\Str::ref($obj,$src));
 		$src = (string)$obj;
 		header('Content-Length: '.strlen($src));
 		print($src);

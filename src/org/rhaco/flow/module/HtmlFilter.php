@@ -8,9 +8,9 @@ namespace org\rhaco\flow\module;
 class HtmlFilter{
 	/**
 	 * @module org.rhaco.Template
-	 * @param \org\rhaco\lang\String $obj
+	 * @param \org\rhaco\lang\Str $obj
 	 */
-	public function before_exec_template(\org\rhaco\lang\String $obj){
+	public function before_exec_template(\org\rhaco\lang\Str $obj){
 		$src = $obj->get();
 		if(preg_match_all('/\$_t_->print_variable\((.+?)\);/ms',$src,$match)){
 			$src = str_replace($match[0],array_map(array($this,'add_escape'),$match[1]),$src);

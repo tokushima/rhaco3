@@ -5,7 +5,7 @@ namespace org\rhaco\lang;
  * @author tokushima
  *
  */
-class String{
+class Str{
 	private $value;
 
 	public function __construct($v){

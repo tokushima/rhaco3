@@ -17,7 +17,7 @@ class Csrf{
 		$req->sessions('csrftoken',$this->no);
 		$req->vars('csrftoken',$this->no);
 	}
-	public function after_template(\org\rhaco\lang\String $obj){
+	public function after_template(\org\rhaco\lang\Str $obj){
 		$src = $obj->get();
 		
 		\org\rhaco\Xml::set($tag,'<:>'.$src.'</:>');

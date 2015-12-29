@@ -122,22 +122,22 @@ class Template extends \org\rhaco\TemplateVariable{
 		$src = $this->replace_xtag($src);
 		/**
 		 * テンプレート作成の初期化
-		 * @param org.rhaco.lang.String $obj
+		 * @param org.rhaco.lang.Str $obj
 		 */
-		$this->object_module('init_template',\org\rhaco\lang\String::ref($obj,$src));
+		$this->object_module('init_template',\org\rhaco\lang\Str::ref($obj,$src));
 		$src = $this->rtcomment($this->rtblock($this->rttemplate((string)$obj),$this->file));
 		$this->selected_src = $src;
 		/**
 		 * テンプレート作成の前処理
-		 * @param org.rhaco.lang.String $obj
+		 * @param org.rhaco.lang.Str $obj
 		 */
-		$this->object_module('before_template',\org\rhaco\lang\String::ref($obj,$src));
+		$this->object_module('before_template',\org\rhaco\lang\Str::ref($obj,$src));
 		$src = $this->rtif($this->rtloop($this->html_form($this->html_list((string)$obj))));
 		/**
 		 * テンプレート作成の後処理
-		 * @param org.rhaco.lang.String $obj
+		 * @param org.rhaco.lang.Str $obj
 		 */
-		$this->object_module('after_template',\org\rhaco\lang\String::ref($obj,$src));
+		$this->object_module('after_template',\org\rhaco\lang\Str::ref($obj,$src));
 		$src = str_replace('__PHP_ARROW__','->',(string)$obj);
 		$src = $this->parse_print_variable($src);
 		$php = array(' ?>','<?php ','->');
@@ -153,9 +153,9 @@ class Template extends \org\rhaco\TemplateVariable{
 	private function exec($_src_){
 		/**
 		 * 実行前処理
-		 * @param org.rhaco.lang.String $obj
+		 * @param org.rhaco.lang.Str $obj
 		 */
-		$this->object_module('before_exec_template',\org\rhaco\lang\String::ref($_obj_,$_src_));
+		$this->object_module('before_exec_template',\org\rhaco\lang\Str::ref($_obj_,$_src_));
 		foreach($this->default_vars() as $k => $v){
 			$this->vars($k,$v);
 		}
@@ -179,9 +179,9 @@ class Template extends \org\rhaco\TemplateVariable{
 		$_src_ = $this->selected_src = null;
 		/**
 		 * 実行後処理
-		 * @param org.rhaco.lang.String $obj
+		 * @param org.rhaco.lang.Str $obj
 		 */
-		$this->object_module('after_exec_template',\org\rhaco\lang\String::ref($_obj_,$_eval_src_));
+		$this->object_module('after_exec_template',\org\rhaco\lang\Str::ref($_obj_,$_eval_src_));
 		return (string)$_obj_;
 	}
 	private function error_handler($errno,$errstr,$errfile,$errline){
@@ -288,9 +288,9 @@ class Template extends \org\rhaco\TemplateVariable{
 			}
 			/**
 			 * ブロック展開の前処理
-			 * @param org.rhaco.lang.String $obj
+			 * @param org.rhaco.lang.Str $obj
 			 */
-			$this->object_module('before_block_template',\org\rhaco\lang\String::ref($obj,$src));
+			$this->object_module('before_block_template',\org\rhaco\lang\Str::ref($obj,$src));
 			$src = (string)$obj;
 			if(empty($blocks)){
 				if(Xml::set($bx,'<:>'.$src.'</:>')){
