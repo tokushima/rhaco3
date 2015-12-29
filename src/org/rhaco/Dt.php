@@ -132,29 +132,33 @@ class Dt extends \org\rhaco\flow\parts\RequestFlow{
 		$libs = array();
 		foreach(self::classes() as $package => $info){
 			$r = new \ReflectionClass($info['class']);
-			$src = file_get_contents($r->getFileName());
-			$class_doc = $r->getDocComment();
-			$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
-			list($summary) = explode("\n",$document);			
+			$f = $r->getFileName();
 			
-			$bool = true;
-			if($this->in_vars('q') != ''){
-				$modules = null;
-				$module = array();
+			if($f !== false){
+				$src = file_get_contents($r->getFileName());
+				$class_doc = $r->getDocComment();
+				$document = trim(preg_replace("/@.+/",'',preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$class_doc))));
+				list($summary) = explode("\n",$document);			
 				
-				foreach($r->getMethods() as $method){
-					if(substr($method->getName(),0,1) != '_' && ($method->isPublic() || $method->isProtected())){
-						$method_document = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$method->getDocComment()));
-						if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$method_document,$match)){
-							foreach($match[1] as $v) $module[trim($v)] = true;
-						}						
+				$bool = true;
+				if($this->in_vars('q') != ''){
+					$modules = null;
+					$module = array();
+					
+					foreach($r->getMethods() as $method){
+						if(substr($method->getName(),0,1) != '_' && ($method->isPublic() || $method->isProtected())){
+							$method_document = preg_replace("/^[\s]*\*[\s]{0,1}/m",'',str_replace(array('/'.'**','*'.'/'),'',$method->getDocComment()));
+							if(preg_match_all("/@module\s+([\w\.\\\\]+)/",$method_document,$match)){
+								foreach($match[1] as $v) $module[trim($v)] = true;
+							}						
+						}
 					}
+					$modules = implode(':',array_keys($module));
 				}
-				$modules = implode(':',array_keys($module));
+				$c = new \org\rhaco\Object();
+				$c->summary = $summary;
+				$libs[$package] = $c;
 			}
-			$c = new \org\rhaco\Object();
-			$c->summary = $summary;
-			$libs[$package] = $c;
 		}
 		ksort($libs);
 		$this->vars('class_list',$libs);
