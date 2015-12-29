@@ -3,28 +3,15 @@ __2010-11-11__
 
 Web framework (PHP 5 >= 5.3.0)
 
-( no composer version: <https://github.com/tokushima/rhaco3_old> )
-
-
 
 ## Install
 
-### composer install
-	$ curl -s http://getcomposer.org/installer | php
-
-### edit composer.json
+### composer.json
 	{
     	"require": {
 			"tokushima/rhaco3":"master-dev"
     	}
 	}
 
-### rhaco install
-	$ php composer.phar install
 
-### cmdman install
-	$ curl -LO http://git.io/cmdman.phar
-
-### create start file
-	$ php cmdman.phar org.rhaco.Dt::setup --create
 

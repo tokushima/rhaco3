@@ -20,13 +20,17 @@ class Session extends \org\rhaco\Object{
 		$this->ses_n = $name;
 		if('' === session_id()){
 			$session_name = \org\rhaco\Conf::get('session_name','SID');
-			if(!ctype_alpha($session_name)) throw new \InvalidArgumentException('session name is is not a alpha value');
+
+			if(!ctype_alpha($session_name)){
+				throw new \InvalidArgumentException('session name is is not a alpha value');
+			}
 			session_cache_limiter(\org\rhaco\Conf::get('session_limiter','nocache'));
 			session_cache_expire((int)(\org\rhaco\Conf::get('session_expire',10800)/60));
 			session_name();
 
 			if(static::has_module('session_read')){
 				ini_set('session.save_handler','user');
+				
 				session_set_save_handler(
 					array($this,'open'),
 					array($this,'close'),
@@ -35,66 +39,17 @@ class Session extends \org\rhaco\Object{
 					array($this,'destroy'),
 					array($this,'gc')
 				);
-				/**
-				 * セッションの有効性を検証します、falseを返した場合にsession_regenerate_id()が呼ばれます
-				 * @return boolean
-				 */
-				if(isset($this->vars[$session_name]) && (!static::has_module('session_verify') || static::module('session_verify') !== true)) session_regenerate_id(true);
+				if(isset($this->vars[$session_name])){
+					session_regenerate_id(true);
+				}
 			}
 			session_start();
 			register_shutdown_function(function(){
-				if('' != session_id()) session_write_close();
+				if('' != session_id()){
+					session_write_close();
+				}
 			});
 		}
-	}
-	final public function open($path,$name){
-		/**
-		 * セッションを開くときに実行される
-		 * @param string $path
-		 * @param string $name
-		 * @return boolean
-		 */
-		return static::module('session_open',$path,$name);
-	}
-	final public function close(){
-		/**
-		 * writeが実行された後で実行される
-		 * @return boolean
-		 */
-		return static::module('session_close');
-	}
-	final public function read($id){
-		/**
-		 * セッションが開始したとき実行されます
-		 * @param string $id
-		 * @return mixed
-		 */
-		return static::module('session_read',$id);
-	}
-	final public function write($id,$sess_data){
-		/**
-		 * セッションの保存や終了が必要となったときに実行されます
-		 * @param string $id
-		 * @param mixed $sess_data
-		 * @return boolean
-		 */
-		return static::module('session_write',$id,$sess_data);
-	}
-	final public function destroy($id){
-		/**
-		 * セッションを破棄した場合に実行される
-		 * @param string $id
-		 * @return boolean
-		 */
-		return static::module('session_destroy',$id);
-	}
-	final public function gc($maxlifetime){
-		/**
-		 * ガベージコレクタ
-		 * @param integer $maxlifetime session.gc_maxlifetime
-		 * @return boolean
-		 */
-		return static::module('session_gc',$maxlifetime);
 	}
 	/**
 	 * セッションの設定
@@ -132,5 +87,59 @@ class Session extends \org\rhaco\Object{
 	 */
 	public function rm_vars(){
 		foreach(((func_num_args() === 0) ? array_keys($_SESSION[$this->ses_n]) : func_get_args()) as $n) unset($_SESSION[$this->ses_n][$n]);
+	}
+	final public function open($path,$name){
+		/**
+		 * セッションを開くときに実行される
+		 * @param string $path
+		 * @param string $name
+		 * @return boolean
+		 */
+		$bool = static::module('session_open',$path,$name);
+		return (!is_bool($bool)) ? true : $bool;
+	}
+	final public function close(){
+		/**
+		 * writeが実行された後で実行される
+		 * @return boolean
+		 */
+		$bool = static::module('session_close');
+		return (!is_bool($bool)) ? true : $bool;
+	}
+	final public function read($id){
+		/**
+		 * セッションが開始したとき実行されます
+		 * @param string $id
+		 * @return mixed
+		 */
+		return static::module('session_read',$id);
+	}
+	final public function write($id,$sess_data){
+		/**
+		 * セッションの保存や終了が必要となったときに実行されます
+		 * @param string $id
+		 * @param mixed $sess_data
+		 * @return boolean
+		 */
+		$bool = static::module('session_write',$id,$sess_data);
+		return (!is_bool($bool)) ? true : $bool;
+	}
+	final public function destroy($id){
+		/**
+		 * セッションを破棄した場合に実行される
+		 * @param string $id
+		 * @return boolean
+		 */
+		$bool = static::module('session_destroy',$id);
+		return (!is_bool($bool)) ? true : $bool;
+	}
+	final public function gc($maxlifetime){
+		/**
+		 * ガベージコレクタ
+		 * @param integer $maxlifetime session.gc_maxlifetime
+		 * @return boolean
+		 */
+		$bool = static::module('session_gc',$maxlifetime);
+		return (!is_bool($bool)) ? true : $bool;
 	}
 }

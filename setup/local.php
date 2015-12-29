@@ -1,2 +1,2 @@
 <?php
-\rhaco\Dt::create_table(null,true);
+\org\rhaco\Dt::create_table(null,true);
