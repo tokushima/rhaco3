@@ -25,7 +25,7 @@ curl -LO http://git.io/cmdman.phar
 php cmdman.phar org.rhaco.Dt::setup
 ```
 
-## entry
+## Application entry
 
 index.php
 ```
